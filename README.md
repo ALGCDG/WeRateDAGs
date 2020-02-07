@@ -1,5 +1,5 @@
 # WeRateDAGs Compiler project
----
+
 
 ## Intermediary ideas
 
