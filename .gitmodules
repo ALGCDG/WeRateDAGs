@@ -1,0 +1,3 @@
+[submodule "langproc-2019-cw"]
+	path = langproc-2019-cw
+	url = https://github.com/LangProc/langproc-2019-cw.git
