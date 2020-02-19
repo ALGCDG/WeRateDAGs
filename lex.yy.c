@@ -505,9 +505,11 @@ char *yytext;
 #line 1 "flexer.lex"
 #line 4 "flexer.lex"
 #include "tokens.hpp"
+#include <iostream>
+#include <sstream>
 extern "C" int fileno(FILE *stream); // fixing bug in flex
-#line 510 "lex.yy.c"
-#line 511 "lex.yy.c"
+#line 512 "lex.yy.c"
+#line 513 "lex.yy.c"
 
 #define INITIAL 0
 
@@ -724,9 +726,9 @@ YY_DECL
 		}
 
 	{
-#line 26 "flexer.lex"
+#line 28 "flexer.lex"
 
-#line 730 "lex.yy.c"
+#line 732 "lex.yy.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -785,7 +787,7 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 27 "flexer.lex"
+#line 29 "flexer.lex"
 {
         /*
         Keywords
@@ -794,13 +796,13 @@ YY_RULE_SETUP
         builtin functions: sizeof
         luckily not flexible
         */
-        fprintf(stderr, "its an int");
+        fprintf(stderr, "its a keyword");
 		//return KEYWORD(INT);
 	}
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 39 "flexer.lex"
+#line 41 "flexer.lex"
 {
         fprintf(stderr, "its an identifier");      
 		//return IDENTIFIER;
@@ -808,84 +810,110 @@ YY_RULE_SETUP
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 44 "flexer.lex"
+#line 46 "flexer.lex"
 {
         // decimal numbers
-        fprintf(stderr, "its a float constant");
+        // don't forget the fFlL suffixes to specify type
+        fprintf(stderr, "its a fractional constant");
 		//return CONSTANT;
 	}
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 50 "flexer.lex"
+#line 53 "flexer.lex"
 {
         // decimal numbers
-        fprintf(stderr, "its a decimal constant");
-		//return CONSTANT;
+        fprintf(stderr, "its a decimal constant: %s\n", yytext);
+        yylval.ivalue = std::stoi(yytext);
+		return Constant;
 	}
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 56 "flexer.lex"
+#line 60 "flexer.lex"
 {
-        // hex number
-        fprintf(stderr, "its a hex constant");
-		//return CONSTANT;
+                    /*
+                    hex number
+                    */
+                    yylval.ivalue = 0;
+                    std::stringstream s;
+                    s << std::hex << yytext;
+                    s >> yylval.ivalue;
+                    fprintf(stderr, "its a hex constant: %d\n", yylval.ivalue);
+		            return Constant;
 	}
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 62 "flexer.lex"
+#line 72 "flexer.lex"
 {
-        fprintf(stderr, "its a binary constant");
-    }
+                    yylval.ivalue = 0;
+                    for (int i = 2; i < yyleng; i++)
+                    {
+                        yylval.ivalue += (yytext[i] == '1') << (yyleng - i - 1); 
+                    }       
+                    fprintf(stderr, "its a binary constant: %d\n", yylval.ivalue);
+    	            return Constant;
+                }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 66 "flexer.lex"
+#line 82 "flexer.lex"
 {
-                fprintf(stderr, "its an octal constant");
+                yylval.ivalue = 0;
+                for (int i = yyleng-1; i >= 0; i--)
+                {
+                    yylval.ivalue += (yytext[i] == '1') << (yyleng - i); 
+                }
+                fprintf(stderr, "its an octal constant: %s\n", yylval.ivalue);
+    	        return Constant;
             }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 70 "flexer.lex"
+#line 92 "flexer.lex"
 {
 		/*
 		Char
         also returns a constant
 		*/
-        fprintf(stderr, "its a char constant");
-        //return CONSTANT;
+        yylval.cvalue = yytext[1];
+        fprintf(stderr, "its a char constant: %s\n", yylval.cvalue);
+        return Constant;
 	}
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 79 "flexer.lex"
+#line 102 "flexer.lex"
 {
         /*
         Operator
         [ ] ( ) . -> ++ -- & * + - ~ ! i sizeof / % << >> < > <= >= == != ^ | && || ? : = *= /= %= += -= <<= >>= &= ^= |= , # ##
         fyi >>= is >> and assign
         */
-        fprintf(stderr, "its an operator");
-		//return Operator
+        fprintf(stderr, "its an operator: %s/n", yytext);
+        yylval.text = new std::string(yytext);
+        return Operator;
 	}
 	YY_BREAK
 case 10:
 /* rule 10 can match eol */
 YY_RULE_SETUP
-#line 89 "flexer.lex"
+#line 113 "flexer.lex"
 {
 		/*
 		String-LITERAL
 		*/
-        fprintf(stderr, "its a string literal");
+        std::string match = std::string(yytext);
+        yylval.text = new std::string();
+        *(yylval.text) = match.substr(1, yyleng - 2);
+        fprintf(stderr, "its a string literal: %s\n", *(yylval.text)); 
+        return String;
 	}
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 98 "flexer.lex"
+#line 126 "flexer.lex"
 {
         /*
         punctuators
@@ -898,7 +926,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 108 "flexer.lex"
+#line 136 "flexer.lex"
 {
     /*
     catchall case
@@ -907,10 +935,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 113 "flexer.lex"
+#line 141 "flexer.lex"
 ECHO;
 	YY_BREAK
-#line 914 "lex.yy.c"
+#line 942 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1915,4 +1943,4 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 113 "flexer.lex"
+#line 141 "flexer.lex"

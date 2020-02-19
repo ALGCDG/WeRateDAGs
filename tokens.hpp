@@ -9,16 +9,64 @@ enum TokenType
 {
     None,
     Operator,
-    constant,
-    identifier,
-    keyword,
-    string,
-    punctuator
+    Operator_add,
+    Operator_sub,
+    Operator_addadd,
+    Operator_subsub,
+    Operator_mul,
+    Operator_div,
+    Operator_mod,
+    Operator_and,
+    Operator_or,
+    Operator_not,
+    Operator_assign,
+    Operator_equal,
+    Operator_not_equal,
+    Operator_greater,
+    Operator_less,
+    Operator_greater_equal,
+    Operator_less_equal,
+    Operator_bit_and,
+    Operator_bit_or,
+    Operator_bit_not,
+    Operator_bit_xor,
+    Operator_sl,
+    Operator_sr,
+    Operator_add_assign,
+    Operator_sub_assign,
+    Operator_mul_assign,
+    Operator_div_assign,
+    Operator_mod_assign,
+    Operator_and_assign,
+    Operator_or_assign,
+    Operator_xor_assign,
+    Operator_sr_assign,
+    Operator_sl_assign,
+    Operator_ref,
+    Operator_deref,
+    Operator_access,
+    Operator_deref_access,
+    Operator_sizeof
+    Constant,
+    Constant_int,
+    Constant_char,
+    Constant_double,
+    Constant_float,
+    Constant_long_double,
+    Identifier,
+    Keyword,
+    Keyword_int,
+    String,
+    Punctuator,
+    Punctuator_eol
 };
 
 union TokenValue
 {
     std::string *text;
+    int ivalue;
+    char cvalue;
+    double dvalue;
 };
 
 extern TokenValue yylval; // function for handing the value to yacc

@@ -10,8 +10,8 @@ int main()
         {
             break;
         }
-        std::cout << *yylval.text << std::endl;
-        delete yylval.text;
+        //std::cout << *yylval.text << std::endl;
+        //delete yylval.text;
     }
     return 0;
 }
