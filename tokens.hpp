@@ -1,22 +1,25 @@
 #ifndef TOKENS_HPP
 #define TOKENS_HPP
 
+#include<string>
+
 // these are the tokens as specified in the 1990 ansi
 // excluding preprocessing tokens
 enum TokenType
 {
+    None,
     Operator,
-    Constant,
-    Identifier,
-    Keyword,
-    String,
-    Punctuator
-}
+    constant,
+    identifier,
+    keyword,
+    string,
+    punctuator
+};
 
 union TokenValue
 {
-    std::string *text
-}
+    std::string *text;
+};
 
 extern TokenValue yylval; // function for handing the value to yacc
 

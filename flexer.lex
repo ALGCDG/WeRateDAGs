@@ -5,19 +5,26 @@
 extern "C" int fileno(FILE *stream); // fixing bug in flex
 %}
 
+Sign [+-]
+Exponent [eE]
+Decimal [0-9]
+NonZero [1-9]
 
-D [0-9]
 A [a-zA-Z_]
 P [a-zA-Z_0-9]
-H [a-fA-F0-9]
 
-Type [int]
-Operator [+,-,*,/,&,&&,|,||]
+X [xX]
+Hex [a-fA-F0-9]
+
+Octal [0-7]
+
+B [bB]
+Binary [01]
+
+Operator [+\-*/%&|^><=!~?:.,#\[\]\(\)\{\}]
 
 %%
-
-"int"
-    {
+"int"|"float"   {
         /*
         Keywords
         type data: int char etc... but also unsigned, struct, enum
@@ -25,38 +32,65 @@ Operator [+,-,*,/,&,&&,|,||]
         builtin functions: sizeof
         luckily not flexible
         */
-		return KEYWORD(INT);
+        fprintf(stderr, "its a keyword");
+		//return KEYWORD(INT);
 	}
 
-AP*	{
-		return IDENTIFIER;
+{A}{P}*	{
+        fprintf(stderr, "its an identifier");      
+		//return IDENTIFIER;
 	}
 
--?{D}+\.?{D}*   {
-		return CONSTANT;
+{Sign}?{Decimal}*\.{Decimal}*({Exponent}{Sign}?{Decimal}+)?   {
+        // decimal numbers
+        fprintf(stderr, "its a float constant");
+		//return CONSTANT;
 	}
+
+{Sign}?{NonZero}{Decimal}*   {
+        // decimal numbers
+        fprintf(stderr, "its a decimal constant");
+		//return CONSTANT;
+	}
+
+0{X}{Hex}+   {
+        // hex number
+        fprintf(stderr, "its a hex constant");
+		//return CONSTANT;
+	}
+
+0{B}{Binary}+   {
+        fprintf(stderr, "its a binary constant");
+    }
+
+0{Octal}*   {
+                fprintf(stderr, "its an octal constant");
+            }
 
 \'.\'	{
 		/*
 		Char
         also returns a constant
 		*/
-        return CONSTANT;
+        fprintf(stderr, "its a char constant");
+        //return CONSTANT;
 	}
 
-P*	{
+{Operator}|"sizeof "|"=="|"!="|"<="|">="|"+="|"-="|"*="|"/="|"%="|"&="|"|="|"^="|"<<="|">>="|"##"|"++"|"--"|"<<"|">>"	{
         /*
         Operator
         [ ] ( ) . -> ++ -- & * + - ~ ! i sizeof / % << >> < > <= >= == != ^ | && || ? : = *= /= %= += -= <<= >>= &= ^= |= , # ##
         fyi >>= is >> and assign
         */
-		return Operator
+        fprintf(stderr, "its an operator");
+		//return Operator
 	}
 
-\".*\"	{
+\".[^"]*\"	{
 		/*
 		String-LITERAL
 		*/
+        fprintf(stderr, "its a string literal");
 	}
 
 
@@ -67,6 +101,8 @@ P*	{
         [](){}*,:=;...#
         end of line, list elemnt seperators
         */
+        fprintf(stderr, "its a punctuator");
+
     }
 
 .   {
