@@ -129,22 +129,11 @@ Operator [+\-*/%&|^><=!~?:.,#\[\]\(\)\{\}]
         return Constant;
 }
 
-{Operator}|"sizeof "|"=="|"!="|"<="|">="|"+="|"-="|"*="|"/="|"%="|"&="|"|="|"^="|"<<="|">>="|"##"|"++"|"--"|"<<"|">>"	{
-        /*
-        Operator
-        [ ] ( ) . -> ++ -- & * + - ~ ! i sizeof / % << >> < > <= >= == != ^ | && || ? : = *= /= %= += -= <<= >>= &= ^= |= , # ##
-        fyi >>= is >> and assign
-        */
-        fprintf(stderr, "its an operator: %s/n", yytext);
-        yylval.text = new std::string(yytext);
-        return Operator;
-}
-
 "+" { return Operator_add; }
 "-" { return Operator_sub; }
 "++" { return Operator_addadd; }
 "--" { return Operator_subsub; }
-"*" { return Operator_mul; OR return Operator_deref; }
+"*" { /* return Operator_mul; OR return Operator_deref; */ return Operator_mul; }
 "/" { return Operator_div; }
 "%" { return Operator_mod; }
 "&&" { return Operator_and; }
@@ -157,7 +146,7 @@ Operator [+\-*/%&|^><=!~?:.,#\[\]\(\)\{\}]
 "<" { return Operator_less; }
 ">=" { return Operator_greater_equal; }
 "<=" { return Operator_less_equal; }
-"&" { return Operator_bit_and; OR return Operator_ref; }
+"&" { /* return Operator_bit_and; OR return Operator_ref; */ return Operator_bit_and; }
 "|" { return Operator_bit_or; }
 "~" { return Operator_bit_not; }
 "^" { return Operator_bit_xor; }
