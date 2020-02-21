@@ -162,9 +162,13 @@ Operator [+\-*/%&|^><=!~?:.,#\[\]\(\)\{\}]
 "^=" { return Operator_xor_assign; }
 ">>=" { return Operator_sr_assign; }
 "<<=" { return Operator_sl_assign; }
-"." { return Operator_access; }
+"---" { return Operator_access; }
 "->" { return Operator_deref_access; }
 "sizeof " { return Operator_sizeof; }
+"?" { return Operator_trinary_question; }
+":" { return Operator_trinary_choice; }
+"," { return Operator_comma; }
+
 
 \".[^"]*\"	{
         /*
