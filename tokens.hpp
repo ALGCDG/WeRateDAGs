@@ -46,7 +46,10 @@ enum TokenType
     Operator_deref,
     Operator_access,
     Operator_deref_access,
-    Operator_sizeof
+    Operator_sizeof,
+    Operator_trinary_question,
+    Operator_trinary_choice,
+    Operator_comma,
     Constant,
     Constant_int,
     Constant_char,
