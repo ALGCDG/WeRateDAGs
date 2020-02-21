@@ -44,7 +44,8 @@ union ident_info{
 
 typedef enum {VAR, ARR, FUN} which_symbol;
 //TODO Rename / restructure, a bit messy :(
-
+// ! type should be represented as an int
+// this is all wrong lmao
 struct ident_data{
     ident_info info;
     which_symbol which;
