@@ -70,6 +70,10 @@ void InsertToken(std::string name, ident_data ident);
 
 ident_data GetTokenData(std::string name);
 //TODO differentiate between function lookup and variable lookup?
+//answer: doesn't matter, uses most local scope as type
+// ie function named in global scope, variable with same name in local scope
+// -> assumes identifier refers to variable
+// -> if used as a function f(), throw error!
 
 void new_scope();
 
