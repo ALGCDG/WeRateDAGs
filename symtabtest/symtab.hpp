@@ -4,18 +4,54 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <stack>
 
 /*
 Need to store:
-    Data type + name
-    Procedure names
-        Number of args and types for function
+    Simple variables:
+        name, type, scope?
+    Arrays:
+        name, type, size
+    Procedures
+        name, number args, return type, arg types
 */
 
 typedef bool data_t;
 
 
+struct var_ident_info{
+    std::string name;
+    int type;
+};
 
+struct arr_ident_info : var_ident_info{
+    int size;
+};
+
+struct fun_ident_info : var_ident_info{
+    int num_args;
+    std::vector<int> arg_types;
+    /**
+     * ? Record default args?
+     */
+};
+
+union ident_info{
+    var_ident_info var;
+    arr_ident_info arr;
+    fun_ident_info fun;
+};
+
+typedef enum {VAR, ARR, FUN} which_symbol;
+//TODO Rename / restructure, a bit messy :(
+
+struct ident_data{
+    ident_info info;
+    which_symbol which;
+};
+
+
+extern std::stack<std::unordered_map<std::string, ident_data>> _table;
 // struct function_type_entry{
 //     _ return_type;
 //     int num_args;
@@ -26,11 +62,16 @@ typedef bool data_t;
 //     _ ident_type;
 // };
 
-extern std::unordered_map<std::string, data_t> SymbolTable;
+//extern std::stack<std::unordered_map<std::string, data_t>> SymbolTable;
 
-data_t lookup(std::string token_value);
+bool IsTokenPresent(std::string token_value);
 
-void insert(std::string in, data_t val);
+void InsertToken(std::string name, ident_data ident);
 
+ident_data GetTokenData(std::string name);
+//TODO differentiate between function lookup and variable lookup?
 
+void new_scope();
+
+void end_scope();
 #endif
