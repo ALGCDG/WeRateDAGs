@@ -18,25 +18,22 @@ Need to store:
         name, type
 */
 
-typedef bool data_t;
-
-
 struct var_or_type_ident_info{
     //string representing symbol's name
-    std::string name;
+    //std::string name;
     //int, flex/bisons representation of identifiers
     int type;
 };
 
 struct arr_ident_info{
-    std::string name;
+    //std::string name;
     int type;
     //size of array, unitialised will have size 0
     int size;
 };
 
 struct fun_ident_info{
-    std::string name;
+    //std::string name;
     int ret_type;
     int num_args;
     std::vector<int> arg_types;
@@ -44,12 +41,6 @@ struct fun_ident_info{
      * ? Record default args?
      */
 };
-
-//equivalent structure to var_ident_info -> needed at all?
-// struct type_ident_info{
-//     std::string name;
-//     int type;
-// };
 
 union ident_info{
     var_or_type_ident_info var;
@@ -66,7 +57,6 @@ struct ident_data{
     which_symbol which;
 };
 
-
 extern std::stack<std::unordered_map<std::string, ident_data>> _table;
 // struct function_type_entry{
 //     _ return_type;
@@ -79,7 +69,6 @@ extern std::stack<std::unordered_map<std::string, ident_data>> _table;
 // };
 
 //extern std::stack<std::unordered_map<std::string, data_t>> SymbolTable;
-
 bool IsNamePresent(std::string token_value);
 
 void InsertNameData(std::string name,  ident_data data);
@@ -87,13 +76,14 @@ void EditNameData(std::string name, ident_data data);
 
 ident_data GetTokenData(std::string name);
 //TODO differentiate between function lookup and variable lookup?
-//answer: doesn't matter, uses most local scope as type
-// ie function named in global scope, variable with same name in local scope
-// -> assumes identifier refers to variable
-// -> if used as a function f(), throw error!
+    //answer: doesn't matter, uses most local scope as type
+    // ie function named in global scope, variable with same name in local scope
+    // -> assumes identifier refers to variable
+    // -> if used as a function f(), throw error!
 
 void new_scope();
 void end_scope();
+
 
 
 #endif
