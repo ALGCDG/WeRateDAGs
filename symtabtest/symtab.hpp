@@ -14,21 +14,30 @@ Need to store:
         name, type, size
     Procedures
         name, number args, return type, arg types
+    Typedefs
+        name, type
 */
 
 typedef bool data_t;
 
 
-struct var_ident_info{
+struct var_or_type_ident_info{
+    //string representing symbol's name
     std::string name;
+    //int, flex/bisons representation of identifiers
     int type;
 };
 
-struct arr_ident_info : var_ident_info{
+struct arr_ident_info{
+    std::string name;
+    int type;
+    //size of array, unitialised will have size 0
     int size;
 };
 
-struct fun_ident_info : var_ident_info{
+struct fun_ident_info{
+    std::string name;
+    int ret_type;
     int num_args;
     std::vector<int> arg_types;
     /**
@@ -36,16 +45,22 @@ struct fun_ident_info : var_ident_info{
      */
 };
 
+//equivalent structure to var_ident_info -> needed at all?
+// struct type_ident_info{
+//     std::string name;
+//     int type;
+// };
+
 union ident_info{
-    var_ident_info var;
+    var_or_type_ident_info var;
     arr_ident_info arr;
     fun_ident_info fun;
 };
 
-typedef enum {VAR, ARR, FUN} which_symbol;
+//? think of a better naming scheme?
+typedef enum {VAR, TYP, ARR, FUN} which_symbol;
 //TODO Rename / restructure, a bit messy :(
-// ! type should be represented as an int
-// this is all wrong lmao
+
 struct ident_data{
     ident_info info;
     which_symbol which;
@@ -65,9 +80,10 @@ extern std::stack<std::unordered_map<std::string, ident_data>> _table;
 
 //extern std::stack<std::unordered_map<std::string, data_t>> SymbolTable;
 
-bool IsTokenPresent(std::string token_value);
+bool IsNamePresent(std::string token_value);
 
-void InsertToken(std::string name, ident_data ident);
+void InsertNameData(std::string name,  ident_data data);
+void EditNameData(std::string name, ident_data data);
 
 ident_data GetTokenData(std::string name);
 //TODO differentiate between function lookup and variable lookup?
@@ -77,6 +93,7 @@ ident_data GetTokenData(std::string name);
 // -> if used as a function f(), throw error!
 
 void new_scope();
-
 void end_scope();
+
+
 #endif
