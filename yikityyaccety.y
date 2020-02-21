@@ -39,6 +39,7 @@ primary_EXPR: identifier
                   | Constant
                   | String
                   | ( EXPR )
+                ;
 
 postfix_EXPR: primary_EXPR
                   | postfix_EXPR [ EXPR ]
@@ -48,9 +49,11 @@ postfix_EXPR: primary_EXPR
                   | postfix_EXPR Operator_deref_access identifier
                   | postfix_EXPR Operator_addadd
                   | postfix_EXPR Operator_subsub
+                  ;
 
 argument_EXPR_list: assignment_EXPR
                         | assignment_EXPR_list, assignment_EXPR
+                        ;
 
 unary_EXPR: postfix_EXPR
                 | Operator_addadd unary_EXPR
@@ -58,64 +61,80 @@ unary_EXPR: postfix_EXPR
                 | unary_operator cast_EXPR
                 | Operator_sizeof unary_EXPR
                 | Operator_sizeof ( type_name )
+                ;
 
 unary_operator: Operator_and | Operator_mul | Operator_plus | Operator_sub | Operator_bit_not | Operator_not
+                
 
 cast_EXPR: unary_EXPR
                | ( type_name ) cast_EXPR
+               ;
 
 multiplicative_EXPR: cast_EXPR
                          | multiplicative_EXPR Operator_mul cast_EXPR
                          | multiplicative_EXPR Operator_div cast_EXPR
                          | multiplicative_EXPR Operator_mod cast_EXPR
+                         ;
 
 additive_EXPR: multiplicative_EXPR
                    | additive_EXPR Operator_add multiplicative_EXPR
                    | additive_EXPR Operator_sub multiplicative_EXPR
+                   ;
 
 shift_EXPR: additive_EXPR
           | shift_EXPR Operator_sl additive_EXPR
           | shift_EXPR Operator_sr additive_EXPR
+          ;
 
 relational_EXPR: shift_EXPR
                | relational_EXPR Operator_less shift_EXPR
                | relational_EXPR Operator_greater shift_EXPR
                | relational_EXPR Operator_less_equal shift_EXPR
                | relational_EXPR Operator_greater_equal shift_EXPR
+               ;
 
 equality_EXPR: relational_EXPR
              | equality_EXPR Operator_equal relational_EXPR
              | equality_EXPR Operator_not_equal relational_EXPR
+             ;
 
-// I"M NOT SO SURE ABOUT THESE LOGIC AND BIT GRAMMARS, CHECK!!!
+/* IM NOT SO SURE ABOUT THESE LOGIC AND BIT GRAMMARS, CHECK!!! */
 
 BIT_AND_EXPR: equality_EXPR
         | BIT_AND_EXPR Operator_bit_and equality_EXPR
+        ;
 
 BIT_XBIT_OR_EXPR: BIT_AND_EXPR
         | BIT_XBIT_OR_EXPR Operator_bit_xor BIT_AND_EXPR
+        ;
 
 BIT_OR_EXPR: BIT_XBIT_OR_EXPR
        | BIT_OR_EXPR Operator_bit_or BIT_XBIT_OR_EXPR
+       ;
 
 LOGIC_AND_EXPR: BIT_OR_EXPR
               | LOGIC_AND_EXPR Operator_and BIT_OR_EXPR
+              ;
 
 LOGIC_OR_EXPR: LOGIC_AND_EXPR
              | LOGIC_OR_EXPR Operator_or LOGIC_AND_EXPR
+             ;
 
 conditional_EXPR: LOGIC_OR_EXPR
                 | LOGIC_OR_EXPR Operator_trinary_question EXPR Operator_trinary_choice conditional_EXPR
+                ;
 
 assignment_EXPR: conditional_EXPR
                | unary_EXPR assignment assignment_EXPR // assignments are = *= /= %= += -= <<= >>= &= ^= |=
-
+                ;
 assignment: Operator_assign | Operator_mul_assign | Operator_div_assign | Operator_mod_assign | Operator_add_assign | Operator_sub_assign | Operator_sl_assign | Operator_sr_assign | Operator_and_assign | Operator_xor_assign | Operator_or_assign
 
 EXPR: assignment_EXPR
     | EXPR Operator_comma assignment_EXPR
+    ;
 
-constant_EXPR: conditional_EXPR // DONT THINK WE NEED THIS, WE DON'T USE CONST
+constant_EXPR: conditional_EXPR /* DONT THINK WE NEED THIS, WE DONT USE CONST */
+                ;
 
 declaration: declaration_specifiers init_declarator_list Punctuator_eol
            | declaration_specifiers Punctuator_eol
@@ -132,12 +151,13 @@ init_declarator_list: init_declarator
 init_declarator: declarator
                | declarator Operator_assign initializer
 
-storage_class_specifier: /* I don't believe we need this either */
+storage_class_specifier: /* I dont believe we need this either */
 
 type_specifier: Keyword_void | Keyword_char | Keyword_short | Keyword_int | Keyword_long | Keyword_float | Keyword_double | Keyword_signed | Keyword_unsigned
               | struct_or_union_specifier
               | enum_specifier
               | typedef_name
+              ;
 
 
 STRUCT STUFF /* cant do it see page 69 of ref */
@@ -154,34 +174,43 @@ statement: labeled_statement
          | select_statement
          | ITER_statement
          | jump-statement
+         ;
 
 labeled_statement: identifier Operator_trinary_choice statement
                  | Keyword_case constant_EXPR Operator_trinary_choice statement
                  | Keyword_default Operator_trinary_choice statement
+                 ;
 
 compound_statement: Punctuator_cur_open declartio???????Punctuator_cur_close /* TODO */
+                ;                       
 
 declaration_list: declaration
                 | declaration_list declaration
+                ;
 
 statement_list: statement
               | statement_list statement
+              ;
 
 EXPR_statement: EXPR
               |  /*how to express null?*/
+              ;
 
 selection_statement: Keyword_if ( EXPR ) statement
                    | Keyword_if ( EXPR ) statement Keyword_else statement
                    | Keyword_switch ( EXPR ) statement
+                   ;
 
 ITER_statement: Keyword_while ( EXPR ) statement
               | Keyword_do statement Keyword_while ( EXPR ) Punctuator_eol
               | Keyword_for ( EXPR Punctuator_eol EXPR Punctuator_eol EXPR ) statement /* NB EXPRs are optional, we have to write one for each case */
+              ;
 
 jump_statement: Keyword_continue Punctuator_eol
               | Keyword_break Punctuator_eol
               | Keyword_return EXPR Punctuator_eol
               | Keyword_return Punctuator_eol /* evaluation of void return is undefined behaviour */
+              ;
 
 /* not sure if we need the next two */
 translation_unit
