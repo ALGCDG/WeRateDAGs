@@ -50,6 +50,7 @@ postfix_EXPR: primary_EXPR
                   | postfix_EXPR Operator_addadd
                   | postfix_EXPR Operator_subsub
                   ;
+                  /*?Doesnt this allow 2 ++ ++ ?*/
 
 argument_EXPR_list: assignment_EXPR
                         | assignment_EXPR_list, assignment_EXPR
@@ -138,20 +139,25 @@ constant_EXPR: conditional_EXPR /* DONT THINK WE NEED THIS, WE DONT USE CONST */
 
 declaration: declaration_specifiers init_declarator_list Punctuator_eol
            | declaration_specifiers Punctuator_eol
+           ;
 
 declaration_specifiers: storage_class_specifier
                       | storage_class_specifier declaration_specifiers
                       | type_spcifier
                       | type_spcifier declaration_specifiers
                       | type_qualifier declaration_specifiers
+                      ;
 
 init_declarator_list: init_declarator
                     | init_declarator_list Operator_comma init_declarator
+                    ;
 
 init_declarator: declarator
                | declarator Operator_assign initializer
+               ;
 
 storage_class_specifier: /* I dont believe we need this either */
+                        ;
 
 type_specifier: Keyword_void | Keyword_char | Keyword_short | Keyword_int | Keyword_long | Keyword_float | Keyword_double | Keyword_signed | Keyword_unsigned
               | struct_or_union_specifier
@@ -176,6 +182,7 @@ statement: labeled_statement
          | jump-statement
          ;
 
+/* ! labeled statement not tested */
 labeled_statement: identifier Operator_trinary_choice statement
                  | Keyword_case constant_EXPR Operator_trinary_choice statement
                  | Keyword_default Operator_trinary_choice statement
