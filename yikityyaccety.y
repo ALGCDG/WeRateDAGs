@@ -72,8 +72,6 @@ equality_EXPR: relational_EXPR
              | equality_EXPR Operator_equal relational_EXPR
              | equality_EXPR Operator_not_equal relational_EXPR
 
-/* I"M NOT SO SURE ABOUT THESE LOGIC AND BIT GRAMMARS, CHECK!!! */
-
 BIT_AND_EXPR: equality_EXPR
         | BIT_AND_EXPR Operator_bit_and equality_EXPR
 

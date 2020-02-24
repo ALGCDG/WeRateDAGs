@@ -1,0 +1,171 @@
+/* A Bison parser, made by GNU Bison 3.0.4.  */
+
+/* Bison interface for Yacc-like parsers in C
+
+   Copyright (C) 1984, 1989-1990, 2000-2015 Free Software Foundation, Inc.
+
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
+
+/* As a special exception, you may create a larger work that contains
+   part or all of the Bison parser skeleton and distribute that work
+   under terms of your choice, so long as that work isn't itself a
+   parser generator using the skeleton or a modified version thereof
+   as a parser skeleton.  Alternatively, if you modify or redistribute
+   the parser skeleton itself, you may (at your option) remove this
+   special exception, which will cause the skeleton and the resulting
+   Bison output files to be licensed under the GNU General Public
+   License without this special exception.
+
+   This special exception was added by the Free Software Foundation in
+   version 2.2 of Bison.  */
+
+#ifndef YY_YY_BASIC_TAB_HPP_INCLUDED
+# define YY_YY_BASIC_TAB_HPP_INCLUDED
+/* Debug traces.  */
+#ifndef YYDEBUG
+# define YYDEBUG 0
+#endif
+#if YYDEBUG
+extern int yydebug;
+#endif
+/* "%code requires" blocks.  */
+#line 1 "basic.y" /* yacc.c:1909  */
+
+
+  #include<iostream>
+  #include<string>
+ /* extern const Expression *g_root; // A way of getting the AST out
+*/
+  //! This is to fix problems when generating C++
+  // We are declaring the functions provided by Flex, so
+  // that Bison generated code can call them.
+  int yylex(void);
+  void yyerror(const char *);
+
+#line 57 "basic.tab.hpp" /* yacc.c:1909  */
+
+/* Token type.  */
+#ifndef YYTOKENTYPE
+# define YYTOKENTYPE
+  enum yytokentype
+  {
+    Constant_int = 258,
+    Constant_char = 259,
+    Constant_double = 260,
+    Constant_float = 261,
+    Constant_long_double = 262,
+    String = 263,
+    Identifier = 264,
+    Operator = 265,
+    Operator_add = 266,
+    Operator_sub = 267,
+    Operator_addadd = 268,
+    Operator_subsub = 269,
+    Operator_mul = 270,
+    Operator_div = 271,
+    Operator_mod = 272,
+    Operator_and = 273,
+    Operator_or = 274,
+    Operator_not = 275,
+    Operator_assign = 276,
+    Operator_equal = 277,
+    Operator_not_equal = 278,
+    Operator_greater = 279,
+    Operator_less = 280,
+    Operator_greater_equal = 281,
+    Operator_less_equal = 282,
+    Operator_bit_and = 283,
+    Operator_bit_or = 284,
+    Operator_bit_not = 285,
+    Operator_bit_xor = 286,
+    Operator_sl = 287,
+    Operator_sr = 288,
+    Operator_add_assign = 289,
+    Operator_sub_assign = 290,
+    Operator_mul_assign = 291,
+    Operator_div_assign = 292,
+    Operator_mod_assign = 293,
+    Operator_and_assign = 294,
+    Operator_or_assign = 295,
+    Operator_xor_assign = 296,
+    Operator_sr_assign = 297,
+    Operator_sl_assign = 298,
+    Operator_ref = 299,
+    Operator_deref = 300,
+    Operator_access = 301,
+    Operator_deref_access = 302,
+    Operator_sizeof = 303,
+    Operator_trinary_question = 304,
+    Operator_trinary_choice = 305,
+    Operator_comma = 306,
+    Keyword = 307,
+    Keyword_void = 308,
+    Keyword_char = 309,
+    Keyword_short = 310,
+    Keyword_int = 311,
+    Keyword_long = 312,
+    Keyword_float = 313,
+    Keyword_double = 314,
+    Keyword_signed = 315,
+    Keyword_unsigned = 316,
+    Keyword_case = 317,
+    Keyword_default = 318,
+    Keyword_if = 319,
+    Keyword_else = 320,
+    Keyword_switch = 321,
+    Keyword_while = 322,
+    Keyword_do = 323,
+    Keyword_for = 324,
+    Keyword_continue = 325,
+    Keyword_break = 326,
+    Keyword_return = 327,
+    Punctuator = 328,
+    Punctuator_eol = 329,
+    Punctuator_par_open = 330,
+    Punctuator_par_close = 331,
+    Punctuator_squ_open = 332,
+    Punctuator_squ_close = 333,
+    Punctuator_cur_open = 334,
+    Punctuator_cur_close = 335
+  };
+#endif
+
+/* Value type.  */
+#if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
+
+union YYSTYPE
+{
+#line 15 "basic.y" /* yacc.c:1909  */
+
+    std::string *text;
+    int ivalue;
+    char cvalue;
+    double dvalue;
+	float fvalue;
+	long double ldvalue;
+
+#line 159 "basic.tab.hpp" /* yacc.c:1909  */
+};
+
+typedef union YYSTYPE YYSTYPE;
+# define YYSTYPE_IS_TRIVIAL 1
+# define YYSTYPE_IS_DECLARED 1
+#endif
+
+
+extern YYSTYPE yylval;
+
+int yyparse (void);
+
+#endif /* !YY_YY_BASIC_TAB_HPP_INCLUDED  */

@@ -77,7 +77,7 @@ enum TokenType
     Keyword_for,
     Keyword_continue,
     Keyword_break,
-    Keyword_return
+    Keyword_return,
     String,
     Punctuator,
     Punctuator_eol,
