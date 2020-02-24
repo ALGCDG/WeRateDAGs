@@ -164,11 +164,22 @@ Operator [+\-*/%&|^><=!~?:.,#\[\]\(\)\{\}]
 "<<=" { return Operator_sl_assign; }
 "---" { return Operator_access; }
 "->" { return Operator_deref_access; }
-"sizeof " { return Operator_sizeof; }
+"sizeof" { return Operator_sizeof; }
 "?" { return Operator_trinary_question; }
 ":" { return Operator_trinary_choice; }
 "," { return Operator_comma; }
 
+"if" { return Keyword_if;  }
+"else" { return Keyword_else; }
+"while" { return Kyeword_while; }
+"do" { return Keyword_do; }
+"switch" { return Keyword_switch; }
+"case" { return Keyword_case; }
+"default" { return Keyword_default; }
+"for" { return Keyword_default; }
+"continue" { return Keyword_continue; }
+"break" { return Keyword_break; }
+"return" { return Keyword_return; }
 
 \".[^"]*\"	{
         /*
@@ -183,7 +194,7 @@ Operator [+\-*/%&|^><=!~?:.,#\[\]\(\)\{\}]
 
 
 
-;   {
+";"   {
         /*
         punctuators
         [](){}*,:=;...#
@@ -192,6 +203,12 @@ Operator [+\-*/%&|^><=!~?:.,#\[\]\(\)\{\}]
         fprintf(stderr, "its a punctuator");
         return Punctuator;
 }
+"(" { return Punctuator_par_open; }
+")" { return Punctuator_par_close; }
+"[" { return Punctuator_squ_open; }
+"]" { return Punctuator_squ_close; }
+"{" { return Punctuator_cur_open; }
+"}" { return Punctuator_cur_close; }
 
 .   {
         /*

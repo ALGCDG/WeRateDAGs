@@ -57,11 +57,36 @@ enum TokenType
     Constant_float,
     Constant_long_double,
     Identifier,
-    Keyword,
+    Keyword, 
+    Keyword_void,
+    Keyword_char,
+    Keyword_short,
     Keyword_int,
+    Keyword_long,
+    Keyword_float,
+    Keyword_double,
+    Keyword_signed,
+    Keyword_unsigned,
+    Keyword_case,
+    Keyword_default,
+    Keyword_if,
+    Keyword_else,
+    Keyword_switch,
+    Keyword_while,
+    Keyword_do,
+    Keyword_for,
+    Keyword_continue,
+    Keyword_break,
+    Keyword_return
     String,
     Punctuator,
-    Punctuator_eol
+    Punctuator_eol,
+    Punctuator_par_open,
+    Punctuator_par_close,
+    Punctuator_squ_open,
+    Punctuator_squ_close,
+    Punctuator_cur_open,
+    Punctuator_cur_close
 };
 
 union TokenValue
