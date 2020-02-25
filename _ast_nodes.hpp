@@ -114,6 +114,12 @@ class Return : public JumpStatement{
 
 };
 
+class ID : public Node{
+public:
+private:
+    std::string Name;
+};
+
 class Expression : public Node{
 public:
 private:
