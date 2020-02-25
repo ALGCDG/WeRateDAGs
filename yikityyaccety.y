@@ -149,7 +149,7 @@ declaration_specifiers: storage_class_specifier
                       ;
 
 init_declarator_list: init_declarator
-                    | init_declarator_list Operator_comma init_declarator
+                    | init_declarator_list Operator_comma                                                                                        init_declarator
                     ;
 
 init_declarator: declarator
