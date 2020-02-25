@@ -229,6 +229,7 @@ FUNC_DEF: declaration_specifiers declarator declaration_list compound_statement
         | declaration_specifiers declarator compound_statement Punctuator_cur_open /* function with no arguments */ Punctuator_cur_close
         | declarator declaration_list compound_statement
         | declarator compound_statement
+        ;
 
 
 %%

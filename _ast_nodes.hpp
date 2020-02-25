@@ -1,6 +1,7 @@
 #ifndef AST_NODE
 #define AST_NODE
 
+#include "_ast_op_types.hpp"
 #include <vector>
 
 /** TODO:
@@ -115,8 +116,39 @@ class Return : public JumpStatement{
 
 class Expression : public Node{
 public:
+private:
+    Type* EvalsToType;
+};
+
+class ExpressionList : public Node{
+private:
+    std::vector<Expression*> Expressions;
+};
+
+class Constant : public Expression{
 
 };
+
+class BinaryOperator : public Expression{
+public:
+    typedef WRDAGS::BinaryOpType OPtype;
+private:
+    OPtype OPCode;
+    Expression* Left;
+    Expression* Right;
+};
+
+/** Thinking about struct access:
+ * Struct access is an expression
+ * Has labelled ret type
+ * Possible ret type is function
+ * function has compound type
+ * ie (a b) -> c
+ * Implement compound type?
+ * Restructure?
+ */
+
+
 
 class Type{
 public:
