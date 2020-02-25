@@ -3,6 +3,7 @@
 
 #include "_ast_op_types.hpp"
 #include <vector>
+#include <string>
 
 /** TODO:
  * Constructors
