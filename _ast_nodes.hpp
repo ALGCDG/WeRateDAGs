@@ -86,7 +86,8 @@ private:
 class Switch : public Statement{
 private:
     Expression* Evaluate;
-    std::vector<CaseOrDefault*> Cases; 
+    //std::vector<CaseOrDefault*> Cases; 
+    ExpressionList* Body;
 };
 
 class CaseOrDefault : public Statement{
