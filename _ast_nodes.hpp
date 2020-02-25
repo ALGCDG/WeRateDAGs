@@ -130,6 +130,7 @@ class Integral : public Type{
  * char
  * ints
  * enumerated types
+ * 
  */
 };
 
