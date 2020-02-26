@@ -167,26 +167,80 @@ private:
  */
 
 
+class Declaration{
+//initial class layout done, perhaps change the structure
+};
 
-// class Type{
-// public:
-//     void accept(ASTVisitor&);
-//     virtual int getByteSize();
-// private:
-// };
+/*Possibility that there are other top level declaration classes so leave NamedDeclaration as a child for now*/
+class NamedDeclaration : public Declaration{
+private:
+    Identifier* ID;
+    //Specifiers
+};
 
-// class Integral : public Type{
-// /** Superset of:
-//  * char
-//  * ints
-//  * enumerated types
-//  * 
-//  */
-// };
+class TypeDeclaration : public NamedDeclaration{
+// needs to hold a type?
+// possibly refactor into better structure
+};
 
+class TypedefNameDeclaration : public TypeDeclaration{
+// declares a typedef
+// need type and name i think
+};
 
+class TagDeclaration : public TypeDeclaration{
+//not a type declaration, structs and enums must be prefixed by struct/enum TAG when used as a type specifier
+//this is called an "elaborated type specifier"
+};
 
+class EnumDeclaration : public TagDeclaration{
+//holds specific info for enums
+};
 
+class StructDeclaration : public TagDeclaration{
+//declaration of struct tag
+//holds specific info for structs
+};
 
+class ValueDeclaration : public NamedDeclaration {
+//super class of the below, holds name and type
+};
+
+class EnumConstantDeclaration : public ValueDeclaration {
+//must be type int in C, holds name and value
+};
+
+class FunctionDeclaration : public ValueDeclaration{
+//holds declaration /and possibly definition
+};
+
+class StructFieldDeclaration : public ValueDeclaration{
+//holds information connected to a particular struct
+};
+
+class VariableDeclaration : public ValueDeclaration{
+//general variable declaration, holds name and type
+};
+
+class ParamDeclaration : public VariableDeclaration{
+//held inside function definition, relevent only within function
+};
+
+/**
+ * Declaration
+ *  Empty Decl
+ *  Named Decl
+ *      Type Decl
+ *          Tag Decl //struct, enum tags
+ *              enum decl
+ *              record decl
+ *          typedef name decl 
+ *      Value Decl //variable, function or enum constant
+ *          enum constant decl
+ *          function decl
+ *          field decl //member of struct
+ *          variable declaration
+ *              param declaration
+ */
 
 #endif
