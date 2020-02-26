@@ -3,6 +3,7 @@
 
 #include "_ast_op_types.hpp"
 #include <vector>
+#include <string>
 
 /** TODO:
  * Constructors
@@ -81,7 +82,8 @@ private:
 class Switch : public Statement{
 private:
     Expression* Evaluate;
-    std::vector<CaseOrDefault*> Cases; 
+    //std::vector<CaseOrDefault*> Cases; 
+    ExpressionList* Body;
 };
 
 class CaseOrDefault : public Statement{
