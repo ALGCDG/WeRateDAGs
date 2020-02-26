@@ -1,15 +1,16 @@
-int f1(int a){
-    return a*2;
-}
 
-int x = 3;
 
-int f2(int b){
-    return f1(b);
-}
+
+typedef struct{
+    int (*fpt)(int);
+
+} testlol;
 
 int main(){
-    int test = 2;
-    return (test == test) ?f2(test) : f1(x) ;
-
+    testlol a;
+    //struct testlol* b = &a;
+    //a.fpt = &f2;
+    a.fpt(3);
+    //b->fpt(2);
+    //f3(2);
 }

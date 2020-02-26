@@ -52,11 +52,6 @@ private:
     StatementList* IFFalse;
 };
 
-class Expression : public Node{
-public:
-    // void accept(ASTVisitor &) override;
-private:
-};
 
 class For : public Statement{
 public:
@@ -114,13 +109,8 @@ class Return : public JumpStatement{
 
 };
 
-class ID : public Node{
-public:
-private:
-    std::string Name;
-};
 
-class Expression : public Node{
+class Expression : public Statement{
 public:
 private:
     Type* EvalsToType;
@@ -144,6 +134,26 @@ private:
     Expression* Right;
 };
 
+class FuncCall : public Expression{
+public:
+private:
+    Expression* Designator;
+    std::vector<Expression*> Args;
+};
+
+class Identifier: public Expression{
+private:
+    std::string name;
+};
+
+class MemberExpression : public Expression{
+private:
+    Expression* ObjectDesignator;
+    Expression* AttributeDesignator;
+};
+
+
+
 /** Thinking about struct access:
  * Struct access is an expression
  * Has labelled ret type
@@ -156,21 +166,21 @@ private:
 
 
 
-class Type{
-public:
-    void accept(ASTVisitor&);
-    virtual int getByteSize();
-private:
-};
+// class Type{
+// public:
+//     void accept(ASTVisitor&);
+//     virtual int getByteSize();
+// private:
+// };
 
-class Integral : public Type{
-/** Superset of:
- * char
- * ints
- * enumerated types
- * 
- */
-};
+// class Integral : public Type{
+// /** Superset of:
+//  * char
+//  * ints
+//  * enumerated types
+//  * 
+//  */
+// };
 
 
 
