@@ -7,10 +7,13 @@ typedef struct{
 } testlol;
 
 int main(){
-    testlol a;
+    struct{
+    int (*fpt)(int);
+    } a;
     //struct testlol* b = &a;
     //a.fpt = &f2;
     a.fpt(3);
+    //test
     //b->fpt(2);
     //f3(2);
 }
