@@ -144,7 +144,58 @@ DECLARATIONS
 */
 
 
+declaration: declaration_specifiers init_declarator_list Punctuator_eol { std::cerr << "decspec list ;" << std::endl; }
+           | declaration_specifiers Punctuator_eol { std::cerr << "decspec ;" << std::endl; }
 
+declaration_specifiers: type_spcifier  { std::cerr << "typspec list" << std::endl; }
+                      | type_spcifier declaration_specifiers  { std::cerr << "typspec decspec" << std::endl; }
+                      | type_qualifier { std::cerr << "typqual" << std::endl; }
+                      | type_qualifier declaration_specifiers { std::cerr << "typqual decspec" << std::endl; }
+
+
+init_declarator_list: init_declarator  { std::cerr << "initdec" << std::endl; }
+                    | init_declarator_list Operator_comma init_declarator { std::cerr << "initdeclist , initdec " << std::endl; }
+
+init_declarator: declarator { std::cerr << "dec" << std::endl; }
+               | declarator Operator_assign initializer { std::cerr << "dec = init" << std::endl; }
+
+type_specifier: Keyword_void | Keyword_char | Keyword_short | Keyword_int | Keyword_long | Keyword_float | Keyword_double | Keyword_signed | Keyword_unsigned
+              | struct_specifier { std::cerr << "struct" << std::endl; }
+              | enum_specifier { std::cerr << "enum" << std::endl; }
+              | typedef_name { std::cerr << "typedef type" << std::endl; }
+
+struct_specifier: Keyword_struct Identifier Punctuator_cur_open struct_declaration_list Punctuator_cur_close { std::cerr << "struct x {...}" << std::endl; }
+				| Keyword_struct Punctuator_cur_open struct_declaration_list Punctuator_cur_close { std::cerr << "struct {...}" << std::endl; }
+				| Keyword_struct Identifier { std::cerr << "struct x" << std::endl; }
+
+
+
+struct_declaration_list: struct_declaration
+					   | struct_declaration_list struct_declaration
+
+struct_declaration: specifier_qualifier_list struct_declaration_list
+
+specifier_qualifier_list: type_spcifier
+						| type_spcifier specifier_qualifier_list
+						| type_qualifier
+						| type_qualifier specifier_qualifier_list
+
+struct_declarator_list: struct_declarator
+					  | struct_declarator_list Operator_comma struct_declarator
+
+struct_declarator: declarator
+
+enum_specifier: Keyword_enum Identifier
+			  | Keyword_enum Identifier Punctuator_cur_open enum_list Punctuator_cur_close
+			  | Keyword_enum Punctuator_cur_open enum_list Punctuator_cur_close
+
+enum_list: enumerator
+		 | enum_list Operator_comma enumerator
+
+enumerator: ENUM_CONST
+		  | ENUM_CONST Operator_assign constant_EXPR
+
+ENUM_CONST: Identifier
 
 ROOT: EXPR { std::cerr << "exp" << std::endl; }
 %%
