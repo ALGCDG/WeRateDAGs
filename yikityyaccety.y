@@ -50,7 +50,6 @@ postfix_EXPR: primary_EXPR
                   | postfix_EXPR Operator_addadd
                   | postfix_EXPR Operator_subsub
                   ;
-                  /*?Doesnt this allow 2 ++ ++ ?*/
 
 argument_EXPR_list: assignment_EXPR
                         | assignment_EXPR_list, assignment_EXPR
@@ -134,22 +133,22 @@ EXPR: assignment_EXPR
     | EXPR Operator_comma assignment_EXPR
     ;
 
-constant_EXPR: conditional_EXPR /* DONT THINK WE NEED THIS, WE DONT USE CONST */
+constant_EXPR: conditional_EXPR /* WE NEED THIS, THIS MEANS e.g. 2 + 3 -> evaluated at compile time */
                 ;
 
 declaration: declaration_specifiers init_declarator_list Punctuator_eol
            | declaration_specifiers Punctuator_eol
            ;
 
-declaration_specifiers: storage_class_specifier
+declaration_specifiers: storage_class_specifier //only typedef
                       | storage_class_specifier declaration_specifiers
                       | type_spcifier
                       | type_spcifier declaration_specifiers
-                      | type_qualifier declaration_specifiers
+                      | type_qualifier declaration_specifiers //dont need, these are const and volatile
                       ;
 
 init_declarator_list: init_declarator
-                    | init_declarator_list Operator_comma                                                                                        init_declarator
+                    | init_declarator_list Operator_comma init_declarator
                     ;
 
 init_declarator: declarator
