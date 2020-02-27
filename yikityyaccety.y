@@ -142,9 +142,8 @@ declaration: declaration_specifiers init_declarator_list Punctuator_eol
 
 declaration_specifiers: storage_class_specifier //only typedef
                       | storage_class_specifier declaration_specifiers
-                      | type_spcifier
                       | type_spcifier declaration_specifiers
-                      | type_qualifier declaration_specifiers //dont need, these are const and volatile
+                      | type_spcifier
                       ;
 
 init_declarator_list: init_declarator
