@@ -260,7 +260,50 @@ ROOT: EXPR { std::cerr << "exp" << std::endl; }
 	| declaration { std::cerr << "Its a declaration" << std::endl; }
 */
 
-ROOT: declaration { std::cerr << "Its a declaration" << std::endl; }
+
+/*
+Statements
+*/
+
+statement: labeled_statement
+         | compound_statement
+         | EXPR_statement
+         | selection_statement
+         | iteration_statement
+         | jump_statement
+
+labeled_statement: Keyword_case constant_EXPR Operator_trinary_choice statement
+                 | Keyword_default Operator_trinary_choice statement
+
+compound_statement: Punctuator_cur_open declaration_list statement_list Punctuator_cur_close
+                  | Punctuator_cur_open declaration_list Punctuator_cur_close
+                  | Punctuator_cur_open statement_list Punctuator_cur_close
+                  | Punctuator_cur_open Punctuator_cur_close
+
+declaration_list: declaration
+                | declaration_list declaration
+
+statement_list: statement
+              | statement_list statement
+
+EXPR_statement: EXPR Punctuator_eol
+                    | Punctuator_eol
+
+selection_statement: Keyword_if Punctuator_par_open EXPR Punctuator_par_close statement
+                   | Keyword_if Punctuator_par_open EXPR Punctuator_par_close statement Keyword_else statement
+                   | Keyword_switch Punctuator_par_open EXPR Punctuator_par_close statement
+
+iteration_statement: Keyword_while Punctuator_par_open EXPR Punctuator_par_close statement
+                   | Keyword_do statement Keyword_while Punctuator_par_open EXPR Punctuator_par_close
+                   | Keyword_for Punctuator_par_open EXPR_statement EXPR_statement EXPR Punctuator_par_close statement
+                   | Keyword_for Punctuator_par_open EXPR_statement EXPR_statement Punctuator_par_close statement
+
+jump_statement: Keyword_continue Punctuator_eol
+              | Keyword_break Punctuator_eol
+              | Keyword_return Punctuator_eol
+              | Keyword_return EXPR Punctuator_eol
+
+ROOT: statement { std::cerr << "Its a valid program" << std::endl; }
 %%
 /*
 const Expression *g_root; // Definition of variable (to match declaration earlier)
