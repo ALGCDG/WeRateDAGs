@@ -1,11 +1,17 @@
+Nonterminals useless in grammar
+
+   struct_declaration_list
+   struct_declaration
+   struct_declarator_list
+   struct_declarator
+
+
 Terminals unused in grammar
 
    Operator
    Operator_ref
    Operator_deref
    Keyword
-   Keyword_signed
-   Keyword_unsigned
    Keyword_case
    Keyword_default
    Keyword_if
@@ -18,9 +24,35 @@ Terminals unused in grammar
    Keyword_break
    Keyword_return
    Punctuator
-   Punctuator_eol
-   Punctuator_cur_open
-   Punctuator_cur_close
+
+
+Rules useless in grammar
+
+  159 struct_specifier: Keyword_struct Identifier Punctuator_cur_open struct_declaration_list Punctuator_cur_close
+  160                 | Keyword_struct Punctuator_cur_open struct_declaration_list Punctuator_cur_close
+
+  161 struct_declaration_list: struct_declaration
+  162                        | struct_declaration_list struct_declaration
+
+  163 struct_declaration: specifier_qualifier_list struct_declaration_list
+
+  164 struct_declarator_list: struct_declarator
+  165                       | struct_declarator_list Operator_comma struct_declarator
+
+  166 struct_declarator: declarator
+
+
+State 7 conflicts: 4 reduce/reduce
+State 50 conflicts: 1 shift/reduce
+State 64 conflicts: 1 reduce/reduce
+State 65 conflicts: 1 reduce/reduce
+State 66 conflicts: 1 reduce/reduce
+State 67 conflicts: 1 reduce/reduce
+State 68 conflicts: 1 reduce/reduce
+State 69 conflicts: 1 reduce/reduce
+State 70 conflicts: 1 reduce/reduce
+State 203 conflicts: 2 reduce/reduce
+State 232 conflicts: 3 reduce/reduce
 
 
 Grammar
@@ -134,7 +166,104 @@ Grammar
    84 EXPR: assignment_EXPR
    85     | EXPR Operator_comma assignment_EXPR
 
-   86 ROOT: EXPR
+   86 constant_EXPR: conditional_EXPR
+
+   87 declaration: declaration_specifiers init_declarator_list Punctuator_eol
+   88            | declaration_specifiers Punctuator_eol
+
+   89 declaration_specifiers: type_specifier
+   90                       | type_specifier declaration_specifiers
+
+   91 init_declarator_list: init_declarator
+   92                     | init_declarator_list Operator_comma init_declarator
+
+   93 init_declarator: declarator
+   94                | declarator Operator_assign initializer
+
+   95 type_specifier: Keyword_void
+   96               | Keyword_char
+   97               | Keyword_short
+   98               | Keyword_int
+   99               | Keyword_long
+  100               | Keyword_float
+  101               | Keyword_double
+  102               | Keyword_signed
+  103               | Keyword_unsigned
+  104               | struct_specifier
+  105               | enum_specifier
+  106               | typedef_name
+
+  107 struct_specifier: Keyword_struct Identifier
+
+  108 specifier_qualifier_list: type_specifier
+  109                         | type_specifier specifier_qualifier_list
+
+  110 enum_specifier: Keyword_enum Identifier
+  111               | Keyword_enum Identifier Punctuator_cur_open enum_list Punctuator_cur_close
+  112               | Keyword_enum Punctuator_cur_open enum_list Punctuator_cur_close
+
+  113 enum_list: enumerator
+  114          | enum_list Operator_comma enumerator
+
+  115 enumerator: ENUM_CONST
+  116           | ENUM_CONST Operator_assign constant_EXPR
+
+  117 ENUM_CONST: Identifier
+
+  118 declarator: direct_declarator
+  119           | pointer direct_declarator
+
+  120 direct_declarator: Identifier
+  121                  | Punctuator_par_open declarator Punctuator_par_close
+  122                  | direct_declarator Punctuator_squ_open Punctuator_squ_close
+  123                  | direct_declarator Punctuator_squ_open constant_EXPR Punctuator_squ_close
+  124                  | direct_declarator Punctuator_par_open parameter_type_list Punctuator_par_close
+  125                  | direct_declarator Punctuator_par_open identifier_list Punctuator_par_close
+  126                  | direct_declarator Punctuator_par_open Punctuator_par_close
+
+  127 pointer: Operator_mul
+  128        | Operator_mul pointer
+
+  129 parameter_type_list: parameter_list
+
+  130 parameter_list: parameter_declaration
+  131               | parameter_list Operator_comma parameter_declaration
+
+  132 parameter_declaration: declaration_specifiers declarator
+  133                      | declaration_specifiers
+  134                      | declaration_specifiers abstract_declarator
+
+  135 identifier_list: Identifier
+  136                | identifier_list Operator_comma Identifier
+
+  137 type_name: specifier_qualifier_list
+  138          | specifier_qualifier_list abstract_declarator
+
+  139 abstract_declarator: pointer
+  140                    | pointer direct_abstract_declarator
+  141                    | direct_abstract_declarator
+
+  142 direct_abstract_declarator: Punctuator_par_open abstract_declarator Punctuator_par_close
+  143                           | direct_abstract_declarator Punctuator_squ_open constant_EXPR Punctuator_squ_close
+  144                           | Punctuator_squ_open constant_EXPR Punctuator_squ_close
+  145                           | direct_abstract_declarator Punctuator_squ_open Punctuator_squ_close
+  146                           | Punctuator_squ_open Punctuator_squ_close
+  147                           | direct_abstract_declarator Punctuator_par_open parameter_type_list Punctuator_par_close
+  148                           | Punctuator_par_open parameter_type_list Punctuator_par_close
+  149                           | direct_abstract_declarator Punctuator_par_open Punctuator_par_close
+  150                           | Punctuator_par_open Punctuator_par_close
+
+  151 typedef_name: Identifier
+
+  152 initializer: assignment_EXPR
+  153            | Punctuator_cur_open initializer_list Punctuator_cur_close
+  154            | Punctuator_cur_open initializer_list Operator_comma Punctuator_cur_close
+
+  155 initializer_list: initializer
+  156                 | initializer_list Operator_comma initializer
+
+  157 ROOT: EXPR
+  158     | declaration
 
 
 Terminals, with rules where they appear
@@ -147,19 +276,19 @@ Constant_double (260) 7
 Constant_float (261) 8
 Constant_long_double (262) 9
 String (263) 3
-Identifier (264) 1 14 15
+Identifier (264) 1 14 15 107 110 111 117 120 135 136 151
 Operator (265)
 Operator_add (266) 28 46
 Operator_sub (267) 29 47
 Operator_addadd (268) 16 21
 Operator_subsub (269) 17 22
-Operator_mul (270) 27 42
+Operator_mul (270) 27 42 127 128
 Operator_div (271) 43
 Operator_mod (272) 44
 Operator_and (273) 66
 Operator_or (274) 68
 Operator_not (275) 31
-Operator_assign (276) 73
+Operator_assign (276) 73 94 116
 Operator_equal (277) 57
 Operator_not_equal (278) 58
 Operator_greater (279) 53
@@ -189,17 +318,17 @@ Operator_deref_access (302) 15
 Operator_sizeof (303) 24 25
 Operator_trinary_question (304) 70
 Operator_trinary_choice (305) 70
-Operator_comma (306) 19 85
+Operator_comma (306) 19 85 92 114 131 136 154 156
 Keyword (307)
-Keyword_void (308) 32
-Keyword_char (309) 33
-Keyword_short (310) 34
-Keyword_int (311) 35
-Keyword_long (312) 36
-Keyword_float (313) 37
-Keyword_double (314) 38
-Keyword_signed (315)
-Keyword_unsigned (316)
+Keyword_void (308) 32 95
+Keyword_char (309) 33 96
+Keyword_short (310) 34 97
+Keyword_int (311) 35 98
+Keyword_long (312) 36 99
+Keyword_float (313) 37 100
+Keyword_double (314) 38 101
+Keyword_signed (315) 102
+Keyword_unsigned (316) 103
 Keyword_case (317)
 Keyword_default (318)
 Keyword_if (319)
@@ -211,67 +340,122 @@ Keyword_for (324)
 Keyword_continue (325)
 Keyword_break (326)
 Keyword_return (327)
-Punctuator (328)
-Punctuator_eol (329)
-Punctuator_par_open (330) 4 12 13 25 40
-Punctuator_par_close (331) 4 12 13 25 40
-Punctuator_squ_open (332) 11
-Punctuator_squ_close (333) 11
-Punctuator_cur_open (334)
-Punctuator_cur_close (335)
+Keyword_enum (328) 110 111 112
+Keyword_struct (329) 107
+Punctuator (330)
+Punctuator_eol (331) 87 88
+Punctuator_par_open (332) 4 12 13 25 40 121 124 125 126 142 147 148
+    149 150
+Punctuator_par_close (333) 4 12 13 25 40 121 124 125 126 142 147 148
+    149 150
+Punctuator_squ_open (334) 11 122 123 143 144 145 146
+Punctuator_squ_close (335) 11 122 123 143 144 145 146
+Punctuator_cur_open (336) 111 112 153 154
+Punctuator_cur_close (337) 111 112 153 154
 
 
 Nonterminals, with rules where they appear
 
-$accept (81)
+$accept (83)
     on left: 0
-primary_EXPR (82)
+primary_EXPR (84)
     on left: 1 2 3 4, on right: 10
-Constant (83)
+Constant (85)
     on left: 5 6 7 8 9, on right: 2
-postfix_EXPR (84)
+postfix_EXPR (86)
     on left: 10 11 12 13 14 15 16 17, on right: 11 12 13 14 15 16 17
     20
-argument_EXPR_list (85)
+argument_EXPR_list (87)
     on left: 18 19, on right: 13 19
-unary_EXPR (86)
+unary_EXPR (88)
     on left: 20 21 22 23 24 25, on right: 21 22 24 39 72
-unary_operator (87)
+unary_operator (89)
     on left: 26 27 28 29 30 31, on right: 23
-type_name (88)
-    on left: 32 33 34 35 36 37 38, on right: 25 40
-cast_EXPR (89)
+type_name (90)
+    on left: 32 33 34 35 36 37 38 137 138, on right: 25 40
+cast_EXPR (91)
     on left: 39 40, on right: 23 40 41 42 43 44
-multiplicative_EXPR (90)
+multiplicative_EXPR (92)
     on left: 41 42 43 44, on right: 42 43 44 45 46 47
-additive_EXPR (91)
+additive_EXPR (93)
     on left: 45 46 47, on right: 46 47 48 49 50
-shift_EXPR (92)
+shift_EXPR (94)
     on left: 48 49 50, on right: 49 50 51 52 53 54 55
-relational_EXPR (93)
+relational_EXPR (95)
     on left: 51 52 53 54 55, on right: 52 53 54 55 56 57 58
-equality_EXPR (94)
+equality_EXPR (96)
     on left: 56 57 58, on right: 57 58 59 60
-BIT_AND_EXPR (95)
+BIT_AND_EXPR (97)
     on left: 59 60, on right: 60 61 62
-BIT_XBIT_OR_EXPR (96)
+BIT_XBIT_OR_EXPR (98)
     on left: 61 62, on right: 62 63 64
-BIT_OR_EXPR (97)
+BIT_OR_EXPR (99)
     on left: 63 64, on right: 64 65 66
-LOGIC_AND_EXPR (98)
+LOGIC_AND_EXPR (100)
     on left: 65 66, on right: 66 67 68
-LOGIC_OR_EXPR (99)
+LOGIC_OR_EXPR (101)
     on left: 67 68, on right: 68 69 70
-conditional_EXPR (100)
-    on left: 69 70, on right: 70 71
-assignment_EXPR (101)
-    on left: 71 72, on right: 18 19 72 84 85
-assignment (102)
+conditional_EXPR (102)
+    on left: 69 70, on right: 70 71 86
+assignment_EXPR (103)
+    on left: 71 72, on right: 18 19 72 84 85 152
+assignment (104)
     on left: 73 74 75 76 77 78 79 80 81 82 83, on right: 72
-EXPR (103)
-    on left: 84 85, on right: 4 11 70 85 86
-ROOT (104)
-    on left: 86, on right: 0
+EXPR (105)
+    on left: 84 85, on right: 4 11 70 85 157
+constant_EXPR (106)
+    on left: 86, on right: 116 123 143 144
+declaration (107)
+    on left: 87 88, on right: 158
+declaration_specifiers (108)
+    on left: 89 90, on right: 87 88 90 132 133 134
+init_declarator_list (109)
+    on left: 91 92, on right: 87 92
+init_declarator (110)
+    on left: 93 94, on right: 91 92
+type_specifier (111)
+    on left: 95 96 97 98 99 100 101 102 103 104 105 106, on right:
+    89 90 108 109
+struct_specifier (112)
+    on left: 107, on right: 104
+specifier_qualifier_list (113)
+    on left: 108 109, on right: 109 137 138
+enum_specifier (114)
+    on left: 110 111 112, on right: 105
+enum_list (115)
+    on left: 113 114, on right: 111 112 114
+enumerator (116)
+    on left: 115 116, on right: 113 114
+ENUM_CONST (117)
+    on left: 117, on right: 115 116
+declarator (118)
+    on left: 118 119, on right: 93 94 121 132
+direct_declarator (119)
+    on left: 120 121 122 123 124 125 126, on right: 118 119 122 123
+    124 125 126
+pointer (120)
+    on left: 127 128, on right: 119 128 139 140
+parameter_type_list (121)
+    on left: 129, on right: 124 147 148
+parameter_list (122)
+    on left: 130 131, on right: 129 131
+parameter_declaration (123)
+    on left: 132 133 134, on right: 130 131
+identifier_list (124)
+    on left: 135 136, on right: 125 136
+abstract_declarator (125)
+    on left: 139 140 141, on right: 134 138 142
+direct_abstract_declarator (126)
+    on left: 142 143 144 145 146 147 148 149 150, on right: 140 141
+    143 145 147 149
+typedef_name (127)
+    on left: 151, on right: 106
+initializer (128)
+    on left: 152 153 154, on right: 94 155 156
+initializer_list (129)
+    on left: 155 156, on right: 153 154 156
+ROOT (130)
+    on left: 157 158, on right: 0
 
 
 State 0
@@ -294,28 +478,45 @@ State 0
     Operator_bit_and      shift, and go to state 14
     Operator_bit_not      shift, and go to state 15
     Operator_sizeof       shift, and go to state 16
-    Punctuator_par_open   shift, and go to state 17
+    Keyword_void          shift, and go to state 17
+    Keyword_char          shift, and go to state 18
+    Keyword_short         shift, and go to state 19
+    Keyword_int           shift, and go to state 20
+    Keyword_long          shift, and go to state 21
+    Keyword_float         shift, and go to state 22
+    Keyword_double        shift, and go to state 23
+    Keyword_signed        shift, and go to state 24
+    Keyword_unsigned      shift, and go to state 25
+    Keyword_enum          shift, and go to state 26
+    Keyword_struct        shift, and go to state 27
+    Punctuator_par_open   shift, and go to state 28
 
-    primary_EXPR         go to state 18
-    Constant             go to state 19
-    postfix_EXPR         go to state 20
-    unary_EXPR           go to state 21
-    unary_operator       go to state 22
-    cast_EXPR            go to state 23
-    multiplicative_EXPR  go to state 24
-    additive_EXPR        go to state 25
-    shift_EXPR           go to state 26
-    relational_EXPR      go to state 27
-    equality_EXPR        go to state 28
-    BIT_AND_EXPR         go to state 29
-    BIT_XBIT_OR_EXPR     go to state 30
-    BIT_OR_EXPR          go to state 31
-    LOGIC_AND_EXPR       go to state 32
-    LOGIC_OR_EXPR        go to state 33
-    conditional_EXPR     go to state 34
-    assignment_EXPR      go to state 35
-    EXPR                 go to state 36
-    ROOT                 go to state 37
+    primary_EXPR            go to state 29
+    Constant                go to state 30
+    postfix_EXPR            go to state 31
+    unary_EXPR              go to state 32
+    unary_operator          go to state 33
+    cast_EXPR               go to state 34
+    multiplicative_EXPR     go to state 35
+    additive_EXPR           go to state 36
+    shift_EXPR              go to state 37
+    relational_EXPR         go to state 38
+    equality_EXPR           go to state 39
+    BIT_AND_EXPR            go to state 40
+    BIT_XBIT_OR_EXPR        go to state 41
+    BIT_OR_EXPR             go to state 42
+    LOGIC_AND_EXPR          go to state 43
+    LOGIC_OR_EXPR           go to state 44
+    conditional_EXPR        go to state 45
+    assignment_EXPR         go to state 46
+    EXPR                    go to state 47
+    declaration             go to state 48
+    declaration_specifiers  go to state 49
+    type_specifier          go to state 50
+    struct_specifier        go to state 51
+    enum_specifier          go to state 52
+    typedef_name            go to state 53
+    ROOT                    go to state 54
 
 
 State 1
@@ -363,8 +564,30 @@ State 6
 State 7
 
     1 primary_EXPR: Identifier .
+  151 typedef_name: Identifier .
 
-    $default  reduce using rule 1 (primary_EXPR)
+    Identifier            reduce using rule 151 (typedef_name)
+    Operator_mul          reduce using rule 1 (primary_EXPR)
+    Operator_mul          [reduce using rule 151 (typedef_name)]
+    Keyword_void          reduce using rule 151 (typedef_name)
+    Keyword_char          reduce using rule 151 (typedef_name)
+    Keyword_short         reduce using rule 151 (typedef_name)
+    Keyword_int           reduce using rule 151 (typedef_name)
+    Keyword_long          reduce using rule 151 (typedef_name)
+    Keyword_float         reduce using rule 151 (typedef_name)
+    Keyword_double        reduce using rule 151 (typedef_name)
+    Keyword_signed        reduce using rule 151 (typedef_name)
+    Keyword_unsigned      reduce using rule 151 (typedef_name)
+    Keyword_enum          reduce using rule 151 (typedef_name)
+    Keyword_struct        reduce using rule 151 (typedef_name)
+    Punctuator_eol        reduce using rule 151 (typedef_name)
+    Punctuator_par_open   reduce using rule 1 (primary_EXPR)
+    Punctuator_par_open   [reduce using rule 151 (typedef_name)]
+    Punctuator_par_close  reduce using rule 1 (primary_EXPR)
+    Punctuator_par_close  [reduce using rule 151 (typedef_name)]
+    Punctuator_squ_open   reduce using rule 1 (primary_EXPR)
+    Punctuator_squ_open   [reduce using rule 151 (typedef_name)]
+    $default              reduce using rule 1 (primary_EXPR)
 
 
 State 8
@@ -391,7 +614,7 @@ State 10
     Constant_float        shift, and go to state 4
     Constant_long_double  shift, and go to state 5
     String                shift, and go to state 6
-    Identifier            shift, and go to state 7
+    Identifier            shift, and go to state 55
     Operator_add          shift, and go to state 8
     Operator_sub          shift, and go to state 9
     Operator_addadd       shift, and go to state 10
@@ -401,13 +624,13 @@ State 10
     Operator_bit_and      shift, and go to state 14
     Operator_bit_not      shift, and go to state 15
     Operator_sizeof       shift, and go to state 16
-    Punctuator_par_open   shift, and go to state 38
+    Punctuator_par_open   shift, and go to state 56
 
-    primary_EXPR    go to state 18
-    Constant        go to state 19
-    postfix_EXPR    go to state 20
-    unary_EXPR      go to state 39
-    unary_operator  go to state 22
+    primary_EXPR    go to state 29
+    Constant        go to state 30
+    postfix_EXPR    go to state 31
+    unary_EXPR      go to state 57
+    unary_operator  go to state 33
 
 
 State 11
@@ -420,7 +643,7 @@ State 11
     Constant_float        shift, and go to state 4
     Constant_long_double  shift, and go to state 5
     String                shift, and go to state 6
-    Identifier            shift, and go to state 7
+    Identifier            shift, and go to state 55
     Operator_add          shift, and go to state 8
     Operator_sub          shift, and go to state 9
     Operator_addadd       shift, and go to state 10
@@ -430,13 +653,13 @@ State 11
     Operator_bit_and      shift, and go to state 14
     Operator_bit_not      shift, and go to state 15
     Operator_sizeof       shift, and go to state 16
-    Punctuator_par_open   shift, and go to state 38
+    Punctuator_par_open   shift, and go to state 56
 
-    primary_EXPR    go to state 18
-    Constant        go to state 19
-    postfix_EXPR    go to state 20
-    unary_EXPR      go to state 40
-    unary_operator  go to state 22
+    primary_EXPR    go to state 29
+    Constant        go to state 30
+    postfix_EXPR    go to state 31
+    unary_EXPR      go to state 58
+    unary_operator  go to state 33
 
 
 State 12
@@ -478,7 +701,7 @@ State 16
     Constant_float        shift, and go to state 4
     Constant_long_double  shift, and go to state 5
     String                shift, and go to state 6
-    Identifier            shift, and go to state 7
+    Identifier            shift, and go to state 55
     Operator_add          shift, and go to state 8
     Operator_sub          shift, and go to state 9
     Operator_addadd       shift, and go to state 10
@@ -488,16 +711,96 @@ State 16
     Operator_bit_and      shift, and go to state 14
     Operator_bit_not      shift, and go to state 15
     Operator_sizeof       shift, and go to state 16
-    Punctuator_par_open   shift, and go to state 41
+    Punctuator_par_open   shift, and go to state 59
 
-    primary_EXPR    go to state 18
-    Constant        go to state 19
-    postfix_EXPR    go to state 20
-    unary_EXPR      go to state 42
-    unary_operator  go to state 22
+    primary_EXPR    go to state 29
+    Constant        go to state 30
+    postfix_EXPR    go to state 31
+    unary_EXPR      go to state 60
+    unary_operator  go to state 33
 
 
 State 17
+
+   95 type_specifier: Keyword_void .
+
+    $default  reduce using rule 95 (type_specifier)
+
+
+State 18
+
+   96 type_specifier: Keyword_char .
+
+    $default  reduce using rule 96 (type_specifier)
+
+
+State 19
+
+   97 type_specifier: Keyword_short .
+
+    $default  reduce using rule 97 (type_specifier)
+
+
+State 20
+
+   98 type_specifier: Keyword_int .
+
+    $default  reduce using rule 98 (type_specifier)
+
+
+State 21
+
+   99 type_specifier: Keyword_long .
+
+    $default  reduce using rule 99 (type_specifier)
+
+
+State 22
+
+  100 type_specifier: Keyword_float .
+
+    $default  reduce using rule 100 (type_specifier)
+
+
+State 23
+
+  101 type_specifier: Keyword_double .
+
+    $default  reduce using rule 101 (type_specifier)
+
+
+State 24
+
+  102 type_specifier: Keyword_signed .
+
+    $default  reduce using rule 102 (type_specifier)
+
+
+State 25
+
+  103 type_specifier: Keyword_unsigned .
+
+    $default  reduce using rule 103 (type_specifier)
+
+
+State 26
+
+  110 enum_specifier: Keyword_enum . Identifier
+  111               | Keyword_enum . Identifier Punctuator_cur_open enum_list Punctuator_cur_close
+  112               | Keyword_enum . Punctuator_cur_open enum_list Punctuator_cur_close
+
+    Identifier           shift, and go to state 61
+    Punctuator_cur_open  shift, and go to state 62
+
+
+State 27
+
+  107 struct_specifier: Keyword_struct . Identifier
+
+    Identifier  shift, and go to state 63
+
+
+State 28
 
     4 primary_EXPR: Punctuator_par_open . EXPR Punctuator_par_close
    40 cast_EXPR: Punctuator_par_open . type_name Punctuator_par_close cast_EXPR
@@ -518,52 +821,61 @@ State 17
     Operator_bit_and      shift, and go to state 14
     Operator_bit_not      shift, and go to state 15
     Operator_sizeof       shift, and go to state 16
-    Keyword_void          shift, and go to state 43
-    Keyword_char          shift, and go to state 44
-    Keyword_short         shift, and go to state 45
-    Keyword_int           shift, and go to state 46
-    Keyword_long          shift, and go to state 47
-    Keyword_float         shift, and go to state 48
-    Keyword_double        shift, and go to state 49
-    Punctuator_par_open   shift, and go to state 17
+    Keyword_void          shift, and go to state 64
+    Keyword_char          shift, and go to state 65
+    Keyword_short         shift, and go to state 66
+    Keyword_int           shift, and go to state 67
+    Keyword_long          shift, and go to state 68
+    Keyword_float         shift, and go to state 69
+    Keyword_double        shift, and go to state 70
+    Keyword_signed        shift, and go to state 24
+    Keyword_unsigned      shift, and go to state 25
+    Keyword_enum          shift, and go to state 26
+    Keyword_struct        shift, and go to state 27
+    Punctuator_par_open   shift, and go to state 28
 
-    primary_EXPR         go to state 18
-    Constant             go to state 19
-    postfix_EXPR         go to state 20
-    unary_EXPR           go to state 21
-    unary_operator       go to state 22
-    type_name            go to state 50
-    cast_EXPR            go to state 23
-    multiplicative_EXPR  go to state 24
-    additive_EXPR        go to state 25
-    shift_EXPR           go to state 26
-    relational_EXPR      go to state 27
-    equality_EXPR        go to state 28
-    BIT_AND_EXPR         go to state 29
-    BIT_XBIT_OR_EXPR     go to state 30
-    BIT_OR_EXPR          go to state 31
-    LOGIC_AND_EXPR       go to state 32
-    LOGIC_OR_EXPR        go to state 33
-    conditional_EXPR     go to state 34
-    assignment_EXPR      go to state 35
-    EXPR                 go to state 51
+    primary_EXPR              go to state 29
+    Constant                  go to state 30
+    postfix_EXPR              go to state 31
+    unary_EXPR                go to state 32
+    unary_operator            go to state 33
+    type_name                 go to state 71
+    cast_EXPR                 go to state 34
+    multiplicative_EXPR       go to state 35
+    additive_EXPR             go to state 36
+    shift_EXPR                go to state 37
+    relational_EXPR           go to state 38
+    equality_EXPR             go to state 39
+    BIT_AND_EXPR              go to state 40
+    BIT_XBIT_OR_EXPR          go to state 41
+    BIT_OR_EXPR               go to state 42
+    LOGIC_AND_EXPR            go to state 43
+    LOGIC_OR_EXPR             go to state 44
+    conditional_EXPR          go to state 45
+    assignment_EXPR           go to state 46
+    EXPR                      go to state 72
+    type_specifier            go to state 73
+    struct_specifier          go to state 51
+    specifier_qualifier_list  go to state 74
+    enum_specifier            go to state 52
+    typedef_name              go to state 53
 
 
-State 18
+State 29
 
    10 postfix_EXPR: primary_EXPR .
 
     $default  reduce using rule 10 (postfix_EXPR)
 
 
-State 19
+State 30
 
     2 primary_EXPR: Constant .
 
     $default  reduce using rule 2 (primary_EXPR)
 
 
-State 20
+State 31
 
    11 postfix_EXPR: postfix_EXPR . Punctuator_squ_open EXPR Punctuator_squ_close
    12             | postfix_EXPR . Punctuator_par_open Punctuator_par_close
@@ -574,39 +886,39 @@ State 20
    17             | postfix_EXPR . Operator_subsub
    20 unary_EXPR: postfix_EXPR .
 
-    Operator_addadd        shift, and go to state 52
-    Operator_subsub        shift, and go to state 53
-    Operator_access        shift, and go to state 54
-    Operator_deref_access  shift, and go to state 55
-    Punctuator_par_open    shift, and go to state 56
-    Punctuator_squ_open    shift, and go to state 57
+    Operator_addadd        shift, and go to state 75
+    Operator_subsub        shift, and go to state 76
+    Operator_access        shift, and go to state 77
+    Operator_deref_access  shift, and go to state 78
+    Punctuator_par_open    shift, and go to state 79
+    Punctuator_squ_open    shift, and go to state 80
 
     $default  reduce using rule 20 (unary_EXPR)
 
 
-State 21
+State 32
 
    39 cast_EXPR: unary_EXPR .
    72 assignment_EXPR: unary_EXPR . assignment assignment_EXPR
 
-    Operator_assign      shift, and go to state 58
-    Operator_add_assign  shift, and go to state 59
-    Operator_sub_assign  shift, and go to state 60
-    Operator_mul_assign  shift, and go to state 61
-    Operator_div_assign  shift, and go to state 62
-    Operator_mod_assign  shift, and go to state 63
-    Operator_and_assign  shift, and go to state 64
-    Operator_or_assign   shift, and go to state 65
-    Operator_xor_assign  shift, and go to state 66
-    Operator_sr_assign   shift, and go to state 67
-    Operator_sl_assign   shift, and go to state 68
+    Operator_assign      shift, and go to state 81
+    Operator_add_assign  shift, and go to state 82
+    Operator_sub_assign  shift, and go to state 83
+    Operator_mul_assign  shift, and go to state 84
+    Operator_div_assign  shift, and go to state 85
+    Operator_mod_assign  shift, and go to state 86
+    Operator_and_assign  shift, and go to state 87
+    Operator_or_assign   shift, and go to state 88
+    Operator_xor_assign  shift, and go to state 89
+    Operator_sr_assign   shift, and go to state 90
+    Operator_sl_assign   shift, and go to state 91
 
     $default  reduce using rule 39 (cast_EXPR)
 
-    assignment  go to state 69
+    assignment  go to state 92
 
 
-State 22
+State 33
 
    23 unary_EXPR: unary_operator . cast_EXPR
 
@@ -616,7 +928,7 @@ State 22
     Constant_float        shift, and go to state 4
     Constant_long_double  shift, and go to state 5
     String                shift, and go to state 6
-    Identifier            shift, and go to state 7
+    Identifier            shift, and go to state 55
     Operator_add          shift, and go to state 8
     Operator_sub          shift, and go to state 9
     Operator_addadd       shift, and go to state 10
@@ -626,62 +938,62 @@ State 22
     Operator_bit_and      shift, and go to state 14
     Operator_bit_not      shift, and go to state 15
     Operator_sizeof       shift, and go to state 16
-    Punctuator_par_open   shift, and go to state 17
+    Punctuator_par_open   shift, and go to state 28
 
-    primary_EXPR    go to state 18
-    Constant        go to state 19
-    postfix_EXPR    go to state 20
-    unary_EXPR      go to state 70
-    unary_operator  go to state 22
-    cast_EXPR       go to state 71
+    primary_EXPR    go to state 29
+    Constant        go to state 30
+    postfix_EXPR    go to state 31
+    unary_EXPR      go to state 93
+    unary_operator  go to state 33
+    cast_EXPR       go to state 94
 
 
-State 23
+State 34
 
    41 multiplicative_EXPR: cast_EXPR .
 
     $default  reduce using rule 41 (multiplicative_EXPR)
 
 
-State 24
+State 35
 
    42 multiplicative_EXPR: multiplicative_EXPR . Operator_mul cast_EXPR
    43                    | multiplicative_EXPR . Operator_div cast_EXPR
    44                    | multiplicative_EXPR . Operator_mod cast_EXPR
    45 additive_EXPR: multiplicative_EXPR .
 
-    Operator_mul  shift, and go to state 72
-    Operator_div  shift, and go to state 73
-    Operator_mod  shift, and go to state 74
+    Operator_mul  shift, and go to state 95
+    Operator_div  shift, and go to state 96
+    Operator_mod  shift, and go to state 97
 
     $default  reduce using rule 45 (additive_EXPR)
 
 
-State 25
+State 36
 
    46 additive_EXPR: additive_EXPR . Operator_add multiplicative_EXPR
    47              | additive_EXPR . Operator_sub multiplicative_EXPR
    48 shift_EXPR: additive_EXPR .
 
-    Operator_add  shift, and go to state 75
-    Operator_sub  shift, and go to state 76
+    Operator_add  shift, and go to state 98
+    Operator_sub  shift, and go to state 99
 
     $default  reduce using rule 48 (shift_EXPR)
 
 
-State 26
+State 37
 
    49 shift_EXPR: shift_EXPR . Operator_sl additive_EXPR
    50           | shift_EXPR . Operator_sr additive_EXPR
    51 relational_EXPR: shift_EXPR .
 
-    Operator_sl  shift, and go to state 77
-    Operator_sr  shift, and go to state 78
+    Operator_sl  shift, and go to state 100
+    Operator_sr  shift, and go to state 101
 
     $default  reduce using rule 51 (relational_EXPR)
 
 
-State 27
+State 38
 
    52 relational_EXPR: relational_EXPR . Operator_less shift_EXPR
    53                | relational_EXPR . Operator_greater shift_EXPR
@@ -689,110 +1001,190 @@ State 27
    55                | relational_EXPR . Operator_greater_equal shift_EXPR
    56 equality_EXPR: relational_EXPR .
 
-    Operator_greater        shift, and go to state 79
-    Operator_less           shift, and go to state 80
-    Operator_greater_equal  shift, and go to state 81
-    Operator_less_equal     shift, and go to state 82
+    Operator_greater        shift, and go to state 102
+    Operator_less           shift, and go to state 103
+    Operator_greater_equal  shift, and go to state 104
+    Operator_less_equal     shift, and go to state 105
 
     $default  reduce using rule 56 (equality_EXPR)
 
 
-State 28
+State 39
 
    57 equality_EXPR: equality_EXPR . Operator_equal relational_EXPR
    58              | equality_EXPR . Operator_not_equal relational_EXPR
    59 BIT_AND_EXPR: equality_EXPR .
 
-    Operator_equal      shift, and go to state 83
-    Operator_not_equal  shift, and go to state 84
+    Operator_equal      shift, and go to state 106
+    Operator_not_equal  shift, and go to state 107
 
     $default  reduce using rule 59 (BIT_AND_EXPR)
 
 
-State 29
+State 40
 
    60 BIT_AND_EXPR: BIT_AND_EXPR . Operator_bit_and equality_EXPR
    61 BIT_XBIT_OR_EXPR: BIT_AND_EXPR .
 
-    Operator_bit_and  shift, and go to state 85
+    Operator_bit_and  shift, and go to state 108
 
     $default  reduce using rule 61 (BIT_XBIT_OR_EXPR)
 
 
-State 30
+State 41
 
    62 BIT_XBIT_OR_EXPR: BIT_XBIT_OR_EXPR . Operator_bit_xor BIT_AND_EXPR
    63 BIT_OR_EXPR: BIT_XBIT_OR_EXPR .
 
-    Operator_bit_xor  shift, and go to state 86
+    Operator_bit_xor  shift, and go to state 109
 
     $default  reduce using rule 63 (BIT_OR_EXPR)
 
 
-State 31
+State 42
 
    64 BIT_OR_EXPR: BIT_OR_EXPR . Operator_bit_or BIT_XBIT_OR_EXPR
    65 LOGIC_AND_EXPR: BIT_OR_EXPR .
 
-    Operator_bit_or  shift, and go to state 87
+    Operator_bit_or  shift, and go to state 110
 
     $default  reduce using rule 65 (LOGIC_AND_EXPR)
 
 
-State 32
+State 43
 
    66 LOGIC_AND_EXPR: LOGIC_AND_EXPR . Operator_and BIT_OR_EXPR
    67 LOGIC_OR_EXPR: LOGIC_AND_EXPR .
 
-    Operator_and  shift, and go to state 88
+    Operator_and  shift, and go to state 111
 
     $default  reduce using rule 67 (LOGIC_OR_EXPR)
 
 
-State 33
+State 44
 
    68 LOGIC_OR_EXPR: LOGIC_OR_EXPR . Operator_or LOGIC_AND_EXPR
    69 conditional_EXPR: LOGIC_OR_EXPR .
    70                 | LOGIC_OR_EXPR . Operator_trinary_question EXPR Operator_trinary_choice conditional_EXPR
 
-    Operator_or                shift, and go to state 89
-    Operator_trinary_question  shift, and go to state 90
+    Operator_or                shift, and go to state 112
+    Operator_trinary_question  shift, and go to state 113
 
     $default  reduce using rule 69 (conditional_EXPR)
 
 
-State 34
+State 45
 
    71 assignment_EXPR: conditional_EXPR .
 
     $default  reduce using rule 71 (assignment_EXPR)
 
 
-State 35
+State 46
 
    84 EXPR: assignment_EXPR .
 
     $default  reduce using rule 84 (EXPR)
 
 
-State 36
+State 47
 
    85 EXPR: EXPR . Operator_comma assignment_EXPR
-   86 ROOT: EXPR .
+  157 ROOT: EXPR .
 
-    Operator_comma  shift, and go to state 91
+    Operator_comma  shift, and go to state 114
 
-    $default  reduce using rule 86 (ROOT)
+    $default  reduce using rule 157 (ROOT)
 
 
-State 37
+State 48
+
+  158 ROOT: declaration .
+
+    $default  reduce using rule 158 (ROOT)
+
+
+State 49
+
+   87 declaration: declaration_specifiers . init_declarator_list Punctuator_eol
+   88            | declaration_specifiers . Punctuator_eol
+
+    Identifier           shift, and go to state 115
+    Operator_mul         shift, and go to state 116
+    Punctuator_eol       shift, and go to state 117
+    Punctuator_par_open  shift, and go to state 118
+
+    init_declarator_list  go to state 119
+    init_declarator       go to state 120
+    declarator            go to state 121
+    direct_declarator     go to state 122
+    pointer               go to state 123
+
+
+State 50
+
+   89 declaration_specifiers: type_specifier .
+   90                       | type_specifier . declaration_specifiers
+
+    Identifier        shift, and go to state 124
+    Keyword_void      shift, and go to state 17
+    Keyword_char      shift, and go to state 18
+    Keyword_short     shift, and go to state 19
+    Keyword_int       shift, and go to state 20
+    Keyword_long      shift, and go to state 21
+    Keyword_float     shift, and go to state 22
+    Keyword_double    shift, and go to state 23
+    Keyword_signed    shift, and go to state 24
+    Keyword_unsigned  shift, and go to state 25
+    Keyword_enum      shift, and go to state 26
+    Keyword_struct    shift, and go to state 27
+
+    Identifier  [reduce using rule 89 (declaration_specifiers)]
+    $default    reduce using rule 89 (declaration_specifiers)
+
+    declaration_specifiers  go to state 125
+    type_specifier          go to state 50
+    struct_specifier        go to state 51
+    enum_specifier          go to state 52
+    typedef_name            go to state 53
+
+
+State 51
+
+  104 type_specifier: struct_specifier .
+
+    $default  reduce using rule 104 (type_specifier)
+
+
+State 52
+
+  105 type_specifier: enum_specifier .
+
+    $default  reduce using rule 105 (type_specifier)
+
+
+State 53
+
+  106 type_specifier: typedef_name .
+
+    $default  reduce using rule 106 (type_specifier)
+
+
+State 54
 
     0 $accept: ROOT . $end
 
-    $end  shift, and go to state 92
+    $end  shift, and go to state 126
 
 
-State 38
+State 55
+
+    1 primary_EXPR: Identifier .
+
+    $default  reduce using rule 1 (primary_EXPR)
+
+
+State 56
 
     4 primary_EXPR: Punctuator_par_open . EXPR Punctuator_par_close
 
@@ -802,7 +1194,7 @@ State 38
     Constant_float        shift, and go to state 4
     Constant_long_double  shift, and go to state 5
     String                shift, and go to state 6
-    Identifier            shift, and go to state 7
+    Identifier            shift, and go to state 55
     Operator_add          shift, and go to state 8
     Operator_sub          shift, and go to state 9
     Operator_addadd       shift, and go to state 10
@@ -812,44 +1204,44 @@ State 38
     Operator_bit_and      shift, and go to state 14
     Operator_bit_not      shift, and go to state 15
     Operator_sizeof       shift, and go to state 16
-    Punctuator_par_open   shift, and go to state 17
+    Punctuator_par_open   shift, and go to state 28
 
-    primary_EXPR         go to state 18
-    Constant             go to state 19
-    postfix_EXPR         go to state 20
-    unary_EXPR           go to state 21
-    unary_operator       go to state 22
-    cast_EXPR            go to state 23
-    multiplicative_EXPR  go to state 24
-    additive_EXPR        go to state 25
-    shift_EXPR           go to state 26
-    relational_EXPR      go to state 27
-    equality_EXPR        go to state 28
-    BIT_AND_EXPR         go to state 29
-    BIT_XBIT_OR_EXPR     go to state 30
-    BIT_OR_EXPR          go to state 31
-    LOGIC_AND_EXPR       go to state 32
-    LOGIC_OR_EXPR        go to state 33
-    conditional_EXPR     go to state 34
-    assignment_EXPR      go to state 35
-    EXPR                 go to state 51
+    primary_EXPR         go to state 29
+    Constant             go to state 30
+    postfix_EXPR         go to state 31
+    unary_EXPR           go to state 32
+    unary_operator       go to state 33
+    cast_EXPR            go to state 34
+    multiplicative_EXPR  go to state 35
+    additive_EXPR        go to state 36
+    shift_EXPR           go to state 37
+    relational_EXPR      go to state 38
+    equality_EXPR        go to state 39
+    BIT_AND_EXPR         go to state 40
+    BIT_XBIT_OR_EXPR     go to state 41
+    BIT_OR_EXPR          go to state 42
+    LOGIC_AND_EXPR       go to state 43
+    LOGIC_OR_EXPR        go to state 44
+    conditional_EXPR     go to state 45
+    assignment_EXPR      go to state 46
+    EXPR                 go to state 72
 
 
-State 39
+State 57
 
    21 unary_EXPR: Operator_addadd unary_EXPR .
 
     $default  reduce using rule 21 (unary_EXPR)
 
 
-State 40
+State 58
 
    22 unary_EXPR: Operator_subsub unary_EXPR .
 
     $default  reduce using rule 22 (unary_EXPR)
 
 
-State 41
+State 59
 
     4 primary_EXPR: Punctuator_par_open . EXPR Punctuator_par_close
    25 unary_EXPR: Operator_sizeof Punctuator_par_open . type_name Punctuator_par_close
@@ -870,138 +1262,239 @@ State 41
     Operator_bit_and      shift, and go to state 14
     Operator_bit_not      shift, and go to state 15
     Operator_sizeof       shift, and go to state 16
-    Keyword_void          shift, and go to state 43
-    Keyword_char          shift, and go to state 44
-    Keyword_short         shift, and go to state 45
-    Keyword_int           shift, and go to state 46
-    Keyword_long          shift, and go to state 47
-    Keyword_float         shift, and go to state 48
-    Keyword_double        shift, and go to state 49
-    Punctuator_par_open   shift, and go to state 17
+    Keyword_void          shift, and go to state 64
+    Keyword_char          shift, and go to state 65
+    Keyword_short         shift, and go to state 66
+    Keyword_int           shift, and go to state 67
+    Keyword_long          shift, and go to state 68
+    Keyword_float         shift, and go to state 69
+    Keyword_double        shift, and go to state 70
+    Keyword_signed        shift, and go to state 24
+    Keyword_unsigned      shift, and go to state 25
+    Keyword_enum          shift, and go to state 26
+    Keyword_struct        shift, and go to state 27
+    Punctuator_par_open   shift, and go to state 28
 
-    primary_EXPR         go to state 18
-    Constant             go to state 19
-    postfix_EXPR         go to state 20
-    unary_EXPR           go to state 21
-    unary_operator       go to state 22
-    type_name            go to state 93
-    cast_EXPR            go to state 23
-    multiplicative_EXPR  go to state 24
-    additive_EXPR        go to state 25
-    shift_EXPR           go to state 26
-    relational_EXPR      go to state 27
-    equality_EXPR        go to state 28
-    BIT_AND_EXPR         go to state 29
-    BIT_XBIT_OR_EXPR     go to state 30
-    BIT_OR_EXPR          go to state 31
-    LOGIC_AND_EXPR       go to state 32
-    LOGIC_OR_EXPR        go to state 33
-    conditional_EXPR     go to state 34
-    assignment_EXPR      go to state 35
-    EXPR                 go to state 51
+    primary_EXPR              go to state 29
+    Constant                  go to state 30
+    postfix_EXPR              go to state 31
+    unary_EXPR                go to state 32
+    unary_operator            go to state 33
+    type_name                 go to state 127
+    cast_EXPR                 go to state 34
+    multiplicative_EXPR       go to state 35
+    additive_EXPR             go to state 36
+    shift_EXPR                go to state 37
+    relational_EXPR           go to state 38
+    equality_EXPR             go to state 39
+    BIT_AND_EXPR              go to state 40
+    BIT_XBIT_OR_EXPR          go to state 41
+    BIT_OR_EXPR               go to state 42
+    LOGIC_AND_EXPR            go to state 43
+    LOGIC_OR_EXPR             go to state 44
+    conditional_EXPR          go to state 45
+    assignment_EXPR           go to state 46
+    EXPR                      go to state 72
+    type_specifier            go to state 73
+    struct_specifier          go to state 51
+    specifier_qualifier_list  go to state 74
+    enum_specifier            go to state 52
+    typedef_name              go to state 53
 
 
-State 42
+State 60
 
    24 unary_EXPR: Operator_sizeof unary_EXPR .
 
     $default  reduce using rule 24 (unary_EXPR)
 
 
-State 43
+State 61
+
+  110 enum_specifier: Keyword_enum Identifier .
+  111               | Keyword_enum Identifier . Punctuator_cur_open enum_list Punctuator_cur_close
+
+    Punctuator_cur_open  shift, and go to state 128
+
+    $default  reduce using rule 110 (enum_specifier)
+
+
+State 62
+
+  112 enum_specifier: Keyword_enum Punctuator_cur_open . enum_list Punctuator_cur_close
+
+    Identifier  shift, and go to state 129
+
+    enum_list   go to state 130
+    enumerator  go to state 131
+    ENUM_CONST  go to state 132
+
+
+State 63
+
+  107 struct_specifier: Keyword_struct Identifier .
+
+    $default  reduce using rule 107 (struct_specifier)
+
+
+State 64
 
    32 type_name: Keyword_void .
+   95 type_specifier: Keyword_void .
 
-    $default  reduce using rule 32 (type_name)
+    Punctuator_par_close  reduce using rule 32 (type_name)
+    Punctuator_par_close  [reduce using rule 95 (type_specifier)]
+    $default              reduce using rule 95 (type_specifier)
 
 
-State 44
+State 65
 
    33 type_name: Keyword_char .
+   96 type_specifier: Keyword_char .
 
-    $default  reduce using rule 33 (type_name)
+    Punctuator_par_close  reduce using rule 33 (type_name)
+    Punctuator_par_close  [reduce using rule 96 (type_specifier)]
+    $default              reduce using rule 96 (type_specifier)
 
 
-State 45
+State 66
 
    34 type_name: Keyword_short .
+   97 type_specifier: Keyword_short .
 
-    $default  reduce using rule 34 (type_name)
+    Punctuator_par_close  reduce using rule 34 (type_name)
+    Punctuator_par_close  [reduce using rule 97 (type_specifier)]
+    $default              reduce using rule 97 (type_specifier)
 
 
-State 46
+State 67
 
    35 type_name: Keyword_int .
+   98 type_specifier: Keyword_int .
 
-    $default  reduce using rule 35 (type_name)
+    Punctuator_par_close  reduce using rule 35 (type_name)
+    Punctuator_par_close  [reduce using rule 98 (type_specifier)]
+    $default              reduce using rule 98 (type_specifier)
 
 
-State 47
+State 68
 
    36 type_name: Keyword_long .
+   99 type_specifier: Keyword_long .
 
-    $default  reduce using rule 36 (type_name)
+    Punctuator_par_close  reduce using rule 36 (type_name)
+    Punctuator_par_close  [reduce using rule 99 (type_specifier)]
+    $default              reduce using rule 99 (type_specifier)
 
 
-State 48
+State 69
 
    37 type_name: Keyword_float .
+  100 type_specifier: Keyword_float .
 
-    $default  reduce using rule 37 (type_name)
+    Punctuator_par_close  reduce using rule 37 (type_name)
+    Punctuator_par_close  [reduce using rule 100 (type_specifier)]
+    $default              reduce using rule 100 (type_specifier)
 
 
-State 49
+State 70
 
    38 type_name: Keyword_double .
+  101 type_specifier: Keyword_double .
 
-    $default  reduce using rule 38 (type_name)
+    Punctuator_par_close  reduce using rule 38 (type_name)
+    Punctuator_par_close  [reduce using rule 101 (type_specifier)]
+    $default              reduce using rule 101 (type_specifier)
 
 
-State 50
+State 71
 
    40 cast_EXPR: Punctuator_par_open type_name . Punctuator_par_close cast_EXPR
 
-    Punctuator_par_close  shift, and go to state 94
+    Punctuator_par_close  shift, and go to state 133
 
 
-State 51
+State 72
 
     4 primary_EXPR: Punctuator_par_open EXPR . Punctuator_par_close
    85 EXPR: EXPR . Operator_comma assignment_EXPR
 
-    Operator_comma        shift, and go to state 91
-    Punctuator_par_close  shift, and go to state 95
+    Operator_comma        shift, and go to state 114
+    Punctuator_par_close  shift, and go to state 134
 
 
-State 52
+State 73
+
+  108 specifier_qualifier_list: type_specifier .
+  109                         | type_specifier . specifier_qualifier_list
+
+    Identifier        shift, and go to state 124
+    Keyword_void      shift, and go to state 17
+    Keyword_char      shift, and go to state 18
+    Keyword_short     shift, and go to state 19
+    Keyword_int       shift, and go to state 20
+    Keyword_long      shift, and go to state 21
+    Keyword_float     shift, and go to state 22
+    Keyword_double    shift, and go to state 23
+    Keyword_signed    shift, and go to state 24
+    Keyword_unsigned  shift, and go to state 25
+    Keyword_enum      shift, and go to state 26
+    Keyword_struct    shift, and go to state 27
+
+    $default  reduce using rule 108 (specifier_qualifier_list)
+
+    type_specifier            go to state 73
+    struct_specifier          go to state 51
+    specifier_qualifier_list  go to state 135
+    enum_specifier            go to state 52
+    typedef_name              go to state 53
+
+
+State 74
+
+  137 type_name: specifier_qualifier_list .
+  138          | specifier_qualifier_list . abstract_declarator
+
+    Operator_mul         shift, and go to state 116
+    Punctuator_par_open  shift, and go to state 136
+    Punctuator_squ_open  shift, and go to state 137
+
+    $default  reduce using rule 137 (type_name)
+
+    pointer                     go to state 138
+    abstract_declarator         go to state 139
+    direct_abstract_declarator  go to state 140
+
+
+State 75
 
    16 postfix_EXPR: postfix_EXPR Operator_addadd .
 
     $default  reduce using rule 16 (postfix_EXPR)
 
 
-State 53
+State 76
 
    17 postfix_EXPR: postfix_EXPR Operator_subsub .
 
     $default  reduce using rule 17 (postfix_EXPR)
 
 
-State 54
+State 77
 
    14 postfix_EXPR: postfix_EXPR Operator_access . Identifier
 
-    Identifier  shift, and go to state 96
+    Identifier  shift, and go to state 141
 
 
-State 55
+State 78
 
    15 postfix_EXPR: postfix_EXPR Operator_deref_access . Identifier
 
-    Identifier  shift, and go to state 97
+    Identifier  shift, and go to state 142
 
 
-State 56
+State 79
 
    12 postfix_EXPR: postfix_EXPR Punctuator_par_open . Punctuator_par_close
    13             | postfix_EXPR Punctuator_par_open . argument_EXPR_list Punctuator_par_close
@@ -1012,7 +1505,7 @@ State 56
     Constant_float        shift, and go to state 4
     Constant_long_double  shift, and go to state 5
     String                shift, and go to state 6
-    Identifier            shift, and go to state 7
+    Identifier            shift, and go to state 55
     Operator_add          shift, and go to state 8
     Operator_sub          shift, and go to state 9
     Operator_addadd       shift, and go to state 10
@@ -1022,31 +1515,31 @@ State 56
     Operator_bit_and      shift, and go to state 14
     Operator_bit_not      shift, and go to state 15
     Operator_sizeof       shift, and go to state 16
-    Punctuator_par_open   shift, and go to state 17
-    Punctuator_par_close  shift, and go to state 98
+    Punctuator_par_open   shift, and go to state 28
+    Punctuator_par_close  shift, and go to state 143
 
-    primary_EXPR         go to state 18
-    Constant             go to state 19
-    postfix_EXPR         go to state 20
-    argument_EXPR_list   go to state 99
-    unary_EXPR           go to state 21
-    unary_operator       go to state 22
-    cast_EXPR            go to state 23
-    multiplicative_EXPR  go to state 24
-    additive_EXPR        go to state 25
-    shift_EXPR           go to state 26
-    relational_EXPR      go to state 27
-    equality_EXPR        go to state 28
-    BIT_AND_EXPR         go to state 29
-    BIT_XBIT_OR_EXPR     go to state 30
-    BIT_OR_EXPR          go to state 31
-    LOGIC_AND_EXPR       go to state 32
-    LOGIC_OR_EXPR        go to state 33
-    conditional_EXPR     go to state 34
-    assignment_EXPR      go to state 100
+    primary_EXPR         go to state 29
+    Constant             go to state 30
+    postfix_EXPR         go to state 31
+    argument_EXPR_list   go to state 144
+    unary_EXPR           go to state 32
+    unary_operator       go to state 33
+    cast_EXPR            go to state 34
+    multiplicative_EXPR  go to state 35
+    additive_EXPR        go to state 36
+    shift_EXPR           go to state 37
+    relational_EXPR      go to state 38
+    equality_EXPR        go to state 39
+    BIT_AND_EXPR         go to state 40
+    BIT_XBIT_OR_EXPR     go to state 41
+    BIT_OR_EXPR          go to state 42
+    LOGIC_AND_EXPR       go to state 43
+    LOGIC_OR_EXPR        go to state 44
+    conditional_EXPR     go to state 45
+    assignment_EXPR      go to state 145
 
 
-State 57
+State 80
 
    11 postfix_EXPR: postfix_EXPR Punctuator_squ_open . EXPR Punctuator_squ_close
 
@@ -1056,7 +1549,7 @@ State 57
     Constant_float        shift, and go to state 4
     Constant_long_double  shift, and go to state 5
     String                shift, and go to state 6
-    Identifier            shift, and go to state 7
+    Identifier            shift, and go to state 55
     Operator_add          shift, and go to state 8
     Operator_sub          shift, and go to state 9
     Operator_addadd       shift, and go to state 10
@@ -1066,107 +1559,107 @@ State 57
     Operator_bit_and      shift, and go to state 14
     Operator_bit_not      shift, and go to state 15
     Operator_sizeof       shift, and go to state 16
-    Punctuator_par_open   shift, and go to state 17
+    Punctuator_par_open   shift, and go to state 28
 
-    primary_EXPR         go to state 18
-    Constant             go to state 19
-    postfix_EXPR         go to state 20
-    unary_EXPR           go to state 21
-    unary_operator       go to state 22
-    cast_EXPR            go to state 23
-    multiplicative_EXPR  go to state 24
-    additive_EXPR        go to state 25
-    shift_EXPR           go to state 26
-    relational_EXPR      go to state 27
-    equality_EXPR        go to state 28
-    BIT_AND_EXPR         go to state 29
-    BIT_XBIT_OR_EXPR     go to state 30
-    BIT_OR_EXPR          go to state 31
-    LOGIC_AND_EXPR       go to state 32
-    LOGIC_OR_EXPR        go to state 33
-    conditional_EXPR     go to state 34
-    assignment_EXPR      go to state 35
-    EXPR                 go to state 101
+    primary_EXPR         go to state 29
+    Constant             go to state 30
+    postfix_EXPR         go to state 31
+    unary_EXPR           go to state 32
+    unary_operator       go to state 33
+    cast_EXPR            go to state 34
+    multiplicative_EXPR  go to state 35
+    additive_EXPR        go to state 36
+    shift_EXPR           go to state 37
+    relational_EXPR      go to state 38
+    equality_EXPR        go to state 39
+    BIT_AND_EXPR         go to state 40
+    BIT_XBIT_OR_EXPR     go to state 41
+    BIT_OR_EXPR          go to state 42
+    LOGIC_AND_EXPR       go to state 43
+    LOGIC_OR_EXPR        go to state 44
+    conditional_EXPR     go to state 45
+    assignment_EXPR      go to state 46
+    EXPR                 go to state 146
 
 
-State 58
+State 81
 
    73 assignment: Operator_assign .
 
     $default  reduce using rule 73 (assignment)
 
 
-State 59
+State 82
 
    77 assignment: Operator_add_assign .
 
     $default  reduce using rule 77 (assignment)
 
 
-State 60
+State 83
 
    78 assignment: Operator_sub_assign .
 
     $default  reduce using rule 78 (assignment)
 
 
-State 61
+State 84
 
    74 assignment: Operator_mul_assign .
 
     $default  reduce using rule 74 (assignment)
 
 
-State 62
+State 85
 
    75 assignment: Operator_div_assign .
 
     $default  reduce using rule 75 (assignment)
 
 
-State 63
+State 86
 
    76 assignment: Operator_mod_assign .
 
     $default  reduce using rule 76 (assignment)
 
 
-State 64
+State 87
 
    81 assignment: Operator_and_assign .
 
     $default  reduce using rule 81 (assignment)
 
 
-State 65
+State 88
 
    83 assignment: Operator_or_assign .
 
     $default  reduce using rule 83 (assignment)
 
 
-State 66
+State 89
 
    82 assignment: Operator_xor_assign .
 
     $default  reduce using rule 82 (assignment)
 
 
-State 67
+State 90
 
    80 assignment: Operator_sr_assign .
 
     $default  reduce using rule 80 (assignment)
 
 
-State 68
+State 91
 
    79 assignment: Operator_sl_assign .
 
     $default  reduce using rule 79 (assignment)
 
 
-State 69
+State 92
 
    72 assignment_EXPR: unary_EXPR assignment . assignment_EXPR
 
@@ -1176,7 +1669,7 @@ State 69
     Constant_float        shift, and go to state 4
     Constant_long_double  shift, and go to state 5
     String                shift, and go to state 6
-    Identifier            shift, and go to state 7
+    Identifier            shift, and go to state 55
     Operator_add          shift, and go to state 8
     Operator_sub          shift, and go to state 9
     Operator_addadd       shift, and go to state 10
@@ -1186,43 +1679,43 @@ State 69
     Operator_bit_and      shift, and go to state 14
     Operator_bit_not      shift, and go to state 15
     Operator_sizeof       shift, and go to state 16
-    Punctuator_par_open   shift, and go to state 17
+    Punctuator_par_open   shift, and go to state 28
 
-    primary_EXPR         go to state 18
-    Constant             go to state 19
-    postfix_EXPR         go to state 20
-    unary_EXPR           go to state 21
-    unary_operator       go to state 22
-    cast_EXPR            go to state 23
-    multiplicative_EXPR  go to state 24
-    additive_EXPR        go to state 25
-    shift_EXPR           go to state 26
-    relational_EXPR      go to state 27
-    equality_EXPR        go to state 28
-    BIT_AND_EXPR         go to state 29
-    BIT_XBIT_OR_EXPR     go to state 30
-    BIT_OR_EXPR          go to state 31
-    LOGIC_AND_EXPR       go to state 32
-    LOGIC_OR_EXPR        go to state 33
-    conditional_EXPR     go to state 34
-    assignment_EXPR      go to state 102
+    primary_EXPR         go to state 29
+    Constant             go to state 30
+    postfix_EXPR         go to state 31
+    unary_EXPR           go to state 32
+    unary_operator       go to state 33
+    cast_EXPR            go to state 34
+    multiplicative_EXPR  go to state 35
+    additive_EXPR        go to state 36
+    shift_EXPR           go to state 37
+    relational_EXPR      go to state 38
+    equality_EXPR        go to state 39
+    BIT_AND_EXPR         go to state 40
+    BIT_XBIT_OR_EXPR     go to state 41
+    BIT_OR_EXPR          go to state 42
+    LOGIC_AND_EXPR       go to state 43
+    LOGIC_OR_EXPR        go to state 44
+    conditional_EXPR     go to state 45
+    assignment_EXPR      go to state 147
 
 
-State 70
+State 93
 
    39 cast_EXPR: unary_EXPR .
 
     $default  reduce using rule 39 (cast_EXPR)
 
 
-State 71
+State 94
 
    23 unary_EXPR: unary_operator cast_EXPR .
 
     $default  reduce using rule 23 (unary_EXPR)
 
 
-State 72
+State 95
 
    42 multiplicative_EXPR: multiplicative_EXPR Operator_mul . cast_EXPR
 
@@ -1232,7 +1725,7 @@ State 72
     Constant_float        shift, and go to state 4
     Constant_long_double  shift, and go to state 5
     String                shift, and go to state 6
-    Identifier            shift, and go to state 7
+    Identifier            shift, and go to state 55
     Operator_add          shift, and go to state 8
     Operator_sub          shift, and go to state 9
     Operator_addadd       shift, and go to state 10
@@ -1242,17 +1735,17 @@ State 72
     Operator_bit_and      shift, and go to state 14
     Operator_bit_not      shift, and go to state 15
     Operator_sizeof       shift, and go to state 16
-    Punctuator_par_open   shift, and go to state 17
+    Punctuator_par_open   shift, and go to state 28
 
-    primary_EXPR    go to state 18
-    Constant        go to state 19
-    postfix_EXPR    go to state 20
-    unary_EXPR      go to state 70
-    unary_operator  go to state 22
-    cast_EXPR       go to state 103
+    primary_EXPR    go to state 29
+    Constant        go to state 30
+    postfix_EXPR    go to state 31
+    unary_EXPR      go to state 93
+    unary_operator  go to state 33
+    cast_EXPR       go to state 148
 
 
-State 73
+State 96
 
    43 multiplicative_EXPR: multiplicative_EXPR Operator_div . cast_EXPR
 
@@ -1262,7 +1755,7 @@ State 73
     Constant_float        shift, and go to state 4
     Constant_long_double  shift, and go to state 5
     String                shift, and go to state 6
-    Identifier            shift, and go to state 7
+    Identifier            shift, and go to state 55
     Operator_add          shift, and go to state 8
     Operator_sub          shift, and go to state 9
     Operator_addadd       shift, and go to state 10
@@ -1272,17 +1765,17 @@ State 73
     Operator_bit_and      shift, and go to state 14
     Operator_bit_not      shift, and go to state 15
     Operator_sizeof       shift, and go to state 16
-    Punctuator_par_open   shift, and go to state 17
+    Punctuator_par_open   shift, and go to state 28
 
-    primary_EXPR    go to state 18
-    Constant        go to state 19
-    postfix_EXPR    go to state 20
-    unary_EXPR      go to state 70
-    unary_operator  go to state 22
-    cast_EXPR       go to state 104
+    primary_EXPR    go to state 29
+    Constant        go to state 30
+    postfix_EXPR    go to state 31
+    unary_EXPR      go to state 93
+    unary_operator  go to state 33
+    cast_EXPR       go to state 149
 
 
-State 74
+State 97
 
    44 multiplicative_EXPR: multiplicative_EXPR Operator_mod . cast_EXPR
 
@@ -1292,7 +1785,7 @@ State 74
     Constant_float        shift, and go to state 4
     Constant_long_double  shift, and go to state 5
     String                shift, and go to state 6
-    Identifier            shift, and go to state 7
+    Identifier            shift, and go to state 55
     Operator_add          shift, and go to state 8
     Operator_sub          shift, and go to state 9
     Operator_addadd       shift, and go to state 10
@@ -1302,17 +1795,17 @@ State 74
     Operator_bit_and      shift, and go to state 14
     Operator_bit_not      shift, and go to state 15
     Operator_sizeof       shift, and go to state 16
-    Punctuator_par_open   shift, and go to state 17
+    Punctuator_par_open   shift, and go to state 28
 
-    primary_EXPR    go to state 18
-    Constant        go to state 19
-    postfix_EXPR    go to state 20
-    unary_EXPR      go to state 70
-    unary_operator  go to state 22
-    cast_EXPR       go to state 105
+    primary_EXPR    go to state 29
+    Constant        go to state 30
+    postfix_EXPR    go to state 31
+    unary_EXPR      go to state 93
+    unary_operator  go to state 33
+    cast_EXPR       go to state 150
 
 
-State 75
+State 98
 
    46 additive_EXPR: additive_EXPR Operator_add . multiplicative_EXPR
 
@@ -1322,7 +1815,7 @@ State 75
     Constant_float        shift, and go to state 4
     Constant_long_double  shift, and go to state 5
     String                shift, and go to state 6
-    Identifier            shift, and go to state 7
+    Identifier            shift, and go to state 55
     Operator_add          shift, and go to state 8
     Operator_sub          shift, and go to state 9
     Operator_addadd       shift, and go to state 10
@@ -1332,18 +1825,18 @@ State 75
     Operator_bit_and      shift, and go to state 14
     Operator_bit_not      shift, and go to state 15
     Operator_sizeof       shift, and go to state 16
-    Punctuator_par_open   shift, and go to state 17
+    Punctuator_par_open   shift, and go to state 28
 
-    primary_EXPR         go to state 18
-    Constant             go to state 19
-    postfix_EXPR         go to state 20
-    unary_EXPR           go to state 70
-    unary_operator       go to state 22
-    cast_EXPR            go to state 23
-    multiplicative_EXPR  go to state 106
+    primary_EXPR         go to state 29
+    Constant             go to state 30
+    postfix_EXPR         go to state 31
+    unary_EXPR           go to state 93
+    unary_operator       go to state 33
+    cast_EXPR            go to state 34
+    multiplicative_EXPR  go to state 151
 
 
-State 76
+State 99
 
    47 additive_EXPR: additive_EXPR Operator_sub . multiplicative_EXPR
 
@@ -1353,7 +1846,7 @@ State 76
     Constant_float        shift, and go to state 4
     Constant_long_double  shift, and go to state 5
     String                shift, and go to state 6
-    Identifier            shift, and go to state 7
+    Identifier            shift, and go to state 55
     Operator_add          shift, and go to state 8
     Operator_sub          shift, and go to state 9
     Operator_addadd       shift, and go to state 10
@@ -1363,18 +1856,18 @@ State 76
     Operator_bit_and      shift, and go to state 14
     Operator_bit_not      shift, and go to state 15
     Operator_sizeof       shift, and go to state 16
-    Punctuator_par_open   shift, and go to state 17
+    Punctuator_par_open   shift, and go to state 28
 
-    primary_EXPR         go to state 18
-    Constant             go to state 19
-    postfix_EXPR         go to state 20
-    unary_EXPR           go to state 70
-    unary_operator       go to state 22
-    cast_EXPR            go to state 23
-    multiplicative_EXPR  go to state 107
+    primary_EXPR         go to state 29
+    Constant             go to state 30
+    postfix_EXPR         go to state 31
+    unary_EXPR           go to state 93
+    unary_operator       go to state 33
+    cast_EXPR            go to state 34
+    multiplicative_EXPR  go to state 152
 
 
-State 77
+State 100
 
    49 shift_EXPR: shift_EXPR Operator_sl . additive_EXPR
 
@@ -1384,7 +1877,7 @@ State 77
     Constant_float        shift, and go to state 4
     Constant_long_double  shift, and go to state 5
     String                shift, and go to state 6
-    Identifier            shift, and go to state 7
+    Identifier            shift, and go to state 55
     Operator_add          shift, and go to state 8
     Operator_sub          shift, and go to state 9
     Operator_addadd       shift, and go to state 10
@@ -1394,19 +1887,19 @@ State 77
     Operator_bit_and      shift, and go to state 14
     Operator_bit_not      shift, and go to state 15
     Operator_sizeof       shift, and go to state 16
-    Punctuator_par_open   shift, and go to state 17
+    Punctuator_par_open   shift, and go to state 28
 
-    primary_EXPR         go to state 18
-    Constant             go to state 19
-    postfix_EXPR         go to state 20
-    unary_EXPR           go to state 70
-    unary_operator       go to state 22
-    cast_EXPR            go to state 23
-    multiplicative_EXPR  go to state 24
-    additive_EXPR        go to state 108
+    primary_EXPR         go to state 29
+    Constant             go to state 30
+    postfix_EXPR         go to state 31
+    unary_EXPR           go to state 93
+    unary_operator       go to state 33
+    cast_EXPR            go to state 34
+    multiplicative_EXPR  go to state 35
+    additive_EXPR        go to state 153
 
 
-State 78
+State 101
 
    50 shift_EXPR: shift_EXPR Operator_sr . additive_EXPR
 
@@ -1416,7 +1909,7 @@ State 78
     Constant_float        shift, and go to state 4
     Constant_long_double  shift, and go to state 5
     String                shift, and go to state 6
-    Identifier            shift, and go to state 7
+    Identifier            shift, and go to state 55
     Operator_add          shift, and go to state 8
     Operator_sub          shift, and go to state 9
     Operator_addadd       shift, and go to state 10
@@ -1426,19 +1919,19 @@ State 78
     Operator_bit_and      shift, and go to state 14
     Operator_bit_not      shift, and go to state 15
     Operator_sizeof       shift, and go to state 16
-    Punctuator_par_open   shift, and go to state 17
+    Punctuator_par_open   shift, and go to state 28
 
-    primary_EXPR         go to state 18
-    Constant             go to state 19
-    postfix_EXPR         go to state 20
-    unary_EXPR           go to state 70
-    unary_operator       go to state 22
-    cast_EXPR            go to state 23
-    multiplicative_EXPR  go to state 24
-    additive_EXPR        go to state 109
+    primary_EXPR         go to state 29
+    Constant             go to state 30
+    postfix_EXPR         go to state 31
+    unary_EXPR           go to state 93
+    unary_operator       go to state 33
+    cast_EXPR            go to state 34
+    multiplicative_EXPR  go to state 35
+    additive_EXPR        go to state 154
 
 
-State 79
+State 102
 
    53 relational_EXPR: relational_EXPR Operator_greater . shift_EXPR
 
@@ -1448,7 +1941,7 @@ State 79
     Constant_float        shift, and go to state 4
     Constant_long_double  shift, and go to state 5
     String                shift, and go to state 6
-    Identifier            shift, and go to state 7
+    Identifier            shift, and go to state 55
     Operator_add          shift, and go to state 8
     Operator_sub          shift, and go to state 9
     Operator_addadd       shift, and go to state 10
@@ -1458,20 +1951,20 @@ State 79
     Operator_bit_and      shift, and go to state 14
     Operator_bit_not      shift, and go to state 15
     Operator_sizeof       shift, and go to state 16
-    Punctuator_par_open   shift, and go to state 17
+    Punctuator_par_open   shift, and go to state 28
 
-    primary_EXPR         go to state 18
-    Constant             go to state 19
-    postfix_EXPR         go to state 20
-    unary_EXPR           go to state 70
-    unary_operator       go to state 22
-    cast_EXPR            go to state 23
-    multiplicative_EXPR  go to state 24
-    additive_EXPR        go to state 25
-    shift_EXPR           go to state 110
+    primary_EXPR         go to state 29
+    Constant             go to state 30
+    postfix_EXPR         go to state 31
+    unary_EXPR           go to state 93
+    unary_operator       go to state 33
+    cast_EXPR            go to state 34
+    multiplicative_EXPR  go to state 35
+    additive_EXPR        go to state 36
+    shift_EXPR           go to state 155
 
 
-State 80
+State 103
 
    52 relational_EXPR: relational_EXPR Operator_less . shift_EXPR
 
@@ -1481,7 +1974,7 @@ State 80
     Constant_float        shift, and go to state 4
     Constant_long_double  shift, and go to state 5
     String                shift, and go to state 6
-    Identifier            shift, and go to state 7
+    Identifier            shift, and go to state 55
     Operator_add          shift, and go to state 8
     Operator_sub          shift, and go to state 9
     Operator_addadd       shift, and go to state 10
@@ -1491,20 +1984,20 @@ State 80
     Operator_bit_and      shift, and go to state 14
     Operator_bit_not      shift, and go to state 15
     Operator_sizeof       shift, and go to state 16
-    Punctuator_par_open   shift, and go to state 17
+    Punctuator_par_open   shift, and go to state 28
 
-    primary_EXPR         go to state 18
-    Constant             go to state 19
-    postfix_EXPR         go to state 20
-    unary_EXPR           go to state 70
-    unary_operator       go to state 22
-    cast_EXPR            go to state 23
-    multiplicative_EXPR  go to state 24
-    additive_EXPR        go to state 25
-    shift_EXPR           go to state 111
+    primary_EXPR         go to state 29
+    Constant             go to state 30
+    postfix_EXPR         go to state 31
+    unary_EXPR           go to state 93
+    unary_operator       go to state 33
+    cast_EXPR            go to state 34
+    multiplicative_EXPR  go to state 35
+    additive_EXPR        go to state 36
+    shift_EXPR           go to state 156
 
 
-State 81
+State 104
 
    55 relational_EXPR: relational_EXPR Operator_greater_equal . shift_EXPR
 
@@ -1514,7 +2007,7 @@ State 81
     Constant_float        shift, and go to state 4
     Constant_long_double  shift, and go to state 5
     String                shift, and go to state 6
-    Identifier            shift, and go to state 7
+    Identifier            shift, and go to state 55
     Operator_add          shift, and go to state 8
     Operator_sub          shift, and go to state 9
     Operator_addadd       shift, and go to state 10
@@ -1524,20 +2017,20 @@ State 81
     Operator_bit_and      shift, and go to state 14
     Operator_bit_not      shift, and go to state 15
     Operator_sizeof       shift, and go to state 16
-    Punctuator_par_open   shift, and go to state 17
+    Punctuator_par_open   shift, and go to state 28
 
-    primary_EXPR         go to state 18
-    Constant             go to state 19
-    postfix_EXPR         go to state 20
-    unary_EXPR           go to state 70
-    unary_operator       go to state 22
-    cast_EXPR            go to state 23
-    multiplicative_EXPR  go to state 24
-    additive_EXPR        go to state 25
-    shift_EXPR           go to state 112
+    primary_EXPR         go to state 29
+    Constant             go to state 30
+    postfix_EXPR         go to state 31
+    unary_EXPR           go to state 93
+    unary_operator       go to state 33
+    cast_EXPR            go to state 34
+    multiplicative_EXPR  go to state 35
+    additive_EXPR        go to state 36
+    shift_EXPR           go to state 157
 
 
-State 82
+State 105
 
    54 relational_EXPR: relational_EXPR Operator_less_equal . shift_EXPR
 
@@ -1547,7 +2040,7 @@ State 82
     Constant_float        shift, and go to state 4
     Constant_long_double  shift, and go to state 5
     String                shift, and go to state 6
-    Identifier            shift, and go to state 7
+    Identifier            shift, and go to state 55
     Operator_add          shift, and go to state 8
     Operator_sub          shift, and go to state 9
     Operator_addadd       shift, and go to state 10
@@ -1557,20 +2050,20 @@ State 82
     Operator_bit_and      shift, and go to state 14
     Operator_bit_not      shift, and go to state 15
     Operator_sizeof       shift, and go to state 16
-    Punctuator_par_open   shift, and go to state 17
+    Punctuator_par_open   shift, and go to state 28
 
-    primary_EXPR         go to state 18
-    Constant             go to state 19
-    postfix_EXPR         go to state 20
-    unary_EXPR           go to state 70
-    unary_operator       go to state 22
-    cast_EXPR            go to state 23
-    multiplicative_EXPR  go to state 24
-    additive_EXPR        go to state 25
-    shift_EXPR           go to state 113
+    primary_EXPR         go to state 29
+    Constant             go to state 30
+    postfix_EXPR         go to state 31
+    unary_EXPR           go to state 93
+    unary_operator       go to state 33
+    cast_EXPR            go to state 34
+    multiplicative_EXPR  go to state 35
+    additive_EXPR        go to state 36
+    shift_EXPR           go to state 158
 
 
-State 83
+State 106
 
    57 equality_EXPR: equality_EXPR Operator_equal . relational_EXPR
 
@@ -1580,7 +2073,7 @@ State 83
     Constant_float        shift, and go to state 4
     Constant_long_double  shift, and go to state 5
     String                shift, and go to state 6
-    Identifier            shift, and go to state 7
+    Identifier            shift, and go to state 55
     Operator_add          shift, and go to state 8
     Operator_sub          shift, and go to state 9
     Operator_addadd       shift, and go to state 10
@@ -1590,21 +2083,21 @@ State 83
     Operator_bit_and      shift, and go to state 14
     Operator_bit_not      shift, and go to state 15
     Operator_sizeof       shift, and go to state 16
-    Punctuator_par_open   shift, and go to state 17
+    Punctuator_par_open   shift, and go to state 28
 
-    primary_EXPR         go to state 18
-    Constant             go to state 19
-    postfix_EXPR         go to state 20
-    unary_EXPR           go to state 70
-    unary_operator       go to state 22
-    cast_EXPR            go to state 23
-    multiplicative_EXPR  go to state 24
-    additive_EXPR        go to state 25
-    shift_EXPR           go to state 26
-    relational_EXPR      go to state 114
+    primary_EXPR         go to state 29
+    Constant             go to state 30
+    postfix_EXPR         go to state 31
+    unary_EXPR           go to state 93
+    unary_operator       go to state 33
+    cast_EXPR            go to state 34
+    multiplicative_EXPR  go to state 35
+    additive_EXPR        go to state 36
+    shift_EXPR           go to state 37
+    relational_EXPR      go to state 159
 
 
-State 84
+State 107
 
    58 equality_EXPR: equality_EXPR Operator_not_equal . relational_EXPR
 
@@ -1614,7 +2107,7 @@ State 84
     Constant_float        shift, and go to state 4
     Constant_long_double  shift, and go to state 5
     String                shift, and go to state 6
-    Identifier            shift, and go to state 7
+    Identifier            shift, and go to state 55
     Operator_add          shift, and go to state 8
     Operator_sub          shift, and go to state 9
     Operator_addadd       shift, and go to state 10
@@ -1624,21 +2117,21 @@ State 84
     Operator_bit_and      shift, and go to state 14
     Operator_bit_not      shift, and go to state 15
     Operator_sizeof       shift, and go to state 16
-    Punctuator_par_open   shift, and go to state 17
+    Punctuator_par_open   shift, and go to state 28
 
-    primary_EXPR         go to state 18
-    Constant             go to state 19
-    postfix_EXPR         go to state 20
-    unary_EXPR           go to state 70
-    unary_operator       go to state 22
-    cast_EXPR            go to state 23
-    multiplicative_EXPR  go to state 24
-    additive_EXPR        go to state 25
-    shift_EXPR           go to state 26
-    relational_EXPR      go to state 115
+    primary_EXPR         go to state 29
+    Constant             go to state 30
+    postfix_EXPR         go to state 31
+    unary_EXPR           go to state 93
+    unary_operator       go to state 33
+    cast_EXPR            go to state 34
+    multiplicative_EXPR  go to state 35
+    additive_EXPR        go to state 36
+    shift_EXPR           go to state 37
+    relational_EXPR      go to state 160
 
 
-State 85
+State 108
 
    60 BIT_AND_EXPR: BIT_AND_EXPR Operator_bit_and . equality_EXPR
 
@@ -1648,7 +2141,7 @@ State 85
     Constant_float        shift, and go to state 4
     Constant_long_double  shift, and go to state 5
     String                shift, and go to state 6
-    Identifier            shift, and go to state 7
+    Identifier            shift, and go to state 55
     Operator_add          shift, and go to state 8
     Operator_sub          shift, and go to state 9
     Operator_addadd       shift, and go to state 10
@@ -1658,22 +2151,22 @@ State 85
     Operator_bit_and      shift, and go to state 14
     Operator_bit_not      shift, and go to state 15
     Operator_sizeof       shift, and go to state 16
-    Punctuator_par_open   shift, and go to state 17
+    Punctuator_par_open   shift, and go to state 28
 
-    primary_EXPR         go to state 18
-    Constant             go to state 19
-    postfix_EXPR         go to state 20
-    unary_EXPR           go to state 70
-    unary_operator       go to state 22
-    cast_EXPR            go to state 23
-    multiplicative_EXPR  go to state 24
-    additive_EXPR        go to state 25
-    shift_EXPR           go to state 26
-    relational_EXPR      go to state 27
-    equality_EXPR        go to state 116
+    primary_EXPR         go to state 29
+    Constant             go to state 30
+    postfix_EXPR         go to state 31
+    unary_EXPR           go to state 93
+    unary_operator       go to state 33
+    cast_EXPR            go to state 34
+    multiplicative_EXPR  go to state 35
+    additive_EXPR        go to state 36
+    shift_EXPR           go to state 37
+    relational_EXPR      go to state 38
+    equality_EXPR        go to state 161
 
 
-State 86
+State 109
 
    62 BIT_XBIT_OR_EXPR: BIT_XBIT_OR_EXPR Operator_bit_xor . BIT_AND_EXPR
 
@@ -1683,7 +2176,7 @@ State 86
     Constant_float        shift, and go to state 4
     Constant_long_double  shift, and go to state 5
     String                shift, and go to state 6
-    Identifier            shift, and go to state 7
+    Identifier            shift, and go to state 55
     Operator_add          shift, and go to state 8
     Operator_sub          shift, and go to state 9
     Operator_addadd       shift, and go to state 10
@@ -1693,23 +2186,23 @@ State 86
     Operator_bit_and      shift, and go to state 14
     Operator_bit_not      shift, and go to state 15
     Operator_sizeof       shift, and go to state 16
-    Punctuator_par_open   shift, and go to state 17
+    Punctuator_par_open   shift, and go to state 28
 
-    primary_EXPR         go to state 18
-    Constant             go to state 19
-    postfix_EXPR         go to state 20
-    unary_EXPR           go to state 70
-    unary_operator       go to state 22
-    cast_EXPR            go to state 23
-    multiplicative_EXPR  go to state 24
-    additive_EXPR        go to state 25
-    shift_EXPR           go to state 26
-    relational_EXPR      go to state 27
-    equality_EXPR        go to state 28
-    BIT_AND_EXPR         go to state 117
+    primary_EXPR         go to state 29
+    Constant             go to state 30
+    postfix_EXPR         go to state 31
+    unary_EXPR           go to state 93
+    unary_operator       go to state 33
+    cast_EXPR            go to state 34
+    multiplicative_EXPR  go to state 35
+    additive_EXPR        go to state 36
+    shift_EXPR           go to state 37
+    relational_EXPR      go to state 38
+    equality_EXPR        go to state 39
+    BIT_AND_EXPR         go to state 162
 
 
-State 87
+State 110
 
    64 BIT_OR_EXPR: BIT_OR_EXPR Operator_bit_or . BIT_XBIT_OR_EXPR
 
@@ -1719,7 +2212,7 @@ State 87
     Constant_float        shift, and go to state 4
     Constant_long_double  shift, and go to state 5
     String                shift, and go to state 6
-    Identifier            shift, and go to state 7
+    Identifier            shift, and go to state 55
     Operator_add          shift, and go to state 8
     Operator_sub          shift, and go to state 9
     Operator_addadd       shift, and go to state 10
@@ -1729,24 +2222,24 @@ State 87
     Operator_bit_and      shift, and go to state 14
     Operator_bit_not      shift, and go to state 15
     Operator_sizeof       shift, and go to state 16
-    Punctuator_par_open   shift, and go to state 17
+    Punctuator_par_open   shift, and go to state 28
 
-    primary_EXPR         go to state 18
-    Constant             go to state 19
-    postfix_EXPR         go to state 20
-    unary_EXPR           go to state 70
-    unary_operator       go to state 22
-    cast_EXPR            go to state 23
-    multiplicative_EXPR  go to state 24
-    additive_EXPR        go to state 25
-    shift_EXPR           go to state 26
-    relational_EXPR      go to state 27
-    equality_EXPR        go to state 28
-    BIT_AND_EXPR         go to state 29
-    BIT_XBIT_OR_EXPR     go to state 118
+    primary_EXPR         go to state 29
+    Constant             go to state 30
+    postfix_EXPR         go to state 31
+    unary_EXPR           go to state 93
+    unary_operator       go to state 33
+    cast_EXPR            go to state 34
+    multiplicative_EXPR  go to state 35
+    additive_EXPR        go to state 36
+    shift_EXPR           go to state 37
+    relational_EXPR      go to state 38
+    equality_EXPR        go to state 39
+    BIT_AND_EXPR         go to state 40
+    BIT_XBIT_OR_EXPR     go to state 163
 
 
-State 88
+State 111
 
    66 LOGIC_AND_EXPR: LOGIC_AND_EXPR Operator_and . BIT_OR_EXPR
 
@@ -1756,7 +2249,7 @@ State 88
     Constant_float        shift, and go to state 4
     Constant_long_double  shift, and go to state 5
     String                shift, and go to state 6
-    Identifier            shift, and go to state 7
+    Identifier            shift, and go to state 55
     Operator_add          shift, and go to state 8
     Operator_sub          shift, and go to state 9
     Operator_addadd       shift, and go to state 10
@@ -1766,25 +2259,25 @@ State 88
     Operator_bit_and      shift, and go to state 14
     Operator_bit_not      shift, and go to state 15
     Operator_sizeof       shift, and go to state 16
-    Punctuator_par_open   shift, and go to state 17
+    Punctuator_par_open   shift, and go to state 28
 
-    primary_EXPR         go to state 18
-    Constant             go to state 19
-    postfix_EXPR         go to state 20
-    unary_EXPR           go to state 70
-    unary_operator       go to state 22
-    cast_EXPR            go to state 23
-    multiplicative_EXPR  go to state 24
-    additive_EXPR        go to state 25
-    shift_EXPR           go to state 26
-    relational_EXPR      go to state 27
-    equality_EXPR        go to state 28
-    BIT_AND_EXPR         go to state 29
-    BIT_XBIT_OR_EXPR     go to state 30
-    BIT_OR_EXPR          go to state 119
+    primary_EXPR         go to state 29
+    Constant             go to state 30
+    postfix_EXPR         go to state 31
+    unary_EXPR           go to state 93
+    unary_operator       go to state 33
+    cast_EXPR            go to state 34
+    multiplicative_EXPR  go to state 35
+    additive_EXPR        go to state 36
+    shift_EXPR           go to state 37
+    relational_EXPR      go to state 38
+    equality_EXPR        go to state 39
+    BIT_AND_EXPR         go to state 40
+    BIT_XBIT_OR_EXPR     go to state 41
+    BIT_OR_EXPR          go to state 164
 
 
-State 89
+State 112
 
    68 LOGIC_OR_EXPR: LOGIC_OR_EXPR Operator_or . LOGIC_AND_EXPR
 
@@ -1794,7 +2287,7 @@ State 89
     Constant_float        shift, and go to state 4
     Constant_long_double  shift, and go to state 5
     String                shift, and go to state 6
-    Identifier            shift, and go to state 7
+    Identifier            shift, and go to state 55
     Operator_add          shift, and go to state 8
     Operator_sub          shift, and go to state 9
     Operator_addadd       shift, and go to state 10
@@ -1804,26 +2297,26 @@ State 89
     Operator_bit_and      shift, and go to state 14
     Operator_bit_not      shift, and go to state 15
     Operator_sizeof       shift, and go to state 16
-    Punctuator_par_open   shift, and go to state 17
+    Punctuator_par_open   shift, and go to state 28
 
-    primary_EXPR         go to state 18
-    Constant             go to state 19
-    postfix_EXPR         go to state 20
-    unary_EXPR           go to state 70
-    unary_operator       go to state 22
-    cast_EXPR            go to state 23
-    multiplicative_EXPR  go to state 24
-    additive_EXPR        go to state 25
-    shift_EXPR           go to state 26
-    relational_EXPR      go to state 27
-    equality_EXPR        go to state 28
-    BIT_AND_EXPR         go to state 29
-    BIT_XBIT_OR_EXPR     go to state 30
-    BIT_OR_EXPR          go to state 31
-    LOGIC_AND_EXPR       go to state 120
+    primary_EXPR         go to state 29
+    Constant             go to state 30
+    postfix_EXPR         go to state 31
+    unary_EXPR           go to state 93
+    unary_operator       go to state 33
+    cast_EXPR            go to state 34
+    multiplicative_EXPR  go to state 35
+    additive_EXPR        go to state 36
+    shift_EXPR           go to state 37
+    relational_EXPR      go to state 38
+    equality_EXPR        go to state 39
+    BIT_AND_EXPR         go to state 40
+    BIT_XBIT_OR_EXPR     go to state 41
+    BIT_OR_EXPR          go to state 42
+    LOGIC_AND_EXPR       go to state 165
 
 
-State 90
+State 113
 
    70 conditional_EXPR: LOGIC_OR_EXPR Operator_trinary_question . EXPR Operator_trinary_choice conditional_EXPR
 
@@ -1833,7 +2326,7 @@ State 90
     Constant_float        shift, and go to state 4
     Constant_long_double  shift, and go to state 5
     String                shift, and go to state 6
-    Identifier            shift, and go to state 7
+    Identifier            shift, and go to state 55
     Operator_add          shift, and go to state 8
     Operator_sub          shift, and go to state 9
     Operator_addadd       shift, and go to state 10
@@ -1843,30 +2336,30 @@ State 90
     Operator_bit_and      shift, and go to state 14
     Operator_bit_not      shift, and go to state 15
     Operator_sizeof       shift, and go to state 16
-    Punctuator_par_open   shift, and go to state 17
+    Punctuator_par_open   shift, and go to state 28
 
-    primary_EXPR         go to state 18
-    Constant             go to state 19
-    postfix_EXPR         go to state 20
-    unary_EXPR           go to state 21
-    unary_operator       go to state 22
-    cast_EXPR            go to state 23
-    multiplicative_EXPR  go to state 24
-    additive_EXPR        go to state 25
-    shift_EXPR           go to state 26
-    relational_EXPR      go to state 27
-    equality_EXPR        go to state 28
-    BIT_AND_EXPR         go to state 29
-    BIT_XBIT_OR_EXPR     go to state 30
-    BIT_OR_EXPR          go to state 31
-    LOGIC_AND_EXPR       go to state 32
-    LOGIC_OR_EXPR        go to state 33
-    conditional_EXPR     go to state 34
-    assignment_EXPR      go to state 35
-    EXPR                 go to state 121
+    primary_EXPR         go to state 29
+    Constant             go to state 30
+    postfix_EXPR         go to state 31
+    unary_EXPR           go to state 32
+    unary_operator       go to state 33
+    cast_EXPR            go to state 34
+    multiplicative_EXPR  go to state 35
+    additive_EXPR        go to state 36
+    shift_EXPR           go to state 37
+    relational_EXPR      go to state 38
+    equality_EXPR        go to state 39
+    BIT_AND_EXPR         go to state 40
+    BIT_XBIT_OR_EXPR     go to state 41
+    BIT_OR_EXPR          go to state 42
+    LOGIC_AND_EXPR       go to state 43
+    LOGIC_OR_EXPR        go to state 44
+    conditional_EXPR     go to state 45
+    assignment_EXPR      go to state 46
+    EXPR                 go to state 166
 
 
-State 91
+State 114
 
    85 EXPR: EXPR Operator_comma . assignment_EXPR
 
@@ -1876,7 +2369,7 @@ State 91
     Constant_float        shift, and go to state 4
     Constant_long_double  shift, and go to state 5
     String                shift, and go to state 6
-    Identifier            shift, and go to state 7
+    Identifier            shift, and go to state 55
     Operator_add          shift, and go to state 8
     Operator_sub          shift, and go to state 9
     Operator_addadd       shift, and go to state 10
@@ -1886,43 +2379,191 @@ State 91
     Operator_bit_and      shift, and go to state 14
     Operator_bit_not      shift, and go to state 15
     Operator_sizeof       shift, and go to state 16
-    Punctuator_par_open   shift, and go to state 17
+    Punctuator_par_open   shift, and go to state 28
 
-    primary_EXPR         go to state 18
-    Constant             go to state 19
-    postfix_EXPR         go to state 20
-    unary_EXPR           go to state 21
-    unary_operator       go to state 22
-    cast_EXPR            go to state 23
-    multiplicative_EXPR  go to state 24
-    additive_EXPR        go to state 25
-    shift_EXPR           go to state 26
-    relational_EXPR      go to state 27
-    equality_EXPR        go to state 28
-    BIT_AND_EXPR         go to state 29
-    BIT_XBIT_OR_EXPR     go to state 30
-    BIT_OR_EXPR          go to state 31
-    LOGIC_AND_EXPR       go to state 32
-    LOGIC_OR_EXPR        go to state 33
-    conditional_EXPR     go to state 34
-    assignment_EXPR      go to state 122
+    primary_EXPR         go to state 29
+    Constant             go to state 30
+    postfix_EXPR         go to state 31
+    unary_EXPR           go to state 32
+    unary_operator       go to state 33
+    cast_EXPR            go to state 34
+    multiplicative_EXPR  go to state 35
+    additive_EXPR        go to state 36
+    shift_EXPR           go to state 37
+    relational_EXPR      go to state 38
+    equality_EXPR        go to state 39
+    BIT_AND_EXPR         go to state 40
+    BIT_XBIT_OR_EXPR     go to state 41
+    BIT_OR_EXPR          go to state 42
+    LOGIC_AND_EXPR       go to state 43
+    LOGIC_OR_EXPR        go to state 44
+    conditional_EXPR     go to state 45
+    assignment_EXPR      go to state 167
 
 
-State 92
+State 115
+
+  120 direct_declarator: Identifier .
+
+    $default  reduce using rule 120 (direct_declarator)
+
+
+State 116
+
+  127 pointer: Operator_mul .
+  128        | Operator_mul . pointer
+
+    Operator_mul  shift, and go to state 116
+
+    $default  reduce using rule 127 (pointer)
+
+    pointer  go to state 168
+
+
+State 117
+
+   88 declaration: declaration_specifiers Punctuator_eol .
+
+    $default  reduce using rule 88 (declaration)
+
+
+State 118
+
+  121 direct_declarator: Punctuator_par_open . declarator Punctuator_par_close
+
+    Identifier           shift, and go to state 115
+    Operator_mul         shift, and go to state 116
+    Punctuator_par_open  shift, and go to state 118
+
+    declarator         go to state 169
+    direct_declarator  go to state 122
+    pointer            go to state 123
+
+
+State 119
+
+   87 declaration: declaration_specifiers init_declarator_list . Punctuator_eol
+   92 init_declarator_list: init_declarator_list . Operator_comma init_declarator
+
+    Operator_comma  shift, and go to state 170
+    Punctuator_eol  shift, and go to state 171
+
+
+State 120
+
+   91 init_declarator_list: init_declarator .
+
+    $default  reduce using rule 91 (init_declarator_list)
+
+
+State 121
+
+   93 init_declarator: declarator .
+   94                | declarator . Operator_assign initializer
+
+    Operator_assign  shift, and go to state 172
+
+    $default  reduce using rule 93 (init_declarator)
+
+
+State 122
+
+  118 declarator: direct_declarator .
+  122 direct_declarator: direct_declarator . Punctuator_squ_open Punctuator_squ_close
+  123                  | direct_declarator . Punctuator_squ_open constant_EXPR Punctuator_squ_close
+  124                  | direct_declarator . Punctuator_par_open parameter_type_list Punctuator_par_close
+  125                  | direct_declarator . Punctuator_par_open identifier_list Punctuator_par_close
+  126                  | direct_declarator . Punctuator_par_open Punctuator_par_close
+
+    Punctuator_par_open  shift, and go to state 173
+    Punctuator_squ_open  shift, and go to state 174
+
+    $default  reduce using rule 118 (declarator)
+
+
+State 123
+
+  119 declarator: pointer . direct_declarator
+
+    Identifier           shift, and go to state 115
+    Punctuator_par_open  shift, and go to state 118
+
+    direct_declarator  go to state 175
+
+
+State 124
+
+  151 typedef_name: Identifier .
+
+    $default  reduce using rule 151 (typedef_name)
+
+
+State 125
+
+   90 declaration_specifiers: type_specifier declaration_specifiers .
+
+    $default  reduce using rule 90 (declaration_specifiers)
+
+
+State 126
 
     0 $accept: ROOT $end .
 
     $default  accept
 
 
-State 93
+State 127
 
    25 unary_EXPR: Operator_sizeof Punctuator_par_open type_name . Punctuator_par_close
 
-    Punctuator_par_close  shift, and go to state 123
+    Punctuator_par_close  shift, and go to state 176
 
 
-State 94
+State 128
+
+  111 enum_specifier: Keyword_enum Identifier Punctuator_cur_open . enum_list Punctuator_cur_close
+
+    Identifier  shift, and go to state 129
+
+    enum_list   go to state 177
+    enumerator  go to state 131
+    ENUM_CONST  go to state 132
+
+
+State 129
+
+  117 ENUM_CONST: Identifier .
+
+    $default  reduce using rule 117 (ENUM_CONST)
+
+
+State 130
+
+  112 enum_specifier: Keyword_enum Punctuator_cur_open enum_list . Punctuator_cur_close
+  114 enum_list: enum_list . Operator_comma enumerator
+
+    Operator_comma        shift, and go to state 178
+    Punctuator_cur_close  shift, and go to state 179
+
+
+State 131
+
+  113 enum_list: enumerator .
+
+    $default  reduce using rule 113 (enum_list)
+
+
+State 132
+
+  115 enumerator: ENUM_CONST .
+  116           | ENUM_CONST . Operator_assign constant_EXPR
+
+    Operator_assign  shift, and go to state 180
+
+    $default  reduce using rule 115 (enumerator)
+
+
+State 133
 
    40 cast_EXPR: Punctuator_par_open type_name Punctuator_par_close . cast_EXPR
 
@@ -1932,7 +2573,7 @@ State 94
     Constant_float        shift, and go to state 4
     Constant_long_double  shift, and go to state 5
     String                shift, and go to state 6
-    Identifier            shift, and go to state 7
+    Identifier            shift, and go to state 55
     Operator_add          shift, and go to state 8
     Operator_sub          shift, and go to state 9
     Operator_addadd       shift, and go to state 10
@@ -1942,198 +2583,319 @@ State 94
     Operator_bit_and      shift, and go to state 14
     Operator_bit_not      shift, and go to state 15
     Operator_sizeof       shift, and go to state 16
-    Punctuator_par_open   shift, and go to state 17
+    Punctuator_par_open   shift, and go to state 28
 
-    primary_EXPR    go to state 18
-    Constant        go to state 19
-    postfix_EXPR    go to state 20
-    unary_EXPR      go to state 70
-    unary_operator  go to state 22
-    cast_EXPR       go to state 124
+    primary_EXPR    go to state 29
+    Constant        go to state 30
+    postfix_EXPR    go to state 31
+    unary_EXPR      go to state 93
+    unary_operator  go to state 33
+    cast_EXPR       go to state 181
 
 
-State 95
+State 134
 
     4 primary_EXPR: Punctuator_par_open EXPR Punctuator_par_close .
 
     $default  reduce using rule 4 (primary_EXPR)
 
 
-State 96
+State 135
+
+  109 specifier_qualifier_list: type_specifier specifier_qualifier_list .
+
+    $default  reduce using rule 109 (specifier_qualifier_list)
+
+
+State 136
+
+  142 direct_abstract_declarator: Punctuator_par_open . abstract_declarator Punctuator_par_close
+  148                           | Punctuator_par_open . parameter_type_list Punctuator_par_close
+  150                           | Punctuator_par_open . Punctuator_par_close
+
+    Identifier            shift, and go to state 124
+    Operator_mul          shift, and go to state 116
+    Keyword_void          shift, and go to state 17
+    Keyword_char          shift, and go to state 18
+    Keyword_short         shift, and go to state 19
+    Keyword_int           shift, and go to state 20
+    Keyword_long          shift, and go to state 21
+    Keyword_float         shift, and go to state 22
+    Keyword_double        shift, and go to state 23
+    Keyword_signed        shift, and go to state 24
+    Keyword_unsigned      shift, and go to state 25
+    Keyword_enum          shift, and go to state 26
+    Keyword_struct        shift, and go to state 27
+    Punctuator_par_open   shift, and go to state 136
+    Punctuator_par_close  shift, and go to state 182
+    Punctuator_squ_open   shift, and go to state 137
+
+    declaration_specifiers      go to state 183
+    type_specifier              go to state 50
+    struct_specifier            go to state 51
+    enum_specifier              go to state 52
+    pointer                     go to state 138
+    parameter_type_list         go to state 184
+    parameter_list              go to state 185
+    parameter_declaration       go to state 186
+    abstract_declarator         go to state 187
+    direct_abstract_declarator  go to state 140
+    typedef_name                go to state 53
+
+
+State 137
+
+  144 direct_abstract_declarator: Punctuator_squ_open . constant_EXPR Punctuator_squ_close
+  146                           | Punctuator_squ_open . Punctuator_squ_close
+
+    Constant_int          shift, and go to state 1
+    Constant_char         shift, and go to state 2
+    Constant_double       shift, and go to state 3
+    Constant_float        shift, and go to state 4
+    Constant_long_double  shift, and go to state 5
+    String                shift, and go to state 6
+    Identifier            shift, and go to state 55
+    Operator_add          shift, and go to state 8
+    Operator_sub          shift, and go to state 9
+    Operator_addadd       shift, and go to state 10
+    Operator_subsub       shift, and go to state 11
+    Operator_mul          shift, and go to state 12
+    Operator_not          shift, and go to state 13
+    Operator_bit_and      shift, and go to state 14
+    Operator_bit_not      shift, and go to state 15
+    Operator_sizeof       shift, and go to state 16
+    Punctuator_par_open   shift, and go to state 28
+    Punctuator_squ_close  shift, and go to state 188
+
+    primary_EXPR         go to state 29
+    Constant             go to state 30
+    postfix_EXPR         go to state 31
+    unary_EXPR           go to state 93
+    unary_operator       go to state 33
+    cast_EXPR            go to state 34
+    multiplicative_EXPR  go to state 35
+    additive_EXPR        go to state 36
+    shift_EXPR           go to state 37
+    relational_EXPR      go to state 38
+    equality_EXPR        go to state 39
+    BIT_AND_EXPR         go to state 40
+    BIT_XBIT_OR_EXPR     go to state 41
+    BIT_OR_EXPR          go to state 42
+    LOGIC_AND_EXPR       go to state 43
+    LOGIC_OR_EXPR        go to state 44
+    conditional_EXPR     go to state 189
+    constant_EXPR        go to state 190
+
+
+State 138
+
+  139 abstract_declarator: pointer .
+  140                    | pointer . direct_abstract_declarator
+
+    Punctuator_par_open  shift, and go to state 136
+    Punctuator_squ_open  shift, and go to state 137
+
+    $default  reduce using rule 139 (abstract_declarator)
+
+    direct_abstract_declarator  go to state 191
+
+
+State 139
+
+  138 type_name: specifier_qualifier_list abstract_declarator .
+
+    $default  reduce using rule 138 (type_name)
+
+
+State 140
+
+  141 abstract_declarator: direct_abstract_declarator .
+  143 direct_abstract_declarator: direct_abstract_declarator . Punctuator_squ_open constant_EXPR Punctuator_squ_close
+  145                           | direct_abstract_declarator . Punctuator_squ_open Punctuator_squ_close
+  147                           | direct_abstract_declarator . Punctuator_par_open parameter_type_list Punctuator_par_close
+  149                           | direct_abstract_declarator . Punctuator_par_open Punctuator_par_close
+
+    Punctuator_par_open  shift, and go to state 192
+    Punctuator_squ_open  shift, and go to state 193
+
+    $default  reduce using rule 141 (abstract_declarator)
+
+
+State 141
 
    14 postfix_EXPR: postfix_EXPR Operator_access Identifier .
 
     $default  reduce using rule 14 (postfix_EXPR)
 
 
-State 97
+State 142
 
    15 postfix_EXPR: postfix_EXPR Operator_deref_access Identifier .
 
     $default  reduce using rule 15 (postfix_EXPR)
 
 
-State 98
+State 143
 
    12 postfix_EXPR: postfix_EXPR Punctuator_par_open Punctuator_par_close .
 
     $default  reduce using rule 12 (postfix_EXPR)
 
 
-State 99
+State 144
 
    13 postfix_EXPR: postfix_EXPR Punctuator_par_open argument_EXPR_list . Punctuator_par_close
    19 argument_EXPR_list: argument_EXPR_list . Operator_comma assignment_EXPR
 
-    Operator_comma        shift, and go to state 125
-    Punctuator_par_close  shift, and go to state 126
+    Operator_comma        shift, and go to state 194
+    Punctuator_par_close  shift, and go to state 195
 
 
-State 100
+State 145
 
    18 argument_EXPR_list: assignment_EXPR .
 
     $default  reduce using rule 18 (argument_EXPR_list)
 
 
-State 101
+State 146
 
    11 postfix_EXPR: postfix_EXPR Punctuator_squ_open EXPR . Punctuator_squ_close
    85 EXPR: EXPR . Operator_comma assignment_EXPR
 
-    Operator_comma        shift, and go to state 91
-    Punctuator_squ_close  shift, and go to state 127
+    Operator_comma        shift, and go to state 114
+    Punctuator_squ_close  shift, and go to state 196
 
 
-State 102
+State 147
 
    72 assignment_EXPR: unary_EXPR assignment assignment_EXPR .
 
     $default  reduce using rule 72 (assignment_EXPR)
 
 
-State 103
+State 148
 
    42 multiplicative_EXPR: multiplicative_EXPR Operator_mul cast_EXPR .
 
     $default  reduce using rule 42 (multiplicative_EXPR)
 
 
-State 104
+State 149
 
    43 multiplicative_EXPR: multiplicative_EXPR Operator_div cast_EXPR .
 
     $default  reduce using rule 43 (multiplicative_EXPR)
 
 
-State 105
+State 150
 
    44 multiplicative_EXPR: multiplicative_EXPR Operator_mod cast_EXPR .
 
     $default  reduce using rule 44 (multiplicative_EXPR)
 
 
-State 106
+State 151
 
    42 multiplicative_EXPR: multiplicative_EXPR . Operator_mul cast_EXPR
    43                    | multiplicative_EXPR . Operator_div cast_EXPR
    44                    | multiplicative_EXPR . Operator_mod cast_EXPR
    46 additive_EXPR: additive_EXPR Operator_add multiplicative_EXPR .
 
-    Operator_mul  shift, and go to state 72
-    Operator_div  shift, and go to state 73
-    Operator_mod  shift, and go to state 74
+    Operator_mul  shift, and go to state 95
+    Operator_div  shift, and go to state 96
+    Operator_mod  shift, and go to state 97
 
     $default  reduce using rule 46 (additive_EXPR)
 
 
-State 107
+State 152
 
    42 multiplicative_EXPR: multiplicative_EXPR . Operator_mul cast_EXPR
    43                    | multiplicative_EXPR . Operator_div cast_EXPR
    44                    | multiplicative_EXPR . Operator_mod cast_EXPR
    47 additive_EXPR: additive_EXPR Operator_sub multiplicative_EXPR .
 
-    Operator_mul  shift, and go to state 72
-    Operator_div  shift, and go to state 73
-    Operator_mod  shift, and go to state 74
+    Operator_mul  shift, and go to state 95
+    Operator_div  shift, and go to state 96
+    Operator_mod  shift, and go to state 97
 
     $default  reduce using rule 47 (additive_EXPR)
 
 
-State 108
+State 153
 
    46 additive_EXPR: additive_EXPR . Operator_add multiplicative_EXPR
    47              | additive_EXPR . Operator_sub multiplicative_EXPR
    49 shift_EXPR: shift_EXPR Operator_sl additive_EXPR .
 
-    Operator_add  shift, and go to state 75
-    Operator_sub  shift, and go to state 76
+    Operator_add  shift, and go to state 98
+    Operator_sub  shift, and go to state 99
 
     $default  reduce using rule 49 (shift_EXPR)
 
 
-State 109
+State 154
 
    46 additive_EXPR: additive_EXPR . Operator_add multiplicative_EXPR
    47              | additive_EXPR . Operator_sub multiplicative_EXPR
    50 shift_EXPR: shift_EXPR Operator_sr additive_EXPR .
 
-    Operator_add  shift, and go to state 75
-    Operator_sub  shift, and go to state 76
+    Operator_add  shift, and go to state 98
+    Operator_sub  shift, and go to state 99
 
     $default  reduce using rule 50 (shift_EXPR)
 
 
-State 110
+State 155
 
    49 shift_EXPR: shift_EXPR . Operator_sl additive_EXPR
    50           | shift_EXPR . Operator_sr additive_EXPR
    53 relational_EXPR: relational_EXPR Operator_greater shift_EXPR .
 
-    Operator_sl  shift, and go to state 77
-    Operator_sr  shift, and go to state 78
+    Operator_sl  shift, and go to state 100
+    Operator_sr  shift, and go to state 101
 
     $default  reduce using rule 53 (relational_EXPR)
 
 
-State 111
+State 156
 
    49 shift_EXPR: shift_EXPR . Operator_sl additive_EXPR
    50           | shift_EXPR . Operator_sr additive_EXPR
    52 relational_EXPR: relational_EXPR Operator_less shift_EXPR .
 
-    Operator_sl  shift, and go to state 77
-    Operator_sr  shift, and go to state 78
+    Operator_sl  shift, and go to state 100
+    Operator_sr  shift, and go to state 101
 
     $default  reduce using rule 52 (relational_EXPR)
 
 
-State 112
+State 157
 
    49 shift_EXPR: shift_EXPR . Operator_sl additive_EXPR
    50           | shift_EXPR . Operator_sr additive_EXPR
    55 relational_EXPR: relational_EXPR Operator_greater_equal shift_EXPR .
 
-    Operator_sl  shift, and go to state 77
-    Operator_sr  shift, and go to state 78
+    Operator_sl  shift, and go to state 100
+    Operator_sr  shift, and go to state 101
 
     $default  reduce using rule 55 (relational_EXPR)
 
 
-State 113
+State 158
 
    49 shift_EXPR: shift_EXPR . Operator_sl additive_EXPR
    50           | shift_EXPR . Operator_sr additive_EXPR
    54 relational_EXPR: relational_EXPR Operator_less_equal shift_EXPR .
 
-    Operator_sl  shift, and go to state 77
-    Operator_sr  shift, and go to state 78
+    Operator_sl  shift, and go to state 100
+    Operator_sr  shift, and go to state 101
 
     $default  reduce using rule 54 (relational_EXPR)
 
 
-State 114
+State 159
 
    52 relational_EXPR: relational_EXPR . Operator_less shift_EXPR
    53                | relational_EXPR . Operator_greater shift_EXPR
@@ -2141,15 +2903,15 @@ State 114
    55                | relational_EXPR . Operator_greater_equal shift_EXPR
    57 equality_EXPR: equality_EXPR Operator_equal relational_EXPR .
 
-    Operator_greater        shift, and go to state 79
-    Operator_less           shift, and go to state 80
-    Operator_greater_equal  shift, and go to state 81
-    Operator_less_equal     shift, and go to state 82
+    Operator_greater        shift, and go to state 102
+    Operator_less           shift, and go to state 103
+    Operator_greater_equal  shift, and go to state 104
+    Operator_less_equal     shift, and go to state 105
 
     $default  reduce using rule 57 (equality_EXPR)
 
 
-State 115
+State 160
 
    52 relational_EXPR: relational_EXPR . Operator_less shift_EXPR
    53                | relational_EXPR . Operator_greater shift_EXPR
@@ -2157,97 +2919,500 @@ State 115
    55                | relational_EXPR . Operator_greater_equal shift_EXPR
    58 equality_EXPR: equality_EXPR Operator_not_equal relational_EXPR .
 
-    Operator_greater        shift, and go to state 79
-    Operator_less           shift, and go to state 80
-    Operator_greater_equal  shift, and go to state 81
-    Operator_less_equal     shift, and go to state 82
+    Operator_greater        shift, and go to state 102
+    Operator_less           shift, and go to state 103
+    Operator_greater_equal  shift, and go to state 104
+    Operator_less_equal     shift, and go to state 105
 
     $default  reduce using rule 58 (equality_EXPR)
 
 
-State 116
+State 161
 
    57 equality_EXPR: equality_EXPR . Operator_equal relational_EXPR
    58              | equality_EXPR . Operator_not_equal relational_EXPR
    60 BIT_AND_EXPR: BIT_AND_EXPR Operator_bit_and equality_EXPR .
 
-    Operator_equal      shift, and go to state 83
-    Operator_not_equal  shift, and go to state 84
+    Operator_equal      shift, and go to state 106
+    Operator_not_equal  shift, and go to state 107
 
     $default  reduce using rule 60 (BIT_AND_EXPR)
 
 
-State 117
+State 162
 
    60 BIT_AND_EXPR: BIT_AND_EXPR . Operator_bit_and equality_EXPR
    62 BIT_XBIT_OR_EXPR: BIT_XBIT_OR_EXPR Operator_bit_xor BIT_AND_EXPR .
 
-    Operator_bit_and  shift, and go to state 85
+    Operator_bit_and  shift, and go to state 108
 
     $default  reduce using rule 62 (BIT_XBIT_OR_EXPR)
 
 
-State 118
+State 163
 
    62 BIT_XBIT_OR_EXPR: BIT_XBIT_OR_EXPR . Operator_bit_xor BIT_AND_EXPR
    64 BIT_OR_EXPR: BIT_OR_EXPR Operator_bit_or BIT_XBIT_OR_EXPR .
 
-    Operator_bit_xor  shift, and go to state 86
+    Operator_bit_xor  shift, and go to state 109
 
     $default  reduce using rule 64 (BIT_OR_EXPR)
 
 
-State 119
+State 164
 
    64 BIT_OR_EXPR: BIT_OR_EXPR . Operator_bit_or BIT_XBIT_OR_EXPR
    66 LOGIC_AND_EXPR: LOGIC_AND_EXPR Operator_and BIT_OR_EXPR .
 
-    Operator_bit_or  shift, and go to state 87
+    Operator_bit_or  shift, and go to state 110
 
     $default  reduce using rule 66 (LOGIC_AND_EXPR)
 
 
-State 120
+State 165
 
    66 LOGIC_AND_EXPR: LOGIC_AND_EXPR . Operator_and BIT_OR_EXPR
    68 LOGIC_OR_EXPR: LOGIC_OR_EXPR Operator_or LOGIC_AND_EXPR .
 
-    Operator_and  shift, and go to state 88
+    Operator_and  shift, and go to state 111
 
     $default  reduce using rule 68 (LOGIC_OR_EXPR)
 
 
-State 121
+State 166
 
    70 conditional_EXPR: LOGIC_OR_EXPR Operator_trinary_question EXPR . Operator_trinary_choice conditional_EXPR
    85 EXPR: EXPR . Operator_comma assignment_EXPR
 
-    Operator_trinary_choice  shift, and go to state 128
-    Operator_comma           shift, and go to state 91
+    Operator_trinary_choice  shift, and go to state 197
+    Operator_comma           shift, and go to state 114
 
 
-State 122
+State 167
 
    85 EXPR: EXPR Operator_comma assignment_EXPR .
 
     $default  reduce using rule 85 (EXPR)
 
 
-State 123
+State 168
+
+  128 pointer: Operator_mul pointer .
+
+    $default  reduce using rule 128 (pointer)
+
+
+State 169
+
+  121 direct_declarator: Punctuator_par_open declarator . Punctuator_par_close
+
+    Punctuator_par_close  shift, and go to state 198
+
+
+State 170
+
+   92 init_declarator_list: init_declarator_list Operator_comma . init_declarator
+
+    Identifier           shift, and go to state 115
+    Operator_mul         shift, and go to state 116
+    Punctuator_par_open  shift, and go to state 118
+
+    init_declarator    go to state 199
+    declarator         go to state 121
+    direct_declarator  go to state 122
+    pointer            go to state 123
+
+
+State 171
+
+   87 declaration: declaration_specifiers init_declarator_list Punctuator_eol .
+
+    $default  reduce using rule 87 (declaration)
+
+
+State 172
+
+   94 init_declarator: declarator Operator_assign . initializer
+
+    Constant_int          shift, and go to state 1
+    Constant_char         shift, and go to state 2
+    Constant_double       shift, and go to state 3
+    Constant_float        shift, and go to state 4
+    Constant_long_double  shift, and go to state 5
+    String                shift, and go to state 6
+    Identifier            shift, and go to state 55
+    Operator_add          shift, and go to state 8
+    Operator_sub          shift, and go to state 9
+    Operator_addadd       shift, and go to state 10
+    Operator_subsub       shift, and go to state 11
+    Operator_mul          shift, and go to state 12
+    Operator_not          shift, and go to state 13
+    Operator_bit_and      shift, and go to state 14
+    Operator_bit_not      shift, and go to state 15
+    Operator_sizeof       shift, and go to state 16
+    Punctuator_par_open   shift, and go to state 28
+    Punctuator_cur_open   shift, and go to state 200
+
+    primary_EXPR         go to state 29
+    Constant             go to state 30
+    postfix_EXPR         go to state 31
+    unary_EXPR           go to state 32
+    unary_operator       go to state 33
+    cast_EXPR            go to state 34
+    multiplicative_EXPR  go to state 35
+    additive_EXPR        go to state 36
+    shift_EXPR           go to state 37
+    relational_EXPR      go to state 38
+    equality_EXPR        go to state 39
+    BIT_AND_EXPR         go to state 40
+    BIT_XBIT_OR_EXPR     go to state 41
+    BIT_OR_EXPR          go to state 42
+    LOGIC_AND_EXPR       go to state 43
+    LOGIC_OR_EXPR        go to state 44
+    conditional_EXPR     go to state 45
+    assignment_EXPR      go to state 201
+    initializer          go to state 202
+
+
+State 173
+
+  124 direct_declarator: direct_declarator Punctuator_par_open . parameter_type_list Punctuator_par_close
+  125                  | direct_declarator Punctuator_par_open . identifier_list Punctuator_par_close
+  126                  | direct_declarator Punctuator_par_open . Punctuator_par_close
+
+    Identifier            shift, and go to state 203
+    Keyword_void          shift, and go to state 17
+    Keyword_char          shift, and go to state 18
+    Keyword_short         shift, and go to state 19
+    Keyword_int           shift, and go to state 20
+    Keyword_long          shift, and go to state 21
+    Keyword_float         shift, and go to state 22
+    Keyword_double        shift, and go to state 23
+    Keyword_signed        shift, and go to state 24
+    Keyword_unsigned      shift, and go to state 25
+    Keyword_enum          shift, and go to state 26
+    Keyword_struct        shift, and go to state 27
+    Punctuator_par_close  shift, and go to state 204
+
+    declaration_specifiers  go to state 183
+    type_specifier          go to state 50
+    struct_specifier        go to state 51
+    enum_specifier          go to state 52
+    parameter_type_list     go to state 205
+    parameter_list          go to state 185
+    parameter_declaration   go to state 186
+    identifier_list         go to state 206
+    typedef_name            go to state 53
+
+
+State 174
+
+  122 direct_declarator: direct_declarator Punctuator_squ_open . Punctuator_squ_close
+  123                  | direct_declarator Punctuator_squ_open . constant_EXPR Punctuator_squ_close
+
+    Constant_int          shift, and go to state 1
+    Constant_char         shift, and go to state 2
+    Constant_double       shift, and go to state 3
+    Constant_float        shift, and go to state 4
+    Constant_long_double  shift, and go to state 5
+    String                shift, and go to state 6
+    Identifier            shift, and go to state 55
+    Operator_add          shift, and go to state 8
+    Operator_sub          shift, and go to state 9
+    Operator_addadd       shift, and go to state 10
+    Operator_subsub       shift, and go to state 11
+    Operator_mul          shift, and go to state 12
+    Operator_not          shift, and go to state 13
+    Operator_bit_and      shift, and go to state 14
+    Operator_bit_not      shift, and go to state 15
+    Operator_sizeof       shift, and go to state 16
+    Punctuator_par_open   shift, and go to state 28
+    Punctuator_squ_close  shift, and go to state 207
+
+    primary_EXPR         go to state 29
+    Constant             go to state 30
+    postfix_EXPR         go to state 31
+    unary_EXPR           go to state 93
+    unary_operator       go to state 33
+    cast_EXPR            go to state 34
+    multiplicative_EXPR  go to state 35
+    additive_EXPR        go to state 36
+    shift_EXPR           go to state 37
+    relational_EXPR      go to state 38
+    equality_EXPR        go to state 39
+    BIT_AND_EXPR         go to state 40
+    BIT_XBIT_OR_EXPR     go to state 41
+    BIT_OR_EXPR          go to state 42
+    LOGIC_AND_EXPR       go to state 43
+    LOGIC_OR_EXPR        go to state 44
+    conditional_EXPR     go to state 189
+    constant_EXPR        go to state 208
+
+
+State 175
+
+  119 declarator: pointer direct_declarator .
+  122 direct_declarator: direct_declarator . Punctuator_squ_open Punctuator_squ_close
+  123                  | direct_declarator . Punctuator_squ_open constant_EXPR Punctuator_squ_close
+  124                  | direct_declarator . Punctuator_par_open parameter_type_list Punctuator_par_close
+  125                  | direct_declarator . Punctuator_par_open identifier_list Punctuator_par_close
+  126                  | direct_declarator . Punctuator_par_open Punctuator_par_close
+
+    Punctuator_par_open  shift, and go to state 173
+    Punctuator_squ_open  shift, and go to state 174
+
+    $default  reduce using rule 119 (declarator)
+
+
+State 176
 
    25 unary_EXPR: Operator_sizeof Punctuator_par_open type_name Punctuator_par_close .
 
     $default  reduce using rule 25 (unary_EXPR)
 
 
-State 124
+State 177
+
+  111 enum_specifier: Keyword_enum Identifier Punctuator_cur_open enum_list . Punctuator_cur_close
+  114 enum_list: enum_list . Operator_comma enumerator
+
+    Operator_comma        shift, and go to state 178
+    Punctuator_cur_close  shift, and go to state 209
+
+
+State 178
+
+  114 enum_list: enum_list Operator_comma . enumerator
+
+    Identifier  shift, and go to state 129
+
+    enumerator  go to state 210
+    ENUM_CONST  go to state 132
+
+
+State 179
+
+  112 enum_specifier: Keyword_enum Punctuator_cur_open enum_list Punctuator_cur_close .
+
+    $default  reduce using rule 112 (enum_specifier)
+
+
+State 180
+
+  116 enumerator: ENUM_CONST Operator_assign . constant_EXPR
+
+    Constant_int          shift, and go to state 1
+    Constant_char         shift, and go to state 2
+    Constant_double       shift, and go to state 3
+    Constant_float        shift, and go to state 4
+    Constant_long_double  shift, and go to state 5
+    String                shift, and go to state 6
+    Identifier            shift, and go to state 55
+    Operator_add          shift, and go to state 8
+    Operator_sub          shift, and go to state 9
+    Operator_addadd       shift, and go to state 10
+    Operator_subsub       shift, and go to state 11
+    Operator_mul          shift, and go to state 12
+    Operator_not          shift, and go to state 13
+    Operator_bit_and      shift, and go to state 14
+    Operator_bit_not      shift, and go to state 15
+    Operator_sizeof       shift, and go to state 16
+    Punctuator_par_open   shift, and go to state 28
+
+    primary_EXPR         go to state 29
+    Constant             go to state 30
+    postfix_EXPR         go to state 31
+    unary_EXPR           go to state 93
+    unary_operator       go to state 33
+    cast_EXPR            go to state 34
+    multiplicative_EXPR  go to state 35
+    additive_EXPR        go to state 36
+    shift_EXPR           go to state 37
+    relational_EXPR      go to state 38
+    equality_EXPR        go to state 39
+    BIT_AND_EXPR         go to state 40
+    BIT_XBIT_OR_EXPR     go to state 41
+    BIT_OR_EXPR          go to state 42
+    LOGIC_AND_EXPR       go to state 43
+    LOGIC_OR_EXPR        go to state 44
+    conditional_EXPR     go to state 189
+    constant_EXPR        go to state 211
+
+
+State 181
 
    40 cast_EXPR: Punctuator_par_open type_name Punctuator_par_close cast_EXPR .
 
     $default  reduce using rule 40 (cast_EXPR)
 
 
-State 125
+State 182
+
+  150 direct_abstract_declarator: Punctuator_par_open Punctuator_par_close .
+
+    $default  reduce using rule 150 (direct_abstract_declarator)
+
+
+State 183
+
+  132 parameter_declaration: declaration_specifiers . declarator
+  133                      | declaration_specifiers .
+  134                      | declaration_specifiers . abstract_declarator
+
+    Identifier           shift, and go to state 115
+    Operator_mul         shift, and go to state 116
+    Punctuator_par_open  shift, and go to state 212
+    Punctuator_squ_open  shift, and go to state 137
+
+    $default  reduce using rule 133 (parameter_declaration)
+
+    declarator                  go to state 213
+    direct_declarator           go to state 122
+    pointer                     go to state 214
+    abstract_declarator         go to state 215
+    direct_abstract_declarator  go to state 140
+
+
+State 184
+
+  148 direct_abstract_declarator: Punctuator_par_open parameter_type_list . Punctuator_par_close
+
+    Punctuator_par_close  shift, and go to state 216
+
+
+State 185
+
+  129 parameter_type_list: parameter_list .
+  131 parameter_list: parameter_list . Operator_comma parameter_declaration
+
+    Operator_comma  shift, and go to state 217
+
+    $default  reduce using rule 129 (parameter_type_list)
+
+
+State 186
+
+  130 parameter_list: parameter_declaration .
+
+    $default  reduce using rule 130 (parameter_list)
+
+
+State 187
+
+  142 direct_abstract_declarator: Punctuator_par_open abstract_declarator . Punctuator_par_close
+
+    Punctuator_par_close  shift, and go to state 218
+
+
+State 188
+
+  146 direct_abstract_declarator: Punctuator_squ_open Punctuator_squ_close .
+
+    $default  reduce using rule 146 (direct_abstract_declarator)
+
+
+State 189
+
+   86 constant_EXPR: conditional_EXPR .
+
+    $default  reduce using rule 86 (constant_EXPR)
+
+
+State 190
+
+  144 direct_abstract_declarator: Punctuator_squ_open constant_EXPR . Punctuator_squ_close
+
+    Punctuator_squ_close  shift, and go to state 219
+
+
+State 191
+
+  140 abstract_declarator: pointer direct_abstract_declarator .
+  143 direct_abstract_declarator: direct_abstract_declarator . Punctuator_squ_open constant_EXPR Punctuator_squ_close
+  145                           | direct_abstract_declarator . Punctuator_squ_open Punctuator_squ_close
+  147                           | direct_abstract_declarator . Punctuator_par_open parameter_type_list Punctuator_par_close
+  149                           | direct_abstract_declarator . Punctuator_par_open Punctuator_par_close
+
+    Punctuator_par_open  shift, and go to state 192
+    Punctuator_squ_open  shift, and go to state 193
+
+    $default  reduce using rule 140 (abstract_declarator)
+
+
+State 192
+
+  147 direct_abstract_declarator: direct_abstract_declarator Punctuator_par_open . parameter_type_list Punctuator_par_close
+  149                           | direct_abstract_declarator Punctuator_par_open . Punctuator_par_close
+
+    Identifier            shift, and go to state 124
+    Keyword_void          shift, and go to state 17
+    Keyword_char          shift, and go to state 18
+    Keyword_short         shift, and go to state 19
+    Keyword_int           shift, and go to state 20
+    Keyword_long          shift, and go to state 21
+    Keyword_float         shift, and go to state 22
+    Keyword_double        shift, and go to state 23
+    Keyword_signed        shift, and go to state 24
+    Keyword_unsigned      shift, and go to state 25
+    Keyword_enum          shift, and go to state 26
+    Keyword_struct        shift, and go to state 27
+    Punctuator_par_close  shift, and go to state 220
+
+    declaration_specifiers  go to state 183
+    type_specifier          go to state 50
+    struct_specifier        go to state 51
+    enum_specifier          go to state 52
+    parameter_type_list     go to state 221
+    parameter_list          go to state 185
+    parameter_declaration   go to state 186
+    typedef_name            go to state 53
+
+
+State 193
+
+  143 direct_abstract_declarator: direct_abstract_declarator Punctuator_squ_open . constant_EXPR Punctuator_squ_close
+  145                           | direct_abstract_declarator Punctuator_squ_open . Punctuator_squ_close
+
+    Constant_int          shift, and go to state 1
+    Constant_char         shift, and go to state 2
+    Constant_double       shift, and go to state 3
+    Constant_float        shift, and go to state 4
+    Constant_long_double  shift, and go to state 5
+    String                shift, and go to state 6
+    Identifier            shift, and go to state 55
+    Operator_add          shift, and go to state 8
+    Operator_sub          shift, and go to state 9
+    Operator_addadd       shift, and go to state 10
+    Operator_subsub       shift, and go to state 11
+    Operator_mul          shift, and go to state 12
+    Operator_not          shift, and go to state 13
+    Operator_bit_and      shift, and go to state 14
+    Operator_bit_not      shift, and go to state 15
+    Operator_sizeof       shift, and go to state 16
+    Punctuator_par_open   shift, and go to state 28
+    Punctuator_squ_close  shift, and go to state 222
+
+    primary_EXPR         go to state 29
+    Constant             go to state 30
+    postfix_EXPR         go to state 31
+    unary_EXPR           go to state 93
+    unary_operator       go to state 33
+    cast_EXPR            go to state 34
+    multiplicative_EXPR  go to state 35
+    additive_EXPR        go to state 36
+    shift_EXPR           go to state 37
+    relational_EXPR      go to state 38
+    equality_EXPR        go to state 39
+    BIT_AND_EXPR         go to state 40
+    BIT_XBIT_OR_EXPR     go to state 41
+    BIT_OR_EXPR          go to state 42
+    LOGIC_AND_EXPR       go to state 43
+    LOGIC_OR_EXPR        go to state 44
+    conditional_EXPR     go to state 189
+    constant_EXPR        go to state 223
+
+
+State 194
 
    19 argument_EXPR_list: argument_EXPR_list Operator_comma . assignment_EXPR
 
@@ -2257,7 +3422,7 @@ State 125
     Constant_float        shift, and go to state 4
     Constant_long_double  shift, and go to state 5
     String                shift, and go to state 6
-    Identifier            shift, and go to state 7
+    Identifier            shift, and go to state 55
     Operator_add          shift, and go to state 8
     Operator_sub          shift, and go to state 9
     Operator_addadd       shift, and go to state 10
@@ -2267,43 +3432,43 @@ State 125
     Operator_bit_and      shift, and go to state 14
     Operator_bit_not      shift, and go to state 15
     Operator_sizeof       shift, and go to state 16
-    Punctuator_par_open   shift, and go to state 17
+    Punctuator_par_open   shift, and go to state 28
 
-    primary_EXPR         go to state 18
-    Constant             go to state 19
-    postfix_EXPR         go to state 20
-    unary_EXPR           go to state 21
-    unary_operator       go to state 22
-    cast_EXPR            go to state 23
-    multiplicative_EXPR  go to state 24
-    additive_EXPR        go to state 25
-    shift_EXPR           go to state 26
-    relational_EXPR      go to state 27
-    equality_EXPR        go to state 28
-    BIT_AND_EXPR         go to state 29
-    BIT_XBIT_OR_EXPR     go to state 30
-    BIT_OR_EXPR          go to state 31
-    LOGIC_AND_EXPR       go to state 32
-    LOGIC_OR_EXPR        go to state 33
-    conditional_EXPR     go to state 34
-    assignment_EXPR      go to state 129
+    primary_EXPR         go to state 29
+    Constant             go to state 30
+    postfix_EXPR         go to state 31
+    unary_EXPR           go to state 32
+    unary_operator       go to state 33
+    cast_EXPR            go to state 34
+    multiplicative_EXPR  go to state 35
+    additive_EXPR        go to state 36
+    shift_EXPR           go to state 37
+    relational_EXPR      go to state 38
+    equality_EXPR        go to state 39
+    BIT_AND_EXPR         go to state 40
+    BIT_XBIT_OR_EXPR     go to state 41
+    BIT_OR_EXPR          go to state 42
+    LOGIC_AND_EXPR       go to state 43
+    LOGIC_OR_EXPR        go to state 44
+    conditional_EXPR     go to state 45
+    assignment_EXPR      go to state 224
 
 
-State 126
+State 195
 
    13 postfix_EXPR: postfix_EXPR Punctuator_par_open argument_EXPR_list Punctuator_par_close .
 
     $default  reduce using rule 13 (postfix_EXPR)
 
 
-State 127
+State 196
 
    11 postfix_EXPR: postfix_EXPR Punctuator_squ_open EXPR Punctuator_squ_close .
 
     $default  reduce using rule 11 (postfix_EXPR)
 
 
-State 128
+State 197
 
    70 conditional_EXPR: LOGIC_OR_EXPR Operator_trinary_question EXPR Operator_trinary_choice . conditional_EXPR
 
@@ -2313,7 +3478,7 @@ State 128
     Constant_float        shift, and go to state 4
     Constant_long_double  shift, and go to state 5
     String                shift, and go to state 6
-    Identifier            shift, and go to state 7
+    Identifier            shift, and go to state 55
     Operator_add          shift, and go to state 8
     Operator_sub          shift, and go to state 9
     Operator_addadd       shift, and go to state 10
@@ -2323,36 +3488,477 @@ State 128
     Operator_bit_and      shift, and go to state 14
     Operator_bit_not      shift, and go to state 15
     Operator_sizeof       shift, and go to state 16
-    Punctuator_par_open   shift, and go to state 17
+    Punctuator_par_open   shift, and go to state 28
 
-    primary_EXPR         go to state 18
-    Constant             go to state 19
-    postfix_EXPR         go to state 20
-    unary_EXPR           go to state 70
-    unary_operator       go to state 22
-    cast_EXPR            go to state 23
-    multiplicative_EXPR  go to state 24
-    additive_EXPR        go to state 25
-    shift_EXPR           go to state 26
-    relational_EXPR      go to state 27
-    equality_EXPR        go to state 28
-    BIT_AND_EXPR         go to state 29
-    BIT_XBIT_OR_EXPR     go to state 30
-    BIT_OR_EXPR          go to state 31
-    LOGIC_AND_EXPR       go to state 32
-    LOGIC_OR_EXPR        go to state 33
-    conditional_EXPR     go to state 130
+    primary_EXPR         go to state 29
+    Constant             go to state 30
+    postfix_EXPR         go to state 31
+    unary_EXPR           go to state 93
+    unary_operator       go to state 33
+    cast_EXPR            go to state 34
+    multiplicative_EXPR  go to state 35
+    additive_EXPR        go to state 36
+    shift_EXPR           go to state 37
+    relational_EXPR      go to state 38
+    equality_EXPR        go to state 39
+    BIT_AND_EXPR         go to state 40
+    BIT_XBIT_OR_EXPR     go to state 41
+    BIT_OR_EXPR          go to state 42
+    LOGIC_AND_EXPR       go to state 43
+    LOGIC_OR_EXPR        go to state 44
+    conditional_EXPR     go to state 225
 
 
-State 129
+State 198
+
+  121 direct_declarator: Punctuator_par_open declarator Punctuator_par_close .
+
+    $default  reduce using rule 121 (direct_declarator)
+
+
+State 199
+
+   92 init_declarator_list: init_declarator_list Operator_comma init_declarator .
+
+    $default  reduce using rule 92 (init_declarator_list)
+
+
+State 200
+
+  153 initializer: Punctuator_cur_open . initializer_list Punctuator_cur_close
+  154            | Punctuator_cur_open . initializer_list Operator_comma Punctuator_cur_close
+
+    Constant_int          shift, and go to state 1
+    Constant_char         shift, and go to state 2
+    Constant_double       shift, and go to state 3
+    Constant_float        shift, and go to state 4
+    Constant_long_double  shift, and go to state 5
+    String                shift, and go to state 6
+    Identifier            shift, and go to state 55
+    Operator_add          shift, and go to state 8
+    Operator_sub          shift, and go to state 9
+    Operator_addadd       shift, and go to state 10
+    Operator_subsub       shift, and go to state 11
+    Operator_mul          shift, and go to state 12
+    Operator_not          shift, and go to state 13
+    Operator_bit_and      shift, and go to state 14
+    Operator_bit_not      shift, and go to state 15
+    Operator_sizeof       shift, and go to state 16
+    Punctuator_par_open   shift, and go to state 28
+    Punctuator_cur_open   shift, and go to state 200
+
+    primary_EXPR         go to state 29
+    Constant             go to state 30
+    postfix_EXPR         go to state 31
+    unary_EXPR           go to state 32
+    unary_operator       go to state 33
+    cast_EXPR            go to state 34
+    multiplicative_EXPR  go to state 35
+    additive_EXPR        go to state 36
+    shift_EXPR           go to state 37
+    relational_EXPR      go to state 38
+    equality_EXPR        go to state 39
+    BIT_AND_EXPR         go to state 40
+    BIT_XBIT_OR_EXPR     go to state 41
+    BIT_OR_EXPR          go to state 42
+    LOGIC_AND_EXPR       go to state 43
+    LOGIC_OR_EXPR        go to state 44
+    conditional_EXPR     go to state 45
+    assignment_EXPR      go to state 201
+    initializer          go to state 226
+    initializer_list     go to state 227
+
+
+State 201
+
+  152 initializer: assignment_EXPR .
+
+    $default  reduce using rule 152 (initializer)
+
+
+State 202
+
+   94 init_declarator: declarator Operator_assign initializer .
+
+    $default  reduce using rule 94 (init_declarator)
+
+
+State 203
+
+  135 identifier_list: Identifier .
+  151 typedef_name: Identifier .
+
+    Operator_comma        reduce using rule 135 (identifier_list)
+    Operator_comma        [reduce using rule 151 (typedef_name)]
+    Punctuator_par_close  reduce using rule 135 (identifier_list)
+    Punctuator_par_close  [reduce using rule 151 (typedef_name)]
+    $default              reduce using rule 151 (typedef_name)
+
+
+State 204
+
+  126 direct_declarator: direct_declarator Punctuator_par_open Punctuator_par_close .
+
+    $default  reduce using rule 126 (direct_declarator)
+
+
+State 205
+
+  124 direct_declarator: direct_declarator Punctuator_par_open parameter_type_list . Punctuator_par_close
+
+    Punctuator_par_close  shift, and go to state 228
+
+
+State 206
+
+  125 direct_declarator: direct_declarator Punctuator_par_open identifier_list . Punctuator_par_close
+  136 identifier_list: identifier_list . Operator_comma Identifier
+
+    Operator_comma        shift, and go to state 229
+    Punctuator_par_close  shift, and go to state 230
+
+
+State 207
+
+  122 direct_declarator: direct_declarator Punctuator_squ_open Punctuator_squ_close .
+
+    $default  reduce using rule 122 (direct_declarator)
+
+
+State 208
+
+  123 direct_declarator: direct_declarator Punctuator_squ_open constant_EXPR . Punctuator_squ_close
+
+    Punctuator_squ_close  shift, and go to state 231
+
+
+State 209
+
+  111 enum_specifier: Keyword_enum Identifier Punctuator_cur_open enum_list Punctuator_cur_close .
+
+    $default  reduce using rule 111 (enum_specifier)
+
+
+State 210
+
+  114 enum_list: enum_list Operator_comma enumerator .
+
+    $default  reduce using rule 114 (enum_list)
+
+
+State 211
+
+  116 enumerator: ENUM_CONST Operator_assign constant_EXPR .
+
+    $default  reduce using rule 116 (enumerator)
+
+
+State 212
+
+  121 direct_declarator: Punctuator_par_open . declarator Punctuator_par_close
+  142 direct_abstract_declarator: Punctuator_par_open . abstract_declarator Punctuator_par_close
+  148                           | Punctuator_par_open . parameter_type_list Punctuator_par_close
+  150                           | Punctuator_par_open . Punctuator_par_close
+
+    Identifier            shift, and go to state 232
+    Operator_mul          shift, and go to state 116
+    Keyword_void          shift, and go to state 17
+    Keyword_char          shift, and go to state 18
+    Keyword_short         shift, and go to state 19
+    Keyword_int           shift, and go to state 20
+    Keyword_long          shift, and go to state 21
+    Keyword_float         shift, and go to state 22
+    Keyword_double        shift, and go to state 23
+    Keyword_signed        shift, and go to state 24
+    Keyword_unsigned      shift, and go to state 25
+    Keyword_enum          shift, and go to state 26
+    Keyword_struct        shift, and go to state 27
+    Punctuator_par_open   shift, and go to state 212
+    Punctuator_par_close  shift, and go to state 182
+    Punctuator_squ_open   shift, and go to state 137
+
+    declaration_specifiers      go to state 183
+    type_specifier              go to state 50
+    struct_specifier            go to state 51
+    enum_specifier              go to state 52
+    declarator                  go to state 169
+    direct_declarator           go to state 122
+    pointer                     go to state 214
+    parameter_type_list         go to state 184
+    parameter_list              go to state 185
+    parameter_declaration       go to state 186
+    abstract_declarator         go to state 187
+    direct_abstract_declarator  go to state 140
+    typedef_name                go to state 53
+
+
+State 213
+
+  132 parameter_declaration: declaration_specifiers declarator .
+
+    $default  reduce using rule 132 (parameter_declaration)
+
+
+State 214
+
+  119 declarator: pointer . direct_declarator
+  139 abstract_declarator: pointer .
+  140                    | pointer . direct_abstract_declarator
+
+    Identifier           shift, and go to state 115
+    Punctuator_par_open  shift, and go to state 212
+    Punctuator_squ_open  shift, and go to state 137
+
+    $default  reduce using rule 139 (abstract_declarator)
+
+    direct_declarator           go to state 175
+    direct_abstract_declarator  go to state 191
+
+
+State 215
+
+  134 parameter_declaration: declaration_specifiers abstract_declarator .
+
+    $default  reduce using rule 134 (parameter_declaration)
+
+
+State 216
+
+  148 direct_abstract_declarator: Punctuator_par_open parameter_type_list Punctuator_par_close .
+
+    $default  reduce using rule 148 (direct_abstract_declarator)
+
+
+State 217
+
+  131 parameter_list: parameter_list Operator_comma . parameter_declaration
+
+    Identifier        shift, and go to state 124
+    Keyword_void      shift, and go to state 17
+    Keyword_char      shift, and go to state 18
+    Keyword_short     shift, and go to state 19
+    Keyword_int       shift, and go to state 20
+    Keyword_long      shift, and go to state 21
+    Keyword_float     shift, and go to state 22
+    Keyword_double    shift, and go to state 23
+    Keyword_signed    shift, and go to state 24
+    Keyword_unsigned  shift, and go to state 25
+    Keyword_enum      shift, and go to state 26
+    Keyword_struct    shift, and go to state 27
+
+    declaration_specifiers  go to state 183
+    type_specifier          go to state 50
+    struct_specifier        go to state 51
+    enum_specifier          go to state 52
+    parameter_declaration   go to state 233
+    typedef_name            go to state 53
+
+
+State 218
+
+  142 direct_abstract_declarator: Punctuator_par_open abstract_declarator Punctuator_par_close .
+
+    $default  reduce using rule 142 (direct_abstract_declarator)
+
+
+State 219
+
+  144 direct_abstract_declarator: Punctuator_squ_open constant_EXPR Punctuator_squ_close .
+
+    $default  reduce using rule 144 (direct_abstract_declarator)
+
+
+State 220
+
+  149 direct_abstract_declarator: direct_abstract_declarator Punctuator_par_open Punctuator_par_close .
+
+    $default  reduce using rule 149 (direct_abstract_declarator)
+
+
+State 221
+
+  147 direct_abstract_declarator: direct_abstract_declarator Punctuator_par_open parameter_type_list . Punctuator_par_close
+
+    Punctuator_par_close  shift, and go to state 234
+
+
+State 222
+
+  145 direct_abstract_declarator: direct_abstract_declarator Punctuator_squ_open Punctuator_squ_close .
+
+    $default  reduce using rule 145 (direct_abstract_declarator)
+
+
+State 223
+
+  143 direct_abstract_declarator: direct_abstract_declarator Punctuator_squ_open constant_EXPR . Punctuator_squ_close
+
+    Punctuator_squ_close  shift, and go to state 235
+
+
+State 224
 
    19 argument_EXPR_list: argument_EXPR_list Operator_comma assignment_EXPR .
 
     $default  reduce using rule 19 (argument_EXPR_list)
 
 
-State 130
+State 225
 
    70 conditional_EXPR: LOGIC_OR_EXPR Operator_trinary_question EXPR Operator_trinary_choice conditional_EXPR .
 
     $default  reduce using rule 70 (conditional_EXPR)
+
+
+State 226
+
+  155 initializer_list: initializer .
+
+    $default  reduce using rule 155 (initializer_list)
+
+
+State 227
+
+  153 initializer: Punctuator_cur_open initializer_list . Punctuator_cur_close
+  154            | Punctuator_cur_open initializer_list . Operator_comma Punctuator_cur_close
+  156 initializer_list: initializer_list . Operator_comma initializer
+
+    Operator_comma        shift, and go to state 236
+    Punctuator_cur_close  shift, and go to state 237
+
+
+State 228
+
+  124 direct_declarator: direct_declarator Punctuator_par_open parameter_type_list Punctuator_par_close .
+
+    $default  reduce using rule 124 (direct_declarator)
+
+
+State 229
+
+  136 identifier_list: identifier_list Operator_comma . Identifier
+
+    Identifier  shift, and go to state 238
+
+
+State 230
+
+  125 direct_declarator: direct_declarator Punctuator_par_open identifier_list Punctuator_par_close .
+
+    $default  reduce using rule 125 (direct_declarator)
+
+
+State 231
+
+  123 direct_declarator: direct_declarator Punctuator_squ_open constant_EXPR Punctuator_squ_close .
+
+    $default  reduce using rule 123 (direct_declarator)
+
+
+State 232
+
+  120 direct_declarator: Identifier .
+  151 typedef_name: Identifier .
+
+    Punctuator_par_open   reduce using rule 120 (direct_declarator)
+    Punctuator_par_open   [reduce using rule 151 (typedef_name)]
+    Punctuator_par_close  reduce using rule 120 (direct_declarator)
+    Punctuator_par_close  [reduce using rule 151 (typedef_name)]
+    Punctuator_squ_open   reduce using rule 120 (direct_declarator)
+    Punctuator_squ_open   [reduce using rule 151 (typedef_name)]
+    $default              reduce using rule 151 (typedef_name)
+
+
+State 233
+
+  131 parameter_list: parameter_list Operator_comma parameter_declaration .
+
+    $default  reduce using rule 131 (parameter_list)
+
+
+State 234
+
+  147 direct_abstract_declarator: direct_abstract_declarator Punctuator_par_open parameter_type_list Punctuator_par_close .
+
+    $default  reduce using rule 147 (direct_abstract_declarator)
+
+
+State 235
+
+  143 direct_abstract_declarator: direct_abstract_declarator Punctuator_squ_open constant_EXPR Punctuator_squ_close .
+
+    $default  reduce using rule 143 (direct_abstract_declarator)
+
+
+State 236
+
+  154 initializer: Punctuator_cur_open initializer_list Operator_comma . Punctuator_cur_close
+  156 initializer_list: initializer_list Operator_comma . initializer
+
+    Constant_int          shift, and go to state 1
+    Constant_char         shift, and go to state 2
+    Constant_double       shift, and go to state 3
+    Constant_float        shift, and go to state 4
+    Constant_long_double  shift, and go to state 5
+    String                shift, and go to state 6
+    Identifier            shift, and go to state 55
+    Operator_add          shift, and go to state 8
+    Operator_sub          shift, and go to state 9
+    Operator_addadd       shift, and go to state 10
+    Operator_subsub       shift, and go to state 11
+    Operator_mul          shift, and go to state 12
+    Operator_not          shift, and go to state 13
+    Operator_bit_and      shift, and go to state 14
+    Operator_bit_not      shift, and go to state 15
+    Operator_sizeof       shift, and go to state 16
+    Punctuator_par_open   shift, and go to state 28
+    Punctuator_cur_open   shift, and go to state 200
+    Punctuator_cur_close  shift, and go to state 239
+
+    primary_EXPR         go to state 29
+    Constant             go to state 30
+    postfix_EXPR         go to state 31
+    unary_EXPR           go to state 32
+    unary_operator       go to state 33
+    cast_EXPR            go to state 34
+    multiplicative_EXPR  go to state 35
+    additive_EXPR        go to state 36
+    shift_EXPR           go to state 37
+    relational_EXPR      go to state 38
+    equality_EXPR        go to state 39
+    BIT_AND_EXPR         go to state 40
+    BIT_XBIT_OR_EXPR     go to state 41
+    BIT_OR_EXPR          go to state 42
+    LOGIC_AND_EXPR       go to state 43
+    LOGIC_OR_EXPR        go to state 44
+    conditional_EXPR     go to state 45
+    assignment_EXPR      go to state 201
+    initializer          go to state 240
+
+
+State 237
+
+  153 initializer: Punctuator_cur_open initializer_list Punctuator_cur_close .
+
+    $default  reduce using rule 153 (initializer)
+
+
+State 238
+
+  136 identifier_list: identifier_list Operator_comma Identifier .
+
+    $default  reduce using rule 136 (identifier_list)
+
+
+State 239
+
+  154 initializer: Punctuator_cur_open initializer_list Operator_comma Punctuator_cur_close .
+
+    $default  reduce using rule 154 (initializer)
+
+
+State 240
+
+  156 initializer_list: initializer_list Operator_comma initializer .
+
+    $default  reduce using rule 156 (initializer_list)

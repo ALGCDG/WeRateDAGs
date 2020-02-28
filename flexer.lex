@@ -91,7 +91,8 @@ Operator [+\-*/%&|^><=!~?:.,#\[\]\(\)\{\}]
 "continue" { return Keyword_continue; }
 "break" { return Keyword_break; }
 "return" { return Keyword_return; }
-
+"enum" { return Keyword_enum; }
+"struct" { return Keyword_struct; }
 
 
 {A}{P}* {
