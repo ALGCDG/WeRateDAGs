@@ -139,6 +139,8 @@ assignment: Operator_assign | Operator_mul_assign | Operator_div_assign | Operat
 EXPR: assignment_EXPR
     | EXPR Operator_comma assignment_EXPR { std::cerr << "x, y" << std::endl; }
 
+constant_EXPR: conditional_EXPR { std::cerr << "cond expr" << std::endl; }
+
 /*
 DECLARATIONS
 */
@@ -197,7 +199,67 @@ enumerator: ENUM_CONST
 
 ENUM_CONST: Identifier
 
+declarator: direct_declarator
+		  | pointer direct_declarator
+
+direct_declarator: Identifier
+				 | Punctuator_par_open declarator Punctuator_par_close
+				 | direct_declarator Punctuator_squ_open Punctuator_squ_close
+				 | direct_declarator Punctuator_squ_open constant_EXPR Punctuator_squ_close
+				 | direct_declarator Punctuator_par_open parameter_type_list  Punctuator_par_close
+				 | direct_declarator Punctuator_par_open identifier_list Punctuator_par_close
+				 | direct_declarator Punctuator_par_open Punctuator_par_close
+
+pointer: Operator_mul type_qualifier_list
+	   | Operator_mul
+	   | Operator_mul type_qualifier_list pointer
+	   | Operator_mul pointer
+
+
+type_qualifier_list: type_qualifier
+				   | type_qualifier_list type_qualifier
+
+parameter_type_list: parameter-list
+
+parameter: parameter_declaration
+		 | parameter_list Operator_comma parameter_declaration
+
+parameter_declaration: declaration_specifiers declarator
+					 | declaration_specifiers
+					 | declaration_specifiers abstract_declarator
+
+identifier_list: Identifier
+			   | identifier_list Operator_comma Identifier
+
+type_name: specifier_qualifier_list
+		 | specifier_qualifier_list abstract_declarator
+
+abstract_declaration: pointer
+					| pointer direct_abstract_declarator
+					| direct_abstract_declarator
+
+direct_abstract_declarator: Punctuator_par_open abstract_declarator Punctuator_par_close
+						  | direct_abstract_declarator Punctuator_squ_open constant_EXPR Punctuator_squ_close
+						  | Punctuator_squ_open constant_EXPR Punctuator_squ_close
+						  | direct_abstract_declarator Punctuator_squ_open Punctuator_squ_close
+						  | Punctuator_squ_open Punctuator_squ_close
+						  | direct_abstract_declarator Punctuator_par_open parameter_type_list Punctuator_par_close
+						  | Punctuator_par_open parameter_type_list Punctuator_par_close
+						  | direct_abstract_declarator Punctuator_par_open Punctuator_par_close
+						  | Punctuator_par_open Punctuator_par_close
+
+
+typedef_name: Identifier
+
+initializer: assignment_EXPR
+		   | Punctuator_cur_open initializer_list Punctuator_cur_close
+		   | Punctuator_cur_open initializer_list Operator_comma Punctuator_cur_close
+
+initializer_list: initializer
+				| initializer_list Operator_comma initializer
+
 ROOT: EXPR { std::cerr << "exp" << std::endl; }
+	| declaration { std::cerr << "Its a declaration" << std::endl; }
 %%
 /*
 const Expression *g_root; // Definition of variable (to match declaration earlier)
