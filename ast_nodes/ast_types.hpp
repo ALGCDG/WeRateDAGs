@@ -1,7 +1,7 @@
 #ifndef AST_TYPE
 #define AST_TYPE
 
-class Type{
+class Type : public Node{
 
 };
 

@@ -1,16 +1,20 @@
 #ifndef AST_EXPR
 #define AST_EXPR
 
+#include "ast_node.hpp"
+
 #include <vector>
 #include <string>
 //TODO:
+//!Change relevent private members to protected
 // Identifier  (and constant, string-literal etc)
 // "Type name" as an expression
+
 
 //?
 // Should the decode functions be in the class?
 
-class Expression{
+class Expression : public Node{
 private:
     Type EvalsToType;
 };
