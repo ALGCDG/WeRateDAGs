@@ -130,14 +130,17 @@ extern int yydebug;
     Keyword_continue = 325,
     Keyword_break = 326,
     Keyword_return = 327,
-    Punctuator = 328,
-    Punctuator_eol = 329,
-    Punctuator_par_open = 330,
-    Punctuator_par_close = 331,
-    Punctuator_squ_open = 332,
-    Punctuator_squ_close = 333,
-    Punctuator_cur_open = 334,
-    Punctuator_cur_close = 335
+    Keyword_enum = 328,
+    Keyword_struct = 329,
+    Keyword_typedef = 330,
+    Punctuator = 331,
+    Punctuator_eol = 332,
+    Punctuator_par_open = 333,
+    Punctuator_par_close = 334,
+    Punctuator_squ_open = 335,
+    Punctuator_squ_close = 336,
+    Punctuator_cur_open = 337,
+    Punctuator_cur_close = 338
   };
 #endif
 
@@ -155,7 +158,7 @@ union YYSTYPE
 	float fvalue;
 	long double ldvalue;
 
-#line 159 "basic.tab.hpp" /* yacc.c:1909  */
+#line 162 "basic.tab.hpp" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;

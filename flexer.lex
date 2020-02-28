@@ -36,7 +36,7 @@ Operator [+\-*/%&|^><=!~?:.,#\[\]\(\)\{\}]
             builtin functions: sizeof
             luckily not flexible
             */
-            fprintf(stderr, "its a keyword");
+            fprintf(stderr, "its a keyword/n");
             return Keyword_int;
 }
 
@@ -50,7 +50,7 @@ Operator [+\-*/%&|^><=!~?:.,#\[\]\(\)\{\}]
 "&&" { return Operator_and; }
 "||" { return Operator_or; }
 "!" { return Operator_not; }
-"=" { return Operator_assign; }
+"=" { fprintf(stderr, "its an assignment!/n"); return Operator_assign; }
 "==" { return Operator_equal; }
 "!=" { return Operator_not_equal; }
 ">" { return Operator_greater; }
@@ -93,14 +93,14 @@ Operator [+\-*/%&|^><=!~?:.,#\[\]\(\)\{\}]
 "return" { return Keyword_return; }
 "enum" { return Keyword_enum; }
 "struct" { return Keyword_struct; }
-
+"typedef" { return Keyword_typedef; }
 
 {A}{P}* {
             /*
             Identifier
             variable names, function names, etc...
             */
-            fprintf(stderr, "its an identifier");      
+            fprintf(stderr, "its an identifier\n");      
             yylval.text = new std::string(yytext);
             return Identifier;
 }
@@ -135,7 +135,7 @@ Operator [+\-*/%&|^><=!~?:.,#\[\]\(\)\{\}]
         decimal constant
         */
         fprintf(stderr, "its a decimal constant: %s\n", yytext);
-        yylval.ivalue = std::stoi(yytext);
+        yylval.ivalue = std::stoi(yytext); /* requires c++11 */
 		return Constant_int;
 	}
 
@@ -203,8 +203,8 @@ Operator [+\-*/%&|^><=!~?:.,#\[\]\(\)\{\}]
         [](){}*,:=;...#
         end of line, list elemnt seperators
         */
-        fprintf(stderr, "its a punctuator");
-        return Punctuator;
+        fprintf(stderr, "its a punctuator\n");
+        return Punctuator_eol;
 }
 "(" { return Punctuator_par_open; }
 ")" { return Punctuator_par_close; }
@@ -214,7 +214,7 @@ Operator [+\-*/%&|^><=!~?:.,#\[\]\(\)\{\}]
 "}" { return Punctuator_cur_close; }
 
 .   {
-		fprintf(stderr, "catch all");
+		fprintf(stderr, "catch all: %s\n", yytext);
         /*
         catchall case
         */
