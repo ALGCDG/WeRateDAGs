@@ -4,7 +4,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include <stack>
+#include <deque>
 
 /*
 Need to store:
@@ -14,64 +14,60 @@ Need to store:
         name, type, size
     Procedures
         name, number args, return type, arg types
+    Typedefs
+        name, type
 */
 
-typedef bool data_t;
 
-
-struct var_ident_info{
+struct RecordEntry{
     std::string name;
+    virtual std::string RecordType() = 0;
+};
+
+struct VarEntry : RecordEntry{
+    std::string RecordType();
     int type;
 };
 
-struct arr_ident_info : var_ident_info{
+struct ArrEntry : RecordEntry{
+    std::string RecordType();
+    int type;
     int size;
 };
 
-struct fun_ident_info : var_ident_info{
-    int num_args;
-    std::vector<int> arg_types;
-    /**
-     * ? Record default args?
-     */
+struct FuncEntry : RecordEntry{
+    std::string RecordType();
+    int retType;
+    int numArgs;
+    std::vector<int> argTypes;
 };
 
-union ident_info{
-    var_ident_info var;
-    arr_ident_info arr;
-    fun_ident_info fun;
+struct TypeEntry : RecordEntry{
+    std::string RecordType();
+    int type;
 };
 
-typedef enum {VAR, ARR, FUN} which_symbol;
-//TODO Rename / restructure, a bit messy :(
+typedef std::unordered_map<std::string, RecordEntry*> ScopedSymbolTable;
+typedef std::deque<ScopedSymbolTable> SymbolTable;
+extern SymbolTable _table;
 
-struct ident_data{
-    ident_info info;
-    which_symbol which;
-};
-
-
-extern std::stack<std::unordered_map<std::string, ident_data>> _table;
-// struct function_type_entry{
-//     _ return_type;
-//     int num_args;
-//     std::vector< _ > arg_types;
-// };
-
-// struct ident_type_entry{
-//     _ ident_type;
-// };
 
 //extern std::stack<std::unordered_map<std::string, data_t>> SymbolTable;
+bool IsNamePresent(std::string name);
 
-bool IsTokenPresent(std::string token_value);
+void InsertNameData(std::string name,  RecordEntry * entry);
+void EditNameData(std::string name, RecordEntry * entry);
 
-void InsertToken(std::string name, ident_data ident);
-
-ident_data GetTokenData(std::string name);
+RecordEntry* GetTokenData(std::string name);
 //TODO differentiate between function lookup and variable lookup?
+    //answer: doesn't matter, uses most local scope as type
+    // ie function named in global scope, variable with same name in local scope
+    // -> assumes identifier refers to variable
+    // -> if used as a function f(), throw error!
 
 void new_scope();
-
 void end_scope();
+
+
+
 #endif

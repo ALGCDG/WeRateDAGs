@@ -1,0 +1,19 @@
+identifier
+constant
+string
+expression
+array subscript
+func call
+member access
+member deref access
+unary operator expression
+cast expression
+binary operator expression
+[something for assignment]
+typedef 
+typenode
+    specific node class for each type?
+declaration specifiers [can append to existing node -> no need for descending tree]
+initialisation declarator list
+    individual initialisation declarator exists as an element of the above
+declarators
