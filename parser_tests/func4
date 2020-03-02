@@ -1,0 +1,11 @@
+int f();
+
+int g()
+{
+    return 2;
+}
+
+void h(int x)
+{
+    return x+x;
+}

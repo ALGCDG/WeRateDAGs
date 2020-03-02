@@ -216,12 +216,12 @@ pointer: Operator_mul { std::cerr << "dumb pointer" << std::endl; }
 
 parameter_type_list: parameter_list
 
-parameter_list: parameter_declaration
-		 	  | parameter_list Operator_comma parameter_declaration
+parameter_list: parameter_declaration { std::cerr << "a parameter" << std::endl; }
+		 	  | parameter_list Operator_comma parameter_declaration { std::cerr << "multiple parameters" << std::endl; }
 
-parameter_declaration: declaration_specifiers declarator
-					 | declaration_specifiers
-					 | declaration_specifiers abstract_declarator
+parameter_declaration: declaration_specifiers declarator { std::cerr << "param dec" << std::endl; }
+					 | declaration_specifiers  { std::cerr << "no param name" << std::endl; }
+					 | declaration_specifiers abstract_declarator { std::cerr << "pass by reference" << std::endl; }
 
 identifier_list: Identifier
 			   | identifier_list Operator_comma Identifier
@@ -265,10 +265,10 @@ ROOT: EXPR { std::cerr << "exp" << std::endl; }
 Statements
 */
 
-statement: labeled_statement
+statement: selection_statement 
+         | labeled_statement
          | compound_statement
-         | EXPR_statement
-         | selection_statement
+         | EXPR_statement 
          | iteration_statement
          | jump_statement
 
@@ -289,12 +289,23 @@ statement_list: statement
 EXPR_statement: EXPR Punctuator_eol
                     | Punctuator_eol
 
-selection_statement: Keyword_if Punctuator_par_open EXPR Punctuator_par_close statement
-                   | Keyword_if Punctuator_par_open EXPR Punctuator_par_close statement Keyword_else statement
+selection_statement: Keyword_if Punctuator_par_open EXPR Punctuator_par_close statement Keyword_else statement
+                   | Keyword_if Punctuator_par_open EXPR Punctuator_par_close statement
                    | Keyword_switch Punctuator_par_open EXPR Punctuator_par_close statement
 
+/*
+my attempt to fix dangling else, still causing issue
+selection_statement: M
+                   | U
+
+M: Keyword_if Punctuator_par_open EXPR Punctuator_par_close M Keyword_else M
+ | NON_IF
+
+U: Keyword_if Punctuator_par_open EXPR Punctuator_par_close selection_statement
+ | Keyword_if Punctuator_par_open EXPR Punctuator_par_close M Keyword_else U
+*/
 iteration_statement: Keyword_while Punctuator_par_open EXPR Punctuator_par_close statement
-                   | Keyword_do statement Keyword_while Punctuator_par_open EXPR Punctuator_par_close
+                   | Keyword_do statement Keyword_while Punctuator_par_open EXPR Punctuator_par_close Punctuator_eol
                    | Keyword_for Punctuator_par_open EXPR_statement EXPR_statement EXPR Punctuator_par_close statement
                    | Keyword_for Punctuator_par_open EXPR_statement EXPR_statement Punctuator_par_close statement
 
@@ -302,8 +313,27 @@ jump_statement: Keyword_continue Punctuator_eol
               | Keyword_break Punctuator_eol
               | Keyword_return Punctuator_eol
               | Keyword_return EXPR Punctuator_eol
-
+/*
 ROOT: statement { std::cerr << "Its a valid program" << std::endl; }
+*/
+
+/*
+External definitions
+*/
+translation_unit: external_declaration
+                | translation_unit external_declaration
+
+external_declaration: function_definition
+                    | declaration
+
+function_definition: declarator compound_statement
+                   | declarator declaration_list compound_statement
+                   | declaration_specifiers declarator compound_statement
+                   | declaration_specifiers declaration declaration_list compound_statement
+
+
+ROOT: translation_unit { std::cerr << "Its a valid program" << std::endl; }
+
 %%
 /*
 const Expression *g_root; // Definition of variable (to match declaration earlier)

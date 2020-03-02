@@ -1,0 +1,4 @@
+product = 1;
+for(;;){
+    product *= i;
+}
