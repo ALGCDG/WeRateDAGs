@@ -25,7 +25,8 @@
 */
 
 class Record{
-    std::string Name;
+public:
+    Identifier ID;
 };
 
 class ScopeTableRecord : public Record{
@@ -34,7 +35,8 @@ private:
 };
 
 class FunctionDeclarationRecord : public Record{
-    
+private:
+    ParameterList* Params;
 };
 
 class FunctionDefinitionRecord : public Record{

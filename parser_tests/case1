@@ -1,0 +1,6 @@
+switch(user_input)
+{
+    case "hello": break;
+    case "bye": print("goodbye");
+    default: print("sorry I don't understand");
+}

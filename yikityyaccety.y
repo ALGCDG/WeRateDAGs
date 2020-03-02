@@ -1,7 +1,4 @@
 %code requires{
-  #include "ast.hpp"
-
-  #include <cassert>
 
   extern const Expression *g_root; // A way of getting the AST out
 
@@ -12,14 +9,6 @@
   void yyerror(const char *);
 }
 
-// Represents the value associated with any kind of
-// AST node.
-%union{
-  const Expression *expr;
-  double number;
-  std::string *string;
-}
-
 %token Constant
 %token String
 %token Identifier
@@ -27,24 +16,19 @@
 %token Keyword_void Keyword_char Keyword_short Keyword_int Keyword_long Keyword_float Keyword_double Keyword_signed Keyword_unsigned Keyword_case Keyword_default Keyword_if Keyword_else Keyword_switch Keyword_while Keyword_do Keyword_for Keyword_continue Keyword_break Keyword_return
 %token Punctuator_eol Punctuator_par_open Punctuator_par_close Punctuator_squ_open Punctuator_squ_close Punctuator_cur_open Punctuator_cur_close
 
-%type <expr> EXPR TERM UNARY FACTOR
-%type <number> T_NUMBER
-%type <string> T_VARIABLE T_LOG T_EXP T_SQRT FUNCTION_NAME
-
 %start ROOT
 
 %%
 
-primary_EXPR: identifier      
-                  | Constant
-                  | String
-                  | ( EXPR )
-                ;
+primary_EXPR: identifier { $$ = new identifier($1) }
+                  | Constant { $$ = new constant($1); }
+                  | String { $$ = new string($1); }
+                  | Punctuator_par_open EXPR Punctuator_par_close { $$ = expression($2); }
 
 postfix_EXPR: primary_EXPR
-                  | postfix_EXPR [ EXPR ]
-                  | postfix_EXPR (  )
-                  | postfix_EXPR ( argument_EXPR_list )
+                  | postfix_EXPR Punctuator_squ_open EXPR Punctuator_squ_close { $$ = }
+                  | postfix_EXPR Punctuator_par_open  Punctuator_par_close
+                  | postfix_EXPR Punctuator_par_open argument_EXPR_list Punctuator_par_close
                   | postfix_EXPR Operator_access identifier
                   | postfix_EXPR Operator_deref_access identifier
                   | postfix_EXPR Operator_addadd
@@ -52,39 +36,33 @@ postfix_EXPR: primary_EXPR
                   ;
 
 argument_EXPR_list: assignment_EXPR
-                        | assignment_EXPR_list, assignment_EXPR
-                        ;
+                        | assignment_EXPR_list Operator_comma assignment_EXPR
 
 unary_EXPR: postfix_EXPR
-                | Operator_addadd unary_EXPR
-                | Operator_subsub unary_EXPR
+                | Operator_addadd unary_EXPR { $$ = preincrement($2); }
+                | Operator_subsub unary_EXPR { $$ = predecrement($2); }
                 | unary_operator cast_EXPR
-                | Operator_sizeof unary_EXPR
-                | Operator_sizeof ( type_name )
-                ;
+                | Operator_sizeof unary_EXPR { $$ = size_of($2); }
+                | Operator_sizeof Punctuator_par_open type_name Punctuator_par_close { $$ = size_of($3); }
 
 unary_operator: Operator_and | Operator_mul | Operator_plus | Operator_sub | Operator_bit_not | Operator_not
                 
 
 cast_EXPR: unary_EXPR
-               | ( type_name ) cast_EXPR
-               ;
+               | Punctuator_par_open type_name Punctuator_par_close cast_EXPR { $$ = new cast($4, $2); /* casts $4 to type $2 */}
 
 multiplicative_EXPR: cast_EXPR
-                         | multiplicative_EXPR Operator_mul cast_EXPR
-                         | multiplicative_EXPR Operator_div cast_EXPR
-                         | multiplicative_EXPR Operator_mod cast_EXPR
-                         ;
+                         | multiplicative_EXPR Operator_mul cast_EXPR { $$ = new multiplication($1, $3); }
+                         | multiplicative_EXPR Operator_div cast_EXPR { $$ = new division($1, $3); }
+                         | multiplicative_EXPR Operator_mod cast_EXPR { $$ = new modulo($1, $3); }
 
 additive_EXPR: multiplicative_EXPR
-                   | additive_EXPR Operator_add multiplicative_EXPR
-                   | additive_EXPR Operator_sub multiplicative_EXPR
-                   ;
+                   | additive_EXPR Operator_add multiplicative_EXPR { $$ = new addition($1, $3); }
+                   | additive_EXPR Operator_sub multiplicative_EXPR { $$ = new subtraction($1, $3); }
 
 shift_EXPR: additive_EXPR
-          | shift_EXPR Operator_sl additive_EXPR
-          | shift_EXPR Operator_sr additive_EXPR
-          ;
+          | shift_EXPR Operator_sl additive_EXPR { $$ = new shiftleft($1, $3); }
+          | shift_EXPR Operator_sr additive_EXPR { $$ = new shiftright($1, $3); }
 
 relational_EXPR: shift_EXPR
                | relational_EXPR Operator_less shift_EXPR
@@ -97,8 +75,6 @@ equality_EXPR: relational_EXPR
              | equality_EXPR Operator_equal relational_EXPR
              | equality_EXPR Operator_not_equal relational_EXPR
              ;
-
-/* IM NOT SO SURE ABOUT THESE LOGIC AND BIT GRAMMARS, CHECK!!! */
 
 BIT_AND_EXPR: equality_EXPR
         | BIT_AND_EXPR Operator_bit_and equality_EXPR
@@ -127,7 +103,9 @@ conditional_EXPR: LOGIC_OR_EXPR
 assignment_EXPR: conditional_EXPR
                | unary_EXPR assignment assignment_EXPR // assignments are = *= /= %= += -= <<= >>= &= ^= |=
                 ;
+               ]s
 assignment: Operator_assign | Operator_mul_assign | Operator_div_assign | Operator_mod_assign | Operator_add_assign | Operator_sub_assign | Operator_sl_assign | Operator_sr_assign | Operator_and_assign | Operator_xor_assign | Operator_or_assign
+               
 
 EXPR: assignment_EXPR
     | EXPR Operator_comma assignment_EXPR
@@ -221,13 +199,19 @@ jump_statement: Keyword_continue Punctuator_eol
 translation_unit
 External_declaration 
 
-
-
 FUNC_DEF: declaration_specifiers declarator declaration_list compound_statement
         | declaration_specifiers declarator compound_statement Punctuator_cur_open /* function with no arguments */ Punctuator_cur_close
         | declarator declaration_list compound_statement
         | declarator compound_statement
         ;
 
-
 %%
+
+const Expression *g_root; // Definition of variable (to match declaration earlier)
+
+const Expression *parseAST()
+{
+  g_root=0;
+  yyparse();
+  return g_root;
+}

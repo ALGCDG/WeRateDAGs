@@ -2,8 +2,9 @@
 #define AST_NODE
 
 class Node{
+    void accept(Visitor* AVisitor);
 private:
-    int TODO;
+    
 };
 
 #endif
