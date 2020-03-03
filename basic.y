@@ -72,7 +72,7 @@ argument_EXPR_list: assignment_EXPR { $$ = new ArgExprList($1); }
 unary_EXPR: postfix_EXPR { $$=$1; }
 		  | Operator_addadd unary_EXPR { $$ = new PreInc($2); }
 		  | Operator_subsub unary_EXPR { $$ = new PreDec($2); }
-      | unary_operator cast_EXPR { $$ = new CastExpr($2); }
+      | unary_operator cast_EXPR { $$ = PrefixExpr::DecodeUnaryOp($2); }
       | Operator_sizeof unary_EXPR { $$ = new SizeofExpr($2); }
       | Operator_sizeof Punctuator_par_open type_name Punctuator_par_close  { $$ = new SizeofType($3); } 
 
@@ -128,6 +128,7 @@ conditional_EXPR: LOGIC_OR_EXPR { $$ = $1; }
 assignment_EXPR: conditional_EXPR { $$ = $1; }
                | unary_EXPR assignment assignment_EXPR { $$ = GenericAssignExpr::DecodeAssignOp($1, $2, $3); }
                
+
 assignment: Operator_assign | Operator_mul_assign | Operator_div_assign | Operator_mod_assign | Operator_add_assign | Operator_sub_assign | Operator_sl_assign | Operator_sr_assign | Operator_and_assign | Operator_xor_assign | Operator_or_assign
                
 
