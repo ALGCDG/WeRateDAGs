@@ -10,6 +10,8 @@ class Statement : public Node{
 
 };
 
+class EmptyStatement : public Statement{};
+
 //----------------------------
 
 class Continue : public Statement{};
@@ -17,6 +19,9 @@ class Continue : public Statement{};
 class Break : public Statement{};
 
 class Return : public Statement{
+public:
+    Return();
+    Return(Expression* ToReturn);
 private:
     Type* ReturnType;
     Expression* ReturnExpression;
@@ -31,12 +36,14 @@ private:
 };
 
 class DoWhile : public Statement{
+public:
+    DoWhile(Statement* Body, Expression* Control);
 private:
     Expression* ControlExpression;
     Statement* Body;
 };
 
-class ForWhile : public Statement{
+class For : public Statement{
 private:
     ExpressionStatement* Init, Control;
     Expression* Next;
@@ -74,14 +81,18 @@ private:
 //------------------------------
 
 class StatementList : public Node{
-    void AppendStatement(Statement* Statement);
+public:
+    StatementList(Statement* TerminalStatement);
+    StatementList(StatementList* OtherStatements, Statement* ThisStatement);
 private:
-    std::vector<Statement*> Statements;
+    Statement* Statement;
+    StatementList* RestOfStatements;
 };
 
 //-------------------------------
 
 class CompoundStatement : public Statement{
+public:
 private:
     DeclarationList* Decls;
     StatementList* Statements;

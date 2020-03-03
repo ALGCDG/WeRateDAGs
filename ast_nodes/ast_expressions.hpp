@@ -2,7 +2,7 @@
 #define AST_EXPR
 
 #include "ast_node.hpp"
-
+#include "ast_types.hpp"
 #include <vector>
 #include <string>
 //TODO:
@@ -15,36 +15,50 @@
 // Should the decode functions be in the class?
 
 class Expression : public Node{
+public:
+    Type* EvalsToType;
 private:
-    Type EvalsToType;
 };
 
 //primary expr
+class Identifier : public Expression{
+public:
+    Type* GetType();
+private:
+    std::string* Name;
+};
 
+class StringLiteral : public ???HALP{};//TODO
 //---------------------------------------------------------
 class PostfixExpr : public Expression{
-private:
+public:
+    PostfixExpr(Expression* LHS);
+protected:
     Expression* LHS;
 };
 
 class ArraySubscript : public PostfixExpr{
+public:
+    ArraySubscript(Expression* LHS, Expression* Subscript);
 private:
     Expression* Subscript;
 };
 
 class FuncCall : public PostfixExpr{
+    FuncCall(Expression* LHS);
+    FuncCall(Expression* LHS, ArgExprList* RHS);
 private:
     ArgExprList* Args;
 };
 
 class MemberAccess : public PostfixExpr{
 private:
-    Identifier ID;
+    std::string* ID;
 };
 
 class DerefMemberAccess : public PostfixExpr{
 private:
-    Identifier ID;
+    std::string* ID;
 };
 
 class PostInc : public PostfixExpr{
@@ -57,8 +71,9 @@ class PostDec : public PostfixExpr{
 
 //---------------------------------------------------------
 
-class ArgExprList{
+class ArgExprList : public Node{
 public:
+    ArgExprList(Expression* Arg);
     void AppendArgExpression(Expression* ArgExpr);
 private:
     std::vector<Expression*> Args;
@@ -68,7 +83,7 @@ private:
 
 class PrefixExpr : public Expression{
     //returns correct unary operator node, described below
-    PrefixExpr* DecodeUnaryOperator(std::string* yytext);
+    static PrefixExpr* DecodeUnaryOperator(std::string* yytext);
 private:
     Expression* RHS;
 };
@@ -115,6 +130,8 @@ class SizeofType : public PrefixExpr{
 };
 
 class CastExpr : public PrefixExpr{
+public:
+    CastExpr(Type? , Expression* ExprToBeCast);
 //need type system
 };
 
@@ -214,63 +231,67 @@ private:
 };
 
 //---------------------------------------------------------
-class GenericAssignmentExpression : public Expression{
+
+class GenericAssignExpr : public Expression{
+    static GenericAssignExpr* DecodeAssignOp(Expression* LHS, std::string* yytext, Expression* RHS);
+
 //Not to be used, dummy stand in, supplies decoder
 //Value and type of assignment expression is that of the right side argument
 public:
     //possibly move this out of this class
-    GenericAssignmentExpression* DecodeAssignmentOperator(std::string* yytext);
 private:
     Expression* LHS, RHS;
 };
 
-class AssignmentExpression : public GenericAssignmentExpression{
+class AssignmentExpression : public GenericAssignExpr{
 
 };
 
-class MulAssignment : public GenericAssignmentExpression{
+class MulAssignment : public GenericAssignExpr{
 
 };
 
-class DivAssignment : public GenericAssignmentExpression{
+class DivAssignment : public GenericAssignExpr{
 
 };
 
-class ModAssignment : public GenericAssignmentExpression{
+class ModAssignment : public GenericAssignExpr{
 
 };
 
-class AddAssignment : public GenericAssignmentExpression{
+class AddAssignment : public GenericAssignExpr{
 
 };
 
-class SubAssignment : public GenericAssignmentExpression{
+class SubAssignment : public GenericAssignExpr{
 
 };
 
-class ShiftLeftAssignment : public GenericAssignmentExpression{
+class ShiftLeftAssignment : public GenericAssignExpr{
 
 };
 
-class ShiftRightAssignment : public GenericAssignmentExpression{
+class ShiftRightAssignment : public GenericAssignExpr{
 
 };
 
-class BitwiseANDAssignment : public GenericAssignmentExpression{
+class BitwiseANDAssignment : public GenericAssignExpr{
 
 };
 
-class BitwiseNOTAssignment : public GenericAssignmentExpression{
+class BitwiseNOTAssignment : public GenericAssignExpr{
 
 };
 
-class BitwiseORAssignment : public GenericAssignmentExpression{
+class BitwiseORAssignment : public GenericAssignExpr{
 
 };
 
 //---------------------------------------------------------
 
 class ConstantExpression : public Expression{
+public:
+    ConstantExpression(Expression* Expr);
 private:
     Expression* ConstantSubtree;
 };
@@ -279,6 +300,8 @@ private:
 // expression ::= assignment-expression | expression "," assignment-expression
 
 class CommaSepExpression : public Expression{
+public:
+    CommaSepExpression(Expression* LHS, Expression* RHS);
 private:
     Expression* LHS, RHS;
 };

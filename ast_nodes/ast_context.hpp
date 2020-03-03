@@ -7,7 +7,9 @@
 #ifndef AST_CONTEXT
 #define AST_CONTEXT
 
-#include "_ast_types.hpp"
+#include "ast_node.hpp"
+#include <string>
+#include <vector>
 
 /*  Don't need as much of a robust class hierarchy
     Need to contain:
@@ -25,45 +27,40 @@
 */
 
 class Record{
-public:
-    Identifier ID;
+
 };
 
 class ScopeTableRecord : public Record{
+public:
+    ScopeTableRecord(_Table* SubTable);
 private:
     _Table* ScopedTablePtr;
 };
 
-class FunctionDeclarationRecord : public Record{
+class NodeRecord : public Record{
+public:
+    NodeRecord(Node* ASTNode);
+    std::string GetID();
 private:
-    ParameterList* Params;
-};
-
-class FunctionDefinitionRecord : public Record{
-
-};
-
-class VariableDeclarationRecord : public Record{
-
-};
-
-class TypeDeclarationRecord : public Record{
-
+    Node* ASTNode;
 };
 
 class _Table{
+public:
     //provide functions for accessing the table
-private:
     std::vector<Record*> Entries;
 };
 
 class Context{
+public:
     //provide functions for using accessed data
+    void IncreaseScope();
+    void DecreaseScope();
+    void AddDeclaration(Node* ASTNode);
+    Node* FindDeclaration(Node* UsedNode);
 private:
-    _Table ContextTable;
-}
-
-
+    static _Table ContextTable;
+};
 
 
 #endif

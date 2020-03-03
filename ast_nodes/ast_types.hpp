@@ -1,6 +1,8 @@
 #ifndef AST_TYPE
 #define AST_TYPE
 
+#include "ast_node.hpp"
+
 class Type : public Node{
 
 };
@@ -28,7 +30,8 @@ class Float : public Type{
 };
 
 class UserDefinedType : public Type{
-
+private:
+    Type* DefinedToBe;
 };
 
 //---------------------------
@@ -50,6 +53,9 @@ class IncompleteArrayType : public Type{
 
 class ArrayType : public Type{
 //size specified
+private:
+    Type* ElementType;
+    
 };
 
 //---------------------------
@@ -57,12 +63,15 @@ class ArrayType : public Type{
 
 class FunctionType : public Type{
 //return type
+//
 };
 
 //---------------------------
 
 class PointerType : public Type{
 //pointer to a type
+private:
+    Type* TypePointedTo;
 };
 
 
