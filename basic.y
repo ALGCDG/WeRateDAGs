@@ -266,7 +266,7 @@ Statements
 statement: selection_statement { $$ = $1; }
          | labeled_statement { $$ = $1; }
          | compound_statement { $$ = $1; }
-         | EXPR_statement { $$ = $1; }
+         | EXPR_statement { $$ = new ExpressionStatement($1); }
          | iteration_statement { $$ = $1; }
          | jump_statement { $$ = $1; }
 
