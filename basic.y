@@ -2,6 +2,7 @@
 
   #include<iostream>
   #include<string>
+  #include "ast/altdec.hpp"
  /* extern const Expression *g_root; // A way of getting the AST out
 */
   //! This is to fix problems when generating C++
