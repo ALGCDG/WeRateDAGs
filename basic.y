@@ -142,23 +142,31 @@ DECLARATIONS
 */
 
 
-declaration: declaration_specifiers init_declarator_list Punctuator_eol { std::cerr << "decspec list ;" << std::endl; }
-           | declaration_specifiers Punctuator_eol { std::cerr << "decspec ;" << std::endl; }
+declaration: declaration_specifiers init_declarator_list Punctuator_eol { $$ = new declaration($1, $2); }
+           | declaration_specifiers Punctuator_eol { $$ = new declaration($1); }
 
 declaration_specifiers: storage_class_specifier { std::cerr << "stor" << std::endl; }
                       | storage_class_specifier declaration_specifiers { std::cerr << "stor decspec" << std::endl; }
-                      | type_specifier  { std::cerr << "typspec list" << std::endl; }
-                      | type_specifier declaration_specifiers  { std::cerr << "typspec decspec" << std::endl; }
+                      | type_specifier { $$ = new declaration_specifiers($1); }
+                      | type_specifier declaration_specifiers { $$ = new declaration_specifiers($1, $2); }
 
 storage_class_specifier: Keyword_typedef { std::cerr << "typedef" << std::endl; }
 
-init_declarator_list: init_declarator  { std::cerr << "initdec" << std::endl; }
-                    | init_declarator_list Operator_comma init_declarator { std::cerr << "initdeclist , initdec " << std::endl; }
+init_declarator_list: init_declarator { $$ = new init_declaration_list($1); }
+                    | init_declarator_list Operator_comma init_declarator { $$ = new init_declaration_list($3, $1); }
 
-init_declarator: declarator { std::cerr << "dec" << std::endl; }
-               | declarator Operator_assign initializer { std::cerr << "dec = init" << std::endl; }
+init_declarator: declarator { $$ = new init_declarator($1); }
+               | declarator Operator_assign initializer { $$ = new init_declarator($1, $3); }
 
-type_specifier: Keyword_void | Keyword_char | Keyword_short | Keyword_int | Keyword_long | Keyword_float | Keyword_double | Keyword_signed | Keyword_unsigned
+type_specifier: Keyword_void { $$ = new type_specifier($1); }
+              | Keyword_char { $$ = new type_specifier($1); }
+              | Keyword_short { $$ = new type_specifier($1); }
+              | Keyword_int { $$ = new type_specifier($1); }
+              | Keyword_long { $$ = new type_specifier($1); }
+              | Keyword_float { $$ = new type_specifier($1); }
+              | Keyword_double { $$ = new type_specifier($1); }
+              | Keyword_signed { $$ = new type_specifier($1); }
+              | Keyword_unsigned{ $$ = new type_specifier($1); }
 /*              | struct_specifier { std::cerr << "struct" << std::endl; }
               | enum_specifier { std::cerr << "enum" << std::endl; }
               | typedef_name { std::cerr << "typedef type" << std::endl; }
@@ -197,59 +205,59 @@ enumerator: ENUM_CONST
 
 ENUM_CONST: Identifier
 */
-declarator: direct_declarator { std::cerr << "direct dec" << std::endl; }
-		  | pointer direct_declarator { std::cerr << "point direct dec" << std::endl; }
+declarator: direct_declarator { $$ = new declarator($1); }
+		  | pointer direct_declarator { $$ = new declarator($2, $1); }
 
 
-direct_declarator: Identifier
-				 | Punctuator_par_open declarator Punctuator_par_close
-				 | direct_declarator Punctuator_squ_open Punctuator_squ_close
-				 | direct_declarator Punctuator_squ_open constant_EXPR Punctuator_squ_close
-				 | direct_declarator Punctuator_par_open parameter_type_list  Punctuator_par_close
-				 | direct_declarator Punctuator_par_open identifier_list Punctuator_par_close
-				 | direct_declarator Punctuator_par_open Punctuator_par_close
+direct_declarator: Identifier { $$ = new direct_declarator($1); }
+				 | Punctuator_par_open declarator Punctuator_par_close  { $$ = new direct_declarator(NULL, NULL, NULL, $2); }
+				 | direct_declarator Punctuator_squ_open Punctuator_squ_close  { $$ = new direct_declarator(NULL, $1, new unspecified_array_length()); }
+				 | direct_declarator Punctuator_squ_open constant_EXPR Punctuator_squ_close  { $$ = new direct_declarator(NULL, $1, $3); }
+				 | direct_declarator Punctuator_par_open parameter_type_list  Punctuator_par_close  { $$ = new direct_declarator(NULL, $1, NULL, $3); }
+				 | direct_declarator Punctuator_par_open identifier_list Punctuator_par_close { std::cerr << "still not sure what this does" << std::endl; }
+				 | direct_declarator Punctuator_par_open Punctuator_par_close { std::cerr << "still not sure what this does" << std::endl; }
 
-pointer: Operator_mul { std::cerr << "dumb pointer" << std::endl; }
-	   | Operator_mul pointer { std::cerr << "pointer" << std::endl; }
+pointer: Operator_mul { $$ = new pointer(); }
+	   | Operator_mul pointer { $$ = new pointer($2); }
 
 parameter_type_list: parameter_list
 
-parameter_list: parameter_declaration { std::cerr << "a parameter" << std::endl; }
-		 	  | parameter_list Operator_comma parameter_declaration { std::cerr << "multiple parameters" << std::endl; }
+parameter_list: parameter_declaration { $$ = new parameter_list($1); }
+		 	  | parameter_list Operator_comma parameter_declaration { $$ = new parameter_list($1, $3) }
 
-parameter_declaration: declaration_specifiers declarator { std::cerr << "param dec" << std::endl; }
-					 | declaration_specifiers  { std::cerr << "no param name" << std::endl; }
-					 | declaration_specifiers abstract_declarator { std::cerr << "pass by reference" << std::endl; }
+parameter_declaration: declaration_specifiers declarator { $$ = new parameter_declaration($1, $2); }
+					 | declaration_specifiers  { $$ = new parameter_declaration($1); }
+					 | declaration_specifiers abstract_declarator { $$ = new parameter_declaration($1, NULL, $2); }
 
 identifier_list: Identifier
 			   | identifier_list Operator_comma Identifier
 
-type_name: specifier_list
-		 | specifier_list abstract_declarator
+type_name: specifier_list { $$ = new type_name($1); }
+		 | specifier_list abstract_declarator { $$ = new type_name($1, $2); }
 
-abstract_declarator: pointer
-					| pointer direct_abstract_declarator
-					| direct_abstract_declarator
+abstract_declarator: pointer { $$ = new abstract_declarator(NULL, $1); }
+					| pointer direct_abstract_declarator { $$ = new abstract_declarator($2, $1); }
+					| direct_abstract_declarator { $$ = new abstract_declarator($1); }
 
-direct_abstract_declarator: Punctuator_par_open abstract_declarator Punctuator_par_close
-						  | direct_abstract_declarator Punctuator_squ_open constant_EXPR Punctuator_squ_close
-						  | Punctuator_squ_open constant_EXPR Punctuator_squ_close
-						  | direct_abstract_declarator Punctuator_squ_open Punctuator_squ_close
-						  | Punctuator_squ_open Punctuator_squ_close
-						  | direct_abstract_declarator Punctuator_par_open parameter_type_list Punctuator_par_close
-						  | Punctuator_par_open parameter_type_list Punctuator_par_close
-						  | direct_abstract_declarator Punctuator_par_open Punctuator_par_close
-						  | Punctuator_par_open Punctuator_par_close
+direct_abstract_declarator: Punctuator_par_open abstract_declarator Punctuator_par_close { $$ = new direct_abstract_declarator(NULL, $2); }
+						  | direct_abstract_declarator Punctuator_squ_open constant_EXPR Punctuator_squ_close { $$ = new direct_abstract_declarator($1, NULL, $3); }
+						  | Punctuator_squ_open constant_EXPR Punctuator_squ_close { $$ = new direct_abstract_declarator(NULL, NULL, $2); }
+						  | direct_abstract_declarator Punctuator_squ_open Punctuator_squ_close { $$ = new direct_abstract_declarator($1, NULL, new unspecified_array_length()); }
+						  | Punctuator_squ_open Punctuator_squ_close { $$ = new direct_abstract_declarator(NULL, NULL, new unspecified_array_length()); }
+						  | direct_abstract_declarator Punctuator_par_open parameter_type_list Punctuator_par_close { $$ = new direct_abstract_declarator($1, NULL, NULL, $3); }
+						  | Punctuator_par_open parameter_type_list Punctuator_par_close { $$ = new direct_abstract_declarator(NULL, NULL, NULL, $2); }
+						  | direct_abstract_declarator Punctuator_par_open Punctuator_par_close { $$ = new direct_abstract_declarator($1, NULL, NULL, new empty_parameter_list()); }
+						  | Punctuator_par_open Punctuator_par_close { $$ = new direct_abstract_declarator(NULL, NULL, NULL, new empty_parameter_list()); }
 
 /*
 typedef_name: Identifier  { std::cerr << "typedef" << std::endl; }
 */
-initializer: assignment_EXPR { std::cerr << "assigning an initialiser" << std::endl; }
-		   | Punctuator_cur_open initializer_list Punctuator_cur_close  { std::cerr << "{init}" << std::endl; }
-		   | Punctuator_cur_open initializer_list Operator_comma Punctuator_cur_close { std::cerr << "{init,}" << std::endl; }
+initializer: assignment_EXPR { $$ = new initializer($1); }
+		   | Punctuator_cur_open initializer_list Punctuator_cur_close  { $$ = new initializer(NULL, $2); }
+		   | Punctuator_cur_open initializer_list Operator_comma Punctuator_cur_close { $$ = new initializer(NULL, $2); }
 
-initializer_list: initializer  { std::cerr << "iniz" << std::endl; }
-				| initializer_list Operator_comma initializer { std::cerr << "iniz, iniz" << std::endl; }
+initializer_list: initializer  { $$ = new initializer_list($1); }
+				| initializer_list Operator_comma initializer { $$ = new initializer_list($3, $1); }
 
 
 
