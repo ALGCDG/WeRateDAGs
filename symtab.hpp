@@ -29,11 +29,12 @@ struct RecordEntry{
      * {
      *  a a;
      * }
-    unsigned int insert_order;
-    bool TypeOrNot;
+     */
+    unsigned int insert_order;//possibly?
+    char TypeOrNot;
 };
 
-typedef std::unordered_map<std::string, RecordEntry*> ScopedSymbolTable;
+typedef std::unordered_map<std::string, RecordEntry> ScopedSymbolTable;
 typedef std::deque<ScopedSymbolTable> SymbolTable;
 extern SymbolTable _table;
 
@@ -50,3 +51,4 @@ namespace symbTab{
 
 
 #endif
+
