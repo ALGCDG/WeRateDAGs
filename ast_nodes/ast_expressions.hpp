@@ -2,7 +2,7 @@
 #define AST_EXPR
 
 #include "ast_node.hpp"
-
+#include "ast_types.hpp"
 #include <vector>
 #include <string>
 //TODO:
@@ -15,50 +15,71 @@
 // Should the decode functions be in the class?
 
 class Expression : public Node{
+public:
+    Type* EvalsToType;
 private:
-    Type EvalsToType;
 };
 
 //primary expr
+class Identifier : public Expression{
+public:
+    Type* GetType();
+private:
+    std::string* Name;
+};
 
+class StringLiteral : public ???HALP{};//TODO
 //---------------------------------------------------------
 class PostfixExpr : public Expression{
-private:
+public:
+    PostfixExpr(Expression* _LHS) : LHS(_LHS){}
+protected:
     Expression* LHS;
 };
 
 class ArraySubscript : public PostfixExpr{
+public:
+    ArraySubscript(Expression* _LHS, Expression* _Subscript) : PostfixExpr(_LHS), Subscript(_Subscript){}
 private:
     Expression* Subscript;
 };
 
 class FuncCall : public PostfixExpr{
+    FuncCall(Expression* _LHS) : PostfixExpr(_LHS) {}
+    FuncCall(Expression* _LHS, ArgExprList* RHS) : PostfixExpr(_LHS), Args(RHS){}
 private:
     ArgExprList* Args;
 };
 
 class MemberAccess : public PostfixExpr{
+public:
+    MemberAccess(Expression* _LHS, Identifier* _ID) : PostfixExpr(_LHS), ID(_ID){}
 private:
-    Identifier ID;
+    Identifier* ID;
 };
 
 class DerefMemberAccess : public PostfixExpr{
+public:
+    DerefMemberAccess(Expression* _LHS, Identifier* _ID) : PostfixExpr(_LHS), ID(_ID){}
 private:
-    Identifier ID;
+    Identifier* ID;
 };
 
 class PostInc : public PostfixExpr{
-
+public:
+    using PostfixExpr::PostfixExpr;
 };
 
 class PostDec : public PostfixExpr{
-
+public:
+    using PostfixExpr::PostfixExpr;
 };
 
 //---------------------------------------------------------
 
-class ArgExprList{
+class ArgExprList : public Node{
 public:
+    ArgExprList(Expression* Arg) : Args{Arg}{}
     void AppendArgExpression(Expression* ArgExpr);
 private:
     std::vector<Expression*> Args;
@@ -67,144 +88,181 @@ private:
 //---------------------------------------------------------
 
 class PrefixExpr : public Expression{
+public:
+    PrefixExpr(Expression* _RHS) : RHS(_RHS){}
     //returns correct unary operator node, described below
-    PrefixExpr* DecodeUnaryOperator(std::string* yytext);
+    static PrefixExpr* DecodeUnaryOp(std::string* yytext, Expression* _RHS);
 private:
     Expression* RHS;
 };
 
 class UnaryAddressOperator : public PrefixExpr{
-
+public:
+    using PrefixExpr::PrefixExpr;
 };
 
 class UnaryDerefOperator : public PrefixExpr{
-
+public:
+    using PrefixExpr::PrefixExpr;
 };
 
 class UnaryPlusOperator : public PrefixExpr{
-
+public:
+    using PrefixExpr::PrefixExpr;
 };
 
 class UnaryNegOperator : public PrefixExpr{
-
+public:
+    using PrefixExpr::PrefixExpr;
 };
 
 class UnaryBitwiseNotOperator : public PrefixExpr{
-
+public:
+    using PrefixExpr::PrefixExpr;
 };
 
 class UnaryLogicalNotOperator : public PrefixExpr{
-
+public:
+    using PrefixExpr::PrefixExpr;
 };
 
 //The rest of the prefix types:
 class PreInc : public PrefixExpr{
-
+public:
+    using PrefixExpr::PrefixExpr;
 };
 
 class PreDec : public PrefixExpr{
-
+public:
+    using PrefixExpr::PrefixExpr;
 };
 
 class SizeofExpr : public PrefixExpr{
-
+public:
+    using PrefixExpr::PrefixExpr;
 };
 
 class SizeofType : public PrefixExpr{
-//need type system
+//TODO -> Needs type system
 };
 
 class CastExpr : public PrefixExpr{
-//need type system
+public:
+    CastExpr(Type? , Expression* ExprToBeCast);
+//TODO -> Needs type system
 };
 
 //---------------------------------------------------------
 
 class BinaryOpExpression : public Expression{
+public:
+    BinaryOpExpression(Expression* _LHS, Expression* _RHS) : LHS(_LHS), RHS(_RHS){}
 private:
     Expression* LHS, RHS;  
 };
 
 class Multiply : public BinaryOpExpression{
-
+public:
+    using BinaryOpExpression::BinaryOpExpression;
 };
 
 class Divide : public BinaryOpExpression{
-
+public:
+    using BinaryOpExpression::BinaryOpExpression;
 };
 
 class Modulo : public BinaryOpExpression{
-
+public:
+    using BinaryOpExpression::BinaryOpExpression;
 };
 
 class Add : public BinaryOpExpression{
-
+public:
+    using BinaryOpExpression::BinaryOpExpression;
 };
 
 class Sub : public BinaryOpExpression{
-
+public:
+    using BinaryOpExpression::BinaryOpExpression;
 };
 
 class ShiftLeft : public BinaryOpExpression{
-
+public:
+    using BinaryOpExpression::BinaryOpExpression;
 };
 
 class ShiftRight : public BinaryOpExpression{
-
+public:
+    using BinaryOpExpression::BinaryOpExpression;
 };
 
 //------------
 class LogicalBinaryExpression : public BinaryOpExpression{
+public:
+    LogicalBinaryExpression(Expression* _LHS, Expression* _RHS) : BinaryOpExpression(_LHS, _RHS), EvalsToType /*TODO set to int */ {}
 //Always evaluates to int
 };
 
 class LessThan : public LogicalBinaryExpression{
-
+public:
+    using LogicalBinaryExpression::LogicalBinaryExpression;
 };
 
 class GreaterThan : public LogicalBinaryExpression{
-
+public:
+    using LogicalBinaryExpression::LogicalBinaryExpression;
 };
 
 class LessThanOrEqual : public LogicalBinaryExpression{
-
+public:
+    using LogicalBinaryExpression::LogicalBinaryExpression;
 };
 
 class GreaterThanOrEqual : public LogicalBinaryExpression{
-
+public:
+    using LogicalBinaryExpression::LogicalBinaryExpression;
 };
 
 class EqualTo : public LogicalBinaryExpression{
-
+public:
+    using LogicalBinaryExpression::LogicalBinaryExpression;
 };
 
 class NotEqualTo : public LogicalBinaryExpression{
-
+public:
+    using LogicalBinaryExpression::LogicalBinaryExpression;
 };
 
 class LogicalAND : public LogicalBinaryExpression{
-
+public:
+    using LogicalBinaryExpression::LogicalBinaryExpression;
 };
 
 class LogicalOR : public LogicalBinaryExpression{
-
+public:
+    using LogicalBinaryExpression::LogicalBinaryExpression;
 };
 
 //------------
 class BitwiseBinaryExpression : public BinaryOpExpression{
 //type depends on input
+public:
+    using BinaryOpExpression::BinaryOpExpression;
 };
 
 class BitwiseAND : public BitwiseBinaryExpression{
-
+public:
+    using BinaryOpExpression::BinaryOpExpression;
 };
 
 class BitwiseOR : public BitwiseBinaryExpression{
-
+public:
+    using BinaryOpExpression::BinaryOpExpression;
 };
 
 class BitwiseXOR : public BitwiseBinaryExpression{
-
+public:
+    using BinaryOpExpression::BinaryOpExpression;
 };
 //---------------------------------------------------------
 
@@ -214,63 +272,79 @@ private:
 };
 
 //---------------------------------------------------------
-class GenericAssignmentExpression : public Expression{
+
+class GenericAssignExpr : public Expression{
+public:
+    GenericAssignExpr(Expression* _LHS, Expression* _RHS) : LHS(_LHS), RHS(_RHS){}
+    static GenericAssignExpr* DecodeAssignOp(Expression* LHS, std::string* yytext, Expression* RHS);
+
 //Not to be used, dummy stand in, supplies decoder
 //Value and type of assignment expression is that of the right side argument
-public:
     //possibly move this out of this class
-    GenericAssignmentExpression* DecodeAssignmentOperator(std::string* yytext);
 private:
     Expression* LHS, RHS;
 };
 
-class AssignmentExpression : public GenericAssignmentExpression{
-
+class AssignmentExpression : public GenericAssignExpr{
+public:
+    using GenericAssignExpr::GenericAssignExpr;
 };
 
-class MulAssignment : public GenericAssignmentExpression{
-
+class MulAssignment : public GenericAssignExpr{
+public:
+    using GenericAssignExpr::GenericAssignExpr;
 };
 
-class DivAssignment : public GenericAssignmentExpression{
-
+class DivAssignment : public GenericAssignExpr{
+public:
+    using GenericAssignExpr::GenericAssignExpr;
 };
 
-class ModAssignment : public GenericAssignmentExpression{
-
+class ModAssignment : public GenericAssignExpr{
+public:
+    using GenericAssignExpr::GenericAssignExpr;
 };
 
-class AddAssignment : public GenericAssignmentExpression{
-
+class AddAssignment : public GenericAssignExpr{
+public:
+    using GenericAssignExpr::GenericAssignExpr;
 };
 
-class SubAssignment : public GenericAssignmentExpression{
-
+class SubAssignment : public GenericAssignExpr{
+public:
+    using GenericAssignExpr::GenericAssignExpr;
 };
 
-class ShiftLeftAssignment : public GenericAssignmentExpression{
-
+class ShiftLeftAssignment : public GenericAssignExpr{
+public:
+    using GenericAssignExpr::GenericAssignExpr;
 };
 
-class ShiftRightAssignment : public GenericAssignmentExpression{
-
+class ShiftRightAssignment : public GenericAssignExpr{
+public:
+    using GenericAssignExpr::GenericAssignExpr;
 };
 
-class BitwiseANDAssignment : public GenericAssignmentExpression{
-
+class BitwiseANDAssignment : public GenericAssignExpr{
+public:
+    using GenericAssignExpr::GenericAssignExpr;
 };
 
-class BitwiseNOTAssignment : public GenericAssignmentExpression{
-
+class BitwiseXORAssignment : public GenericAssignExpr{
+public:
+    using GenericAssignExpr::GenericAssignExpr;
 };
 
-class BitwiseORAssignment : public GenericAssignmentExpression{
-
+class BitwiseORAssignment : public GenericAssignExpr{
+public:
+    using GenericAssignExpr::GenericAssignExpr;
 };
 
 //---------------------------------------------------------
 
 class ConstantExpression : public Expression{
+public:
+    ConstantExpression(Expression* Expr);
 private:
     Expression* ConstantSubtree;
 };
@@ -279,6 +353,8 @@ private:
 // expression ::= assignment-expression | expression "," assignment-expression
 
 class CommaSepExpression : public Expression{
+public:
+    CommaSepExpression(Expression* _LHS, Expression* _RHS) : RHS(_RHS), LHS(_LHS){}
 private:
     Expression* LHS, RHS;
 };
