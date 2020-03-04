@@ -60,6 +60,7 @@ public:
     void AddDeclarationNode(std::string _ID, Node* _node); //and definition? for functions?
     void NewScope();
     void PopScope();
+    bool IdentifierIsGlobal(std::string _ID); // not defined yet
     static ContextTable* Instance();
 private:
     std::deque<LocalTable> table_data;

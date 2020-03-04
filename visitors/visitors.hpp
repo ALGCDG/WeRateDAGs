@@ -4,6 +4,7 @@
 #include "ast_expressions.hpp"
 #include "ast_statements.hpp"
 #include "ast_externaldefs.hpp"
+
 class Visitor{
 public:
     //they don't all want to be pure virtual
@@ -85,10 +86,6 @@ public:
     virtual void visit(ExternalDeclaration*) = 0;
     
     //Declarations
-
-
-
-
 
 }
 
