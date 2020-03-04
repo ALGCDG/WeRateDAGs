@@ -1,5 +1,13 @@
-typedef int a;
-int main(){
-    a a = 1;
-    return 0;
+int f(){
+    int b = 1;
+    void g(){
+        b+=1;
+    }
+    g();
+    return b;
+}
+
+int main()
+{
+    return f();
 }

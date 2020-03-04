@@ -23,9 +23,18 @@ private:
 //primary expr
 class Identifier : public Expression{
 public:
-    Type* GetType();
-private:
-    std::string* Name;
+    std::string Name;
+};
+
+class Constant : public Expression{
+public:
+    union { 
+        int int_t; 
+        char char_t;
+        double dbl_t;
+        float flt_t;
+        long long_t;
+    };
 };
 
 class StringLiteral : public ???HALP{};//TODO
@@ -33,7 +42,6 @@ class StringLiteral : public ???HALP{};//TODO
 class PostfixExpr : public Expression{
 public:
     PostfixExpr(Expression* _LHS) : LHS(_LHS){}
-protected:
     Expression* LHS;
 };
 
@@ -45,10 +53,11 @@ private:
 };
 
 class FuncCall : public PostfixExpr{
+public:
     FuncCall(Expression* _LHS) : PostfixExpr(_LHS) {}
     FuncCall(Expression* _LHS, ArgExprList* RHS) : PostfixExpr(_LHS), Args(RHS){}
-private:
     ArgExprList* Args;
+
 };
 
 class MemberAccess : public PostfixExpr{
@@ -81,7 +90,7 @@ class ArgExprList : public Node{
 public:
     ArgExprList(Expression* Arg) : Args{Arg}{}
     void AppendArgExpression(Expression* ArgExpr);
-private:
+    //in the grammar, expression* can be assignment expression
     std::vector<Expression*> Args;
 };
 
@@ -157,8 +166,7 @@ public:
 class BinaryOpExpression : public Expression{
 public:
     BinaryOpExpression(Expression* _LHS, Expression* _RHS) : LHS(_LHS), RHS(_RHS){}
-private:
-    Expression* LHS, RHS;  
+    Expression *LHS, *RHS;  
 };
 
 class Multiply : public BinaryOpExpression{
@@ -281,8 +289,7 @@ public:
 //Not to be used, dummy stand in, supplies decoder
 //Value and type of assignment expression is that of the right side argument
     //possibly move this out of this class
-private:
-    Expression* LHS, RHS;
+    Expression* LHS, *RHS;
 };
 
 class AssignmentExpression : public GenericAssignExpr{
