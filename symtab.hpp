@@ -30,7 +30,7 @@ struct RecordEntry{
      *  a a;
      * }
      */
-    unsigned int insert_order;//possibly?
+    // unsigned int insert_order;//possibly?
     char TypeOrNot;
 };
 

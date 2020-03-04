@@ -10,6 +10,9 @@
 #include "ast_node.hpp"
 #include <string>
 #include <vector>
+#include <unordered_map>
+#include <deque>
+#include <string>
 
 /*  Don't need as much of a robust class hierarchy
     Need to contain:
@@ -26,40 +29,41 @@
 
 */
 
-class Record{
+// class Record{
+// //is this needed? perhaps only noderecord needed
+// };
 
-};
+// class ScopeTableRecord : public Record{
+// public:
+//     ScopeTableRecord(_Table* SubTable);
+// private:
+//     _Table* ScopedTablePtr;
+// };
 
-class ScopeTableRecord : public Record{
+//possibly specialised records for func def, array def?
+// class NodeRecord : public Record{
+// public:
+//     // NodeRecord(Node* ASTNode);
+//     NodeRecord(Node* _node) : ASTNode(_node){}
+//     Node* GetNode(std::string _ID);
+// private:
+//     Node* ASTNode;
+// };
+
+typedef std::unordered_map<std::string, Node*> LocalTable;
+
+//maps name directly to node
+class ContextTable{
 public:
-    ScopeTableRecord(_Table* SubTable);
+    ContextTable() : table_data(){}
+    Node* GetObjectDeclaration(std::string _ID); //definition?
+    void AddDeclarationNode(std::string _ID, Node* _node); //and definition? for functions?
+    void NewScope();
+    void PopScope();
+    static ContextTable* Instance();
 private:
-    _Table* ScopedTablePtr;
-};
-
-class NodeRecord : public Record{
-public:
-    NodeRecord(Node* ASTNode);
-    std::string GetID();
-private:
-    Node* ASTNode;
-};
-
-class _Table{
-public:
-    //provide functions for accessing the table
-    std::vector<Record*> Entries;
-};
-
-class Context{
-public:
-    //provide functions for using accessed data
-    void IncreaseScope();
-    void DecreaseScope();
-    void AddDeclaration(Node* ASTNode);
-    Node* FindDeclaration(Node* UsedNode);
-private:
-    static _Table ContextTable;
+    std::deque<LocalTable> table_data;
+    static ContextTable* table_instance;
 };
 
 
