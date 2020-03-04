@@ -24,8 +24,8 @@ public:
     virtual void visit(UnaryDerefOperator*) = 0;
     virtual void visit(UnaryPlusOperator*) = 0;
     virtual void visit(UnaryNegOperator*) = 0;
-    virtual void visit(UnaryBitwiseNotOperator) = 0;
-    virtual void visit(UnaryLogicalNotOperator) = 0;
+    virtual void visit(UnaryBitwiseNotOperator*) = 0;
+    virtual void visit(UnaryLogicalNotOperator*) = 0;
     virtual void visit(PreInc*) = 0;
     virtual void visit(PreDec*) = 0;
     virtual void visit(SizeofExpr*) = 0;
