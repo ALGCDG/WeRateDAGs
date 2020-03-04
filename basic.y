@@ -43,12 +43,9 @@
 EXPRESSIONS
 */
 
-primary_EXPR: Identifier { std::cerr << "IDENTIFIER" << std::endl; // $$ = new identifier($1); 
-}
-                 | Constant { std::cerr << "CONSTANT" << std::endl; // $$ = new constant($1); 
-				 }
-                  | String { std::cerr << "STRING" << std::endl; // $$ = new string($1); 
-				  }
+primary_EXPR: Identifier { std::cerr << "IDENTIFIER" << std::endl; // $$ = new identifier($1); }
+                 | Constant { std::cerr << "CONSTANT" << std::endl; // $$ = new constant($1);  }
+                  | String { std::cerr << "STRING" << std::endl; // $$ = new string($1);  }
               | Punctuator_par_open EXPR Punctuator_par_close { std::cout << "(x)" << std::endl; }
 
 
@@ -59,108 +56,117 @@ Constant: Constant_int {}
 		| Constant_long_double {}
 
 
-postfix_EXPR: primary_EXPR { std::cerr << "prim" << std::endl; }
-                  | postfix_EXPR Punctuator_squ_open EXPR Punctuator_squ_close { std::cerr << "x[y]" << std::endl; }
-                  | postfix_EXPR Punctuator_par_open  Punctuator_par_close  { std::cerr << "x(y)" << std::endl; }
-                  | postfix_EXPR Punctuator_par_open argument_EXPR_list Punctuator_par_close  { std::cerr << "x(y,z)" << std::endl; }
-                  | postfix_EXPR Operator_access Identifier   { std::cerr << "x.y" << std::endl; }
-                  | postfix_EXPR Operator_deref_access Identifier   { std::cerr << "x->y" << std::endl; }
-                  | postfix_EXPR Operator_addadd  { std::cerr << "x++" << std::endl; }
-                  | postfix_EXPR Operator_subsub  { std::cerr << "x--" << std::endl; }
+postfix_EXPR: primary_EXPR { $$ = $1; } /*Pass through*/
+                  | postfix_EXPR Punctuator_squ_open EXPR Punctuator_squ_close { $$ = new ArraySubscript($1, $3); }
+                  | postfix_EXPR Punctuator_par_open  Punctuator_par_close  { $$ = new FuncCall($1); }
+                  | postfix_EXPR Punctuator_par_open argument_EXPR_list Punctuator_par_close  { $$ = new FuncCall($1, $3); }
+                  | postfix_EXPR Operator_access Identifier   { $$ = new MemberAccess($1, $3); }
+                  | postfix_EXPR Operator_deref_access Identifier   { $$ = new DerefMemberAccess($1, $3); }
+                  | postfix_EXPR Operator_addadd  { $$ = new PostInc($1); }
+                  | postfix_EXPR Operator_subsub  { $$ = new PostDec($1); }
 
 
-argument_EXPR_list: assignment_EXPR
-                  | argument_EXPR_list Operator_comma assignment_EXPR { std::cerr << "argument list" << std::endl; }
+argument_EXPR_list: assignment_EXPR { $$ = new ArgExprList($1); }
+                  | argument_EXPR_list Operator_comma assignment_EXPR { ($1)->AppendArgExpression($3); }
 
-unary_EXPR: postfix_EXPR { std::cerr << "as;dklfj" << std::endl; }
-		  | Operator_addadd unary_EXPR { std::cerr << "++x" << std::endl; }
-		  | Operator_subsub unary_EXPR { std::cerr << "--x" << std::endl; }
-		| unary_operator cast_EXPR { std::cerr << "unary op" << std::endl; }
-		| Operator_sizeof unary_EXPR { std::cerr << "size of" << std::endl; }
-		| Operator_sizeof Punctuator_par_open type_name Punctuator_par_close  { std::cerr << "size of" << std::endl; } 
+unary_EXPR: postfix_EXPR { $$=$1; }
+		  | Operator_addadd unary_EXPR { $$ = new PreInc($2); }
+		  | Operator_subsub unary_EXPR { $$ = new PreDec($2); }
+      | unary_operator cast_EXPR { $$ = PrefixExpr::DecodeUnaryOp($2); }
+      | Operator_sizeof unary_EXPR { $$ = new SizeofExpr($2); }
+      | Operator_sizeof Punctuator_par_open type_name Punctuator_par_close  { $$ = new SizeofType($3); } 
 
 unary_operator: Operator_bit_and | Operator_mul | Operator_add | Operator_sub | Operator_bit_not | Operator_not
 
-cast_EXPR: unary_EXPR
-               | Punctuator_par_open type_name Punctuator_par_close cast_EXPR { std::cerr << "(cast) x" << std::endl; }
+cast_EXPR: unary_EXPR { $$ = $1; }
+               | Punctuator_par_open type_name Punctuator_par_close cast_EXPR { $$ = new CastExpr($2, $4); }
 
-multiplicative_EXPR: cast_EXPR
-                         | multiplicative_EXPR Operator_mul cast_EXPR { std::cerr << "x * cast" << std::endl; }
-                         | multiplicative_EXPR Operator_div cast_EXPR { std::cerr << "x / cast" << std::endl; }  
-						 | multiplicative_EXPR Operator_mod cast_EXPR { std::cerr << "x % cast" << std::endl; }
+multiplicative_EXPR: cast_EXPR { $$ = $1; }
+                         | multiplicative_EXPR Operator_mul cast_EXPR { $$ = new Multiply($1, $3); }
+                         | multiplicative_EXPR Operator_div cast_EXPR { $$ = new Divide($1, $3); }  
+						             | multiplicative_EXPR Operator_mod cast_EXPR { $$ = new Modulo($1, $3); }
 
 
-additive_EXPR: multiplicative_EXPR
-                   | additive_EXPR Operator_add multiplicative_EXPR { std::cerr << "x + y" << std::endl; }
-                   | additive_EXPR Operator_sub multiplicative_EXPR { std::cerr << "x - y" << std::endl; }
+additive_EXPR: multiplicative_EXPR { $$ = $1;}
+                   | additive_EXPR Operator_add multiplicative_EXPR { $$ = new Add($1, $3); }
+                   | additive_EXPR Operator_sub multiplicative_EXPR { $$ = new Sub($1, $3); }
 
-shift_EXPR: additive_EXPR
-          | shift_EXPR Operator_sl additive_EXPR { std::cerr << "x << y" << std::endl; }
-          | shift_EXPR Operator_sr additive_EXPR { std::cerr << "x >> y" << std::endl; }
+shift_EXPR: additive_EXPR { $$ = $1; }
+          | shift_EXPR Operator_sl additive_EXPR { $$ = new ShiftLeft($1, $3); }
+          | shift_EXPR Operator_sr additive_EXPR { $$ = new ShiftRight($1, $3); }
 
 relational_EXPR: shift_EXPR
-               | relational_EXPR Operator_less shift_EXPR { std::cerr << "x < y" << std::endl; }
-               | relational_EXPR Operator_greater shift_EXPR { std::cerr << "x > y" << std::endl; }
-               | relational_EXPR Operator_less_equal shift_EXPR { std::cerr << "x <= y" << std::endl; }
-               | relational_EXPR Operator_greater_equal shift_EXPR { std::cerr << "x >= y" << std::endl; }
+               | relational_EXPR Operator_less shift_EXPR { $$ = new LessThan($1, $3); }
+               | relational_EXPR Operator_greater shift_EXPR { $$ = new GreaterThan($1, $3); }
+               | relational_EXPR Operator_less_equal shift_EXPR { $$ = new LessThanOrEqual($1, $3); }
+               | relational_EXPR Operator_greater_equal shift_EXPR { $$ = new GreaterThanOrEqual($1, $3); }
 
-equality_EXPR: relational_EXPR
-             | equality_EXPR Operator_equal relational_EXPR { std::cerr << "x == y" << std::endl; }
-             | equality_EXPR Operator_not_equal relational_EXPR { std::cerr << "x != y" << std::endl; }
+equality_EXPR: relational_EXPR { $$ = $1; }
+             | equality_EXPR Operator_equal relational_EXPR { $$ = new EqualTo($1, $3); }
+             | equality_EXPR Operator_not_equal relational_EXPR { $$ = new NotEqualTo($1, $3); }
 
 
 
-BIT_AND_EXPR: equality_EXPR
-        | BIT_AND_EXPR Operator_bit_and equality_EXPR { std::cerr << "x & y" << std::endl; }
+BIT_AND_EXPR: equality_EXPR { $$ = $1; }
+        | BIT_AND_EXPR Operator_bit_and equality_EXPR { $$ = new BitwiseAND($1, $3); }
 
-BIT_XBIT_OR_EXPR: BIT_AND_EXPR
-        | BIT_XBIT_OR_EXPR Operator_bit_xor BIT_AND_EXPR{ std::cerr << "x ^ y" << std::endl; }
+BIT_XBIT_OR_EXPR: BIT_AND_EXPR { $$ = $1; }
+        | BIT_XBIT_OR_EXPR Operator_bit_xor BIT_AND_EXPR{ $$ = new BitwiseXOR($1, $3); }
 
-BIT_OR_EXPR: BIT_XBIT_OR_EXPR
-       | BIT_OR_EXPR Operator_bit_or BIT_XBIT_OR_EXPR{ std::cerr << "x | y" << std::endl; }
+BIT_OR_EXPR: BIT_XBIT_OR_EXPR { $$ = $1; }
+       | BIT_OR_EXPR Operator_bit_or BIT_XBIT_OR_EXPR{ $$ = new BitwiseOR($1, $3); }
 
-LOGIC_AND_EXPR: BIT_OR_EXPR
-              | LOGIC_AND_EXPR Operator_and BIT_OR_EXPR{ std::cerr << "x || y" << std::endl; }
+LOGIC_AND_EXPR: BIT_OR_EXPR { $$ = $1; }
+              | LOGIC_AND_EXPR Operator_and BIT_OR_EXPR{ $$ = new LogicAND($1, $3); }
 
-LOGIC_OR_EXPR: LOGIC_AND_EXPR
-             | LOGIC_OR_EXPR Operator_or LOGIC_AND_EXPR{ std::cerr << "x && y" << std::endl; }
+LOGIC_OR_EXPR: LOGIC_AND_EXPR { $$ = $1; }
+             | LOGIC_OR_EXPR Operator_or LOGIC_AND_EXPR{ $$ = new LogicOR($1, $3); }
 
-conditional_EXPR: LOGIC_OR_EXPR
-                | LOGIC_OR_EXPR Operator_trinary_question EXPR Operator_trinary_choice conditional_EXPR { std::cerr << "x?y:z" << std::endl; }
+conditional_EXPR: LOGIC_OR_EXPR { $$ = $1; }
+                | LOGIC_OR_EXPR Operator_trinary_question EXPR Operator_trinary_choice conditional_EXPR { $$ = new TernaryOpExpression($1, $3, $5); }
 
-assignment_EXPR: conditional_EXPR
-               | unary_EXPR assignment assignment_EXPR { std::cerr << "assignment" << std::endl; }
+assignment_EXPR: conditional_EXPR { $$ = $1; }
+               | unary_EXPR assignment assignment_EXPR { $$ = GenericAssignExpr::DecodeAssignOp($1, $2, $3); }
                
+
 assignment: Operator_assign | Operator_mul_assign | Operator_div_assign | Operator_mod_assign | Operator_add_assign | Operator_sub_assign | Operator_sl_assign | Operator_sr_assign | Operator_and_assign | Operator_xor_assign | Operator_or_assign
                
 
-EXPR: assignment_EXPR
-    | EXPR Operator_comma assignment_EXPR { std::cerr << "x, y" << std::endl; }
+EXPR: assignment_EXPR { $$ = $1; }
+    | EXPR Operator_comma assignment_EXPR { $$ = new CommaSepExpression($1, $3); }
 
-constant_EXPR: conditional_EXPR { std::cerr << "cond expr" << std::endl; }
+constant_EXPR: conditional_EXPR { ConstantExpression($1); }
 
 /*
 DECLARATIONS
 */
 
 
-declaration: declaration_specifiers init_declarator_list Punctuator_eol { std::cerr << "decspec list ;" << std::endl; }
-           | declaration_specifiers Punctuator_eol { std::cerr << "decspec ;" << std::endl; }
+declaration: declaration_specifiers init_declarator_list Punctuator_eol { $$ = new declaration($1, $2); }
+           | declaration_specifiers Punctuator_eol { $$ = new declaration($1); }
 
 declaration_specifiers: storage_class_specifier { std::cerr << "stor" << std::endl; }
                       | storage_class_specifier declaration_specifiers { std::cerr << "stor decspec" << std::endl; }
-                      | type_specifier  { std::cerr << "typspec list" << std::endl; }
-                      | type_specifier declaration_specifiers  { std::cerr << "typspec decspec" << std::endl; }
+                      | type_specifier { $$ = new declaration_specifiers($1); }
+                      | type_specifier declaration_specifiers { $$ = new declaration_specifiers($1, $2); }
 
 storage_class_specifier: Keyword_typedef { std::cerr << "typedef" << std::endl; }
 
-init_declarator_list: init_declarator  { std::cerr << "initdec" << std::endl; }
-                    | init_declarator_list Operator_comma init_declarator { std::cerr << "initdeclist , initdec " << std::endl; }
+init_declarator_list: init_declarator { $$ = new init_declaration_list($1); }
+                    | init_declarator_list Operator_comma init_declarator { $$ = new init_declaration_list($3, $1); }
 
-init_declarator: declarator { std::cerr << "dec" << std::endl; }
-               | declarator Operator_assign initializer { std::cerr << "dec = init" << std::endl; }
+init_declarator: declarator { $$ = new init_declarator($1); }
+               | declarator Operator_assign initializer { $$ = new init_declarator($1, $3); }
 
-type_specifier: Keyword_void | Keyword_char | Keyword_short | Keyword_int | Keyword_long | Keyword_float | Keyword_double | Keyword_signed | Keyword_unsigned
+type_specifier: Keyword_void { $$ = new type_specifier($1); }
+              | Keyword_char { $$ = new type_specifier($1); }
+              | Keyword_short { $$ = new type_specifier($1); }
+              | Keyword_int { $$ = new type_specifier($1); }
+              | Keyword_long { $$ = new type_specifier($1); }
+              | Keyword_float { $$ = new type_specifier($1); }
+              | Keyword_double { $$ = new type_specifier($1); }
+              | Keyword_signed { $$ = new type_specifier($1); }
+              | Keyword_unsigned{ $$ = new type_specifier($1); }
 /*              | struct_specifier { std::cerr << "struct" << std::endl; }
               | enum_specifier { std::cerr << "enum" << std::endl; }
               | typedef_name { std::cerr << "typedef type" << std::endl; }
@@ -199,59 +205,59 @@ enumerator: ENUM_CONST
 
 ENUM_CONST: Identifier
 */
-declarator: direct_declarator { std::cerr << "direct dec" << std::endl; }
-		  | pointer direct_declarator { std::cerr << "point direct dec" << std::endl; }
+declarator: direct_declarator { $$ = new declarator($1); }
+		  | pointer direct_declarator { $$ = new declarator($2, $1); }
 
 
-direct_declarator: Identifier
-				 | Punctuator_par_open declarator Punctuator_par_close
-				 | direct_declarator Punctuator_squ_open Punctuator_squ_close
-				 | direct_declarator Punctuator_squ_open constant_EXPR Punctuator_squ_close
-				 | direct_declarator Punctuator_par_open parameter_type_list  Punctuator_par_close
-				 | direct_declarator Punctuator_par_open identifier_list Punctuator_par_close
-				 | direct_declarator Punctuator_par_open Punctuator_par_close
+direct_declarator: Identifier { $$ = new direct_declarator($1); }
+				 | Punctuator_par_open declarator Punctuator_par_close  { $$ = new direct_declarator(NULL, NULL, NULL, $2); }
+				 | direct_declarator Punctuator_squ_open Punctuator_squ_close  { $$ = new direct_declarator(NULL, $1, new unspecified_array_length()); }
+				 | direct_declarator Punctuator_squ_open constant_EXPR Punctuator_squ_close  { $$ = new direct_declarator(NULL, $1, $3); }
+				 | direct_declarator Punctuator_par_open parameter_type_list  Punctuator_par_close  { $$ = new direct_declarator(NULL, $1, NULL, $3); }
+				 | direct_declarator Punctuator_par_open identifier_list Punctuator_par_close { std::cerr << "still not sure what this does" << std::endl; }
+				 | direct_declarator Punctuator_par_open Punctuator_par_close { std::cerr << "still not sure what this does" << std::endl; }
 
-pointer: Operator_mul { std::cerr << "dumb pointer" << std::endl; }
-	   | Operator_mul pointer { std::cerr << "pointer" << std::endl; }
+pointer: Operator_mul { $$ = new pointer(); }
+	   | Operator_mul pointer { $$ = new pointer($2); }
 
 parameter_type_list: parameter_list
 
-parameter_list: parameter_declaration { std::cerr << "a parameter" << std::endl; }
-		 	  | parameter_list Operator_comma parameter_declaration { std::cerr << "multiple parameters" << std::endl; }
+parameter_list: parameter_declaration { $$ = new parameter_list($1); }
+		 	  | parameter_list Operator_comma parameter_declaration { $$ = new parameter_list($1, $3) }
 
-parameter_declaration: declaration_specifiers declarator { std::cerr << "param dec" << std::endl; }
-					 | declaration_specifiers  { std::cerr << "no param name" << std::endl; }
-					 | declaration_specifiers abstract_declarator { std::cerr << "pass by reference" << std::endl; }
+parameter_declaration: declaration_specifiers declarator { $$ = new parameter_declaration($1, $2); }
+					 | declaration_specifiers  { $$ = new parameter_declaration($1); }
+					 | declaration_specifiers abstract_declarator { $$ = new parameter_declaration($1, NULL, $2); }
 
 identifier_list: Identifier
 			   | identifier_list Operator_comma Identifier
 
-type_name: specifier_list
-		 | specifier_list abstract_declarator
+type_name: specifier_list { $$ = new type_name($1); }
+		 | specifier_list abstract_declarator { $$ = new type_name($1, $2); }
 
-abstract_declarator: pointer
-					| pointer direct_abstract_declarator
-					| direct_abstract_declarator
+abstract_declarator: pointer { $$ = new abstract_declarator(NULL, $1); }
+					| pointer direct_abstract_declarator { $$ = new abstract_declarator($2, $1); }
+					| direct_abstract_declarator { $$ = new abstract_declarator($1); }
 
-direct_abstract_declarator: Punctuator_par_open abstract_declarator Punctuator_par_close
-						  | direct_abstract_declarator Punctuator_squ_open constant_EXPR Punctuator_squ_close
-						  | Punctuator_squ_open constant_EXPR Punctuator_squ_close
-						  | direct_abstract_declarator Punctuator_squ_open Punctuator_squ_close
-						  | Punctuator_squ_open Punctuator_squ_close
-						  | direct_abstract_declarator Punctuator_par_open parameter_type_list Punctuator_par_close
-						  | Punctuator_par_open parameter_type_list Punctuator_par_close
-						  | direct_abstract_declarator Punctuator_par_open Punctuator_par_close
-						  | Punctuator_par_open Punctuator_par_close
+direct_abstract_declarator: Punctuator_par_open abstract_declarator Punctuator_par_close { $$ = new direct_abstract_declarator(NULL, $2); }
+						  | direct_abstract_declarator Punctuator_squ_open constant_EXPR Punctuator_squ_close { $$ = new direct_abstract_declarator($1, NULL, $3); }
+						  | Punctuator_squ_open constant_EXPR Punctuator_squ_close { $$ = new direct_abstract_declarator(NULL, NULL, $2); }
+						  | direct_abstract_declarator Punctuator_squ_open Punctuator_squ_close { $$ = new direct_abstract_declarator($1, NULL, new unspecified_array_length()); }
+						  | Punctuator_squ_open Punctuator_squ_close { $$ = new direct_abstract_declarator(NULL, NULL, new unspecified_array_length()); }
+						  | direct_abstract_declarator Punctuator_par_open parameter_type_list Punctuator_par_close { $$ = new direct_abstract_declarator($1, NULL, NULL, $3); }
+						  | Punctuator_par_open parameter_type_list Punctuator_par_close { $$ = new direct_abstract_declarator(NULL, NULL, NULL, $2); }
+						  | direct_abstract_declarator Punctuator_par_open Punctuator_par_close { $$ = new direct_abstract_declarator($1, NULL, NULL, new empty_parameter_list()); }
+						  | Punctuator_par_open Punctuator_par_close { $$ = new direct_abstract_declarator(NULL, NULL, NULL, new empty_parameter_list()); }
 
 /*
 typedef_name: Identifier  { std::cerr << "typedef" << std::endl; }
 */
-initializer: assignment_EXPR { std::cerr << "assigning an initialiser" << std::endl; }
-		   | Punctuator_cur_open initializer_list Punctuator_cur_close  { std::cerr << "{init}" << std::endl; }
-		   | Punctuator_cur_open initializer_list Operator_comma Punctuator_cur_close { std::cerr << "{init,}" << std::endl; }
+initializer: assignment_EXPR { $$ = new initializer($1); }
+		   | Punctuator_cur_open initializer_list Punctuator_cur_close  { $$ = new initializer(NULL, $2); }
+		   | Punctuator_cur_open initializer_list Operator_comma Punctuator_cur_close { $$ = new initializer(NULL, $2); }
 
-initializer_list: initializer  { std::cerr << "iniz" << std::endl; }
-				| initializer_list Operator_comma initializer { std::cerr << "iniz, iniz" << std::endl; }
+initializer_list: initializer  { $$ = new initializer_list($1); }
+				| initializer_list Operator_comma initializer { $$ = new initializer_list($3, $1); }
 
 
 
@@ -265,33 +271,33 @@ ROOT: EXPR { std::cerr << "exp" << std::endl; }
 Statements
 */
 
-statement: selection_statement 
-         | labeled_statement
-         | compound_statement
-         | EXPR_statement 
-         | iteration_statement
-         | jump_statement
+statement: selection_statement { $$ = $1; }
+         | labeled_statement { $$ = $1; }
+         | compound_statement { $$ = $1; }
+         | EXPR_statement { $$ = new ExpressionStatement($1); }
+         | iteration_statement { $$ = $1; }
+         | jump_statement { $$ = $1; }
 
-labeled_statement: Keyword_case constant_EXPR Operator_trinary_choice statement
-                 | Keyword_default Operator_trinary_choice statement
+labeled_statement: Keyword_case constant_EXPR Operator_trinary_choice statement { $$ = new CaseOrDefault($2, $4); }
+                 | Keyword_default Operator_trinary_choice statement { $$ = new CaseOrDefault($3); }
 
-compound_statement: Punctuator_cur_open declaration_list statement_list Punctuator_cur_close
-                  | Punctuator_cur_open declaration_list Punctuator_cur_close
-                  | Punctuator_cur_open statement_list Punctuator_cur_close
+compound_statement: Punctuator_cur_open declaration_list statement_list Punctuator_cur_close { $$ = new CompoundStatement($2, $3); }
+                  | Punctuator_cur_open declaration_list Punctuator_cur_close { $$ = new CompoundStatement($2);}
+                  | Punctuator_cur_open statement_list Punctuator_cur_close { $$ = new CompoundStatement($2); /*Will need to use arg overloaded constructor to differentiate between the above*/}
                   | Punctuator_cur_open Punctuator_cur_close
 
 declaration_list: declaration
                 | declaration_list declaration
 
-statement_list: statement
-              | statement_list statement
+statement_list: statement { $$ = new StatementList($1); }
+              | statement_list statement { $$ = new StatementList($1, $2); }
 
-EXPR_statement: EXPR Punctuator_eol
-                    | Punctuator_eol
+EXPR_statement: EXPR Punctuator_eol { $$ = new ExpressionStatement($1); }
+                    | Punctuator_eol { $$ = new EmptyStatement(); }
 
-selection_statement: Keyword_if Punctuator_par_open EXPR Punctuator_par_close statement Keyword_else statement
-                   | Keyword_if Punctuator_par_open EXPR Punctuator_par_close statement
-                   | Keyword_switch Punctuator_par_open EXPR Punctuator_par_close statement
+selection_statement: Keyword_if Punctuator_par_open EXPR Punctuator_par_close statement Keyword_else statement { $$ = new IfElse($3, $5, $7); }
+                   | Keyword_if Punctuator_par_open EXPR Punctuator_par_close statement { $$ = new If($3, $5); }
+                   | Keyword_switch Punctuator_par_open EXPR Punctuator_par_close statement { $$ = new Switch($3, $5); }
 
 /*
 my attempt to fix dangling else, still causing issue
@@ -304,15 +310,15 @@ M: Keyword_if Punctuator_par_open EXPR Punctuator_par_close M Keyword_else M
 U: Keyword_if Punctuator_par_open EXPR Punctuator_par_close selection_statement
  | Keyword_if Punctuator_par_open EXPR Punctuator_par_close M Keyword_else U
 */
-iteration_statement: Keyword_while Punctuator_par_open EXPR Punctuator_par_close statement
-                   | Keyword_do statement Keyword_while Punctuator_par_open EXPR Punctuator_par_close Punctuator_eol
-                   | Keyword_for Punctuator_par_open EXPR_statement EXPR_statement EXPR Punctuator_par_close statement
-                   | Keyword_for Punctuator_par_open EXPR_statement EXPR_statement Punctuator_par_close statement
+iteration_statement: Keyword_while Punctuator_par_open EXPR Punctuator_par_close statement { $$ = new While($3, $5); }
+                   | Keyword_do statement Keyword_while Punctuator_par_open EXPR Punctuator_par_close Punctuator_eol { $$ = new DoWhile($2, $5); }
+                   | Keyword_for Punctuator_par_open EXPR_statement EXPR_statement EXPR Punctuator_par_close statement { $$ = new For($3,$4,$5,$7);}
+                   | Keyword_for Punctuator_par_open EXPR_statement EXPR_statement Punctuator_par_close statement { $$ = new For($3,$4,$6);}
 
-jump_statement: Keyword_continue Punctuator_eol
-              | Keyword_break Punctuator_eol
-              | Keyword_return Punctuator_eol
-              | Keyword_return EXPR Punctuator_eol
+jump_statement: Keyword_continue Punctuator_eol { $$ = new Continue(); }
+              | Keyword_break Punctuator_eol{ $$ = new Break(); }
+              | Keyword_return Punctuator_eol{ $$ = new Return(); }
+              | Keyword_return EXPR Punctuator_eol{ $$ = new Return($2); }
 /*
 ROOT: statement { std::cerr << "Its a valid program" << std::endl; }
 */

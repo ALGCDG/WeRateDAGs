@@ -7,7 +7,12 @@
 #ifndef AST_CONTEXT
 #define AST_CONTEXT
 
-#include "_ast_types.hpp"
+#include "ast_node.hpp"
+#include <string>
+#include <vector>
+#include <unordered_map>
+#include <deque>
+#include <string>
 
 /*  Don't need as much of a robust class hierarchy
     Need to contain:
@@ -24,46 +29,43 @@
 
 */
 
-class Record{
+// class Record{
+// //is this needed? perhaps only noderecord needed
+// };
+
+// class ScopeTableRecord : public Record{
+// public:
+//     ScopeTableRecord(_Table* SubTable);
+// private:
+//     _Table* ScopedTablePtr;
+// };
+
+//possibly specialised records for func def, array def?
+// class NodeRecord : public Record{
+// public:
+//     // NodeRecord(Node* ASTNode);
+//     NodeRecord(Node* _node) : ASTNode(_node){}
+//     Node* GetNode(std::string _ID);
+// private:
+//     Node* ASTNode;
+// };
+
+typedef std::unordered_map<std::string, Node*> LocalTable;
+
+//maps name directly to node
+class ContextTable{
 public:
-    Identifier ID;
-};
-
-class ScopeTableRecord : public Record{
+    ContextTable() : table_data(){}
+    Node* GetObjectDeclaration(std::string _ID); //definition?
+    void AddDeclarationNode(std::string _ID, Node* _node); //and definition? for functions?
+    void NewScope();
+    void PopScope();
+    bool IdentifierIsGlobal(std::string _ID); // not defined yet
+    static ContextTable* Instance();
 private:
-    _Table* ScopedTablePtr;
+    std::deque<LocalTable> table_data;
+    static ContextTable* table_instance;
 };
-
-class FunctionDeclarationRecord : public Record{
-private:
-    ParameterList* Params;
-};
-
-class FunctionDefinitionRecord : public Record{
-
-};
-
-class VariableDeclarationRecord : public Record{
-
-};
-
-class TypeDeclarationRecord : public Record{
-
-};
-
-class _Table{
-    //provide functions for accessing the table
-private:
-    std::vector<Record*> Entries;
-};
-
-class Context{
-    //provide functions for using accessed data
-private:
-    _Table ContextTable;
-}
-
-
 
 
 #endif

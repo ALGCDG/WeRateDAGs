@@ -1,6 +1,8 @@
 #ifndef AST_DECLS
 #define AST_DECLS
 
+#include "ast_expressions.hpp"
+#include <vector>
 //vargs?
 //asbtract declarators?
 //decl list (in statements grammar)
@@ -131,11 +133,13 @@ private:
 };
 
 class PointerAbstractDeclarator : public Node{
+    //for just a pointer
 protected:
     PointerList* Pointer;
 };
 
 class FullAbstractDeclarator : public PointerAbstractDeclarator{
+    //for pointer (opt) and direct abstract declarator
 private:
     DirectAbstractDeclarator* Decl;
 };
@@ -148,16 +152,40 @@ private:
 };
 
 class ArrayDirAbsDeclarator : public DirectAbstractDeclarator{
+public:
+    bool IsIncomplete();
 private:
     DirectAbstractDeclarator* DADecl;
     ConstantExpression* Expr;
 };
 
-class IncompleteArrDirAbsDeclarator : public DirectAbstractDeclarator{
+class FunctionDirAbsDeclarator : public DirectAbstractDeclarator{
+public:
 private:
     DirectAbstractDeclarator* DADecl;
+    ParameterList* List;
 };
 
+class Initialiser : public Declarator{
+
+};
+
+class InitialiserAssignment : public Initialiser{
+private:
+    GenericAssignExpr* AssExpr;
+};
+
+class BracketedInitialiseList : public Initialiser{
+private:
+    InitialiserList* List;
+};
+
+class InitialiserList : public Node{
+public:
+    void AppenedInitialiser(Initialiser* Init);
+private:
+    std::vector<Initialiser*> List;
+};
 //bottom of 6.5.5 in grammars
 #endif
 
