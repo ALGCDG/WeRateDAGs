@@ -1,31 +1,37 @@
 #ifndef AST_DECLS
 #define AST_DECLS
 
+#include "ast_node.hpp"
+#include <string>
+
 class declaration : public Node
 {
-    *declartaion_specifier specifier // specifies type of declaration
-    *init_declaration_list list // list of variables being declared as this type, may be null
-    declaration(declartaion_specifier * _specifier ,init_declaration_list * _list = NULL) : specifier(_specifier), list(_list) {}
+public:
+    declaration_specifiers* specifier; // specifies type of declaration
+    init_declaration_list* list; // list of variables being declared as this type, may be null
+    declaration(declaration_specifiers * _specifier ,init_declaration_list * _list = NULL) : specifier(_specifier), list(_list) {}
 };
 
 
-class declartaion_specifiers : public Node
+class declaration_specifiers : public Node
 {
+public:
     // storage information about decleration
     // type, storage ( ie int) (ie long)
     // again cascades
     type_specifier * type_spec;
-    declartaion_specifiers * specifier; // may be null if there is none
+    declaration_specifiers * specifier; // may be null if there is none
     declaration_specifiers(type_specifier _type_spec, declaration_specifiers * _specifier = NULL) type_spec(_type_spec), specifier(_specifier) {}
 };
 
 class init_declaration_list : public Node
 {
+public:
     // multiple declarations in one line
     // cascades
     init_declaration * init_dec;
     init_declaration_list * init_dec_list;// may point to null if there are no more
-    initializer_list(init_declaration * _init_dec, init_declaration_list * _init_dec_list = NULL) init_dec(_init_dec), init_dec_list(_init_dec_list) {}
+    init_declaration_list(init_declaration* _init_dec, init_declaration_list * _init_dec_list = NULL) init_dec(_init_dec), init_dec_list(_init_dec_list) {}
 };
 
 class init_declaration : public Node
@@ -59,7 +65,7 @@ class type_specifier : public Node
     enum C_types basic_type;
     */
     std::string type;
-    type_specifier(const std::string &Keyword = '') : type(Keyword) {}
+    type_specifier(const std::string &Keyword = "") : type(Keyword) {}
 };
 
 class specifier_list : public Node
@@ -72,8 +78,9 @@ class specifier_list : public Node
 
 class pointer : public Node
 {
+public:
     // pointers are constructed and counted
-    pointer* p
+    pointer* p;
     static int count(const int &i)
     {
         // we count the number of pointers and delete in one thing
@@ -81,7 +88,7 @@ class pointer : public Node
         {
             int no_children = p->count(i);
             delete p;
-            return no_children + 1
+            return no_children + 1;
         }
     }
     pointer(pointer * _p = NULL) : p(_p) {}
@@ -93,30 +100,31 @@ Declarators
 
 class base_declarator : public Node
 {
-    int pointer;
-    base_declarator(pointer * point = NULL)
+public:
+    int point_cnt;
+    base_declarator(pointer* point = NULL)
     {
-        mode = m;
         // counting layer of pointers
         if ( point != NULL )
         {
-            pointer = point->count(0);
+            point_cnt = point->count(0);
             delete point;
         }
     }
 };
 
 
-class absract_declarator : base_declarator
+class abstract_declarator : public base_declarator
 {
+public:
     // unlinked operand
     direct_abstract_declarator * dabs_dec;
     abstract_declarator(direct_abstract_declarator * _dabs_dec = NULL, pointer * point = NULL) : base_declarator(point), dabs_dec(_dabs_dec) {}
-}
+};
 
 
 
-class declarator : base_declarator
+class declarator : public base_declarator
 {
     // asserts link between symbol and operand
     direct_declarator * dir_dec;
