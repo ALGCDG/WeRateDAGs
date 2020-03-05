@@ -18,18 +18,19 @@
 class Expression : public Node{
 public:
     Type* EvalsToType;
-private:
 };
 
 //primary expr
 class IdentifierNode : public Expression{
 public:
+    IdentifierNode(std::string _name) : Name(_name){}
     std::string Name;
     Context::Record* ContextRecord;
 };
 
 class Constant : public Expression{
 public:
+    Constant();//TODO
     union { 
         int int_t; 
         char char_t;
@@ -39,7 +40,13 @@ public:
     };
 };
 
-class StringLiteral : public ???HALP{};//TODO
+
+class StringLiteral : public Expression{
+public:
+    StringLiteral(std::string _str, bool L = false) : wide(L), str(_str){}
+    bool wide;
+    std::string str;
+};
 //---------------------------------------------------------
 class PostfixExpr : public Expression{
 public:
@@ -153,15 +160,16 @@ public:
     using PrefixExpr::PrefixExpr;
 };
 
-class SizeofType : public PrefixExpr{
-//TODO -> Needs type system
+class SizeofType : public Expression{
+public:
+    SizeofType(type_name* _typ_nam) : typ_nam(_typ_nam){}
+    type_name* typ_nam;
 };
 
 class CastExpr : public PrefixExpr{
 public:
-    CastExpr(type_name* _typ , Expression* _ExprToBeCast) : typ(_typ), ExprToBeCast(_ExprToBeCast){}
+    CastExpr(type_name* _typ , Expression* _ExprToBeCast) : typ(_typ), PrefixExpr(_ExprToBeCast) {}
     type_name* typ;
-    Expression* ExprToBeCast;
 //TODO -> Needs type system
 };
 
@@ -211,7 +219,7 @@ public:
 //------------
 class LogicalBinaryExpression : public BinaryOpExpression{
 public:
-    LogicalBinaryExpression(Expression* _LHS, Expression* _RHS) : BinaryOpExpression(_LHS, _RHS), EvalsToType() /*TODO set to int */ {}
+    LogicalBinaryExpression(Expression* _LHS, Expression* _RHS) : BinaryOpExpression(_LHS, _RHS)/*, EvalsToType() TODO set to int */ {}
 //Always evaluates to int
 };
 

@@ -52,14 +52,14 @@ namespace Context
 //     Node* ASTNode;
 // };
 
-typedef std::unordered_map<std::string, Record*> LocalTable;
+typedef std::unordered_map<std::string, Context::Record*> LocalTable;
 
 //maps name directly to node
 class ContextTable{
 public:
     ContextTable() : table_data(){}
-    Node* GetObjectDeclaration(std::string _ID); //definition?
-    void AddDeclarationNode(std::string _ID, Node* _node); //and definition? for functions?
+    Context::Record* GetObjectRecord(std::string _ID); //definition?
+    void AddObjectRecord(std::string _ID, Context::Record* _node); //and definition? for functions?
     void NewScope();
     void PopScope();
     bool IdentifierIsGlobal(std::string _ID); // not defined yet
