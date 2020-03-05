@@ -13,6 +13,7 @@ public:
     //potential to combine some of the visits into the same overload?
     //Expressions
     virtual void visit(Node*); //If nothing defined for this type of node
+    virtual void visit(Constant*);
     virtual void visit(ArraySubscript*) = 0;
     virtual void visit(FuncCall*) = 0;
     virtual void visit(MemberAccess*) = 0;

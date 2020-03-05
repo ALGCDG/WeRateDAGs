@@ -2,37 +2,30 @@
 #define AST_EXTERNS
 
 #include "ast_node.hpp"
-#include "ast_declarations.hpp"
+#include "altdec.hpp"
 #include <vector>
 
 class TranslationUnit : public Node
 {
 private:
-    std::vector<ExternalDef*> Units;
+    std::vector<GenericExternalDeclaration*> Units;
 public:
-    TranslationUnit(ExternalDef* _externaldef) : Units{_externaldef} {}
-    
+    TranslationUnit(GenericExternalDeclaration* _externaldef) : Units{_externaldef} {}
 };
 
-class ExternalDef : public Node
-{
-private:
+class GenericExternalDeclaration : public Node{};
+
+class FunctionDefinition : public GenericExternalDeclaration{
 public:
+    declaration_specifiers* specs;
+    declarator* decl;
+    declaration_list* decl_list;
+    CompoundStatement* Body;
 };
 
-class ExternalFuncDef : public ExternalDef
-{
-private:
-    
+class ExternalDeclaration : public GenericExternalDeclaration{
 public:
-    ExternalFuncDef(/* args */) {}
+    declaration* decl;
 };
-
-class ExternalDeclaration : public ExternalDef
-{
-private:
-    Declaration* ExtDecl;
-};
-
 
 #endif
