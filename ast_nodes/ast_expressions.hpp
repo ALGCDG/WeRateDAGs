@@ -3,6 +3,7 @@
 
 #include "ast_node.hpp"
 #include "ast_types.hpp"
+#include "ast_context.hpp"
 #include <vector>
 #include <string>
 //TODO:
@@ -24,6 +25,7 @@ private:
 class Identifier : public Expression{
 public:
     std::string Name;
+    Context::Record* ContextRecord;
 };
 
 class Constant : public Expression{

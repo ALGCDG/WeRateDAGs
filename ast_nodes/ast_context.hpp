@@ -28,10 +28,12 @@
     - OR symbol tables, as linked data structures using pointers
 
 */
-
-// class Record{
-// //is this needed? perhaps only noderecord needed
-// };
+namespace Context
+{
+    class Record{
+//is this needed? perhaps only noderecord needed
+};
+}
 
 // class ScopeTableRecord : public Record{
 // public:
@@ -50,7 +52,7 @@
 //     Node* ASTNode;
 // };
 
-typedef std::unordered_map<std::string, Node*> LocalTable;
+typedef std::unordered_map<std::string, Record*> LocalTable;
 
 //maps name directly to node
 class ContextTable{

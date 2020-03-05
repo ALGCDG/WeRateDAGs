@@ -168,7 +168,7 @@ type_specifier: Keyword_void { $$ = new type_specifier($1); }
               | Keyword_double { $$ = new type_specifier($1); }
               | Keyword_signed { $$ = new type_specifier($1); }
               | Keyword_unsigned{ $$ = new type_specifier($1); }
-/*              | struct_specifier { std::cerr << "struct" << std::endl; }
+/*            | struct_specifier { std::cerr << "struct" << std::endl; }
               | enum_specifier { std::cerr << "enum" << std::endl; }
               | typedef_name { std::cerr << "typedef type" << std::endl; }
 
