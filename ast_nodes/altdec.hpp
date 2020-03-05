@@ -197,7 +197,7 @@ Initializers
 
 class initializer : public Node
 {
-    assignment_expression * ass_expr;
+    expression * ass_expr;
     // OR
     initializer_list * init_list;
     initializer(assignment_expression * _ass_expr, initializer_list * _init_list = NULL) : ass_expr(_ass_expr), init_list(_init_list) {}
