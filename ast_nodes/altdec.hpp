@@ -141,7 +141,7 @@ Direct Declartions
 
 class base_direct_declarator : public Node
 {
-    public:
+public:
     // direct_abstract_declarator and direct_declarator share a lot in common
     // it is the better part of wisdom to make them children of a common node -> archie being pretentious
     ConstantExpression * const_expr; // nonnull if it is an array, zero if empty
@@ -165,6 +165,7 @@ public:
 
 class direct_declarator : public base_direct_declarator
 {
+public:
     IdentifierNode * ID;
     direct_declarator * dir_dec; // may be null
     declarator * dec;                                                                                                                                                                     //TODO doesnt match
