@@ -2,6 +2,7 @@
 #define PYTRVISIT_HPP
 
 #include <string>
+#include <unordered_set>
 
 #include "visitors.hpp"
 #include "ast_expressions.hpp"
@@ -10,6 +11,8 @@
 class python_Visitor: public Visitor
 {
     int indentation;
+    // an unordered set used to store the global names
+    std::unordered_set<std::string> global; 
     std::string gentabs()
     {
         std::string indent = "";
@@ -19,11 +22,10 @@ class python_Visitor: public Visitor
         }
         return indent;
     }
-
     void visit(While* w)
     {
         std::cout << gentabs() << "while ";
-        w->Body->accept(this);
+        w->ControlExpression->accept(this);
         std::cout << " :" << std::endl;
         indentation++;
         w->Body->accept(this);
@@ -32,6 +34,102 @@ class python_Visitor: public Visitor
 
     void visit(If* i)
     {
+        std::cout << gentabs() << "if ";
+        i->ControlExpression->accept(this);
+        std::cout << " :" << std::endl;
+        indentation++;
+        i->IfTrue->accept(this);
+        indentation--;
+    }
+    void visit(IfElse* ie)
+    {
+        std::cout << gentabs() << "if ";
+        ie->ControlExpression->accept(this);
+        std::cout << " :" << std::endl;
+        indentation++;
+        ie->IfTrue->accept(this);
+        indentation--;
+        std::cout << gentabs() << "else: " << std::endl;
+        indentation++;
+        ie->IfFalse->accept(this);
+        indentation--;   
+    }
+    void visit(Return* r)
+    {
+        std::cout << gentabs() << "return ";
+        if (r->ReturnType != NULL)
+        {
+            r->ReturnExpression->accept(this);
+        }
+        std::cout << std::endl;
+    }
+    void visit(CompoundStatement* cs)
+    {
+        // handling sequences
+        if (cs->Decls != NULL)
+        {
+            cs->Decls->accept(this);
+        }
+        if (cs->Statements != NULL)
+        {
+            cs->Statements->accept(this);
+        }   
+    }
+    void visit(StatementList* sl)
+    {
+        sl->statement->visit(this);
+        if (cs->RestOfStatements != NULL)
+        {
+            cs->RestOfStatements->accept(this);
+        }
+    }
+    /*
+    Declarations
+    */
+    void visit(declaration* dec)
+    {
+        std::cout << gentab();
+        // we can assume it is a function or an int
+        if (dec->list != NULL)
+        {
+            dec->list->accept(this);
+        }
+        std::cout << std::endl;
+    }
+    void visit(init_declaration_list * il)
+    {
+        il->init_dec->accept(this);
+        if(il->init_dec_list != NULL)
+        {
+            il->init_dec_list->accept(this);
+        }
+    }
+    void visit(init_declaration * id)
+    {
+        // getting variable name
+        auto name = id->dec->dir_dec->ID->Name;
+        if (global.find(name) !=  global.end())
+        {
+            // variable is referenced in global scope
+            std::cout << "global "
+        }
+        id->dec->dir_dec->ID->accept(this);
+        if (indentation == 0)
+        {
+            // if we are in the global scope, we add it to the set
+            global.insert(id->dec->dir_dec->ID->Name);
+        }
+        std::cout << "=";
+        if (id->init == NULL)
+        {
+            // uninitialised values default to zero
+            std::cout << "0";
+        }
+        else if (id->init->ass_expr != NULL)
+        {
+            // assigning int value
+            id->init->ass_expr->accept(this);
+        }
     }
 
     //Expressions
@@ -86,7 +184,7 @@ class python_Visitor: public Visitor
             (*it)->accept(this);
         }
     }
-    void visit(Identifier* ID){
+    void visit(IdentifierNode* ID){
         std::cout << ID->Name;
     }
 

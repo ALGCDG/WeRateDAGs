@@ -22,7 +22,11 @@ public:
     // again cascades
     type_specifier * type_spec;
     declaration_specifiers * specifier; // may be null if there is none
+<<<<<<< HEAD
     declaration_specifiers(type_specifier * _type_spec, declaration_specifiers * _specifier = NULL) : type_spec(_type_spec), specifier(_specifier) {}
+=======
+    declaration_specifiers(type_specifier* _type_spec, declaration_specifiers * _specifier = NULL) : type_spec(_type_spec), specifier(_specifier) {}
+>>>>>>> 598b90eb4a91981991843ed869c289d5df4dd2fa
 };
 
 class init_declaration_list : public Node
@@ -143,6 +147,7 @@ class base_direct_declarator : public Node
 {
     public:
     // direct_abstract_declarator and direct_declarator share a lot in common
+<<<<<<< HEAD
     // it is the better part of wisdom to make them children of a common node -> archie being pretentious
     ConstantExpression * const_expr; // nonnull if it is an array, zero if empty
     parameter_list * para_list; // nonnull if it is a functio
@@ -151,6 +156,16 @@ class base_direct_declarator : public Node
 
 // a class used to signify that an array declaration does not specify array length
 class unspecified_array_length : public ConstantExpression {};
+=======
+    // it is the better part of wisdom to make them children of a common node
+    ConstantExpression * const_expr; // nonnull if it is an array, zero if empty
+    parameter_list * para_list; // nonnull if it is a functio                                                                               //missing abs_dec TODO
+    base_direct_declarator(abstract_declarator * _abs_dec, ConstantExpression * _const_expr = NULL, parameter_list * _para_list = NULL) : abs_dec(_abs_dec), const_expr (_const_expr), para_list(_para_list) {}
+};
+
+// a class used to signify that an array declaration does not specify array length
+class unspecified_array_length : public ConstantExpression {};//TODO why is this constant
+>>>>>>> 598b90eb4a91981991843ed869c289d5df4dd2fa
 // a class used to signify that a parameter list is empty
 class empty_parameter_list : public parameter_list {};
 
@@ -158,19 +173,31 @@ class direct_abstract_declarator : public base_direct_declarator
 {
 public:
     direct_abstract_declarator * dabs_dec; // may be null
+<<<<<<< HEAD
     abstract_declarator * abs_dec;
     direct_abstract_declarator(direct_abstract_declarator * _dabs_dec = NULL, abstract_declarator * _abs_dec = NULL, ConstantExpression * _const_expr = NULL, parameter_list * _para_list = NULL) 
         : base_direct_declarator(_const_expr, _para_list), dabs_dec(_dabs_dec), abs_dec(_abs_dec) {}
+=======
+    abstract_declarator * abs_dec;                                                                                                                                                                   //TODO constructors don't match
+    direct_abstract_declarator(direct_abstract_declarator * _dabs_dec = NULL, abstract_declarator * _abs_dec = NULL, ConstantExpression * _const_expr = NULL, parameter_list * _para_list = NULL) : base_direct_declarator(_const_expr, _para_list), dabs_dec(_dabs_dec), abs_dec(_abs_dec) {}
+>>>>>>> 598b90eb4a91981991843ed869c289d5df4dd2fa
 };
 
 class direct_declarator : public base_direct_declarator
 {
+<<<<<<< HEAD
 public:
     Identifier * ID;
     direct_declarator * dir_dec; // may be null
     declarator * dec;
     direct_declarator(Identifier * _ID = NULL, direct_declarator * _dir_dec = NULL, ConstantExpression * _const_expr = NULL, parameter_list * _para_list = NULL, declarator * _dec) 
         : base_direct_declarator(_const_expr, _para_list), ID(_ID), dir_dec(_dir_dec), dec(_dec) {}
+=======
+    IdentifierNode * ID;
+    direct_declarator * dir_dec; // may be null
+    declarator * dec;                                                                                                                                                                     //TODO doesnt match
+    direct_declarator(IdentifierNode * _ID = NULL, direct_declarator * _dir_dec = NULL, ConstantExpression * _const_expr = NULL, parameter_list * _para_list = NULL, declarator * _dec) : base_direct_declarator(_const_expr, _para_list), ID(_ID), dir_dec(_dir_dec), dec(_dec) {}
+>>>>>>> 598b90eb4a91981991843ed869c289d5df4dd2fa
 };
 
 /*
@@ -209,11 +236,18 @@ Initializers
 
 class initializer : public Node
 {
+<<<<<<< HEAD
 public:
     Expression* ass_expr;
     // OR
     initializer_list * init_list;
     initializer(Expression* _ass_expr, initializer_list * _init_list = NULL) : ass_expr(_ass_expr), init_list(_init_list) {}
+=======
+    Expression* ass_expr;
+    // OR
+    initializer_list * init_list;
+    initializer(Expression * _ass_expr, initializer_list * _init_list = NULL) : ass_expr(_ass_expr), init_list(_init_list) {}
+>>>>>>> 598b90eb4a91981991843ed869c289d5df4dd2fa
 };
 
 class initializer_list : public Node

@@ -101,11 +101,11 @@ private:
 
 class StatementList : public Node{
 public:
-    StatementList(Statement* TerminalStatement) : Statement(TerminalStatement), RestOfStatements(NULL){}
-    StatementList(StatementList* OtherStatements, Statement* ThisStatement) : Statement(ThisStatement), RestOfStatements(RestOfStatements){}
+    StatementList(Statement* TerminalStatement) : statement(TerminalStatement), RestOfStatements(NULL){}
+    StatementList(StatementList* OtherStatements, Statement* ThisStatement) : statement(ThisStatement), RestOfStatements(RestOfStatements){}
     bool isTerminalStatement() const;
 private:
-    Statement* Statement;
+    Statement* statement;
     StatementList* RestOfStatements;
 };
 

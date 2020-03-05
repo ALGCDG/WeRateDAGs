@@ -30,8 +30,8 @@
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
-#ifndef YY_YY_BASIC_TAB_HPP_INCLUDED
-# define YY_YY_BASIC_TAB_HPP_INCLUDED
+#ifndef YY_YY_SRC_PARSER_TAB_HPP_INCLUDED
+# define YY_YY_SRC_PARSER_TAB_HPP_INCLUDED
 /* Debug traces.  */
 #ifndef YYDEBUG
 # define YYDEBUG 0
@@ -40,11 +40,18 @@
 extern int yydebug;
 #endif
 /* "%code requires" blocks.  */
-#line 1 "basic.y" /* yacc.c:1909  */
+#line 1 "src/parser.y" /* yacc.c:1909  */
 
 
   #include<iostream>
   #include<string>
+  #include "ast_node.hpp"
+  #include "ast_expressions.hpp"
+  #include "ast_statements.hpp"
+  #include "ast_types.hpp"
+  #include "ast_node.hpp"
+
+  #include "altdec.hpp"
  /* extern const Expression *g_root; // A way of getting the AST out
 */
   //! This is to fix problems when generating C++
@@ -53,7 +60,7 @@ extern int yydebug;
   int yylex(void);
   void yyerror(const char *);
 
-#line 57 "basic.tab.hpp" /* yacc.c:1909  */
+#line 64 "src/parser.tab.hpp" /* yacc.c:1909  */
 
 /* Token type.  */
 #ifndef YYTOKENTYPE
@@ -149,16 +156,20 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 15 "basic.y" /* yacc.c:1909  */
+#line 22 "src/parser.y" /* yacc.c:1909  */
 
     std::string *text;
     int ivalue;
     char cvalue;
     double dvalue;
-	float fvalue;
-	long double ldvalue;
+	  float fvalue;
+	  long double ldvalue;
+    Node* node;
+    Expression* expression;
+    IdentiferNode* identnode;
+    ConstantExpression* constexpr;
 
-#line 162 "basic.tab.hpp" /* yacc.c:1909  */
+#line 173 "src/parser.tab.hpp" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;
@@ -171,4 +182,4 @@ extern YYSTYPE yylval;
 
 int yyparse (void);
 
-#endif /* !YY_YY_BASIC_TAB_HPP_INCLUDED  */
+#endif /* !YY_YY_SRC_PARSER_TAB_HPP_INCLUDED  */
