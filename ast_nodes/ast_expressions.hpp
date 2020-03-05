@@ -21,7 +21,7 @@ private:
 };
 
 //primary expr
-class Identifier : public Expression{
+class IdentifierNode : public Expression{
 public:
     std::string Name;
 };
@@ -32,7 +32,7 @@ public:
         int int_t; 
         char char_t;
         double dbl_t;
-        float flt_t;
+        float flt_t;    
         long long_t;
     };
 };
@@ -62,16 +62,16 @@ public:
 
 class MemberAccess : public PostfixExpr{
 public:
-    MemberAccess(Expression* _LHS, Identifier* _ID) : PostfixExpr(_LHS), ID(_ID){}
+    MemberAccess(Expression* _LHS, IdentifierNode* _ID) : PostfixExpr(_LHS), ID(_ID){}
 private:
-    Identifier* ID;
+    IdentifierNode* ID;
 };
 
 class DerefMemberAccess : public PostfixExpr{
 public:
-    DerefMemberAccess(Expression* _LHS, Identifier* _ID) : PostfixExpr(_LHS), ID(_ID){}
+    DerefMemberAccess(Expression* _LHS, IdentifierNode* _ID) : PostfixExpr(_LHS), ID(_ID){}
 private:
-    Identifier* ID;
+    IdentifierNode* ID;
 };
 
 class PostInc : public PostfixExpr{
@@ -157,7 +157,9 @@ class SizeofType : public PrefixExpr{
 
 class CastExpr : public PrefixExpr{
 public:
-    CastExpr(Type? , Expression* ExprToBeCast);
+    CastExpr(type_name* _typ , Expression* _ExprToBeCast) : typ(_typ), ExprToBeCast(_ExprToBeCast){}
+    type_name* typ;
+    Expression* ExprToBeCast;
 //TODO -> Needs type system
 };
 
@@ -207,7 +209,7 @@ public:
 //------------
 class LogicalBinaryExpression : public BinaryOpExpression{
 public:
-    LogicalBinaryExpression(Expression* _LHS, Expression* _RHS) : BinaryOpExpression(_LHS, _RHS), EvalsToType /*TODO set to int */ {}
+    LogicalBinaryExpression(Expression* _LHS, Expression* _RHS) : BinaryOpExpression(_LHS, _RHS), EvalsToType() /*TODO set to int */ {}
 //Always evaluates to int
 };
 
@@ -363,7 +365,7 @@ class CommaSepExpression : public Expression{
 public:
     CommaSepExpression(Expression* _LHS, Expression* _RHS) : RHS(_RHS), LHS(_LHS){}
 private:
-    Expression* LHS, RHS;
+    Expression* LHS, *RHS;
 };
 
 //---------------------------------------------------------

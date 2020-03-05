@@ -1,6 +1,6 @@
   
 CPPFLAGS += -std=c++11 -W -Wall -g -Wno-unused-parameter
-CPPFLAGS += -I include
+CPPFLAGS += -I ast_nodes -I visitors
 
 all : bin/translator
 

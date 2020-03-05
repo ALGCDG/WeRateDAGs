@@ -1,5 +1,5 @@
-#ifndef AST_DECLS
-#define AST_DECLS
+#ifndef AST_DECLS1
+#define AST_DECLS1
 
 #include "ast_expressions.hpp"
 #include <vector>
@@ -71,7 +71,7 @@ class DirectDeclarator : public Node{
 
 class IdentDirectDeclarator : public DirectDeclarator{
 private:
-    Identifier ID;
+    IdentifierNode ID;
 };
 
 class BracketedDirectDeclarator : public DirectDeclarator{

@@ -27,10 +27,13 @@
 	  float fvalue;
 	  long double ldvalue;
     Node* node;
+    Expression* expression;
+    IdentiferNode* identnode;
+    ConstantExpression* constexpr;
 }
 
 %token Constant_int Constant_char Constant_double Constant_float Constant_long_double
-%token String
+%token String /*What is this for*/
 %token Identifier
 %token Operator Operator_add  Operator_sub  Operator_addadd  Operator_subsub  Operator_mul  Operator_div  Operator_mod  Operator_and  Operator_or  Operator_not  Operator_assign  Operator_equal  Operator_not_equal  Operator_greater  Operator_less  Operator_greater_equal  Operator_less_equal  Operator_bit_and  Operator_bit_or  Operator_bit_not  Operator_bit_xor  Operator_sl  Operator_sr  Operator_add_assign  Operator_sub_assign  Operator_mul_assign  Operator_div_assign  Operator_mod_assign  Operator_and_assign  Operator_or_assign  Operator_xor_assign  Operator_sr_assign  Operator_sl_assign  Operator_ref  Operator_deref  Operator_access  Operator_deref_access  Operator_sizeof  Operator_trinary_question  Operator_trinary_choice  Operator_comma 
 %token Keyword Keyword_void Keyword_char Keyword_short Keyword_int Keyword_long Keyword_float Keyword_double Keyword_signed Keyword_unsigned Keyword_case Keyword_default Keyword_if Keyword_else Keyword_switch Keyword_while Keyword_do Keyword_for Keyword_continue Keyword_break Keyword_return Keyword_enum Keyword_struct Keyword_typedef
@@ -43,30 +46,33 @@
 %type <dvalue> Constant_double
 %type <fvalue> Constant_float
 %type <ldvalue> Constant_long_double
+%type <text> Identifier
+%type <text> Keyword Keyword_void Keyword_char Keyword_short Keyword_int Keyword_long Keyword_float Keyword_double Keyword_signed Keyword_unsigned Keyword_case Keyword_default Keyword_if Keyword_else Keyword_switch Keyword_while Keyword_do Keyword_for Keyword_continue Keyword_break Keyword_return Keyword_enum Keyword_struct Keyword_typedef
 
 
-%type <node> primary_EXPR
-%type <node> Constant
-%type <node> postfix_EXPR
-%type <node> argument_EXPR_list
-%type <node> unary_EXPR
-%type <node> unary_operator
-%type <node> cast_EXPR
-%type <node> multiplicative_EXPR
-%type <node> additive_EXPR
-%type <node> shift_EXPR
-%type <node> relational_EXPR
-%type <node> equality_EXPR
-%type <node> BIT_AND_EXPR
-%type <node> BIT_XBIT_OR_EXPR
-%type <node> BIT_OR_EXPR
-%type <node> LOGIC_AND_EXPR
-%type <node> LOGIC_OR_EXPR
-%type <node> conditional_EXPR
-%type <node> assignment_EXPR
-%type <node> assignment
-%type <node> EXPR
-%type <node> constant_EXPR
+%type <expression> primary_EXPR
+%type <identnode> Ident
+%type <expression> Constant
+%type <expression> postfix_EXPR
+%type <expression> argument_EXPR_list
+%type <expression> unary_EXPR
+%type <expression> unary_operator
+%type <expression> cast_EXPR
+%type <expression> multiplicative_EXPR
+%type <expression> additive_EXPR
+%type <expression> shift_EXPR
+%type <expression> relational_EXPR
+%type <expression> equality_EXPR
+%type <expression> BIT_AND_EXPR
+%type <expression> BIT_XBIT_OR_EXPR
+%type <expression> BIT_OR_EXPR
+%type <expression> LOGIC_AND_EXPR
+%type <expression> LOGIC_OR_EXPR
+%type <expression> conditional_EXPR
+%type <expression> assignment_EXPR
+%type <expression> assignment
+%type <expression> EXPR
+%type <constexpr> constant_EXPR
 
 
 %type <node> declaration
@@ -110,11 +116,12 @@
 EXPRESSIONS
 */
 
-primary_EXPR: Identifier { std::cerr << "IDENTIFIER" << std::endl; }
+primary_EXPR: Ident { $$ = new IdentiferNode; }
                  | Constant { std::cerr << "CONSTANT" << std::endl; }
                   | String { std::cerr << "STRING" << std::endl; }
               | Punctuator_par_open EXPR Punctuator_par_close { std::cout << "(x)" << std::endl; }
 
+Ident: Identifier { $$ = new IdentiferNode($1); } 
 
 Constant: Constant_int {}  
 		| Constant_char {}
@@ -127,8 +134,8 @@ postfix_EXPR: primary_EXPR { $$ = $1; } /*Pass through*/
                   | postfix_EXPR Punctuator_squ_open EXPR Punctuator_squ_close { $$ = new ArraySubscript($1, $3); }
                   | postfix_EXPR Punctuator_par_open  Punctuator_par_close  { $$ = new FuncCall($1); }
                   | postfix_EXPR Punctuator_par_open argument_EXPR_list Punctuator_par_close  { $$ = new FuncCall($1, $3); }
-                  | postfix_EXPR Operator_access Identifier   { $$ = new MemberAccess($1, $3); }
-                  | postfix_EXPR Operator_deref_access Identifier   { $$ = new DerefMemberAccess($1, $3); }
+                  | postfix_EXPR Operator_access Ident   { $$ = new MemberAccess($1, $3); }
+                  | postfix_EXPR Operator_deref_access Ident   { $$ = new DerefMemberAccess($1, $3); }
                   | postfix_EXPR Operator_addadd  { $$ = new PostInc($1); }
                   | postfix_EXPR Operator_subsub  { $$ = new PostDec($1); }
 
@@ -143,7 +150,12 @@ unary_EXPR: postfix_EXPR { $$=$1; }
       | Operator_sizeof unary_EXPR { $$ = new SizeofExpr($2); }
       | Operator_sizeof Punctuator_par_open type_name Punctuator_par_close  { $$ = new SizeofType($3); } 
 
-unary_operator: Operator_bit_and | Operator_mul | Operator_add | Operator_sub | Operator_bit_not | Operator_not
+unary_operator: Operator_bit_and { $$ = new string("&");} 
+              | Operator_mul { $$ = new string("*");}
+              | Operator_add { $$ = new string("+");}
+              | Operator_sub { $$ = new string("-");}
+              | Operator_bit_not { $$ = new string("~");}
+              | Operator_not { $$ = new string("!");}
 
 cast_EXPR: unary_EXPR { $$ = $1; }
                | Punctuator_par_open type_name Punctuator_par_close cast_EXPR { $$ = new CastExpr($2, $4); }
@@ -196,7 +208,17 @@ assignment_EXPR: conditional_EXPR { $$ = $1; }
                | unary_EXPR assignment assignment_EXPR { $$ = GenericAssignExpr::DecodeAssignOp($1, $2, $3); }
                
 
-assignment: Operator_assign | Operator_mul_assign | Operator_div_assign | Operator_mod_assign | Operator_add_assign | Operator_sub_assign | Operator_sl_assign | Operator_sr_assign | Operator_and_assign | Operator_xor_assign | Operator_or_assign
+assignment: Operator_assign { $$ = new string("=");} 
+          | Operator_mul_assign { $$ = new string("*=");}
+          | Operator_div_assign { $$ = new string("/=");}
+          | Operator_mod_assign { $$ = new string("%=");}
+          | Operator_add_assign { $$ = new string("+=");}
+          | Operator_sub_assign { $$ = new string("-=");}
+          | Operator_sl_assign { $$ = new string("<<=");}
+          | Operator_sr_assign { $$ = new string(">>=");}
+          | Operator_and_assign { $$ = new string("&=");}
+          | Operator_xor_assign { $$ = new string("^=");}
+          | Operator_or_assign{ $$ = new string("|=");}
                
 
 EXPR: assignment_EXPR { $$ = $1; }
@@ -238,9 +260,9 @@ type_specifier: Keyword_void { $$ = new type_specifier($1); }
               | enum_specifier { std::cerr << "enum" << std::endl; }
               | typedef_name { std::cerr << "typedef type" << std::endl; }
 
-struct_specifier: Keyword_struct Identifier Punctuator_cur_open struct_declaration_list Punctuator_cur_close { std::cerr << "struct x {...}" << std::endl; }
+struct_specifier: Keyword_struct Ident Punctuator_cur_open struct_declaration_list Punctuator_cur_close { std::cerr << "struct x {...}" << std::endl; }
 				| Keyword_struct Punctuator_cur_open struct_declaration_list Punctuator_cur_close { std::cerr << "struct {...}" << std::endl; }
-				| Keyword_struct Identifier { std::cerr << "struct x" << std::endl; }
+				| Keyword_struct Ident { std::cerr << "struct x" << std::endl; }
 
 
 
@@ -260,8 +282,8 @@ struct_declarator: declarator
                  | Operator_trinary_choice struct_declarator
 
 
-enum_specifier: Keyword_enum Identifier
-			  | Keyword_enum Identifier Punctuator_cur_open enum_list Punctuator_cur_close
+enum_specifier: Keyword_enum Ident
+			  | Keyword_enum Ident Punctuator_cur_open enum_list Punctuator_cur_close
 			  | Keyword_enum Punctuator_cur_open enum_list Punctuator_cur_close
 
 enum_list: enumerator
@@ -270,13 +292,13 @@ enum_list: enumerator
 enumerator: ENUM_CONST
 		  | ENUM_CONST Operator_assign constant_EXPR
 
-ENUM_CONST: Identifier
+ENUM_CONST: Ident
 */
 declarator: direct_declarator { $$ = new declarator($1); }
 		  | pointer direct_declarator { $$ = new declarator($2, $1); }
 
 
-direct_declarator: Identifier { $$ = new direct_declarator($1); }
+direct_declarator: Ident { $$ = new direct_declarator($1); }
 				 | Punctuator_par_open declarator Punctuator_par_close  { $$ = new direct_declarator(NULL, NULL, NULL, $2); }
 				 | direct_declarator Punctuator_squ_open Punctuator_squ_close  { $$ = new direct_declarator(NULL, $1, new unspecified_array_length()); }
 				 | direct_declarator Punctuator_squ_open constant_EXPR Punctuator_squ_close  { $$ = new direct_declarator(NULL, $1, $3); }
@@ -296,8 +318,8 @@ parameter_declaration: declaration_specifiers declarator { $$ = new parameter_de
 					 | declaration_specifiers  { $$ = new parameter_declaration($1); }
 					 | declaration_specifiers abstract_declarator { $$ = new parameter_declaration($1, NULL, $2); }
 
-identifier_list: Identifier
-			   | identifier_list Operator_comma Identifier
+identifier_list: Ident
+			   | identifier_list Operator_comma Ident
 
 type_name: specifier_list { $$ = new type_name($1); }
 		 | specifier_list abstract_declarator { $$ = new type_name($1, $2); }
@@ -317,7 +339,7 @@ direct_abstract_declarator: Punctuator_par_open abstract_declarator Punctuator_p
 						  | Punctuator_par_open Punctuator_par_close { $$ = new direct_abstract_declarator(NULL, NULL, NULL, new empty_parameter_list()); }
 
 /*
-typedef_name: Identifier  { std::cerr << "typedef" << std::endl; }
+typedef_name: Ident  { std::cerr << "typedef" << std::endl; }
 */
 initializer: assignment_EXPR { $$ = new initializer($1); }
 		   | Punctuator_cur_open initializer_list Punctuator_cur_close  { $$ = new initializer(NULL, $2); }
@@ -351,7 +373,7 @@ labeled_statement: Keyword_case constant_EXPR Operator_trinary_choice statement 
 compound_statement: Punctuator_cur_open declaration_list statement_list Punctuator_cur_close { $$ = new CompoundStatement($2, $3); }
                   | Punctuator_cur_open declaration_list Punctuator_cur_close { $$ = new CompoundStatement($2);}
                   | Punctuator_cur_open statement_list Punctuator_cur_close { $$ = new CompoundStatement($2); /*Will need to use arg overloaded constructor to differentiate between the above*/}
-                  | Punctuator_cur_open Punctuator_cur_close
+                  | Punctuator_cur_open Punctuator_cur_close { $$ = new EmptyStatement; }
 
 declaration_list: declaration
                 | declaration_list declaration

@@ -2,6 +2,7 @@
 #define PYTRVISIT_HPP
 
 #include <string>
+#include <unordered_set>
 
 #include "visitors.hpp"
 #include "ast_expressions.hpp"
@@ -183,7 +184,7 @@ class python_Visitor: public Visitor
             (*it)->accept(this);
         }
     }
-    void visit(Identifier* ID){
+    void visit(IdentifierNode* ID){
         std::cout << ID->Name;
     }
 
