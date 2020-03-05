@@ -2,7 +2,13 @@
 
   #include<iostream>
   #include<string>
-  #include "ast/altdec.hpp"
+  #include "ast_node.hpp"
+  #include "ast_expressions.hpp"
+  #include "ast_statements.hpp"
+  #include "ast_types.hpp"
+  #include "ast_node.hpp"
+
+  #include "altdec.hpp"
  /* extern const Expression *g_root; // A way of getting the AST out
 */
   //! This is to fix problems when generating C++
@@ -36,6 +42,65 @@
 %type <dvalue> Constant_double
 %type <fvalue> Constant_float
 %type <ldvalue> Constant_long_double
+
+
+%type <> primary_EXPR
+%type <> Constant
+%type <> postfix_EXPR
+%type <> argument_EXPR_list
+%type <> unary_EXPR
+%type <> unary_operator
+%type <> cast_EXPR
+%type <> multiplicative_EXPR
+%type <> additive_EXPR
+%type <> shift_EXPR
+%type <> relational_EXPR
+%type <> equality_EXPR
+%type <> BIT_AND_EXPR
+%type <> BIT_XBIT_OR_EXPR
+%type <> BIT_OR_EXPR
+%type <> LOGIC_AND_EXPR
+%type <> LOGIC_OR_EXPR
+%type <> conditional_EXPR
+%type <> assignment_EXPR
+%type <> assignment
+%type <> EXPR
+%type <> constant_EXPR
+
+
+%type <declaration> declaration
+%type <declaration_specifiers> declaration_specifiers
+%type <storage_class_specifier> storage_class_specifier
+%type <init_declarator_list> init_declarator_list
+%type <init_declarator> init_declarator
+%type <type_specifier> type_specifier
+%type <specifier_list> specifier_list
+%type <declarator> declarator
+%type <direct_declarator> direct_declarator
+%type <pointer> pointer
+%type <parameter_type_list> parameter_type_list
+%type <parameter_list> parameter_list
+%type <parameter_declaration> parameter_declaration
+%type <identifier_list> identifier_list
+%type <type_name> type_name
+%type <abstract_declarator> abstract_declarator
+%type <direct_abstract_declara> direct_abstract_declarator
+%type <initializer> initializer
+%type <initializer_list> initializer_list
+				
+
+
+%type <> statement
+%type <> labeled_statement
+%type <> compound_statement
+%type <> declaration_list
+%type <> statement_list
+%type <> EXPR_statement
+%type <> selection_statement
+%type <> iteration_statement
+%type <> jump_statement 
+
+
 %start ROOT
 
 %%
