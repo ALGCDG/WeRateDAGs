@@ -68,25 +68,25 @@
 %type <> constant_EXPR
 
 
-%type <declaration> declaration
-%type <declaration_specifiers> declaration_specifiers
-%type <storage_class_specifier> storage_class_specifier
-%type <init_declarator_list> init_declarator_list
-%type <init_declarator> init_declarator
-%type <type_specifier> type_specifier
-%type <specifier_list> specifier_list
-%type <declarator> declarator
-%type <direct_declarator> direct_declarator
-%type <pointer> pointer
-%type <parameter_type_list> parameter_type_list
-%type <parameter_list> parameter_list
-%type <parameter_declaration> parameter_declaration
-%type <identifier_list> identifier_list
-%type <type_name> type_name
-%type <abstract_declarator> abstract_declarator
-%type <direct_abstract_declara> direct_abstract_declarator
-%type <initializer> initializer
-%type <initializer_list> initializer_list
+%type <node> declaration
+%type <node> declaration_specifiers
+%type <node> storage_class_specifier
+%type <node> init_declarator_list
+%type <node> init_declarator
+%type <node> type_specifier
+%type <node> specifier_list
+%type <node> declarator
+%type <node> direct_declarator
+%type <node> pointer
+%type <node> parameter_type_list
+%type <node> parameter_list
+%type <node> parameter_declaration
+%type <node> identifier_list
+%type <node> type_name
+%type <node> abstract_declarator
+%type <node> direct_abstract_declarator
+%type <node> initializer
+%type <node> initializer_list
 				
 
 
