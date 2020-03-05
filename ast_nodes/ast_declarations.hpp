@@ -2,6 +2,7 @@
 #define AST_DECLS1
 
 #include "ast_expressions.hpp"
+#include "altdec.hpp"
 #include <vector>
 //vargs?
 //asbtract declarators?
@@ -116,13 +117,13 @@ class ParamDeclaration : public Node{
 
 class NamedParameterDeclaration : public ParamDeclaration{
 private:
-    DeclarationSpecifiers* Specs;
+    declaration_specifiers* Specs;
     Declarator* Decl;
 };
 
 class UnnamedParameterDeclaration : public ParamDeclaration{
 private:
-    DeclarationSpecifiers* Specs; //eg int
+    declaration_specifiers* Specs; //eg int
 
     //optional
     PointerAbstractDeclarator* Decl; //eg *

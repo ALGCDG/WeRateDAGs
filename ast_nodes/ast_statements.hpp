@@ -2,9 +2,9 @@
 #define AST_STATS
 
 #include "ast_expressions.hpp"
-#include "ast_declarations.hpp"
+//#include "ast_declarations.hpp"
 #include "ast_node.hpp"
-#include "ast_types.hpp"
+//#include "ast_types.hpp"
 
 class Statement : public Node{
 
@@ -20,10 +20,11 @@ class Break : public Statement{};
 
 class Return : public Statement{
 public:
-    Return() : ReturnType(NULL), ReturnExpression(NULL) {}
-    Return(Expression* ToReturn) : ReturnType(NULL), ReturnExpression(ToReturn){}
-    Type* ReturnType;
+    Return() : /*ReturnType(NULL),*/ ReturnExpression(NULL) {}
+    Return(Expression* ToReturn) : /*ReturnType(NULL),*/ ReturnExpression(ToReturn){}
+    //Type* ReturnType;
     Expression* ReturnExpression;
+    //TODO types!
 };
 
 //------------------------------
@@ -51,7 +52,7 @@ public:
     For(ExpressionStatement* _init, ExpressionStatement* _control, Expression* _next, Statement* _body) 
             : Init(_init), Control(_control), Next(_next), Body(_body){}
 private:
-    ExpressionStatement* Init, Control;
+    ExpressionStatement* Init, *Control;
     Expression* Next;
     Statement* Body;
 };
@@ -134,4 +135,11 @@ private:
     Statement* Body;
 };
 
+class DeclarationList : public Node{
+public:
+    DeclarationList(declaration* _this_decl): this_decl(_this_decl), left_list(NULL){}
+    DeclarationList(DeclarationList* list, declaration* _this_decl): this_decl(_this_decl), left_list(list){}
+    declaration* this_decl;
+    DeclarationList* left_list;
+};
 #endif

@@ -48,10 +48,10 @@ extern int yydebug;
   #include "ast_node.hpp"
   #include "ast_expressions.hpp"
   #include "ast_statements.hpp"
-  #include "ast_types.hpp"
+  /*#include "ast_types.hpp"*/
   #include "ast_node.hpp"
-
   #include "altdec.hpp"
+
  /* extern const Expression *g_root; // A way of getting the AST out
 */
   //! This is to fix problems when generating C++

@@ -8,12 +8,15 @@
 #define AST_CONTEXT
 
 #include "ast_node.hpp"
+#include "visitors.hpp"
+#include "ast_expressions.hpp"
 #include <string>
 #include <vector>
 #include <unordered_map>
 #include <deque>
 #include <string>
 
+class ConstantExpression;
 /*  Don't need as much of a robust class hierarchy
     Need to contain:
     - Type definitions / declarations
@@ -31,26 +34,42 @@
 namespace Context
 {
     class Record{
-//is this needed? perhaps only noderecord needed
+
 };
+
+
+class typePart{
+    //function: return, args with type
+    //pointer to primitive type
+    //array of size, of type
+    //canonical type or type name
+};
+
+class pointerPart : public Context::typePart{
+public:
+    Context::typePart* pointerTo;
+};
+
+class argPart : public Context::typePart{
+public:
+    std::vector<Context::typePart*> argTypes;
+};
+
+class funcPart : public Context::typePart{
+public:
+    Context::typePart* returns;
+    Context::argPart* args;
+};
+
+class arrayPart : public Context::typePart{
+public:
+    ConstantExpression* size;
+    Context::typePart* ofType;
+};
+
 }
 
-// class ScopeTableRecord : public Record{
-// public:
-//     ScopeTableRecord(_Table* SubTable);
-// private:
-//     _Table* ScopedTablePtr;
-// };
 
-//possibly specialised records for func def, array def?
-// class NodeRecord : public Record{
-// public:
-//     // NodeRecord(Node* ASTNode);
-//     NodeRecord(Node* _node) : ASTNode(_node){}
-//     Node* GetNode(std::string _ID);
-// private:
-//     Node* ASTNode;
-// };
 
 typedef std::unordered_map<std::string, Context::Record*> LocalTable;
 

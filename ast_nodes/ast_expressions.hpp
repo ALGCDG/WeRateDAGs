@@ -2,8 +2,9 @@
 #define AST_EXPR
 
 #include "ast_node.hpp"
-#include "ast_types.hpp"
+//#include "ast_types.hpp"
 #include "ast_context.hpp"
+#include "altdec.hpp"
 #include <vector>
 #include <string>
 //TODO:
@@ -17,7 +18,8 @@
 
 class Expression : public Node{
 public:
-    Type* EvalsToType;
+    //Type* EvalsToType;
+    //TODO types!
 };
 
 //primary expr
