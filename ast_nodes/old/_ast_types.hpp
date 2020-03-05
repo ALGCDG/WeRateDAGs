@@ -1,4 +1,4 @@
-    #ifndef AST_TYPES
+#ifndef AST_TYPES
 #define AST_TYPES
 
 #include <string>

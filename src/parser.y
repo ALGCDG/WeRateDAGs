@@ -5,10 +5,10 @@
   #include "ast_node.hpp"
   #include "ast_expressions.hpp"
   #include "ast_statements.hpp"
-  #include "ast_types.hpp"
+  /*#include "ast_types.hpp"*/
   #include "ast_node.hpp"
-
   #include "altdec.hpp"
+
  /* extern const Expression *g_root; // A way of getting the AST out
 */
   //! This is to fix problems when generating C++
@@ -303,7 +303,7 @@ direct_declarator: Ident { $$ = new direct_declarator($1); }
 				 | direct_declarator Punctuator_squ_open Punctuator_squ_close  { $$ = new direct_declarator(NULL, $1, new unspecified_array_length()); }
 				 | direct_declarator Punctuator_squ_open constant_EXPR Punctuator_squ_close  { $$ = new direct_declarator(NULL, $1, $3); }
 				 | direct_declarator Punctuator_par_open parameter_type_list  Punctuator_par_close  { $$ = new direct_declarator(NULL, $1, NULL, $3); }
-				 /*| direct_declarator Punctuator_par_open identifier_list Punctuator_par_close { std::cerr << "still not sure what this does" << std::endl; }*/ k&r style, not needed
+				 /*| direct_declarator Punctuator_par_open identifier_list Punctuator_par_close { std::cerr << "still not sure what this does" << std::endl; } k&r style, not needed*/
 				 | direct_declarator Punctuator_par_open Punctuator_par_close { std::cerr << "function taking 0 args" << std::endl; }
 
 pointer: Operator_mul { $$ = new pointer(); }
