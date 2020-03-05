@@ -21,13 +21,6 @@ class python_Visitor: public Visitor
         }
         return indent;
     }
-<<<<<<< HEAD
-    /*
-    Statement Translation
-    */
-=======
-
->>>>>>> joff
     void visit(While* w)
     {
         std::cout << gentabs() << "while ";

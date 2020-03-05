@@ -24,8 +24,9 @@
     int ivalue;
     char cvalue;
     double dvalue;
-	float fvalue;
-	long double ldvalue;
+	  float fvalue;
+	  long double ldvalue;
+    Node* node;
 }
 
 %token Constant_int Constant_char Constant_double Constant_float Constant_long_double
@@ -37,35 +38,35 @@
 
 
 
-%type <ivalue> Constant Constant_int
+%type <ivalue> Constant_int
 %type <cvalue> Constant_char
 %type <dvalue> Constant_double
 %type <fvalue> Constant_float
 %type <ldvalue> Constant_long_double
 
 
-%type <> primary_EXPR
-%type <> Constant
-%type <> postfix_EXPR
-%type <> argument_EXPR_list
-%type <> unary_EXPR
-%type <> unary_operator
-%type <> cast_EXPR
-%type <> multiplicative_EXPR
-%type <> additive_EXPR
-%type <> shift_EXPR
-%type <> relational_EXPR
-%type <> equality_EXPR
-%type <> BIT_AND_EXPR
-%type <> BIT_XBIT_OR_EXPR
-%type <> BIT_OR_EXPR
-%type <> LOGIC_AND_EXPR
-%type <> LOGIC_OR_EXPR
-%type <> conditional_EXPR
-%type <> assignment_EXPR
-%type <> assignment
-%type <> EXPR
-%type <> constant_EXPR
+%type <node> primary_EXPR
+%type <node> Constant
+%type <node> postfix_EXPR
+%type <node> argument_EXPR_list
+%type <node> unary_EXPR
+%type <node> unary_operator
+%type <node> cast_EXPR
+%type <node> multiplicative_EXPR
+%type <node> additive_EXPR
+%type <node> shift_EXPR
+%type <node> relational_EXPR
+%type <node> equality_EXPR
+%type <node> BIT_AND_EXPR
+%type <node> BIT_XBIT_OR_EXPR
+%type <node> BIT_OR_EXPR
+%type <node> LOGIC_AND_EXPR
+%type <node> LOGIC_OR_EXPR
+%type <node> conditional_EXPR
+%type <node> assignment_EXPR
+%type <node> assignment
+%type <node> EXPR
+%type <node> constant_EXPR
 
 
 %type <declaration> declaration
@@ -90,15 +91,15 @@
 				
 
 
-%type <> statement
-%type <> labeled_statement
-%type <> compound_statement
-%type <> declaration_list
-%type <> statement_list
-%type <> EXPR_statement
-%type <> selection_statement
-%type <> iteration_statement
-%type <> jump_statement 
+%type <node> statement
+%type <node> labeled_statement
+%type <node> compound_statement
+%type <node> declaration_list
+%type <node> statement_list
+%type <node> EXPR_statement
+%type <node> selection_statement
+%type <node> iteration_statement
+%type <node> jump_statement 
 
 
 %start ROOT
