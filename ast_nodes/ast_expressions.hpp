@@ -3,6 +3,7 @@
 
 #include "ast_node.hpp"
 #include "ast_types.hpp"
+#include "ast_context.hpp"
 #include <vector>
 #include <string>
 //TODO:
@@ -17,27 +18,35 @@
 class Expression : public Node{
 public:
     Type* EvalsToType;
-private:
 };
 
 //primary expr
-class Identifier : public Expression{
+class IdentifierNode : public Expression{
 public:
+    IdentifierNode(std::string _name) : Name(_name){}
     std::string Name;
+    Context::Record* ContextRecord;
 };
 
 class Constant : public Expression{
 public:
+    Constant();//TODO
     union { 
         int int_t; 
         char char_t;
         double dbl_t;
-        float flt_t;
+        float flt_t;    
         long long_t;
     };
 };
 
-class StringLiteral : public ???HALP{};//TODO
+
+class StringLiteral : public Expression{
+public:
+    StringLiteral(std::string _str, bool L = false) : wide(L), str(_str){}
+    bool wide;
+    std::string str;
+};
 //---------------------------------------------------------
 class PostfixExpr : public Expression{
 public:
@@ -62,16 +71,16 @@ public:
 
 class MemberAccess : public PostfixExpr{
 public:
-    MemberAccess(Expression* _LHS, Identifier* _ID) : PostfixExpr(_LHS), ID(_ID){}
+    MemberAccess(Expression* _LHS, IdentifierNode* _ID) : PostfixExpr(_LHS), ID(_ID){}
 private:
-    Identifier* ID;
+    IdentifierNode* ID;
 };
 
 class DerefMemberAccess : public PostfixExpr{
 public:
-    DerefMemberAccess(Expression* _LHS, Identifier* _ID) : PostfixExpr(_LHS), ID(_ID){}
+    DerefMemberAccess(Expression* _LHS, IdentifierNode* _ID) : PostfixExpr(_LHS), ID(_ID){}
 private:
-    Identifier* ID;
+    IdentifierNode* ID;
 };
 
 class PostInc : public PostfixExpr{
@@ -151,13 +160,16 @@ public:
     using PrefixExpr::PrefixExpr;
 };
 
-class SizeofType : public PrefixExpr{
-//TODO -> Needs type system
+class SizeofType : public Expression{
+public:
+    SizeofType(type_name* _typ_nam) : typ_nam(_typ_nam){}
+    type_name* typ_nam;
 };
 
 class CastExpr : public PrefixExpr{
 public:
-    CastExpr(Type? , Expression* ExprToBeCast);
+    CastExpr(type_name* _typ , Expression* _ExprToBeCast) : typ(_typ), PrefixExpr(_ExprToBeCast) {}
+    type_name* typ;
 //TODO -> Needs type system
 };
 
@@ -207,7 +219,7 @@ public:
 //------------
 class LogicalBinaryExpression : public BinaryOpExpression{
 public:
-    LogicalBinaryExpression(Expression* _LHS, Expression* _RHS) : BinaryOpExpression(_LHS, _RHS), EvalsToType /*TODO set to int */ {}
+    LogicalBinaryExpression(Expression* _LHS, Expression* _RHS) : BinaryOpExpression(_LHS, _RHS)/*, EvalsToType() TODO set to int */ {}
 //Always evaluates to int
 };
 
@@ -363,7 +375,7 @@ class CommaSepExpression : public Expression{
 public:
     CommaSepExpression(Expression* _LHS, Expression* _RHS) : RHS(_RHS), LHS(_LHS){}
 private:
-    Expression* LHS, RHS;
+    Expression* LHS, *RHS;
 };
 
 //---------------------------------------------------------
