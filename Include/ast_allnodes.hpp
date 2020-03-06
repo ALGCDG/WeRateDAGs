@@ -3,15 +3,19 @@
 
 #include <string>
 #include <vector>
+// #include "ast_basenode.hpp"
 
-#include "visitors.hpp"
-//FORWARD DECLARE VISITOR
-//class Visitor;
+// #include "visitors.hpp"
+// //FORWARD DECLARE VISITOR
+// class Visitor;
 
-#include "ast_context.hpp"
+// #include "ast_context.hpp"
 //CONTEXT DOES NOT NEED TO KNOW THESE NODES, HANDLED BY VISITOR
 //NO FORWARD DECLARATION NEEDED
-
+namespace Context{
+    class Record;
+}
+class Visitor;
 
 class Node{
 public:
@@ -107,7 +111,7 @@ public:
 
 class ArgExprList : public Node{
 public:
-    ArgExprList(Expression* Arg) : Args{Arg}{}
+    ArgExprList(Expression* Arg){ Args.push_back(Arg); }
     void AppendArgExpression(Expression* ArgExpr);
     //in the grammar, expression* can be assignment expression
     std::vector<Expression*> Args;
@@ -755,6 +759,31 @@ public:
     initializer * init;
     initializer_list * init_list; // cascades may be null
     initializer_list(initializer * _init, initializer_list * _init_list = NULL) : init(_init), init_list(_init_list) {}
+};
+
+
+class TranslationUnit : public Node
+{
+private:
+public:
+    std::vector<GenericExternalDeclaration*> decls;
+    TranslationUnit(GenericExternalDeclaration* _externaldef){ decls.push_back(_externaldef); }
+    void AppendDeclaration(GenericExternalDeclaration* _decl);
+};
+
+class GenericExternalDeclaration : public Node{};
+
+class FunctionDefinition : public GenericExternalDeclaration{
+public:
+    declaration_specifiers* specs;
+    declarator* decl;
+    DeclarationList* decl_list;
+    CompoundStatement* Body;
+};
+
+class ExternalDeclaration : public GenericExternalDeclaration{
+public:
+    declaration* decl;
 };
 
 #endif

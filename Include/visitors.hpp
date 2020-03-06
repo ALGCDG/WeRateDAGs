@@ -1,7 +1,7 @@
 #ifndef VISITORS_HPP
 #define VISITORS_HPP
 
-#include "ast_allnodes.hpp"
+#include "ast_basenode.hpp"
 
 class Visitor{
 public:
