@@ -26,6 +26,7 @@
     IdentifierNode* identnode;
     type_name* _typename;
     ConstantExpression* constexpr;
+    Statement* stmt;
 }
 
 %token Constant_int Constant_char Constant_double Constant_float Constant_long_double
@@ -66,7 +67,7 @@
 %type <expression> LOGIC_OR_EXPR
 %type <expression> conditional_EXPR
 %type <expression> assignment_EXPR
-%type <expression> assignment
+%type <text> assignment
 %type <expression> EXPR
 %type <constexpr> constant_EXPR
 
@@ -93,15 +94,15 @@
 				
 
 
-%type <node> statement
-%type <node> labeled_statement
-%type <node> compound_statement
-%type <node> declaration_list
-%type <node> statement_list
-%type <node> EXPR_statement
-%type <node> selection_statement
-%type <node> iteration_statement
-%type <node> jump_statement 
+%type <stmt> statement
+%type <stmt> labeled_statement
+%type <stmt> compound_statement
+%type <stmt> declaration_list
+%type <stmt> statement_list
+%type <stmt> EXPR_statement
+%type <stmt> selection_statement
+%type <stmt> iteration_statement
+%type <stmt> jump_statement 
 
 
 %start ROOT
@@ -359,7 +360,7 @@ Statements
 statement: selection_statement { $$ = $1; }
          | labeled_statement { $$ = $1; }
          | compound_statement { $$ = $1; }
-         | EXPR_statement { $$ = new ExpressionStatement($1); }
+         | EXPR_statement { $$ = $1; }
          | iteration_statement { $$ = $1; }
          | jump_statement { $$ = $1; }
 

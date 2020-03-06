@@ -216,12 +216,12 @@ private:
 
 class PostInc : public PostfixExpr{
 public:
-    using PostfixExpr::PostfixExpr;
+    PostInc(Expression* _LHS) : PostfixExpr(_LHS){}
 };
 
 class PostDec : public PostfixExpr{
 public:
-    using PostfixExpr::PostfixExpr;
+    PostDec(Expression* _LHS) : PostfixExpr(_LHS){}
 };
 
 
@@ -238,48 +238,48 @@ private:
 
 class UnaryAddressOperator : public PrefixExpr{
 public:
-    using PrefixExpr::PrefixExpr;
+    UnaryAddressOperator(Expression* _RHS) : PrefixExpr(_RHS){}
 };
 
 class UnaryDerefOperator : public PrefixExpr{
 public:
-    using PrefixExpr::PrefixExpr;
+    UnaryDerefOperator(Expression* _RHS) : PrefixExpr(_RHS){}
 };
 
 class UnaryPlusOperator : public PrefixExpr{
 public:
-    using PrefixExpr::PrefixExpr;
+    UnaryPlusOperator(Expression* _RHS) : PrefixExpr(_RHS){}
 };
 
 class UnaryNegOperator : public PrefixExpr{
 public:
-    using PrefixExpr::PrefixExpr;
+    UnaryNegOperator(Expression* _RHS) : PrefixExpr(_RHS){}
 };
 
 class UnaryBitwiseNotOperator : public PrefixExpr{
 public:
-    using PrefixExpr::PrefixExpr;
+    UnaryBitwiseNotOperator(Expression* _RHS) : PrefixExpr(_RHS){}
 };
 
 class UnaryLogicalNotOperator : public PrefixExpr{
 public:
-    using PrefixExpr::PrefixExpr;
+    UnaryLogicalNotOperator(Expression* _RHS) : PrefixExpr(_RHS){}
 };
 
 //The rest of the prefix types:
 class PreInc : public PrefixExpr{
 public:
-    using PrefixExpr::PrefixExpr;
+    PreInc(Expression* _RHS) : PrefixExpr(_RHS){}
 };
 
 class PreDec : public PrefixExpr{
 public:
-    using PrefixExpr::PrefixExpr;
+    PreDec(Expression* _RHS) : PrefixExpr(_RHS){}
 };
 
 class SizeofExpr : public PrefixExpr{
 public:
-    using PrefixExpr::PrefixExpr;
+    SizeofExpr(Expression* _RHS) : PrefixExpr(_RHS){}
 };
 
 class SizeofType : public Expression{
@@ -305,37 +305,37 @@ public:
 
 class Multiply : public BinaryOpExpression{
 public:
-    using BinaryOpExpression::BinaryOpExpression;
+    Multiply(Expression* _LHS, Expression* _RHS) : BinaryOpExpression(_LHS, _RHS){}
 };
 
 class Divide : public BinaryOpExpression{
 public:
-    using BinaryOpExpression::BinaryOpExpression;
+    Divide(Expression* _LHS, Expression* _RHS) : BinaryOpExpression(_LHS, _RHS){}
 };
 
 class Modulo : public BinaryOpExpression{
 public:
-    using BinaryOpExpression::BinaryOpExpression;
+    Modulo(Expression* _LHS, Expression* _RHS) : BinaryOpExpression(_LHS, _RHS){}
 };
 
 class Add : public BinaryOpExpression{
 public:
-    using BinaryOpExpression::BinaryOpExpression;
+    Add(Expression* _LHS, Expression* _RHS) : BinaryOpExpression(_LHS, _RHS){}
 };
 
 class Sub : public BinaryOpExpression{
 public:
-    using BinaryOpExpression::BinaryOpExpression;
+    Sub(Expression* _LHS, Expression* _RHS) : BinaryOpExpression(_LHS, _RHS){}
 };
 
 class ShiftLeft : public BinaryOpExpression{
 public:
-    using BinaryOpExpression::BinaryOpExpression;
+    ShiftLeft(Expression* _LHS, Expression* _RHS) : BinaryOpExpression(_LHS, _RHS){}
 };
 
 class ShiftRight : public BinaryOpExpression{
 public:
-    using BinaryOpExpression::BinaryOpExpression;
+    ShiftRight(Expression* _LHS, Expression* _RHS) : BinaryOpExpression(_LHS, _RHS){}
 };
 
 //------------
@@ -347,70 +347,71 @@ public:
 
 class LessThan : public LogicalBinaryExpression{
 public:
-    using LogicalBinaryExpression::LogicalBinaryExpression;
+    LessThan(Expression* _LHS, Expression* _RHS) : LogicalBinaryExpression(_LHS, _RHS){}
 };
 
 class GreaterThan : public LogicalBinaryExpression{
 public:
-    using LogicalBinaryExpression::LogicalBinaryExpression;
+    GreaterThan(Expression* _LHS, Expression* _RHS) : LogicalBinaryExpression(_LHS, _RHS){}
 };
 
 class LessThanOrEqual : public LogicalBinaryExpression{
 public:
-    using LogicalBinaryExpression::LogicalBinaryExpression;
+    LessThanOrEqual(Expression* _LHS, Expression* _RHS) : LogicalBinaryExpression(_LHS, _RHS){}
 };
 
 class GreaterThanOrEqual : public LogicalBinaryExpression{
 public:
-    using LogicalBinaryExpression::LogicalBinaryExpression;
+    GreaterThanOrEqual(Expression* _LHS, Expression* _RHS) : LogicalBinaryExpression(_LHS, _RHS){}
 };
 
 class EqualTo : public LogicalBinaryExpression{
 public:
-    using LogicalBinaryExpression::LogicalBinaryExpression;
+    EqualTo(Expression* _LHS, Expression* _RHS) : LogicalBinaryExpression(_LHS, _RHS){}
 };
 
 class NotEqualTo : public LogicalBinaryExpression{
 public:
-    using LogicalBinaryExpression::LogicalBinaryExpression;
+    NotEqualTo(Expression* _LHS, Expression* _RHS) : LogicalBinaryExpression(_LHS, _RHS){}
 };
 
 class LogicalAND : public LogicalBinaryExpression{
 public:
-    using LogicalBinaryExpression::LogicalBinaryExpression;
+    LogicalAND(Expression* _LHS, Expression* _RHS) : LogicalBinaryExpression(_LHS, _RHS){}
 };
 
 class LogicalOR : public LogicalBinaryExpression{
 public:
-    using LogicalBinaryExpression::LogicalBinaryExpression;
+    LogicalOR(Expression* _LHS, Expression* _RHS) : LogicalBinaryExpression(_LHS, _RHS){}
 };
 
 //------------
 class BitwiseBinaryExpression : public BinaryOpExpression{
 //type depends on input
 public:
-    using BinaryOpExpression::BinaryOpExpression;
+    BitwiseBinaryExpression(Expression* _LHS, Expression* _RHS) : BinaryOpExpression(_LHS, _RHS){}
 };
 
 class BitwiseAND : public BitwiseBinaryExpression{
 public:
-    using BinaryOpExpression::BinaryOpExpression;
+    BitwiseAND(Expression* _LHS, Expression* _RHS) : BitwiseBinaryExpression(_LHS, _RHS){}
 };
 
 class BitwiseOR : public BitwiseBinaryExpression{
 public:
-    using BinaryOpExpression::BinaryOpExpression;
+    BitwiseOR(Expression* _LHS, Expression* _RHS) : BitwiseBinaryExpression(_LHS, _RHS){}
 };
 
 class BitwiseXOR : public BitwiseBinaryExpression{
 public:
-    using BinaryOpExpression::BinaryOpExpression;
+    BitwiseXOR(Expression* _LHS, Expression* _RHS) : BitwiseBinaryExpression(_LHS, _RHS){}
 };
 //---------------------------------------------------------
 
 class TernaryOpExpression : public Expression{
-private:
-    Expression* Condition, IfTrue, IfFalse;
+public:
+    TernaryOpExpression(Expression* cond, Expression* _true, Expression* _false) : Condition(cond), IfTrue(_true), IfFalse(_false){}
+    Expression* Condition, *IfTrue, *IfFalse;
 };
 
 //---------------------------------------------------------
@@ -428,57 +429,57 @@ public:
 
 class AssignmentExpression : public GenericAssignExpr{
 public:
-    using GenericAssignExpr::GenericAssignExpr;
+    AssignmentExpression(Expression* _LHS, Expression* _RHS) : GenericAssignExpr(_LHS, _RHS){}
 };
 
 class MulAssignment : public GenericAssignExpr{
 public:
-    using GenericAssignExpr::GenericAssignExpr;
+    MulAssignment(Expression* _LHS, Expression* _RHS) : GenericAssignExpr(_LHS, _RHS){}
 };
 
 class DivAssignment : public GenericAssignExpr{
 public:
-    using GenericAssignExpr::GenericAssignExpr;
+    DivAssignment(Expression* _LHS, Expression* _RHS) : GenericAssignExpr(_LHS, _RHS){}
 };
 
 class ModAssignment : public GenericAssignExpr{
 public:
-    using GenericAssignExpr::GenericAssignExpr;
+    ModAssignment(Expression* _LHS, Expression* _RHS) : GenericAssignExpr(_LHS, _RHS){}
 };
 
 class AddAssignment : public GenericAssignExpr{
 public:
-    using GenericAssignExpr::GenericAssignExpr;
+    AddAssignment(Expression* _LHS, Expression* _RHS) : GenericAssignExpr(_LHS, _RHS){}
 };
 
 class SubAssignment : public GenericAssignExpr{
 public:
-    using GenericAssignExpr::GenericAssignExpr;
+    SubAssignment(Expression* _LHS, Expression* _RHS) : GenericAssignExpr(_LHS, _RHS){}
 };
 
 class ShiftLeftAssignment : public GenericAssignExpr{
 public:
-    using GenericAssignExpr::GenericAssignExpr;
+    ShiftLeftAssignment(Expression* _LHS, Expression* _RHS) : GenericAssignExpr(_LHS, _RHS){}
 };
 
 class ShiftRightAssignment : public GenericAssignExpr{
 public:
-    using GenericAssignExpr::GenericAssignExpr;
+    ShiftRightAssignment(Expression* _LHS, Expression* _RHS) : GenericAssignExpr(_LHS, _RHS){}
 };
 
 class BitwiseANDAssignment : public GenericAssignExpr{
 public:
-    using GenericAssignExpr::GenericAssignExpr;
+    BitwiseANDAssignment(Expression* _LHS, Expression* _RHS) : GenericAssignExpr(_LHS, _RHS){}
 };
 
 class BitwiseXORAssignment : public GenericAssignExpr{
 public:
-    using GenericAssignExpr::GenericAssignExpr;
+    BitwiseXORAssignment(Expression* _LHS, Expression* _RHS) : GenericAssignExpr(_LHS, _RHS){}
 };
 
 class BitwiseORAssignment : public GenericAssignExpr{
 public:
-    using GenericAssignExpr::GenericAssignExpr;
+    BitwiseORAssignment(Expression* _LHS, Expression* _RHS) : GenericAssignExpr(_LHS, _RHS){}
 };
 
 //---------------------------------------------------------
@@ -682,6 +683,7 @@ public:
 
 class init_declarator : public Node
 {
+public:
     // a single atomic declaration
     declarator * dec; // points to declaration, ie a name or identifier
     initializer * init; // points to expression being assigned to identifier, may be NULL if none is

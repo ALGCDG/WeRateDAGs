@@ -164,8 +164,9 @@ union YYSTYPE
     IdentifierNode* identnode;
     type_name* _typename;
     ConstantExpression* constexpr;
+    Statement* stmt;
 
-#line 169 "src/parser.tab.hpp" /* yacc.c:1909  */
+#line 170 "src/parser.tab.hpp" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;
