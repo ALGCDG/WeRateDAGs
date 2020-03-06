@@ -4,10 +4,10 @@ CPPFLAGS += -I Include
 
 all : bin/translator
 
-src/parser.tab.cpp src/parser.tab.hpp : src/parser.y
+src/parser.tab.cpp Include/parser.tab.hpp : src/parser.y
 	bison -v -d src/parser.y -o src/parser.tab.cpp
 
-src/lexer.yy.cpp : src/lexer.flex src/parser.tab.hpp
+src/lexer.yy.cpp : src/lexer.flex Include/parser.tab.hpp
 	flex -o src/lexer.yy.cpp  src/lexer.flex
 
 bin/translator : src/parser.tab.o src/lexer.yy.o
