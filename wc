@@ -20,8 +20,32 @@ src/parser.y:28:23: error: expected ‘;’ at end of member declaration
 src/parser.y:28:25: error: declaration does not declare anything [-fpermissive]
      ConstantExpression* constexpr;
                          ^
-src/parser.y: In function ‘int yyparse()’:
-src/parser.y:186:88: error: use of deleted function ‘BitwiseAND::BitwiseAND(Expression*, Expression*)’
+src/parser.y:31:1: error: ‘storage_class_specifier’ does not name a type
+ storage_class_specifier * t_storage_class_specifier;
+ ^
+src/parser.y:39:1: error: ‘parameter_type_list’ does not name a type
+ parameter_type_list  *  t_parameter_type_list;
+ ^
+src/parser.y:42:1: error: ‘identifier_list’ does not name a type
+ identifier_list       * t_identifier_list;
+ ^
+src/parser.tab.cpp:1503:9: error: use of deleted function ‘YYSTYPE::YYSTYPE()’
+ YYSTYPE yylval;
+         ^
+src/parser.tab.cpp:204:7: note: ‘YYSTYPE::YYSTYPE()’ is implicitly deleted because the default definition would be ill-formed:
+ union YYSTYPE
+       ^
+src/parser.y:45:28: error: union member ‘YYSTYPE::t_direct_abstract_declarator’ with non-trivial ‘direct_abstract_declarator::direct_abstract_declarator(direct_abstract_declarator*, abstract_declarator*, ConstantExpression*, parameter_list*)’
+ direct_abstract_declarator t_direct_abstract_declarator;
+                            ^
+src/parser.tab.cpp: In function ‘int yyparse()’:
+src/parser.tab.cpp:1532:30: error: use of deleted function ‘YYSTYPE::YYSTYPE()’
+     YYSTYPE yyvsa[YYINITDEPTH];
+                              ^
+src/parser.tab.cpp:1544:11: error: use of deleted function ‘YYSTYPE::YYSTYPE()’
+   YYSTYPE yyval;
+           ^
+src/parser.y:202:88: error: use of deleted function ‘BitwiseAND::BitwiseAND(Expression*, Expression*)’
 In file included from src/parser.y:5:0:
 Include/ast_allnodes.hpp:397:31: note: ‘BitwiseAND::BitwiseAND(Expression*, Expression*)’ is implicitly deleted because the default definition would be ill-formed:
      using BinaryOpExpression::BinaryOpExpression;
@@ -42,7 +66,7 @@ Include/ast_allnodes.hpp:300:7: note: candidate: constexpr BinaryOpExpression::B
 Include/ast_allnodes.hpp:300:7: note:   candidate expects 1 argument, 0 provided
 Include/ast_allnodes.hpp:300:7: note: candidate: constexpr BinaryOpExpression::BinaryOpExpression(BinaryOpExpression&&)
 Include/ast_allnodes.hpp:300:7: note:   candidate expects 1 argument, 0 provided
-src/parser.y:189:88: error: use of deleted function ‘BitwiseXOR::BitwiseXOR(Expression*, Expression*)’
+src/parser.y:205:88: error: use of deleted function ‘BitwiseXOR::BitwiseXOR(Expression*, Expression*)’
          | BIT_XBIT_OR_EXPR Operator_bit_xor BIT_AND_EXPR{ $$ = new BitwiseXOR($1, $3); }
                                                                                         ^
 In file included from src/parser.y:5:0:
@@ -50,22 +74,22 @@ Include/ast_allnodes.hpp:407:31: note: ‘BitwiseXOR::BitwiseXOR(Expression*, Ex
      using BinaryOpExpression::BinaryOpExpression;
                                ^
 Include/ast_allnodes.hpp:407:31: error: use of deleted function ‘BitwiseBinaryExpression::BitwiseBinaryExpression()’
-src/parser.y:192:87: error: use of deleted function ‘BitwiseOR::BitwiseOR(Expression*, Expression*)’
+src/parser.y:208:87: error: use of deleted function ‘BitwiseOR::BitwiseOR(Expression*, Expression*)’
 In file included from src/parser.y:5:0:
 Include/ast_allnodes.hpp:402:31: note: ‘BitwiseOR::BitwiseOR(Expression*, Expression*)’ is implicitly deleted because the default definition would be ill-formed:
      using BinaryOpExpression::BinaryOpExpression;
                                ^
 Include/ast_allnodes.hpp:402:31: error: use of deleted function ‘BitwiseBinaryExpression::BitwiseBinaryExpression()’
-src/parser.y:195:32: error: expected type-specifier before ‘LogicAND’
+src/parser.y:211:32: error: expected type-specifier before ‘LogicAND’
                | LOGIC_AND_EXPR Operator_and BIT_OR_EXPR{ $$ = new LogicAND($1, $3); }
                                 ^
-src/parser.y:198:32: error: expected type-specifier before ‘LogicOR’
+src/parser.y:214:32: error: expected type-specifier before ‘LogicOR’
               | LOGIC_OR_EXPR Operator_or LOGIC_AND_EXPR{ $$ = new LogicOR($1, $3); }
                                 ^
-src/parser.y:201:121: error: new initializer expression list treated as compound expression [-fpermissive]
+src/parser.y:217:121: error: new initializer expression list treated as compound expression [-fpermissive]
                  | LOGIC_OR_EXPR Operator_trinary_question EXPR Operator_trinary_choice conditional_EXPR { $$ = new TernaryOpExpression($1, $3, $5); }
                                                                                                                          ^
-src/parser.y:201:121: error: no matching function for call to ‘TernaryOpExpression::TernaryOpExpression(Expression*&)’
+src/parser.y:217:121: error: no matching function for call to ‘TernaryOpExpression::TernaryOpExpression(Expression*&)’
 In file included from src/parser.y:5:0:
 Include/ast_allnodes.hpp:411:7: note: candidate: TernaryOpExpression::TernaryOpExpression()
  class TernaryOpExpression : public Expression{
@@ -75,128 +99,62 @@ Include/ast_allnodes.hpp:411:7: note: candidate: constexpr TernaryOpExpression::
 Include/ast_allnodes.hpp:411:7: note:   no known conversion for argument 1 from ‘Expression*’ to ‘const TernaryOpExpression&’
 Include/ast_allnodes.hpp:411:7: note: candidate: constexpr TernaryOpExpression::TernaryOpExpression(TernaryOpExpression&&)
 Include/ast_allnodes.hpp:411:7: note:   no known conversion for argument 1 from ‘Expression*’ to ‘TernaryOpExpression&&’
-src/parser.y:204:131: error: no matching function for call to ‘GenericAssignExpr::DecodeAssignOp(Expression*&, Expression*&, Expression*&)’
+src/parser.y:220:131: error: no matching function for call to ‘GenericAssignExpr::DecodeAssignOp(Expression*&, Expression*&, Expression*&)’
 In file included from src/parser.y:5:0:
 Include/ast_allnodes.hpp:421:31: note: candidate: static GenericAssignExpr* GenericAssignExpr::DecodeAssignOp(Expression*, std::__cxx11::string*, Expression*)
      static GenericAssignExpr* DecodeAssignOp(Expression* LHS, std::string* yytext, Expression* RHS);
                                ^
 Include/ast_allnodes.hpp:421:31: note:   no known conversion for argument 2 from ‘Expression*’ to ‘std::__cxx11::string* {aka std::__cxx11::basic_string<char>*}’
-src/parser.y:207:26: error: cannot convert ‘std::__cxx11::string* {aka std::__cxx11::basic_string<char>*}’ to ‘Expression*’ in assignment
+src/parser.y:223:26: error: cannot convert ‘std::__cxx11::string* {aka std::__cxx11::basic_string<char>*}’ to ‘Expression*’ in assignment
  assignment: Operator_assign { $$ = new std::string("=");} 
                           ^
-src/parser.y:208:26: error: cannot convert ‘std::__cxx11::string* {aka std::__cxx11::basic_string<char>*}’ to ‘Expression*’ in assignment
+src/parser.y:224:26: error: cannot convert ‘std::__cxx11::string* {aka std::__cxx11::basic_string<char>*}’ to ‘Expression*’ in assignment
            | Operator_mul_assign { $$ = new std::string("*=");}
                           ^
-src/parser.y:209:26: error: cannot convert ‘std::__cxx11::string* {aka std::__cxx11::basic_string<char>*}’ to ‘Expression*’ in assignment
+src/parser.y:225:26: error: cannot convert ‘std::__cxx11::string* {aka std::__cxx11::basic_string<char>*}’ to ‘Expression*’ in assignment
            | Operator_div_assign { $$ = new std::string("/=");}
                           ^
-src/parser.y:210:26: error: cannot convert ‘std::__cxx11::string* {aka std::__cxx11::basic_string<char>*}’ to ‘Expression*’ in assignment
+src/parser.y:226:26: error: cannot convert ‘std::__cxx11::string* {aka std::__cxx11::basic_string<char>*}’ to ‘Expression*’ in assignment
            | Operator_mod_assign { $$ = new std::string("%=");}
                           ^
-src/parser.y:211:26: error: cannot convert ‘std::__cxx11::string* {aka std::__cxx11::basic_string<char>*}’ to ‘Expression*’ in assignment
+src/parser.y:227:26: error: cannot convert ‘std::__cxx11::string* {aka std::__cxx11::basic_string<char>*}’ to ‘Expression*’ in assignment
            | Operator_add_assign { $$ = new std::string("+=");}
                           ^
-src/parser.y:212:26: error: cannot convert ‘std::__cxx11::string* {aka std::__cxx11::basic_string<char>*}’ to ‘Expression*’ in assignment
+src/parser.y:228:26: error: cannot convert ‘std::__cxx11::string* {aka std::__cxx11::basic_string<char>*}’ to ‘Expression*’ in assignment
            | Operator_sub_assign { $$ = new std::string("-=");}
                           ^
-src/parser.y:213:26: error: cannot convert ‘std::__cxx11::string* {aka std::__cxx11::basic_string<char>*}’ to ‘Expression*’ in assignment
+src/parser.y:229:26: error: cannot convert ‘std::__cxx11::string* {aka std::__cxx11::basic_string<char>*}’ to ‘Expression*’ in assignment
            | Operator_sl_assign { $$ = new std::string("<<=");}
                           ^
-src/parser.y:214:26: error: cannot convert ‘std::__cxx11::string* {aka std::__cxx11::basic_string<char>*}’ to ‘Expression*’ in assignment
+src/parser.y:230:26: error: cannot convert ‘std::__cxx11::string* {aka std::__cxx11::basic_string<char>*}’ to ‘Expression*’ in assignment
            | Operator_sr_assign { $$ = new std::string(">>=");}
                           ^
-src/parser.y:215:26: error: cannot convert ‘std::__cxx11::string* {aka std::__cxx11::basic_string<char>*}’ to ‘Expression*’ in assignment
+src/parser.y:231:26: error: cannot convert ‘std::__cxx11::string* {aka std::__cxx11::basic_string<char>*}’ to ‘Expression*’ in assignment
            | Operator_and_assign { $$ = new std::string("&=");}
                           ^
-src/parser.y:216:26: error: cannot convert ‘std::__cxx11::string* {aka std::__cxx11::basic_string<char>*}’ to ‘Expression*’ in assignment
+src/parser.y:232:26: error: cannot convert ‘std::__cxx11::string* {aka std::__cxx11::basic_string<char>*}’ to ‘Expression*’ in assignment
            | Operator_xor_assign { $$ = new std::string("^=");}
                           ^
-src/parser.y:217:26: error: cannot convert ‘std::__cxx11::string* {aka std::__cxx11::basic_string<char>*}’ to ‘Expression*’ in assignment
+src/parser.y:233:26: error: cannot convert ‘std::__cxx11::string* {aka std::__cxx11::basic_string<char>*}’ to ‘Expression*’ in assignment
            | Operator_or_assign{ $$ = new std::string("|=");}
                           ^
-src/parser.y:230:49: error: invalid conversion from ‘Node*’ to ‘declaration_specifiers*’ [-fpermissive]
- declaration: declaration_specifiers init_declarator_list Punctuator_eol { $$ = new declaration($1, $2); }
-                                                 ^
-In file included from src/parser.y:5:0:
-Include/ast_allnodes.hpp:658:5: note:   initializing argument 1 of ‘declaration::declaration(declaration_specifiers*, init_declarator_list*)’
-     declaration(declaration_specifiers * _specifier ,init_declarator_list * _list = NULL) : specifier(_specifier), list(_list) {}
-     ^
-src/parser.y:230:67: error: invalid conversion from ‘Node*’ to ‘init_declarator_list*’ [-fpermissive]
- declaration: declaration_specifiers init_declarator_list Punctuator_eol { $$ = new declaration($1, $2); }
-                                                                   ^
-In file included from src/parser.y:5:0:
-Include/ast_allnodes.hpp:658:5: note:   initializing argument 2 of ‘declaration::declaration(declaration_specifiers*, init_declarator_list*)’
-     declaration(declaration_specifiers * _specifier ,init_declarator_list * _list = NULL) : specifier(_specifier), list(_list) {}
-     ^
-src/parser.y:231:49: error: invalid conversion from ‘Node*’ to ‘declaration_specifiers*’ [-fpermissive]
-            | declaration_specifiers Punctuator_eol { $$ = new declaration($1); }
-                                                 ^
-In file included from src/parser.y:5:0:
-Include/ast_allnodes.hpp:658:5: note:   initializing argument 1 of ‘declaration::declaration(declaration_specifiers*, init_declarator_list*)’
-     declaration(declaration_specifiers * _specifier ,init_declarator_list * _list = NULL) : specifier(_specifier), list(_list) {}
-     ^
-src/parser.y:235:59: error: invalid conversion from ‘Node*’ to ‘type_specifier*’ [-fpermissive]
-                       | type_specifier { $$ = new declaration_specifiers($1); }
-                                                           ^
-In file included from src/parser.y:5:0:
-Include/ast_allnodes.hpp:670:5: note:   initializing argument 1 of ‘declaration_specifiers::declaration_specifiers(type_specifier*, declaration_specifiers*)’
-     declaration_specifiers(type_specifier * _type_spec, declaration_specifiers * _specifier = NULL) : type_spec(_type_spec), specifier(_specifier) {}
-     ^
-src/parser.y:236:60: error: invalid conversion from ‘Node*’ to ‘type_specifier*’ [-fpermissive]
-                       | type_specifier declaration_specifiers { $$ = new declaration_specifiers($1, $2); }
-                                                            ^
-In file included from src/parser.y:5:0:
-Include/ast_allnodes.hpp:670:5: note:   initializing argument 1 of ‘declaration_specifiers::declaration_specifiers(type_specifier*, declaration_specifiers*)’
-     declaration_specifiers(type_specifier * _type_spec, declaration_specifiers * _specifier = NULL) : type_spec(_type_spec), specifier(_specifier) {}
-     ^
-src/parser.y:236:77: error: invalid conversion from ‘Node*’ to ‘declaration_specifiers*’ [-fpermissive]
-                       | type_specifier declaration_specifiers { $$ = new declaration_specifiers($1, $2); }
-                                                                             ^
-In file included from src/parser.y:5:0:
-Include/ast_allnodes.hpp:670:5: note:   initializing argument 2 of ‘declaration_specifiers::declaration_specifiers(type_specifier*, declaration_specifiers*)’
-     declaration_specifiers(type_specifier * _type_spec, declaration_specifiers * _specifier = NULL) : type_spec(_type_spec), specifier(_specifier) {}
-     ^
-src/parser.y:240:26: error: expected type-specifier before ‘init_declaration_list’
+src/parser.y:256:44: error: expected type-specifier before ‘init_declaration_list’
  init_declarator_list: init_declarator { $$ = new init_declaration_list($1); }
-                          ^
-src/parser.y:241:26: error: expected type-specifier before ‘init_declaration_list’
+                                            ^
+src/parser.y:257:44: error: expected type-specifier before ‘init_declaration_list’
                      | init_declarator_list Operator_comma init_declarator { $$ = new init_declaration_list($3, $1); }
-                          ^
+                                            ^
 In file included from src/parser.y:5:0:
 Include/ast_allnodes.hpp:688:5: error: ‘init_declarator::init_declarator(declarator*, initializer*)’ is private
      init_declarator(declarator * _dec, initializer * _init = NULL) : dec(_dec), init(_init) {}
      ^
-src/parser.y:243:57: error: within this context
- init_declarator: declarator { $$ = new init_declarator($1); }
-                                                         ^
-src/parser.y:243:52: error: invalid conversion from ‘Node*’ to ‘declarator*’ [-fpermissive]
- init_declarator: declarator { $$ = new init_declarator($1); }
-                                                    ^
+src/parser.y:259:78: error: within this context
 In file included from src/parser.y:5:0:
-Include/ast_allnodes.hpp:688:5: note:   initializing argument 1 of ‘init_declarator::init_declarator(declarator*, initializer*)’
-     init_declarator(declarator * _dec, initializer * _init = NULL) : dec(_dec), init(_init) {}
-     ^
 Include/ast_allnodes.hpp:688:5: error: ‘init_declarator::init_declarator(declarator*, initializer*)’ is private
-src/parser.y:244:75: error: within this context
-                | declarator Operator_assign initializer { $$ = new init_declarator($1, $3); }
-                                                                           ^
-src/parser.y:244:53: error: invalid conversion from ‘Node*’ to ‘declarator*’ [-fpermissive]
-                | declarator Operator_assign initializer { $$ = new init_declarator($1, $3); }
-                                                     ^
-In file included from src/parser.y:5:0:
-Include/ast_allnodes.hpp:688:5: note:   initializing argument 1 of ‘init_declarator::init_declarator(declarator*, initializer*)’
      init_declarator(declarator * _dec, initializer * _init = NULL) : dec(_dec), init(_init) {}
      ^
-src/parser.y:244:70: error: invalid conversion from ‘Node*’ to ‘initializer*’ [-fpermissive]
-                | declarator Operator_assign initializer { $$ = new init_declarator($1, $3); }
-                                                                      ^
-In file included from src/parser.y:5:0:
-Include/ast_allnodes.hpp:688:5: note:   initializing argument 2 of ‘init_declarator::init_declarator(declarator*, initializer*)’
-     init_declarator(declarator * _dec, initializer * _init = NULL) : dec(_dec), init(_init) {}
-     ^
-src/parser.y:246:56: error: no matching function for call to ‘type_specifier::type_specifier(std::__cxx11::string*&)’
- type_specifier: Keyword_void { $$ = new type_specifier($1); }
-                                                        ^
+src/parser.y:260:105: error: within this context
+src/parser.y:262:68: error: no matching function for call to ‘type_specifier::type_specifier(std::__cxx11::string*&)’
 In file included from src/parser.y:5:0:
 Include/ast_allnodes.hpp:714:5: note: candidate: type_specifier::type_specifier(const string&)
      type_specifier(const std::string &Keyword = "") : type(Keyword) {}
@@ -208,9 +166,7 @@ Include/ast_allnodes.hpp:707:7: note: candidate: type_specifier::type_specifier(
 Include/ast_allnodes.hpp:707:7: note:   no known conversion for argument 1 from ‘std::__cxx11::string* {aka std::__cxx11::basic_string<char>*}’ to ‘const type_specifier&’
 Include/ast_allnodes.hpp:707:7: note: candidate: type_specifier::type_specifier(type_specifier&&)
 Include/ast_allnodes.hpp:707:7: note:   no known conversion for argument 1 from ‘std::__cxx11::string* {aka std::__cxx11::basic_string<char>*}’ to ‘type_specifier&&’
-src/parser.y:247:56: error: no matching function for call to ‘type_specifier::type_specifier(std::__cxx11::string*&)’
-               | Keyword_char { $$ = new type_specifier($1); }
-                                                        ^
+src/parser.y:263:68: error: no matching function for call to ‘type_specifier::type_specifier(std::__cxx11::string*&)’
 In file included from src/parser.y:5:0:
 Include/ast_allnodes.hpp:714:5: note: candidate: type_specifier::type_specifier(const string&)
      type_specifier(const std::string &Keyword = "") : type(Keyword) {}
@@ -222,9 +178,7 @@ Include/ast_allnodes.hpp:707:7: note: candidate: type_specifier::type_specifier(
 Include/ast_allnodes.hpp:707:7: note:   no known conversion for argument 1 from ‘std::__cxx11::string* {aka std::__cxx11::basic_string<char>*}’ to ‘const type_specifier&’
 Include/ast_allnodes.hpp:707:7: note: candidate: type_specifier::type_specifier(type_specifier&&)
 Include/ast_allnodes.hpp:707:7: note:   no known conversion for argument 1 from ‘std::__cxx11::string* {aka std::__cxx11::basic_string<char>*}’ to ‘type_specifier&&’
-src/parser.y:248:56: error: no matching function for call to ‘type_specifier::type_specifier(std::__cxx11::string*&)’
-               | Keyword_short { $$ = new type_specifier($1); }
-                                                        ^
+src/parser.y:264:68: error: no matching function for call to ‘type_specifier::type_specifier(std::__cxx11::string*&)’
 In file included from src/parser.y:5:0:
 Include/ast_allnodes.hpp:714:5: note: candidate: type_specifier::type_specifier(const string&)
      type_specifier(const std::string &Keyword = "") : type(Keyword) {}
@@ -236,9 +190,7 @@ Include/ast_allnodes.hpp:707:7: note: candidate: type_specifier::type_specifier(
 Include/ast_allnodes.hpp:707:7: note:   no known conversion for argument 1 from ‘std::__cxx11::string* {aka std::__cxx11::basic_string<char>*}’ to ‘const type_specifier&’
 Include/ast_allnodes.hpp:707:7: note: candidate: type_specifier::type_specifier(type_specifier&&)
 Include/ast_allnodes.hpp:707:7: note:   no known conversion for argument 1 from ‘std::__cxx11::string* {aka std::__cxx11::basic_string<char>*}’ to ‘type_specifier&&’
-src/parser.y:249:56: error: no matching function for call to ‘type_specifier::type_specifier(std::__cxx11::string*&)’
-               | Keyword_int { $$ = new type_specifier($1); }
-                                                        ^
+src/parser.y:265:68: error: no matching function for call to ‘type_specifier::type_specifier(std::__cxx11::string*&)’
 In file included from src/parser.y:5:0:
 Include/ast_allnodes.hpp:714:5: note: candidate: type_specifier::type_specifier(const string&)
      type_specifier(const std::string &Keyword = "") : type(Keyword) {}
@@ -250,9 +202,7 @@ Include/ast_allnodes.hpp:707:7: note: candidate: type_specifier::type_specifier(
 Include/ast_allnodes.hpp:707:7: note:   no known conversion for argument 1 from ‘std::__cxx11::string* {aka std::__cxx11::basic_string<char>*}’ to ‘const type_specifier&’
 Include/ast_allnodes.hpp:707:7: note: candidate: type_specifier::type_specifier(type_specifier&&)
 Include/ast_allnodes.hpp:707:7: note:   no known conversion for argument 1 from ‘std::__cxx11::string* {aka std::__cxx11::basic_string<char>*}’ to ‘type_specifier&&’
-src/parser.y:250:56: error: no matching function for call to ‘type_specifier::type_specifier(std::__cxx11::string*&)’
-               | Keyword_long { $$ = new type_specifier($1); }
-                                                        ^
+src/parser.y:266:68: error: no matching function for call to ‘type_specifier::type_specifier(std::__cxx11::string*&)’
 In file included from src/parser.y:5:0:
 Include/ast_allnodes.hpp:714:5: note: candidate: type_specifier::type_specifier(const string&)
      type_specifier(const std::string &Keyword = "") : type(Keyword) {}
@@ -264,9 +214,7 @@ Include/ast_allnodes.hpp:707:7: note: candidate: type_specifier::type_specifier(
 Include/ast_allnodes.hpp:707:7: note:   no known conversion for argument 1 from ‘std::__cxx11::string* {aka std::__cxx11::basic_string<char>*}’ to ‘const type_specifier&’
 Include/ast_allnodes.hpp:707:7: note: candidate: type_specifier::type_specifier(type_specifier&&)
 Include/ast_allnodes.hpp:707:7: note:   no known conversion for argument 1 from ‘std::__cxx11::string* {aka std::__cxx11::basic_string<char>*}’ to ‘type_specifier&&’
-src/parser.y:251:56: error: no matching function for call to ‘type_specifier::type_specifier(std::__cxx11::string*&)’
-               | Keyword_float { $$ = new type_specifier($1); }
-                                                        ^
+src/parser.y:267:68: error: no matching function for call to ‘type_specifier::type_specifier(std::__cxx11::string*&)’
 In file included from src/parser.y:5:0:
 Include/ast_allnodes.hpp:714:5: note: candidate: type_specifier::type_specifier(const string&)
      type_specifier(const std::string &Keyword = "") : type(Keyword) {}
@@ -278,9 +226,7 @@ Include/ast_allnodes.hpp:707:7: note: candidate: type_specifier::type_specifier(
 Include/ast_allnodes.hpp:707:7: note:   no known conversion for argument 1 from ‘std::__cxx11::string* {aka std::__cxx11::basic_string<char>*}’ to ‘const type_specifier&’
 Include/ast_allnodes.hpp:707:7: note: candidate: type_specifier::type_specifier(type_specifier&&)
 Include/ast_allnodes.hpp:707:7: note:   no known conversion for argument 1 from ‘std::__cxx11::string* {aka std::__cxx11::basic_string<char>*}’ to ‘type_specifier&&’
-src/parser.y:252:56: error: no matching function for call to ‘type_specifier::type_specifier(std::__cxx11::string*&)’
-               | Keyword_double { $$ = new type_specifier($1); }
-                                                        ^
+src/parser.y:268:68: error: no matching function for call to ‘type_specifier::type_specifier(std::__cxx11::string*&)’
 In file included from src/parser.y:5:0:
 Include/ast_allnodes.hpp:714:5: note: candidate: type_specifier::type_specifier(const string&)
      type_specifier(const std::string &Keyword = "") : type(Keyword) {}
@@ -292,9 +238,7 @@ Include/ast_allnodes.hpp:707:7: note: candidate: type_specifier::type_specifier(
 Include/ast_allnodes.hpp:707:7: note:   no known conversion for argument 1 from ‘std::__cxx11::string* {aka std::__cxx11::basic_string<char>*}’ to ‘const type_specifier&’
 Include/ast_allnodes.hpp:707:7: note: candidate: type_specifier::type_specifier(type_specifier&&)
 Include/ast_allnodes.hpp:707:7: note:   no known conversion for argument 1 from ‘std::__cxx11::string* {aka std::__cxx11::basic_string<char>*}’ to ‘type_specifier&&’
-src/parser.y:253:56: error: no matching function for call to ‘type_specifier::type_specifier(std::__cxx11::string*&)’
-               | Keyword_signed { $$ = new type_specifier($1); }
-                                                        ^
+src/parser.y:269:68: error: no matching function for call to ‘type_specifier::type_specifier(std::__cxx11::string*&)’
 In file included from src/parser.y:5:0:
 Include/ast_allnodes.hpp:714:5: note: candidate: type_specifier::type_specifier(const string&)
      type_specifier(const std::string &Keyword = "") : type(Keyword) {}
@@ -306,9 +250,7 @@ Include/ast_allnodes.hpp:707:7: note: candidate: type_specifier::type_specifier(
 Include/ast_allnodes.hpp:707:7: note:   no known conversion for argument 1 from ‘std::__cxx11::string* {aka std::__cxx11::basic_string<char>*}’ to ‘const type_specifier&’
 Include/ast_allnodes.hpp:707:7: note: candidate: type_specifier::type_specifier(type_specifier&&)
 Include/ast_allnodes.hpp:707:7: note:   no known conversion for argument 1 from ‘std::__cxx11::string* {aka std::__cxx11::basic_string<char>*}’ to ‘type_specifier&&’
-src/parser.y:254:56: error: no matching function for call to ‘type_specifier::type_specifier(std::__cxx11::string*&)’
-               | Keyword_unsigned{ $$ = new type_specifier($1); }
-                                                        ^
+src/parser.y:270:68: error: no matching function for call to ‘type_specifier::type_specifier(std::__cxx11::string*&)’
 In file included from src/parser.y:5:0:
 Include/ast_allnodes.hpp:714:5: note: candidate: type_specifier::type_specifier(const string&)
      type_specifier(const std::string &Keyword = "") : type(Keyword) {}
@@ -323,40 +265,29 @@ Include/ast_allnodes.hpp:707:7: note:   no known conversion for argument 1 from 
 Include/ast_allnodes.hpp:780:5: error: ‘declarator::declarator(direct_declarator*, pointer*)’ is private
      declarator(direct_declarator * _dir_dec, pointer * point = NULL) : base_declarator(point), dir_dec(_dir_dec) {}
      ^
-src/parser.y:293:52: error: within this context
- declarator: direct_declarator { $$ = new declarator($1); }
-                                                    ^
-src/parser.y:293:47: error: invalid conversion from ‘Node*’ to ‘direct_declarator*’ [-fpermissive]
- declarator: direct_declarator { $$ = new declarator($1); }
-                                               ^
+src/parser.y:309:75: error: within this context
 In file included from src/parser.y:5:0:
-Include/ast_allnodes.hpp:780:5: note:   initializing argument 1 of ‘declarator::declarator(direct_declarator*, pointer*)’
-     declarator(direct_declarator * _dir_dec, pointer * point = NULL) : base_declarator(point), dir_dec(_dir_dec) {}
-     ^
 Include/ast_allnodes.hpp:780:5: error: ‘declarator::declarator(direct_declarator*, pointer*)’ is private
-src/parser.y:294:70: error: within this context
-src/parser.y:294:47: error: invalid conversion from ‘Node*’ to ‘direct_declarator*’ [-fpermissive]
-     | pointer direct_declarator { $$ = new declarator($2, $1); }
-                                               ^
-In file included from src/parser.y:5:0:
-Include/ast_allnodes.hpp:780:5: note:   initializing argument 1 of ‘declarator::declarator(direct_declarator*, pointer*)’
      declarator(direct_declarator * _dir_dec, pointer * point = NULL) : base_declarator(point), dir_dec(_dir_dec) {}
      ^
-src/parser.y:294:65: error: invalid conversion from ‘Node*’ to ‘pointer*’ [-fpermissive]
-In file included from src/parser.y:5:0:
-Include/ast_allnodes.hpp:780:5: note:   initializing argument 2 of ‘declarator::declarator(direct_declarator*, pointer*)’
-     declarator(direct_declarator * _dir_dec, pointer * point = NULL) : base_declarator(point), dir_dec(_dir_dec) {}
-     ^
-src/parser.y:298:73: error: invalid conversion from ‘Node*’ to ‘parameter_list*’ [-fpermissive]
+src/parser.y:310:98: error: within this context
+src/parser.y:314:101: error: no matching function for call to ‘direct_declarator::direct_declarator(NULL, NULL, NULL, declarator*&)’
       | Punctuator_par_open declarator Punctuator_par_close  { $$ = new direct_declarator(NULL, NULL, NULL, $2); }
-                                                                         ^
+                                                                                                     ^
 In file included from src/parser.y:5:0:
-Include/ast_allnodes.hpp:817:5: note:   initializing argument 4 of ‘direct_declarator::direct_declarator(IdentifierNode*, direct_declarator*, ConstantExpression*, parameter_list*, declarator*)’
+Include/ast_allnodes.hpp:817:5: note: candidate: direct_declarator::direct_declarator(IdentifierNode*, direct_declarator*, ConstantExpression*, parameter_list*, declarator*)
      direct_declarator(IdentifierNode * _ID = NULL, direct_declarator * _dir_dec = NULL, ConstantExpression * _const_expr = NULL, parameter_list * _para_list = NULL, declarator * _dec = NULL) 
      ^
-src/parser.y:299:97: error: use of deleted function ‘unspecified_array_length::unspecified_array_length()’
+Include/ast_allnodes.hpp:817:5: note:   no known conversion for argument 4 from ‘declarator*’ to ‘parameter_list*’
+Include/ast_allnodes.hpp:811:7: note: candidate: constexpr direct_declarator::direct_declarator(const direct_declarator&)
+ class direct_declarator : public base_direct_declarator
+       ^
+Include/ast_allnodes.hpp:811:7: note:   candidate expects 1 argument, 4 provided
+Include/ast_allnodes.hpp:811:7: note: candidate: constexpr direct_declarator::direct_declarator(direct_declarator&&)
+Include/ast_allnodes.hpp:811:7: note:   candidate expects 1 argument, 4 provided
+src/parser.y:315:127: error: use of deleted function ‘unspecified_array_length::unspecified_array_length()’
       | direct_declarator Punctuator_squ_open Punctuator_squ_close  { $$ = new direct_declarator(NULL, $1, new unspecified_array_length()); }
-                                                                                                 ^
+                                                                                                                               ^
 In file included from src/parser.y:5:0:
 Include/ast_allnodes.hpp:798:7: note: ‘unspecified_array_length::unspecified_array_length()’ is implicitly deleted because the default definition would be ill-formed:
  class unspecified_array_length : public ConstantExpression {};
@@ -372,79 +303,26 @@ Include/ast_allnodes.hpp:486:7: note: candidate: constexpr ConstantExpression::C
 Include/ast_allnodes.hpp:486:7: note:   candidate expects 1 argument, 0 provided
 Include/ast_allnodes.hpp:486:7: note: candidate: constexpr ConstantExpression::ConstantExpression(ConstantExpression&&)
 Include/ast_allnodes.hpp:486:7: note:   candidate expects 1 argument, 0 provided
-src/parser.y:300:79: error: expected unqualified-id before ‘constexpr’
+src/parser.y:316:109: error: expected unqualified-id before ‘constexpr’
       | direct_declarator Punctuator_squ_open constant_EXPR Punctuator_squ_close  { $$ = new direct_declarator(NULL, $1, $3); }
-                                                                               ^
-src/parser.y:300:79: error: expected ‘)’ before ‘constexpr’
-src/parser.y:301:61: error: invalid conversion from ‘Node*’ to ‘direct_declarator*’ [-fpermissive]
+                                                                                                             ^
+src/parser.y:316:109: error: expected ‘)’ before ‘constexpr’
+src/parser.y:317:115: error: ‘YYSTYPE {aka union YYSTYPE}’ has no member named ‘t_parameter_type_list’
       | direct_declarator Punctuator_par_open parameter_type_list  Punctuator_par_close  { $$ = new direct_declarator(NULL, $1, NULL, $3); }
-                                                             ^
+                                                                                                                   ^
+src/parser.y:327:117: error: no matching function for call to ‘parameter_list::parameter_list(parameter_list*&, parameter_declaration*&)’
 In file included from src/parser.y:5:0:
-Include/ast_allnodes.hpp:817:5: note:   initializing argument 2 of ‘direct_declarator::direct_declarator(IdentifierNode*, direct_declarator*, ConstantExpression*, parameter_list*, declarator*)’
-     direct_declarator(IdentifierNode * _ID = NULL, direct_declarator * _dir_dec = NULL, ConstantExpression * _const_expr = NULL, parameter_list * _para_list = NULL, declarator * _dec = NULL) 
-     ^
-src/parser.y:301:85: error: invalid conversion from ‘Node*’ to ‘parameter_list*’ [-fpermissive]
-      | direct_declarator Punctuator_par_open parameter_type_list  Punctuator_par_close  { $$ = new direct_declarator(NULL, $1, NULL, $3); }
-                                                                                     ^
-In file included from src/parser.y:5:0:
-Include/ast_allnodes.hpp:817:5: note:   initializing argument 4 of ‘direct_declarator::direct_declarator(IdentifierNode*, direct_declarator*, ConstantExpression*, parameter_list*, declarator*)’
-     direct_declarator(IdentifierNode * _ID = NULL, direct_declarator * _dir_dec = NULL, ConstantExpression * _const_expr = NULL, parameter_list * _para_list = NULL, declarator * _dec = NULL) 
-     ^
-src/parser.y:306:44: error: invalid conversion from ‘Node*’ to ‘pointer*’ [-fpermissive]
-     | Operator_mul pointer { $$ = new pointer($2); }
-                                            ^
-In file included from src/parser.y:5:0:
-Include/ast_allnodes.hpp:740:5: note:   initializing argument 1 of ‘pointer::pointer(pointer*)’
-     pointer(pointer * _p = NULL) : p(_p) {}
-     ^
-src/parser.y:310:51: error: invalid conversion from ‘Node*’ to ‘parameter_declaration*’ [-fpermissive]
- parameter_list: parameter_declaration { $$ = new parameter_list($1); }
-                                                   ^
-In file included from src/parser.y:5:0:
-Include/ast_allnodes.hpp:831:5: note:   initializing argument 1 of ‘parameter_list::parameter_list(parameter_declaration*, parameter_list*, abstract_declarator*)’
+Include/ast_allnodes.hpp:831:5: note: candidate: parameter_list::parameter_list(parameter_declaration*, parameter_list*, abstract_declarator*)
      parameter_list(parameter_declaration * _para_dec, parameter_list * _para_list = NULL, abstract_declarator * _abs_dec = NULL) : para_list(_para_list), para_dec(_para_dec), abs_dec(_abs_dec) {}
      ^
-src/parser.y:311:52: error: invalid conversion from ‘Node*’ to ‘parameter_declaration*’ [-fpermissive]
-       | parameter_list Operator_comma parameter_declaration { $$ = new parameter_list($1, $3) }
-                                                    ^
-In file included from src/parser.y:5:0:
-Include/ast_allnodes.hpp:831:5: note:   initializing argument 1 of ‘parameter_list::parameter_list(parameter_declaration*, parameter_list*, abstract_declarator*)’
-     parameter_list(parameter_declaration * _para_dec, parameter_list * _para_list = NULL, abstract_declarator * _abs_dec = NULL) : para_list(_para_list), para_dec(_para_dec), abs_dec(_abs_dec) {}
-     ^
-src/parser.y:311:69: error: invalid conversion from ‘Node*’ to ‘parameter_list*’ [-fpermissive]
-       | parameter_list Operator_comma parameter_declaration { $$ = new parameter_list($1, $3) }
-                                                                     ^
-In file included from src/parser.y:5:0:
-Include/ast_allnodes.hpp:831:5: note:   initializing argument 2 of ‘parameter_list::parameter_list(parameter_declaration*, parameter_list*, abstract_declarator*)’
-     parameter_list(parameter_declaration * _para_dec, parameter_list * _para_list = NULL, abstract_declarator * _abs_dec = NULL) : para_list(_para_list), para_dec(_para_dec), abs_dec(_abs_dec) {}
-     ^
-src/parser.y:311:76: error: expected ‘;’ before ‘}’ token
-       | parameter_list Operator_comma parameter_declaration { $$ = new parameter_list($1, $3) }
-                                                                            ^
-src/parser.y:313:59: error: invalid conversion from ‘Node*’ to ‘declaration_specifiers*’ [-fpermissive]
- parameter_declaration: declaration_specifiers declarator { $$ = new parameter_declaration($1, $2); }
-                                                           ^
-In file included from src/parser.y:5:0:
-Include/ast_allnodes.hpp:839:5: note:   initializing argument 1 of ‘parameter_declaration::parameter_declaration(declaration_specifiers*, declarator*)’
-     parameter_declaration(declaration_specifiers * _dec_spec, declarator * _dec = NULL) : dec_spec(_dec_spec), dec(_dec) {}
-     ^
-src/parser.y:313:76: error: invalid conversion from ‘Node*’ to ‘declarator*’ [-fpermissive]
- parameter_declaration: declaration_specifiers declarator { $$ = new parameter_declaration($1, $2); }
-                                                                            ^
-In file included from src/parser.y:5:0:
-Include/ast_allnodes.hpp:839:5: note:   initializing argument 2 of ‘parameter_declaration::parameter_declaration(declaration_specifiers*, declarator*)’
-     parameter_declaration(declaration_specifiers * _dec_spec, declarator * _dec = NULL) : dec_spec(_dec_spec), dec(_dec) {}
-     ^
-src/parser.y:314:58: error: invalid conversion from ‘Node*’ to ‘declaration_specifiers*’ [-fpermissive]
-       | declaration_specifiers  { $$ = new parameter_declaration($1); }
-                                                          ^
-In file included from src/parser.y:5:0:
-Include/ast_allnodes.hpp:839:5: note:   initializing argument 1 of ‘parameter_declaration::parameter_declaration(declaration_specifiers*, declarator*)’
-     parameter_declaration(declaration_specifiers * _dec_spec, declarator * _dec = NULL) : dec_spec(_dec_spec), dec(_dec) {}
-     ^
-src/parser.y:315:87: error: no matching function for call to ‘parameter_declaration::parameter_declaration(Node*&, NULL, Node*&)’
-       | declaration_specifiers abstract_declarator { $$ = new parameter_declaration($1, NULL, $2); }
-                                                                                       ^
+Include/ast_allnodes.hpp:831:5: note:   no known conversion for argument 1 from ‘parameter_list*’ to ‘parameter_declaration*’
+Include/ast_allnodes.hpp:825:7: note: candidate: constexpr parameter_list::parameter_list(const parameter_list&)
+ class parameter_list : public Node
+       ^
+Include/ast_allnodes.hpp:825:7: note:   candidate expects 1 argument, 2 provided
+Include/ast_allnodes.hpp:825:7: note: candidate: constexpr parameter_list::parameter_list(parameter_list&&)
+Include/ast_allnodes.hpp:825:7: note:   candidate expects 1 argument, 2 provided
+src/parser.y:331:143: error: no matching function for call to ‘parameter_declaration::parameter_declaration(declaration_specifiers*&, NULL, abstract_declarator*&)’
 In file included from src/parser.y:5:0:
 Include/ast_allnodes.hpp:839:5: note: candidate: parameter_declaration::parameter_declaration(declaration_specifiers*, declarator*)
      parameter_declaration(declaration_specifiers * _dec_spec, declarator * _dec = NULL) : dec_spec(_dec_spec), dec(_dec) {}
@@ -456,114 +334,72 @@ Include/ast_allnodes.hpp:834:7: note: candidate: constexpr parameter_declaration
 Include/ast_allnodes.hpp:834:7: note:   candidate expects 1 argument, 3 provided
 Include/ast_allnodes.hpp:834:7: note: candidate: constexpr parameter_declaration::parameter_declaration(parameter_declaration&&)
 Include/ast_allnodes.hpp:834:7: note:   candidate expects 1 argument, 3 provided
-src/parser.y:320:51: error: invalid conversion from ‘Node*’ to ‘specifier_list*’ [-fpermissive]
- type_name: specifier_list { $$ = new type_name($1); }
-                                                   ^
-In file included from src/parser.y:5:0:
-Include/ast_allnodes.hpp:847:5: note:   initializing argument 1 of ‘type_name::type_name(specifier_list*, abstract_declarator*)’
-     type_name(specifier_list * _spec_list, abstract_declarator * _abs_dec = NULL) : spec_list(_spec_list), abs_dec(_abs_dec) {}
-     ^
-src/parser.y:321:52: error: invalid conversion from ‘Node*’ to ‘specifier_list*’ [-fpermissive]
-    | specifier_list abstract_declarator { $$ = new type_name($1, $2); }
-                                                    ^
-In file included from src/parser.y:5:0:
-Include/ast_allnodes.hpp:847:5: note:   initializing argument 1 of ‘type_name::type_name(specifier_list*, abstract_declarator*)’
-     type_name(specifier_list * _spec_list, abstract_declarator * _abs_dec = NULL) : spec_list(_spec_list), abs_dec(_abs_dec) {}
-     ^
-src/parser.y:321:69: error: invalid conversion from ‘Node*’ to ‘abstract_declarator*’ [-fpermissive]
-    | specifier_list abstract_declarator { $$ = new type_name($1, $2); }
-                                                                     ^
-In file included from src/parser.y:5:0:
-Include/ast_allnodes.hpp:847:5: note:   initializing argument 2 of ‘type_name::type_name(specifier_list*, abstract_declarator*)’
-     type_name(specifier_list * _spec_list, abstract_declarator * _abs_dec = NULL) : spec_list(_spec_list), abs_dec(_abs_dec) {}
-     ^
-src/parser.y:323:62: error: invalid conversion from ‘Node*’ to ‘pointer*’ [-fpermissive]
- abstract_declarator: pointer { $$ = new abstract_declarator(NULL, $1); }
-                                                              ^
-In file included from src/parser.y:5:0:
-Include/ast_allnodes.hpp:770:5: note:   initializing argument 2 of ‘abstract_declarator::abstract_declarator(direct_abstract_declarator*, pointer*)’
-     abstract_declarator(direct_abstract_declarator * _dabs_dec = NULL, pointer * point = NULL) : base_declarator(point), dabs_dec(_dabs_dec) {}
-     ^
-src/parser.y:324:56: error: invalid conversion from ‘Node*’ to ‘direct_abstract_declarator*’ [-fpermissive]
+src/parser.y:340:73: error: ‘YYSTYPE {aka union YYSTYPE}’ has no member named ‘t_direct_abstract_declara’
       | pointer direct_abstract_declarator { $$ = new abstract_declarator($2, $1); }
-                                                        ^
-In file included from src/parser.y:5:0:
-Include/ast_allnodes.hpp:770:5: note:   initializing argument 1 of ‘abstract_declarator::abstract_declarator(direct_abstract_declarator*, pointer*)’
-     abstract_declarator(direct_abstract_declarator * _dabs_dec = NULL, pointer * point = NULL) : base_declarator(point), dabs_dec(_dabs_dec) {}
-     ^
-src/parser.y:324:74: error: invalid conversion from ‘Node*’ to ‘pointer*’ [-fpermissive]
-      | pointer direct_abstract_declarator { $$ = new abstract_declarator($2, $1); }
-                                                                          ^
-In file included from src/parser.y:5:0:
-Include/ast_allnodes.hpp:770:5: note:   initializing argument 2 of ‘abstract_declarator::abstract_declarator(direct_abstract_declarator*, pointer*)’
-     abstract_declarator(direct_abstract_declarator * _dabs_dec = NULL, pointer * point = NULL) : base_declarator(point), dabs_dec(_dabs_dec) {}
-     ^
-src/parser.y:325:56: error: invalid conversion from ‘Node*’ to ‘direct_abstract_declarator*’ [-fpermissive]
-      | direct_abstract_declarator { $$ = new abstract_declarator($1); }
-                                                        ^
-In file included from src/parser.y:5:0:
-Include/ast_allnodes.hpp:770:5: note:   initializing argument 1 of ‘abstract_declarator::abstract_declarator(direct_abstract_declarator*, pointer*)’
-     abstract_declarator(direct_abstract_declarator * _dabs_dec = NULL, pointer * point = NULL) : base_declarator(point), dabs_dec(_dabs_dec) {}
-     ^
-src/parser.y:327:70: error: invalid conversion from ‘Node*’ to ‘abstract_declarator*’ [-fpermissive]
+                                                                         ^
+src/parser.y:341:73: error: ‘YYSTYPE {aka union YYSTYPE}’ has no member named ‘t_direct_abstract_declara’
+src/parser.y:343:14: error: ‘YYSTYPE {aka union YYSTYPE}’ has no member named ‘t_direct_abstract_declara’
  direct_abstract_declarator: Punctuator_par_open abstract_declarator Punctuator_par_close { $$ = new direct_abstract_declarator(NULL, $2); }
-                                                                      ^
-In file included from src/parser.y:5:0:
-Include/ast_allnodes.hpp:807:5: note:   initializing argument 2 of ‘direct_abstract_declarator::direct_abstract_declarator(direct_abstract_declarator*, abstract_declarator*, ConstantExpression*, parameter_list*)’
-     direct_abstract_declarator(direct_abstract_declarator * _dabs_dec = NULL, abstract_declarator * _abs_dec = NULL, ConstantExpression * _const_expr = NULL, parameter_list * _para_list = NULL) 
-     ^
-src/parser.y:328:88: error: expected unqualified-id before ‘constexpr’
+              ^
+src/parser.y:344:14: error: ‘YYSTYPE {aka union YYSTYPE}’ has no member named ‘t_direct_abstract_declara’
          | direct_abstract_declarator Punctuator_squ_open constant_EXPR Punctuator_squ_close { $$ = new direct_abstract_declarator($1, NULL, $3); }
-                                                                                        ^
-src/parser.y:328:88: error: expected ‘)’ before ‘constexpr’
-src/parser.y:329:76: error: expected unqualified-id before ‘constexpr’
+              ^
+src/parser.y:344:85: error: ‘YYSTYPE {aka union YYSTYPE}’ has no member named ‘t_direct_abstract_declara’
+         | direct_abstract_declarator Punctuator_squ_open constant_EXPR Punctuator_squ_close { $$ = new direct_abstract_declarator($1, NULL, $3); }
+                                                                                     ^
+src/parser.y:344:130: error: expected unqualified-id before ‘constexpr’
+         | direct_abstract_declarator Punctuator_squ_open constant_EXPR Punctuator_squ_close { $$ = new direct_abstract_declarator($1, NULL, $3); }
+                                                                                                                                  ^
+src/parser.y:344:130: error: expected ‘)’ before ‘constexpr’
+src/parser.y:345:14: error: ‘YYSTYPE {aka union YYSTYPE}’ has no member named ‘t_direct_abstract_declara’
          | Punctuator_squ_open constant_EXPR Punctuator_squ_close { $$ = new direct_abstract_declarator(NULL, NULL, $2); }
-                                                                            ^
-src/parser.y:329:76: error: expected ‘)’ before ‘constexpr’
-src/parser.y:330:106: error: use of deleted function ‘unspecified_array_length::unspecified_array_length()’
-         | direct_abstract_declarator Punctuator_squ_open Punctuator_squ_close { $$ = new direct_abstract_declarator($1, NULL, new unspecified_array_length()); }
-                                                                                                          ^
-src/parser.y:331:94: error: use of deleted function ‘unspecified_array_length::unspecified_array_length()’
-         | Punctuator_squ_open Punctuator_squ_close { $$ = new direct_abstract_declarator(NULL, NULL, new unspecified_array_length()); }
-                                                                                              ^
-src/parser.y:332:64: error: invalid conversion from ‘Node*’ to ‘direct_abstract_declarator*’ [-fpermissive]
-         | direct_abstract_declarator Punctuator_par_open parameter_type_list Punctuator_par_close { $$ = new direct_abstract_declarator($1, NULL, NULL, $3); }
-                                                                ^
-In file included from src/parser.y:5:0:
-Include/ast_allnodes.hpp:807:5: note:   initializing argument 1 of ‘direct_abstract_declarator::direct_abstract_declarator(direct_abstract_declarator*, abstract_declarator*, ConstantExpression*, parameter_list*)’
-     direct_abstract_declarator(direct_abstract_declarator * _dabs_dec = NULL, abstract_declarator * _abs_dec = NULL, ConstantExpression * _const_expr = NULL, parameter_list * _para_list = NULL) 
-     ^
-src/parser.y:332:94: error: invalid conversion from ‘Node*’ to ‘parameter_list*’ [-fpermissive]
-         | direct_abstract_declarator Punctuator_par_open parameter_type_list Punctuator_par_close { $$ = new direct_abstract_declarator($1, NULL, NULL, $3); }
-                                                                                              ^
-In file included from src/parser.y:5:0:
-Include/ast_allnodes.hpp:807:5: note:   initializing argument 4 of ‘direct_abstract_declarator::direct_abstract_declarator(direct_abstract_declarator*, abstract_declarator*, ConstantExpression*, parameter_list*)’
-     direct_abstract_declarator(direct_abstract_declarator * _dabs_dec = NULL, abstract_declarator * _abs_dec = NULL, ConstantExpression * _const_expr = NULL, parameter_list * _para_list = NULL) 
-     ^
-src/parser.y:333:82: error: invalid conversion from ‘Node*’ to ‘parameter_list*’ [-fpermissive]
-         | Punctuator_par_open parameter_type_list Punctuator_par_close { $$ = new direct_abstract_declarator(NULL, NULL, NULL, $2); }
-                                                                                  ^
-In file included from src/parser.y:5:0:
-Include/ast_allnodes.hpp:807:5: note:   initializing argument 4 of ‘direct_abstract_declarator::direct_abstract_declarator(direct_abstract_declarator*, abstract_declarator*, ConstantExpression*, parameter_list*)’
-     direct_abstract_declarator(direct_abstract_declarator * _dabs_dec = NULL, abstract_declarator * _abs_dec = NULL, ConstantExpression * _const_expr = NULL, parameter_list * _para_list = NULL) 
-     ^
-src/parser.y:334:109: error: no matching function for call to ‘direct_abstract_declarator::direct_abstract_declarator(Node*&, NULL, NULL, empty_parameter_list*)’
-         | direct_abstract_declarator Punctuator_par_open Punctuator_par_close { $$ = new direct_abstract_declarator($1, NULL, NULL, new empty_parameter_list()); }
-                                                                                                             ^
-In file included from src/parser.y:5:0:
-Include/ast_allnodes.hpp:807:5: note: candidate: direct_abstract_declarator::direct_abstract_declarator(direct_abstract_declarator*, abstract_declarator*, ConstantExpression*, parameter_list*)
-     direct_abstract_declarator(direct_abstract_declarator * _dabs_dec = NULL, abstract_declarator * _abs_dec = NULL, ConstantExpression * _const_expr = NULL, parameter_list * _para_list = NULL) 
-     ^
-Include/ast_allnodes.hpp:807:5: note:   no known conversion for argument 4 from ‘empty_parameter_list*’ to ‘parameter_list*’
-Include/ast_allnodes.hpp:802:7: note: candidate: constexpr direct_abstract_declarator::direct_abstract_declarator(const direct_abstract_declarator&)
- class direct_abstract_declarator : public base_direct_declarator
-       ^
-Include/ast_allnodes.hpp:802:7: note:   candidate expects 1 argument, 4 provided
-Include/ast_allnodes.hpp:802:7: note: candidate: constexpr direct_abstract_declarator::direct_abstract_declarator(direct_abstract_declarator&&)
-Include/ast_allnodes.hpp:802:7: note:   candidate expects 1 argument, 4 provided
-src/parser.y:335:97: error: no matching function for call to ‘direct_abstract_declarator::direct_abstract_declarator(NULL, NULL, NULL, empty_parameter_list*)’
-         | Punctuator_par_open Punctuator_par_close { $$ = new direct_abstract_declarator(NULL, NULL, NULL, new empty_parameter_list()); }
+              ^
+src/parser.y:345:97: error: expected unqualified-id before ‘constexpr’
+         | Punctuator_squ_open constant_EXPR Punctuator_squ_close { $$ = new direct_abstract_declarator(NULL, NULL, $2); }
                                                                                                  ^
+src/parser.y:345:97: error: expected ‘)’ before ‘constexpr’
+src/parser.y:346:14: error: ‘YYSTYPE {aka union YYSTYPE}’ has no member named ‘t_direct_abstract_declara’
+         | direct_abstract_declarator Punctuator_squ_open Punctuator_squ_close { $$ = new direct_abstract_declarator($1, NULL, new unspecified_array_length()); }
+              ^
+src/parser.y:346:85: error: ‘YYSTYPE {aka union YYSTYPE}’ has no member named ‘t_direct_abstract_declara’
+         | direct_abstract_declarator Punctuator_squ_open Punctuator_squ_close { $$ = new direct_abstract_declarator($1, NULL, new unspecified_array_length()); }
+                                                                                     ^
+src/parser.y:346:148: error: use of deleted function ‘unspecified_array_length::unspecified_array_length()’
+         | direct_abstract_declarator Punctuator_squ_open Punctuator_squ_close { $$ = new direct_abstract_declarator($1, NULL, new unspecified_array_length()); }
+                                                                                                                                                    ^
+src/parser.y:347:14: error: ‘YYSTYPE {aka union YYSTYPE}’ has no member named ‘t_direct_abstract_declara’
+         | Punctuator_squ_open Punctuator_squ_close { $$ = new direct_abstract_declarator(NULL, NULL, new unspecified_array_length()); }
+              ^
+src/parser.y:347:115: error: use of deleted function ‘unspecified_array_length::unspecified_array_length()’
+         | Punctuator_squ_open Punctuator_squ_close { $$ = new direct_abstract_declarator(NULL, NULL, new unspecified_array_length()); }
+                                                                                                                   ^
+src/parser.y:348:14: error: ‘YYSTYPE {aka union YYSTYPE}’ has no member named ‘t_direct_abstract_declara’
+         | direct_abstract_declarator Punctuator_par_open parameter_type_list Punctuator_par_close { $$ = new direct_abstract_declarator($1, NULL, NULL, $3); }
+              ^
+src/parser.y:348:85: error: ‘YYSTYPE {aka union YYSTYPE}’ has no member named ‘t_direct_abstract_declara’
+         | direct_abstract_declarator Punctuator_par_open parameter_type_list Punctuator_par_close { $$ = new direct_abstract_declarator($1, NULL, NULL, $3); }
+                                                                                     ^
+src/parser.y:348:136: error: ‘YYSTYPE {aka union YYSTYPE}’ has no member named ‘t_parameter_type_list’
+         | direct_abstract_declarator Punctuator_par_open parameter_type_list Punctuator_par_close { $$ = new direct_abstract_declarator($1, NULL, NULL, $3); }
+                                                                                                                                        ^
+src/parser.y:349:14: error: ‘YYSTYPE {aka union YYSTYPE}’ has no member named ‘t_direct_abstract_declara’
+         | Punctuator_par_open parameter_type_list Punctuator_par_close { $$ = new direct_abstract_declarator(NULL, NULL, NULL, $2); }
+              ^
+src/parser.y:349:103: error: ‘YYSTYPE {aka union YYSTYPE}’ has no member named ‘t_parameter_type_list’
+         | Punctuator_par_open parameter_type_list Punctuator_par_close { $$ = new direct_abstract_declarator(NULL, NULL, NULL, $2); }
+                                                                                                       ^
+src/parser.y:350:14: error: ‘YYSTYPE {aka union YYSTYPE}’ has no member named ‘t_direct_abstract_declara’
+         | direct_abstract_declarator Punctuator_par_open Punctuator_par_close { $$ = new direct_abstract_declarator($1, NULL, NULL, new empty_parameter_list()); }
+              ^
+src/parser.y:350:85: error: ‘YYSTYPE {aka union YYSTYPE}’ has no member named ‘t_direct_abstract_declara’
+         | direct_abstract_declarator Punctuator_par_open Punctuator_par_close { $$ = new direct_abstract_declarator($1, NULL, NULL, new empty_parameter_list()); }
+                                                                                     ^
+src/parser.y:351:14: error: ‘YYSTYPE {aka union YYSTYPE}’ has no member named ‘t_direct_abstract_declara’
+         | Punctuator_par_open Punctuator_par_close { $$ = new direct_abstract_declarator(NULL, NULL, NULL, new empty_parameter_list()); }
+              ^
+src/parser.y:351:118: error: no matching function for call to ‘direct_abstract_declarator::direct_abstract_declarator(NULL, NULL, NULL, empty_parameter_list*)’
+         | Punctuator_par_open Punctuator_par_close { $$ = new direct_abstract_declarator(NULL, NULL, NULL, new empty_parameter_list()); }
+                                                                                                                      ^
 In file included from src/parser.y:5:0:
 Include/ast_allnodes.hpp:807:5: note: candidate: direct_abstract_declarator::direct_abstract_declarator(direct_abstract_declarator*, abstract_declarator*, ConstantExpression*, parameter_list*)
      direct_abstract_declarator(direct_abstract_declarator * _dabs_dec = NULL, abstract_declarator * _abs_dec = NULL, ConstantExpression * _const_expr = NULL, parameter_list * _para_list = NULL) 
@@ -575,53 +411,18 @@ Include/ast_allnodes.hpp:802:7: note: candidate: constexpr direct_abstract_decla
 Include/ast_allnodes.hpp:802:7: note:   candidate expects 1 argument, 4 provided
 Include/ast_allnodes.hpp:802:7: note: candidate: constexpr direct_abstract_declarator::direct_abstract_declarator(direct_abstract_declarator&&)
 Include/ast_allnodes.hpp:802:7: note:   candidate expects 1 argument, 4 provided
-src/parser.y:341:55: error: invalid conversion from ‘Node*’ to ‘initializer_list*’ [-fpermissive]
-      | Punctuator_cur_open initializer_list Punctuator_cur_close  { $$ = new initializer(NULL, $2); }
-                                                       ^
-In file included from src/parser.y:5:0:
-Include/ast_allnodes.hpp:861:5: note:   initializing argument 2 of ‘initializer::initializer(Expression*, initializer_list*)’
-     initializer(Expression* _ass_expr, initializer_list * _init_list = NULL) : ass_expr(_ass_expr), init_list(_init_list) {}
-     ^
-src/parser.y:342:55: error: invalid conversion from ‘Node*’ to ‘initializer_list*’ [-fpermissive]
-      | Punctuator_cur_open initializer_list Operator_comma Punctuator_cur_close { $$ = new initializer(NULL, $2); }
-                                                       ^
-In file included from src/parser.y:5:0:
-Include/ast_allnodes.hpp:861:5: note:   initializing argument 2 of ‘initializer::initializer(Expression*, initializer_list*)’
-     initializer(Expression* _ass_expr, initializer_list * _init_list = NULL) : ass_expr(_ass_expr), init_list(_init_list) {}
-     ^
-src/parser.y:344:53: error: invalid conversion from ‘Node*’ to ‘initializer*’ [-fpermissive]
- initializer_list: initializer  { $$ = new initializer_list($1); }
-                                                     ^
-In file included from src/parser.y:5:0:
-Include/ast_allnodes.hpp:869:5: note:   initializing argument 1 of ‘initializer_list::initializer_list(initializer*, initializer_list*)’
-     initializer_list(initializer * _init, initializer_list * _init_list = NULL) : init(_init), init_list(_init_list) {}
-     ^
-src/parser.y:345:53: error: invalid conversion from ‘Node*’ to ‘initializer*’ [-fpermissive]
-     | initializer_list Operator_comma initializer { $$ = new initializer_list($3, $1); }
-                                                     ^
-In file included from src/parser.y:5:0:
-Include/ast_allnodes.hpp:869:5: note:   initializing argument 1 of ‘initializer_list::initializer_list(initializer*, initializer_list*)’
-     initializer_list(initializer * _init, initializer_list * _init_list = NULL) : init(_init), init_list(_init_list) {}
-     ^
-src/parser.y:345:71: error: invalid conversion from ‘Node*’ to ‘initializer_list*’ [-fpermissive]
-     | initializer_list Operator_comma initializer { $$ = new initializer_list($3, $1); }
-                                                                       ^
-In file included from src/parser.y:5:0:
-Include/ast_allnodes.hpp:869:5: note:   initializing argument 2 of ‘initializer_list::initializer_list(initializer*, initializer_list*)’
-     initializer_list(initializer * _init, initializer_list * _init_list = NULL) : init(_init), init_list(_init_list) {}
-     ^
-src/parser.y:362:56: error: invalid conversion from ‘Node*’ to ‘Expression*’ [-fpermissive]
+src/parser.y:378:56: error: invalid conversion from ‘Node*’ to ‘Expression*’ [-fpermissive]
           | EXPR_statement { $$ = new ExpressionStatement($1); }
                                                         ^
 In file included from src/parser.y:5:0:
 Include/ast_allnodes.hpp:597:5: note:   initializing argument 1 of ‘ExpressionStatement::ExpressionStatement(Expression*)’
      ExpressionStatement(Expression* _expr) : Expr(_expr){}
      ^
-src/parser.y:366:51: error: expected unqualified-id before ‘constexpr’
+src/parser.y:382:51: error: expected unqualified-id before ‘constexpr’
  labeled_statement: Keyword_case constant_EXPR Operator_trinary_choice statement { $$ = new CaseOrDefault($2, $4); }
                                                    ^
-src/parser.y:366:51: error: expected ‘)’ before ‘constexpr’
-src/parser.y:366:78: error: no matching function for call to ‘CaseOrDefault::CaseOrDefault()’
+src/parser.y:382:51: error: expected ‘)’ before ‘constexpr’
+src/parser.y:382:78: error: no matching function for call to ‘CaseOrDefault::CaseOrDefault()’
  labeled_statement: Keyword_case constant_EXPR Operator_trinary_choice statement { $$ = new CaseOrDefault($2, $4); }
                                                                               ^
 In file included from src/parser.y:5:0:
@@ -639,28 +440,28 @@ Include/ast_allnodes.hpp:628:7: note: candidate: constexpr CaseOrDefault::CaseOr
 Include/ast_allnodes.hpp:628:7: note:   candidate expects 1 argument, 0 provided
 Include/ast_allnodes.hpp:628:7: note: candidate: constexpr CaseOrDefault::CaseOrDefault(CaseOrDefault&&)
 Include/ast_allnodes.hpp:628:7: note:   candidate expects 1 argument, 0 provided
-src/parser.y:367:50: error: invalid conversion from ‘Node*’ to ‘Statement*’ [-fpermissive]
+src/parser.y:383:50: error: invalid conversion from ‘Node*’ to ‘Statement*’ [-fpermissive]
                   | Keyword_default Operator_trinary_choice statement { $$ = new CaseOrDefault($3); }
                                                   ^
 In file included from src/parser.y:5:0:
 Include/ast_allnodes.hpp:631:5: note:   initializing argument 1 of ‘CaseOrDefault::CaseOrDefault(Statement*)’
      CaseOrDefault(Statement* _body) : Eval(NULL), Body(_body){}
      ^
-src/parser.y:369:55: error: invalid conversion from ‘Node*’ to ‘DeclarationList*’ [-fpermissive]
+src/parser.y:385:55: error: invalid conversion from ‘Node*’ to ‘DeclarationList*’ [-fpermissive]
  compound_statement: Punctuator_cur_open declaration_list statement_list Punctuator_cur_close { $$ = new CompoundStatement($2, $3); }
                                                        ^
 In file included from src/parser.y:5:0:
 Include/ast_allnodes.hpp:618:5: note:   initializing argument 1 of ‘CompoundStatement::CompoundStatement(DeclarationList*, StatementList*)’
      CompoundStatement(DeclarationList* _decls, StatementList* _stmnts) : Decls(_decls), Statements(_stmnts){}
      ^
-src/parser.y:369:73: error: invalid conversion from ‘Node*’ to ‘StatementList*’ [-fpermissive]
+src/parser.y:385:73: error: invalid conversion from ‘Node*’ to ‘StatementList*’ [-fpermissive]
  compound_statement: Punctuator_cur_open declaration_list statement_list Punctuator_cur_close { $$ = new CompoundStatement($2, $3); }
                                                                          ^
 In file included from src/parser.y:5:0:
 Include/ast_allnodes.hpp:618:5: note:   initializing argument 2 of ‘CompoundStatement::CompoundStatement(DeclarationList*, StatementList*)’
      CompoundStatement(DeclarationList* _decls, StatementList* _stmnts) : Decls(_decls), Statements(_stmnts){}
      ^
-src/parser.y:370:60: error: no matching function for call to ‘CompoundStatement(Node*&)’
+src/parser.y:386:60: error: no matching function for call to ‘CompoundStatement(Node*&)’
                    | Punctuator_cur_open declaration_list Punctuator_cur_close { $$ = new CompoundStatement($2);}
                                                             ^
 In file included from src/parser.y:5:0:
@@ -668,7 +469,7 @@ Include/ast_allnodes.hpp:620:5: note: candidate: CompoundStatement::CompoundStat
      CompoundStatement(StatementList* _stmnts) : Decls(NULL), Statements(_stmnts){}
      ^
 Include/ast_allnodes.hpp:620:5: note:   conversion of argument 1 would be ill-formed:
-src/parser.y:370:55: error: invalid conversion from ‘Node*’ to ‘StatementList*’ [-fpermissive]
+src/parser.y:386:55: error: invalid conversion from ‘Node*’ to ‘StatementList*’ [-fpermissive]
                    | Punctuator_cur_open declaration_list Punctuator_cur_close { $$ = new CompoundStatement($2);}
                                                        ^
 In file included from src/parser.y:5:0:
@@ -676,7 +477,7 @@ Include/ast_allnodes.hpp:619:5: note: candidate: CompoundStatement::CompoundStat
      CompoundStatement(DeclarationList* _decls) : Decls(_decls), Statements(NULL){}
      ^
 Include/ast_allnodes.hpp:619:5: note:   conversion of argument 1 would be ill-formed:
-src/parser.y:370:55: error: invalid conversion from ‘Node*’ to ‘DeclarationList*’ [-fpermissive]
+src/parser.y:386:55: error: invalid conversion from ‘Node*’ to ‘DeclarationList*’ [-fpermissive]
                    | Punctuator_cur_open declaration_list Punctuator_cur_close { $$ = new CompoundStatement($2);}
                                                        ^
 In file included from src/parser.y:5:0:
@@ -684,7 +485,7 @@ Include/ast_allnodes.hpp:616:7: note: candidate: constexpr CompoundStatement::Co
  class CompoundStatement : public Statement{
        ^
 Include/ast_allnodes.hpp:616:7: note:   conversion of argument 1 would be ill-formed:
-src/parser.y:370:60: error: conversion from ‘Node*’ to ‘const CompoundStatement’ is ambiguous
+src/parser.y:386:60: error: conversion from ‘Node*’ to ‘const CompoundStatement’ is ambiguous
                    | Punctuator_cur_open declaration_list Punctuator_cur_close { $$ = new CompoundStatement($2);}
                                                             ^
 In file included from src/parser.y:5:0:
@@ -692,7 +493,7 @@ Include/ast_allnodes.hpp:620:5: note: candidate: CompoundStatement::CompoundStat
      CompoundStatement(StatementList* _stmnts) : Decls(NULL), Statements(_stmnts){}
      ^
 Include/ast_allnodes.hpp:620:5: note:   conversion of argument 1 would be ill-formed:
-src/parser.y:370:55: error: invalid conversion from ‘Node*’ to ‘StatementList*’ [-fpermissive]
+src/parser.y:386:55: error: invalid conversion from ‘Node*’ to ‘StatementList*’ [-fpermissive]
                    | Punctuator_cur_open declaration_list Punctuator_cur_close { $$ = new CompoundStatement($2);}
                                                        ^
 In file included from src/parser.y:5:0:
@@ -700,7 +501,7 @@ Include/ast_allnodes.hpp:619:5: note: candidate: CompoundStatement::CompoundStat
      CompoundStatement(DeclarationList* _decls) : Decls(_decls), Statements(NULL){}
      ^
 Include/ast_allnodes.hpp:619:5: note:   conversion of argument 1 would be ill-formed:
-src/parser.y:370:55: error: invalid conversion from ‘Node*’ to ‘DeclarationList*’ [-fpermissive]
+src/parser.y:386:55: error: invalid conversion from ‘Node*’ to ‘DeclarationList*’ [-fpermissive]
                    | Punctuator_cur_open declaration_list Punctuator_cur_close { $$ = new CompoundStatement($2);}
                                                        ^
 In file included from src/parser.y:5:0:
@@ -708,7 +509,7 @@ Include/ast_allnodes.hpp:616:7: note: candidate: constexpr CompoundStatement::Co
  class CompoundStatement : public Statement{
        ^
 Include/ast_allnodes.hpp:616:7: note:   conversion of argument 1 would be ill-formed:
-src/parser.y:370:60: error: conversion from ‘Node*’ to ‘CompoundStatement’ is ambiguous
+src/parser.y:386:60: error: conversion from ‘Node*’ to ‘CompoundStatement’ is ambiguous
                    | Punctuator_cur_open declaration_list Punctuator_cur_close { $$ = new CompoundStatement($2);}
                                                             ^
 In file included from src/parser.y:5:0:
@@ -716,7 +517,7 @@ Include/ast_allnodes.hpp:620:5: note: candidate: CompoundStatement::CompoundStat
      CompoundStatement(StatementList* _stmnts) : Decls(NULL), Statements(_stmnts){}
      ^
 Include/ast_allnodes.hpp:620:5: note:   conversion of argument 1 would be ill-formed:
-src/parser.y:370:55: error: invalid conversion from ‘Node*’ to ‘StatementList*’ [-fpermissive]
+src/parser.y:386:55: error: invalid conversion from ‘Node*’ to ‘StatementList*’ [-fpermissive]
                    | Punctuator_cur_open declaration_list Punctuator_cur_close { $$ = new CompoundStatement($2);}
                                                        ^
 In file included from src/parser.y:5:0:
@@ -724,10 +525,10 @@ Include/ast_allnodes.hpp:619:5: note: candidate: CompoundStatement::CompoundStat
      CompoundStatement(DeclarationList* _decls) : Decls(_decls), Statements(NULL){}
      ^
 Include/ast_allnodes.hpp:619:5: note:   conversion of argument 1 would be ill-formed:
-src/parser.y:370:55: error: invalid conversion from ‘Node*’ to ‘DeclarationList*’ [-fpermissive]
+src/parser.y:386:55: error: invalid conversion from ‘Node*’ to ‘DeclarationList*’ [-fpermissive]
                    | Punctuator_cur_open declaration_list Punctuator_cur_close { $$ = new CompoundStatement($2);}
                                                        ^
-src/parser.y:371:60: error: no matching function for call to ‘CompoundStatement(Node*&)’
+src/parser.y:387:60: error: no matching function for call to ‘CompoundStatement(Node*&)’
                    | Punctuator_cur_open statement_list Punctuator_cur_close { $$ = new CompoundStatement($2); /*Will need to use arg overloaded constructor to differentiate between the above*/}
                                                             ^
 In file included from src/parser.y:5:0:
@@ -735,7 +536,7 @@ Include/ast_allnodes.hpp:620:5: note: candidate: CompoundStatement::CompoundStat
      CompoundStatement(StatementList* _stmnts) : Decls(NULL), Statements(_stmnts){}
      ^
 Include/ast_allnodes.hpp:620:5: note:   conversion of argument 1 would be ill-formed:
-src/parser.y:371:55: error: invalid conversion from ‘Node*’ to ‘StatementList*’ [-fpermissive]
+src/parser.y:387:55: error: invalid conversion from ‘Node*’ to ‘StatementList*’ [-fpermissive]
                    | Punctuator_cur_open statement_list Punctuator_cur_close { $$ = new CompoundStatement($2); /*Will need to use arg overloaded constructor to differentiate between the above*/}
                                                        ^
 In file included from src/parser.y:5:0:
@@ -743,7 +544,7 @@ Include/ast_allnodes.hpp:619:5: note: candidate: CompoundStatement::CompoundStat
      CompoundStatement(DeclarationList* _decls) : Decls(_decls), Statements(NULL){}
      ^
 Include/ast_allnodes.hpp:619:5: note:   conversion of argument 1 would be ill-formed:
-src/parser.y:371:55: error: invalid conversion from ‘Node*’ to ‘DeclarationList*’ [-fpermissive]
+src/parser.y:387:55: error: invalid conversion from ‘Node*’ to ‘DeclarationList*’ [-fpermissive]
                    | Punctuator_cur_open statement_list Punctuator_cur_close { $$ = new CompoundStatement($2); /*Will need to use arg overloaded constructor to differentiate between the above*/}
                                                        ^
 In file included from src/parser.y:5:0:
@@ -751,7 +552,7 @@ Include/ast_allnodes.hpp:616:7: note: candidate: constexpr CompoundStatement::Co
  class CompoundStatement : public Statement{
        ^
 Include/ast_allnodes.hpp:616:7: note:   conversion of argument 1 would be ill-formed:
-src/parser.y:371:60: error: conversion from ‘Node*’ to ‘const CompoundStatement’ is ambiguous
+src/parser.y:387:60: error: conversion from ‘Node*’ to ‘const CompoundStatement’ is ambiguous
                    | Punctuator_cur_open statement_list Punctuator_cur_close { $$ = new CompoundStatement($2); /*Will need to use arg overloaded constructor to differentiate between the above*/}
                                                             ^
 In file included from src/parser.y:5:0:
@@ -759,7 +560,7 @@ Include/ast_allnodes.hpp:620:5: note: candidate: CompoundStatement::CompoundStat
      CompoundStatement(StatementList* _stmnts) : Decls(NULL), Statements(_stmnts){}
      ^
 Include/ast_allnodes.hpp:620:5: note:   conversion of argument 1 would be ill-formed:
-src/parser.y:371:55: error: invalid conversion from ‘Node*’ to ‘StatementList*’ [-fpermissive]
+src/parser.y:387:55: error: invalid conversion from ‘Node*’ to ‘StatementList*’ [-fpermissive]
                    | Punctuator_cur_open statement_list Punctuator_cur_close { $$ = new CompoundStatement($2); /*Will need to use arg overloaded constructor to differentiate between the above*/}
                                                        ^
 In file included from src/parser.y:5:0:
@@ -767,7 +568,7 @@ Include/ast_allnodes.hpp:619:5: note: candidate: CompoundStatement::CompoundStat
      CompoundStatement(DeclarationList* _decls) : Decls(_decls), Statements(NULL){}
      ^
 Include/ast_allnodes.hpp:619:5: note:   conversion of argument 1 would be ill-formed:
-src/parser.y:371:55: error: invalid conversion from ‘Node*’ to ‘DeclarationList*’ [-fpermissive]
+src/parser.y:387:55: error: invalid conversion from ‘Node*’ to ‘DeclarationList*’ [-fpermissive]
                    | Punctuator_cur_open statement_list Punctuator_cur_close { $$ = new CompoundStatement($2); /*Will need to use arg overloaded constructor to differentiate between the above*/}
                                                        ^
 In file included from src/parser.y:5:0:
@@ -775,7 +576,7 @@ Include/ast_allnodes.hpp:616:7: note: candidate: constexpr CompoundStatement::Co
  class CompoundStatement : public Statement{
        ^
 Include/ast_allnodes.hpp:616:7: note:   conversion of argument 1 would be ill-formed:
-src/parser.y:371:60: error: conversion from ‘Node*’ to ‘CompoundStatement’ is ambiguous
+src/parser.y:387:60: error: conversion from ‘Node*’ to ‘CompoundStatement’ is ambiguous
                    | Punctuator_cur_open statement_list Punctuator_cur_close { $$ = new CompoundStatement($2); /*Will need to use arg overloaded constructor to differentiate between the above*/}
                                                             ^
 In file included from src/parser.y:5:0:
@@ -783,7 +584,7 @@ Include/ast_allnodes.hpp:620:5: note: candidate: CompoundStatement::CompoundStat
      CompoundStatement(StatementList* _stmnts) : Decls(NULL), Statements(_stmnts){}
      ^
 Include/ast_allnodes.hpp:620:5: note:   conversion of argument 1 would be ill-formed:
-src/parser.y:371:55: error: invalid conversion from ‘Node*’ to ‘StatementList*’ [-fpermissive]
+src/parser.y:387:55: error: invalid conversion from ‘Node*’ to ‘StatementList*’ [-fpermissive]
                    | Punctuator_cur_open statement_list Punctuator_cur_close { $$ = new CompoundStatement($2); /*Will need to use arg overloaded constructor to differentiate between the above*/}
                                                        ^
 In file included from src/parser.y:5:0:
@@ -791,108 +592,108 @@ Include/ast_allnodes.hpp:619:5: note: candidate: CompoundStatement::CompoundStat
      CompoundStatement(DeclarationList* _decls) : Decls(_decls), Statements(NULL){}
      ^
 Include/ast_allnodes.hpp:619:5: note:   conversion of argument 1 would be ill-formed:
-src/parser.y:371:55: error: invalid conversion from ‘Node*’ to ‘DeclarationList*’ [-fpermissive]
+src/parser.y:387:55: error: invalid conversion from ‘Node*’ to ‘DeclarationList*’ [-fpermissive]
                    | Punctuator_cur_open statement_list Punctuator_cur_close { $$ = new CompoundStatement($2); /*Will need to use arg overloaded constructor to differentiate between the above*/}
                                                        ^
-src/parser.y:377:50: error: invalid conversion from ‘Node*’ to ‘Statement*’ [-fpermissive]
+src/parser.y:393:50: error: invalid conversion from ‘Node*’ to ‘Statement*’ [-fpermissive]
  statement_list: statement { $$ = new StatementList($1); }
                                                   ^
 In file included from src/parser.y:5:0:
 Include/ast_allnodes.hpp:606:5: note:   initializing argument 1 of ‘StatementList::StatementList(Statement*)’
      StatementList(Statement* TerminalStatement) : statement(TerminalStatement), RestOfStatements(NULL){}
      ^
-src/parser.y:378:51: error: invalid conversion from ‘Node*’ to ‘StatementList*’ [-fpermissive]
+src/parser.y:394:51: error: invalid conversion from ‘Node*’ to ‘StatementList*’ [-fpermissive]
                | statement_list statement { $$ = new StatementList($1, $2); }
                                                    ^
 In file included from src/parser.y:5:0:
 Include/ast_allnodes.hpp:607:5: note:   initializing argument 1 of ‘StatementList::StatementList(StatementList*, Statement*)’
      StatementList(StatementList* OtherStatements, Statement* ThisStatement) : statement(ThisStatement), RestOfStatements(RestOfStatements){}
      ^
-src/parser.y:378:68: error: invalid conversion from ‘Node*’ to ‘Statement*’ [-fpermissive]
+src/parser.y:394:68: error: invalid conversion from ‘Node*’ to ‘Statement*’ [-fpermissive]
                | statement_list statement { $$ = new StatementList($1, $2); }
                                                                     ^
 In file included from src/parser.y:5:0:
 Include/ast_allnodes.hpp:607:5: note:   initializing argument 2 of ‘StatementList::StatementList(StatementList*, Statement*)’
      StatementList(StatementList* OtherStatements, Statement* ThisStatement) : statement(ThisStatement), RestOfStatements(RestOfStatements){}
      ^
-src/parser.y:383:68: error: invalid conversion from ‘Node*’ to ‘Statement*’ [-fpermissive]
+src/parser.y:399:68: error: invalid conversion from ‘Node*’ to ‘Statement*’ [-fpermissive]
  selection_statement: Keyword_if Punctuator_par_open EXPR Punctuator_par_close statement Keyword_else statement { $$ = new IfElse($3, $5, $7); }
                                                                     ^
 In file included from src/parser.y:5:0:
 Include/ast_allnodes.hpp:579:5: note:   initializing argument 2 of ‘IfElse::IfElse(Expression*, Statement*, Statement*)’
      IfElse(Expression* _control, Statement* _iftrue, Statement* _iffalse) 
      ^
-src/parser.y:383:85: error: invalid conversion from ‘Node*’ to ‘Statement*’ [-fpermissive]
+src/parser.y:399:85: error: invalid conversion from ‘Node*’ to ‘Statement*’ [-fpermissive]
  selection_statement: Keyword_if Punctuator_par_open EXPR Punctuator_par_close statement Keyword_else statement { $$ = new IfElse($3, $5, $7); }
                                                                                      ^
 In file included from src/parser.y:5:0:
 Include/ast_allnodes.hpp:579:5: note:   initializing argument 3 of ‘IfElse::IfElse(Expression*, Statement*, Statement*)’
      IfElse(Expression* _control, Statement* _iftrue, Statement* _iffalse) 
      ^
-src/parser.y:384:63: error: invalid conversion from ‘Node*’ to ‘Statement*’ [-fpermissive]
+src/parser.y:400:63: error: invalid conversion from ‘Node*’ to ‘Statement*’ [-fpermissive]
                     | Keyword_if Punctuator_par_open EXPR Punctuator_par_close statement { $$ = new If($3, $5); }
                                                                ^
 In file included from src/parser.y:5:0:
 Include/ast_allnodes.hpp:572:5: note:   initializing argument 2 of ‘If::If(Expression*, Statement*)’
      If(Expression* _control, Statement* _iftrue) : SelectionStatement(_control), IfTrue(_iftrue){}
      ^
-src/parser.y:385:67: error: invalid conversion from ‘Node*’ to ‘Statement*’ [-fpermissive]
+src/parser.y:401:67: error: invalid conversion from ‘Node*’ to ‘Statement*’ [-fpermissive]
                     | Keyword_switch Punctuator_par_open EXPR Punctuator_par_close statement { $$ = new Switch($3, $5); }
                                                                    ^
 In file included from src/parser.y:5:0:
 Include/ast_allnodes.hpp:588:5: note:   initializing argument 2 of ‘Switch::Switch(Expression*, Statement*)’
      Switch(Expression* _control, Statement* _body) : SelectionStatement(_control), Body(_body){}
      ^
-src/parser.y:398:66: error: invalid conversion from ‘Node*’ to ‘Statement*’ [-fpermissive]
+src/parser.y:414:66: error: invalid conversion from ‘Node*’ to ‘Statement*’ [-fpermissive]
  iteration_statement: Keyword_while Punctuator_par_open EXPR Punctuator_par_close statement { $$ = new While($3, $5); }
                                                                   ^
 In file included from src/parser.y:5:0:
 Include/ast_allnodes.hpp:535:5: note:   initializing argument 2 of ‘While::While(Expression*, Statement*)’
      While(Expression*  _Control, Statement* _Body) : ControlExpression(_Control), Body(_Body){} 
      ^
-src/parser.y:399:45: error: invalid conversion from ‘Node*’ to ‘Statement*’ [-fpermissive]
+src/parser.y:415:45: error: invalid conversion from ‘Node*’ to ‘Statement*’ [-fpermissive]
                     | Keyword_do statement Keyword_while Punctuator_par_open EXPR Punctuator_par_close Punctuator_eol { $$ = new DoWhile($2, $5); }
                                              ^
 In file included from src/parser.y:5:0:
 Include/ast_allnodes.hpp:543:5: note:   initializing argument 1 of ‘DoWhile::DoWhile(Statement*, Expression*)’
      DoWhile(Statement* _Body, Expression* _Control) : Body(_Body), ControlExpression(_Control){}
      ^
-src/parser.y:400:41: error: invalid conversion from ‘Node*’ to ‘ExpressionStatement*’ [-fpermissive]
+src/parser.y:416:41: error: invalid conversion from ‘Node*’ to ‘ExpressionStatement*’ [-fpermissive]
                     | Keyword_for Punctuator_par_open EXPR_statement EXPR_statement EXPR Punctuator_par_close statement { $$ = new For($3,$4,$5,$7);}
                                          ^
 In file included from src/parser.y:5:0:
 Include/ast_allnodes.hpp:553:5: note:   initializing argument 1 of ‘For::For(ExpressionStatement*, ExpressionStatement*, Expression*, Statement*)’
      For(ExpressionStatement* _init, ExpressionStatement* _control, Expression* _next, Statement* _body) 
      ^
-src/parser.y:400:58: error: invalid conversion from ‘Node*’ to ‘ExpressionStatement*’ [-fpermissive]
+src/parser.y:416:58: error: invalid conversion from ‘Node*’ to ‘ExpressionStatement*’ [-fpermissive]
                     | Keyword_for Punctuator_par_open EXPR_statement EXPR_statement EXPR Punctuator_par_close statement { $$ = new For($3,$4,$5,$7);}
                                                           ^
 In file included from src/parser.y:5:0:
 Include/ast_allnodes.hpp:553:5: note:   initializing argument 2 of ‘For::For(ExpressionStatement*, ExpressionStatement*, Expression*, Statement*)’
      For(ExpressionStatement* _init, ExpressionStatement* _control, Expression* _next, Statement* _body) 
      ^
-src/parser.y:400:97: error: invalid conversion from ‘Node*’ to ‘Statement*’ [-fpermissive]
+src/parser.y:416:97: error: invalid conversion from ‘Node*’ to ‘Statement*’ [-fpermissive]
                     | Keyword_for Punctuator_par_open EXPR_statement EXPR_statement EXPR Punctuator_par_close statement { $$ = new For($3,$4,$5,$7);}
                                                                                                  ^
 In file included from src/parser.y:5:0:
 Include/ast_allnodes.hpp:553:5: note:   initializing argument 4 of ‘For::For(ExpressionStatement*, ExpressionStatement*, Expression*, Statement*)’
      For(ExpressionStatement* _init, ExpressionStatement* _control, Expression* _next, Statement* _body) 
      ^
-src/parser.y:401:41: error: invalid conversion from ‘Node*’ to ‘ExpressionStatement*’ [-fpermissive]
+src/parser.y:417:41: error: invalid conversion from ‘Node*’ to ‘ExpressionStatement*’ [-fpermissive]
                     | Keyword_for Punctuator_par_open EXPR_statement EXPR_statement Punctuator_par_close statement { $$ = new For($3,$4,$6);}
                                          ^
 In file included from src/parser.y:5:0:
 Include/ast_allnodes.hpp:551:5: note:   initializing argument 1 of ‘For::For(ExpressionStatement*, ExpressionStatement*, Statement*)’
      For(ExpressionStatement* _init, ExpressionStatement* _control, Statement* _body) 
      ^
-src/parser.y:401:58: error: invalid conversion from ‘Node*’ to ‘ExpressionStatement*’ [-fpermissive]
+src/parser.y:417:58: error: invalid conversion from ‘Node*’ to ‘ExpressionStatement*’ [-fpermissive]
                     | Keyword_for Punctuator_par_open EXPR_statement EXPR_statement Punctuator_par_close statement { $$ = new For($3,$4,$6);}
                                                           ^
 In file included from src/parser.y:5:0:
 Include/ast_allnodes.hpp:551:5: note:   initializing argument 2 of ‘For::For(ExpressionStatement*, ExpressionStatement*, Statement*)’
      For(ExpressionStatement* _init, ExpressionStatement* _control, Statement* _body) 
      ^
-src/parser.y:401:74: error: invalid conversion from ‘Node*’ to ‘Statement*’ [-fpermissive]
+src/parser.y:417:74: error: invalid conversion from ‘Node*’ to ‘Statement*’ [-fpermissive]
                     | Keyword_for Punctuator_par_open EXPR_statement EXPR_statement Punctuator_par_close statement { $$ = new For($3,$4,$6);}
                                                                           ^
 In file included from src/parser.y:5:0:
@@ -900,7 +701,7 @@ Include/ast_allnodes.hpp:551:5: note:   initializing argument 3 of ‘For::For(E
      For(ExpressionStatement* _init, ExpressionStatement* _control, Statement* _body) 
      ^
 src/parser.y: At global scope:
-src/parser.y:443:6: warning: ISO C++ forbids declaration of ‘main’ with no type [-Wreturn-type]
+src/parser.y:459:6: warning: ISO C++ forbids declaration of ‘main’ with no type [-Wreturn-type]
  main()
       ^
 make: *** [src/parser.tab.o] Error 1

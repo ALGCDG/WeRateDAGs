@@ -22,9 +22,30 @@
 	  long double ldvalue;
     Node* node;
     Expression* expression;
-    IdentiferNode* identnode;
+    ArgExprList* argexprlist;
+    IdentifierNode* identnode;
+    type_name* _typename;
     ConstantExpression* constexpr;
-}
+declaration       *    t_declaration;
+declaration_specifiers * t_declaration_specifiers;
+storage_class_specifier * t_storage_class_specifier;
+init_declarator_list  * t_init_declarator_list;
+init_declarator       * t_init_declarator;
+type_specifier        * t_type_specifier;
+specifier_list        * t_specifier_list;
+declarator            * t_declarator;
+direct_declarator     * t_direct_declarator;
+pointer               * t_pointer;
+parameter_type_list  *  t_parameter_type_list;
+parameter_list       *  t_parameter_list;
+parameter_declaration * t_parameter_declaration;
+identifier_list       * t_identifier_list;
+type_name            *  t_type_name;
+abstract_declarator *   t_abstract_declarator;
+direct_abstract_declarator t_direct_abstract_declarator;
+initializer * t_initializer;
+initializer_list * t_initializer_list;
+};
 
 %token Constant_int Constant_char Constant_double Constant_float Constant_long_double
 %token String /*What is this for*/
@@ -48,9 +69,9 @@
 %type <identnode> Ident
 %type <expression> Constant
 %type <expression> postfix_EXPR
-%type <expression> argument_EXPR_list
+%type <argexprlist> argument_EXPR_list
 %type <expression> unary_EXPR
-%type <expression> unary_operator
+%type <text> unary_operator
 %type <expression> cast_EXPR
 %type <expression> multiplicative_EXPR
 %type <expression> additive_EXPR
@@ -68,28 +89,25 @@
 %type <expression> EXPR
 %type <constexpr> constant_EXPR
 
-
-%type <node> declaration
-%type <node> declaration_specifiers
-%type <node> storage_class_specifier
-%type <node> init_declarator_list
-%type <node> init_declarator
-%type <node> type_specifier
-%type <node> specifier_list
-%type <node> declarator
-%type <node> direct_declarator
-%type <node> pointer
-%type <node> parameter_type_list
-%type <node> parameter_list
-%type <node> parameter_declaration
-%type <node> identifier_list
-%type <node> type_name
-%type <node> abstract_declarator
-%type <node> direct_abstract_declarator
-%type <node> initializer
-%type <node> initializer_list
-				
-
+%type <t_declaration> declaration
+%type <t_declaration_specifiers> declaration_specifiers
+%type <t_storage_class_specifier> storage_class_specifier
+%type <t_init_declarator_list> init_declarator_list
+%type <t_init_declarator> init_declarator
+%type <t_type_specifier> type_specifier
+%type <t_specifier_list> specifier_list
+%type <t_declarator> declarator
+%type <t_direct_declarator> direct_declarator
+%type <t_pointer> pointer
+%type <t_parameter_type_list> parameter_type_list
+%type <t_parameter_list> parameter_list
+%type <t_parameter_declaration> parameter_declaration
+%type <t_identifier_list> identifier_list
+%type <t_type_name> type_name
+%type <t_abstract_declarator> abstract_declarator
+%type <t_direct_abstract_declara> direct_abstract_declarator
+%type <t_initializer> initializer
+%type <t_initializer_list> initializer_list
 
 %type <node> statement
 %type <node> labeled_statement
@@ -110,12 +128,12 @@
 EXPRESSIONS
 */
 
-primary_EXPR: Ident { $$ = new IdentiferNode; }
+primary_EXPR: Ident { $$ = $1; }
                  | Constant { std::cerr << "CONSTANT" << std::endl; }
                   | String { std::cerr << "STRING" << std::endl; }
               | Punctuator_par_open EXPR Punctuator_par_close { std::cout << "(x)" << std::endl; }
 
-Ident: Identifier { $$ = new IdentiferNode($1); } 
+Ident: Identifier { $$ = new IdentifierNode($1); } 
 
 Constant: Constant_int {}  
 		| Constant_char {}
@@ -140,16 +158,16 @@ argument_EXPR_list: assignment_EXPR { $$ = new ArgExprList($1); }
 unary_EXPR: postfix_EXPR { $$=$1; }
 		  | Operator_addadd unary_EXPR { $$ = new PreInc($2); }
 		  | Operator_subsub unary_EXPR { $$ = new PreDec($2); }
-      | unary_operator cast_EXPR { $$ = PrefixExpr::DecodeUnaryOp($2); }
+      | unary_operator cast_EXPR { $$ = PrefixExpr::DecodeUnaryOp($1,$2); }
       | Operator_sizeof unary_EXPR { $$ = new SizeofExpr($2); }
       | Operator_sizeof Punctuator_par_open type_name Punctuator_par_close  { $$ = new SizeofType($3); } 
 
-unary_operator: Operator_bit_and { $$ = new string("&");} 
-              | Operator_mul { $$ = new string("*");}
-              | Operator_add { $$ = new string("+");}
-              | Operator_sub { $$ = new string("-");}
-              | Operator_bit_not { $$ = new string("~");}
-              | Operator_not { $$ = new string("!");}
+unary_operator: Operator_bit_and { $$ = new std::string("&");} 
+              | Operator_mul { $$ = new std::string("*");}
+              | Operator_add { $$ = new std::string("+");}
+              | Operator_sub { $$ = new std::string("-");}
+              | Operator_bit_not { $$ = new std::string("~");}
+              | Operator_not { $$ = new std::string("!");}
 
 cast_EXPR: unary_EXPR { $$ = $1; }
                | Punctuator_par_open type_name Punctuator_par_close cast_EXPR { $$ = new CastExpr($2, $4); }
@@ -202,17 +220,17 @@ assignment_EXPR: conditional_EXPR { $$ = $1; }
                | unary_EXPR assignment assignment_EXPR { $$ = GenericAssignExpr::DecodeAssignOp($1, $2, $3); }
                
 
-assignment: Operator_assign { $$ = new string("=");} 
-          | Operator_mul_assign { $$ = new string("*=");}
-          | Operator_div_assign { $$ = new string("/=");}
-          | Operator_mod_assign { $$ = new string("%=");}
-          | Operator_add_assign { $$ = new string("+=");}
-          | Operator_sub_assign { $$ = new string("-=");}
-          | Operator_sl_assign { $$ = new string("<<=");}
-          | Operator_sr_assign { $$ = new string(">>=");}
-          | Operator_and_assign { $$ = new string("&=");}
-          | Operator_xor_assign { $$ = new string("^=");}
-          | Operator_or_assign{ $$ = new string("|=");}
+assignment: Operator_assign { $$ = new std::string("=");} 
+          | Operator_mul_assign { $$ = new std::string("*=");}
+          | Operator_div_assign { $$ = new std::string("/=");}
+          | Operator_mod_assign { $$ = new std::string("%=");}
+          | Operator_add_assign { $$ = new std::string("+=");}
+          | Operator_sub_assign { $$ = new std::string("-=");}
+          | Operator_sl_assign { $$ = new std::string("<<=");}
+          | Operator_sr_assign { $$ = new std::string(">>=");}
+          | Operator_and_assign { $$ = new std::string("&=");}
+          | Operator_xor_assign { $$ = new std::string("^=");}
+          | Operator_or_assign{ $$ = new std::string("|=");}
                
 
 EXPR: assignment_EXPR { $$ = $1; }
