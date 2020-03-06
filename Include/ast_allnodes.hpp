@@ -6,7 +6,7 @@
 
 #include "visitors.hpp"
 //FORWARD DECLARE VISITOR
-class Visitor;
+//class Visitor;
 
 #include "ast_context.hpp"
 //CONTEXT DOES NOT NEED TO KNOW THESE NODES, HANDLED BY VISITOR

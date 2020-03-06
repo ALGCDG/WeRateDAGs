@@ -63,6 +63,21 @@ public:
     virtual void visit(ConstantExpression*);
     virtual void visit(CommaSepExpression*);
 
+    //Declarations
+
+
+	virtual void visit(declaration*);
+	virtual void visit(declaration_specifiers*);
+	virtual void visit(init_declarator_list*);
+	virtual void visit(init_declarator*);
+	virtual void visit(type_specifier*);
+	virtual void visit(specifier_list*);
+	virtual void visit(pointer*);
+	virtual void visit(base_declarator*);
+	virtual void visit(abstract_declarator*);
+	virtual void visit(declarator*);
+
+
     //Statements
     virtual void visit(EmptyStatement*);
     virtual void visit(Continue*);
