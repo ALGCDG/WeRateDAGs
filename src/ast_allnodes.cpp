@@ -4,6 +4,10 @@ void ArgExprList::AppendArgExpression(Expression* ArgExpr){
     Args.push_back(ArgExpr);
 }
 
+void TranslationUnit::AppendDeclaration(GenericExternalDeclaration* _decl){
+    decls.push_back(_decl);
+}
+
 /*static*/
 PrefixExpr* PrefixExpr::DecodeUnaryOp(std::string* yytext, Expression* _RHS){
     std::string op = *yytext;

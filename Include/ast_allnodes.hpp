@@ -3,23 +3,26 @@
 
 #include <string>
 #include <vector>
-#include "ast_basenode.hpp"
+// #include "ast_basenode.hpp"
 
 // #include "visitors.hpp"
 // //FORWARD DECLARE VISITOR
 // class Visitor;
 
-#include "ast_context.hpp"
+// #include "ast_context.hpp"
 //CONTEXT DOES NOT NEED TO KNOW THESE NODES, HANDLED BY VISITOR
 //NO FORWARD DECLARATION NEEDED
+namespace Context{
+    class Record;
+}
+class Visitor;
 
-
-// class Node{
-// public:
-//     void accept(Visitor* AVisitor);
-// private:
+class Node{
+public:
+    void accept(Visitor* AVisitor);
+private:
     
-// };
+};
 
 /*
 EXPRESSIONS
@@ -108,7 +111,7 @@ public:
 
 class ArgExprList : public Node{
 public:
-    ArgExprList(Expression* Arg) : Args{Arg}{}
+    ArgExprList(Expression* Arg){ Args.push_back(Arg); }
     void AppendArgExpression(Expression* ArgExpr);
     //in the grammar, expression* can be assignment expression
     std::vector<Expression*> Args;
@@ -762,9 +765,10 @@ public:
 class TranslationUnit : public Node
 {
 private:
-    std::vector<GenericExternalDeclaration*> Units;
 public:
-    TranslationUnit(GenericExternalDeclaration* _externaldef) : Units(_externaldef) {}
+    std::vector<GenericExternalDeclaration*> decls;
+    TranslationUnit(GenericExternalDeclaration* _externaldef){ decls.push_back(_externaldef); }
+    void AppendDeclaration(GenericExternalDeclaration* _decl);
 };
 
 class GenericExternalDeclaration : public Node{};
@@ -773,7 +777,7 @@ class FunctionDefinition : public GenericExternalDeclaration{
 public:
     declaration_specifiers* specs;
     declarator* decl;
-    declaration_list* decl_list;
+    DeclarationList* decl_list;
     CompoundStatement* Body;
 };
 
