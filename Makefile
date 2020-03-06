@@ -15,7 +15,8 @@ bin/translator : src/parser.tab.o src/lexer.yy.o
 	g++ $(CPPFLAGS) -o bin/translator $^
 	
 clean :
-	rm src/*.o
-	rm bin/*
-	rm src/*.tab.cpp
-	rm src/*.yy.cpp
+	rm -f src/*.o
+	rm -f bin/*
+	rm -f src/*.tab.*
+	rm -f src/*.yy.*
+	

@@ -17,6 +17,113 @@ namespace Context{
 }
 class Visitor;
 
+class Node;
+class Expression;
+class IdentifierNode;
+class Constant;
+class StringLiteral;
+class PostfixExpr;
+class ArgExprList;
+class ArraySubscript;
+class FuncCall;
+class MemberAccess;
+class DerefMemberAccess;
+class PostInc;
+class PostDec;
+class PrefixExpr;
+class UnaryAddressOperator;
+class UnaryDerefOperator;
+class UnaryPlusOperator;
+class UnaryNegOperator;
+class UnaryBitwiseNotOperator;
+class UnaryLogicalNotOperator;
+class PreInc;
+class PreDec;
+class SizeofExpr;
+class SizeofType;
+class CastExpr;
+class BinaryOpExpression;
+class declarator;
+class direct_declarator;
+
+class Multiply;
+class Divide;
+class Modulo;
+class Add;
+class Sub;
+class ShiftLeft;
+class ShiftRight;
+class LogicalBinaryExpression;
+class LessThan;
+class GreaterThan;
+class LessThanOrEqual;
+class GreaterThanOrEqual;
+class EqualTo;
+class NotEqualTo;
+class LogicalAND;
+class LogicalOR;
+class BitwiseBinaryExpression;
+class BitwiseAND;
+class BitwiseOR;
+class BitwiseXOR;
+class TernaryOpExpression;
+class GenericAssignExpr;
+class AssignmentExpression;
+class MulAssignment;
+class DivAssignment;
+class ModAssignment;
+class AddAssignment;
+class SubAssignment;
+class ShiftLeftAssignment;
+class ShiftRightAssignment;
+class BitwiseANDAssignment;
+class BitwiseXORAssignment;
+class BitwiseORAssignment;
+class ConstantExpression;
+class CommaSepExpression;
+class Statement;
+class EmptyStatement;
+class Continue;
+class Break;
+class Return;
+class While;
+class DoWhile;
+class For;
+class SelectionStatement;
+class If;
+class IfElse;
+class Switch;
+class ExpressionStatement;
+class StatementList;
+class CompoundStatement;
+class CaseOrDefault;
+class DeclarationList;
+class declaration;
+class declaration_specifiers;
+class init_declarator_list;
+class init_declarator;
+class type_specifier;
+class specifier_list;
+class pointer;
+class base_declarator;
+class abstract_declarator;
+class declarator;
+class base_direct_declarator;
+class unspecified_array_length;
+class empty_parameter_list_list;
+class direct_abstract_declarator;
+class direct_declarator;
+class direct_declarator_direct_declarator;
+class parameter_list;
+class parameter_declaration;
+class type_name;
+class initializer;
+class initializer_list;
+class GenericExternalDeclaration;
+class TranslationUnit;
+class FunctionDefinition;
+class ExternalDeclaration;
+
 class Node{
 public:
     void accept(Visitor* AVisitor);
@@ -37,8 +144,8 @@ public:
 //primary expr
 class IdentifierNode : public Expression{
 public:
-    IdentifierNode(std::string _name) : Name(_name){}
-    std::string Name;
+    IdentifierNode(std::string* _name) : Name(_name){}
+    std::string* Name;
     Context::Record* ContextRecord;
 };
 
@@ -67,7 +174,17 @@ public:
     PostfixExpr(Expression* _LHS) : LHS(_LHS){}
     Expression* LHS;
 };
+//---------------------------------------------------------
 
+class ArgExprList : public Node{
+public:
+    ArgExprList(Expression* Arg){ Args.push_back(Arg);}
+    void AppendArgExpression(Expression* ArgExpr){ Args.push_back(ArgExpr); }
+    //in the grammar, expression* can be assignment expression
+    std::vector<Expression*> Args;
+};
+
+//------------------------------------------------------
 class ArraySubscript : public PostfixExpr{
 public:
     ArraySubscript(Expression* _LHS, Expression* _Subscript) : PostfixExpr(_LHS), Subscript(_Subscript){}
@@ -107,15 +224,6 @@ public:
     using PostfixExpr::PostfixExpr;
 };
 
-//---------------------------------------------------------
-
-class ArgExprList : public Node{
-public:
-    ArgExprList(Expression* Arg){ Args.push_back(Arg); }
-    void AppendArgExpression(Expression* ArgExpr);
-    //in the grammar, expression* can be assignment expression
-    std::vector<Expression*> Args;
-};
 
 //---------------------------------------------------------
 
@@ -182,7 +290,7 @@ public:
 
 class CastExpr : public PrefixExpr{
 public:
-    CastExpr(type_name* _typ , Expression* _ExprToBeCast) : typ(_typ), PrefixExpr(_ExprToBeCast) {}
+    CastExpr(type_name* _typ , Expression* _ExprToBeCast) : PrefixExpr(_ExprToBeCast), typ(_typ) {}
     type_name* typ;
 //TODO -> Needs type system
 };
@@ -389,7 +497,7 @@ class CommaSepExpression : public Expression{
 public:
     CommaSepExpression(Expression* _LHS, Expression* _RHS) : RHS(_RHS), LHS(_LHS){}
 private:
-    Expression* LHS, *RHS;
+    Expression* RHS, *LHS;
 };
 
 //---------------------------------------------------------
@@ -434,8 +542,8 @@ class DoWhile : public Statement{
 public:
     DoWhile(Statement* _Body, Expression* _Control) : Body(_Body), ControlExpression(_Control){}
 private:
-    Expression* ControlExpression;
     Statement* Body;
+    Expression* ControlExpression;
 };
 
 class For : public Statement{
@@ -761,6 +869,7 @@ public:
     initializer_list(initializer * _init, initializer_list * _init_list = NULL) : init(_init), init_list(_init_list) {}
 };
 
+class GenericExternalDeclaration : public Node{};
 
 class TranslationUnit : public Node
 {
@@ -768,10 +877,9 @@ private:
 public:
     std::vector<GenericExternalDeclaration*> decls;
     TranslationUnit(GenericExternalDeclaration* _externaldef){ decls.push_back(_externaldef); }
-    void AppendDeclaration(GenericExternalDeclaration* _decl);
+    void AppendDeclaration(GenericExternalDeclaration* _decl){ decls.push_back(_decl);}
 };
 
-class GenericExternalDeclaration : public Node{};
 
 class FunctionDefinition : public GenericExternalDeclaration{
 public:

@@ -22,7 +22,9 @@
 	  long double ldvalue;
     Node* node;
     Expression* expression;
-    IdentiferNode* identnode;
+    ArgExprList* argexprlist;
+    IdentifierNode* identnode;
+    type_name* _typename;
     ConstantExpression* constexpr;
 }
 
@@ -48,9 +50,9 @@
 %type <identnode> Ident
 %type <expression> Constant
 %type <expression> postfix_EXPR
-%type <expression> argument_EXPR_list
+%type <argexprlist> argument_EXPR_list
 %type <expression> unary_EXPR
-%type <expression> unary_operator
+%type <text> unary_operator
 %type <expression> cast_EXPR
 %type <expression> multiplicative_EXPR
 %type <expression> additive_EXPR
@@ -83,7 +85,7 @@
 %type <node> parameter_list
 %type <node> parameter_declaration
 %type <node> identifier_list
-%type <node> type_name
+%type <_typename> type_name
 %type <node> abstract_declarator
 %type <node> direct_abstract_declarator
 %type <node> initializer
@@ -110,12 +112,12 @@
 EXPRESSIONS
 */
 
-primary_EXPR: Ident { $$ = new IdentiferNode; }
+primary_EXPR: Ident { $$ = $1; }
                  | Constant { std::cerr << "CONSTANT" << std::endl; }
                   | String { std::cerr << "STRING" << std::endl; }
               | Punctuator_par_open EXPR Punctuator_par_close { std::cout << "(x)" << std::endl; }
 
-Ident: Identifier { $$ = new IdentiferNode($1); } 
+Ident: Identifier { $$ = new IdentifierNode($1); } 
 
 Constant: Constant_int {}  
 		| Constant_char {}
@@ -140,16 +142,16 @@ argument_EXPR_list: assignment_EXPR { $$ = new ArgExprList($1); }
 unary_EXPR: postfix_EXPR { $$=$1; }
 		  | Operator_addadd unary_EXPR { $$ = new PreInc($2); }
 		  | Operator_subsub unary_EXPR { $$ = new PreDec($2); }
-      | unary_operator cast_EXPR { $$ = PrefixExpr::DecodeUnaryOp($2); }
+      | unary_operator cast_EXPR { $$ = PrefixExpr::DecodeUnaryOp($1,$2); }
       | Operator_sizeof unary_EXPR { $$ = new SizeofExpr($2); }
       | Operator_sizeof Punctuator_par_open type_name Punctuator_par_close  { $$ = new SizeofType($3); } 
 
-unary_operator: Operator_bit_and { $$ = new string("&");} 
-              | Operator_mul { $$ = new string("*");}
-              | Operator_add { $$ = new string("+");}
-              | Operator_sub { $$ = new string("-");}
-              | Operator_bit_not { $$ = new string("~");}
-              | Operator_not { $$ = new string("!");}
+unary_operator: Operator_bit_and { $$ = new std::string("&");} 
+              | Operator_mul { $$ = new std::string("*");}
+              | Operator_add { $$ = new std::string("+");}
+              | Operator_sub { $$ = new std::string("-");}
+              | Operator_bit_not { $$ = new std::string("~");}
+              | Operator_not { $$ = new std::string("!");}
 
 cast_EXPR: unary_EXPR { $$ = $1; }
                | Punctuator_par_open type_name Punctuator_par_close cast_EXPR { $$ = new CastExpr($2, $4); }
@@ -202,17 +204,17 @@ assignment_EXPR: conditional_EXPR { $$ = $1; }
                | unary_EXPR assignment assignment_EXPR { $$ = GenericAssignExpr::DecodeAssignOp($1, $2, $3); }
                
 
-assignment: Operator_assign { $$ = new string("=");} 
-          | Operator_mul_assign { $$ = new string("*=");}
-          | Operator_div_assign { $$ = new string("/=");}
-          | Operator_mod_assign { $$ = new string("%=");}
-          | Operator_add_assign { $$ = new string("+=");}
-          | Operator_sub_assign { $$ = new string("-=");}
-          | Operator_sl_assign { $$ = new string("<<=");}
-          | Operator_sr_assign { $$ = new string(">>=");}
-          | Operator_and_assign { $$ = new string("&=");}
-          | Operator_xor_assign { $$ = new string("^=");}
-          | Operator_or_assign{ $$ = new string("|=");}
+assignment: Operator_assign { $$ = new std::string("=");} 
+          | Operator_mul_assign { $$ = new std::string("*=");}
+          | Operator_div_assign { $$ = new std::string("/=");}
+          | Operator_mod_assign { $$ = new std::string("%=");}
+          | Operator_add_assign { $$ = new std::string("+=");}
+          | Operator_sub_assign { $$ = new std::string("-=");}
+          | Operator_sl_assign { $$ = new std::string("<<=");}
+          | Operator_sr_assign { $$ = new std::string(">>=");}
+          | Operator_and_assign { $$ = new std::string("&=");}
+          | Operator_xor_assign { $$ = new std::string("^=");}
+          | Operator_or_assign{ $$ = new std::string("|=");}
                
 
 EXPR: assignment_EXPR { $$ = $1; }
