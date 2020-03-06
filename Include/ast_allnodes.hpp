@@ -542,8 +542,8 @@ class declaration : public Node
 {
 public:
     declaration_specifiers* specifier; // specifies type of declaration
-    init_declaration_list* list; // list of variables being declared as this type, may be null
-    declaration(declaration_specifiers * _specifier ,init_declaration_list * _list = NULL) : specifier(_specifier), list(_list) {}
+    init_declarator_list* list; // list of variables being declared as this type, may be null
+    declaration(declaration_specifiers * _specifier ,init_declarator_list * _list = NULL) : specifier(_specifier), list(_list) {}
 };
 
 
@@ -558,22 +558,22 @@ public:
     declaration_specifiers(type_specifier * _type_spec, declaration_specifiers * _specifier = NULL) : type_spec(_type_spec), specifier(_specifier) {}
 };
 
-class init_declaration_list : public Node
+class init_declarator_list : public Node
 {
 public:
     // multiple declarations in one line
     // cascades
-    init_declaration * init_dec;
-    init_declaration_list * init_dec_list;// may point to null if there are no more
-    init_declaration_list(init_declaration* _init_dec, init_declaration_list * _init_dec_list = NULL) : init_dec(_init_dec), init_dec_list(_init_dec_list) {}
+    init_declarator * init_dec;
+    init_declarator_list * init_dec_list;// may point to null if there are no more
+    init_declarator_list(init_declarator* _init_dec, init_declarator_list * _init_dec_list = NULL) : init_dec(_init_dec), init_dec_list(_init_dec_list) {}
 };
 
-class init_declaration : public Node
+class init_declarator : public Node
 {
     // a single atomic declaration
     declarator * dec; // points to declaration, ie a name or identifier
     initializer * init; // points to expression being assigned to identifier, may be NULL if none is
-    init_declaration(declarator * _dec, initializer * _init = NULL) : dec(_dec), init(_init) {}
+    init_declarator(declarator * _dec, initializer * _init = NULL) : dec(_dec), init(_init) {}
 };
 
 /*
