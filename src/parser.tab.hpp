@@ -45,12 +45,7 @@ extern int yydebug;
 
   #include<iostream>
   #include<string>
-  #include "ast_node.hpp"
-  #include "ast_expressions.hpp"
-  #include "ast_statements.hpp"
-  /*#include "ast_types.hpp"*/
-  #include "ast_node.hpp"
-  #include "altdec.hpp"
+  #include "ast_allnodes.hpp"
 
  /* extern const Expression *g_root; // A way of getting the AST out
 */
@@ -60,7 +55,7 @@ extern int yydebug;
   int yylex(void);
   void yyerror(const char *);
 
-#line 64 "src/parser.tab.hpp" /* yacc.c:1909  */
+#line 59 "src/parser.tab.hpp" /* yacc.c:1909  */
 
 /* Token type.  */
 #ifndef YYTOKENTYPE
@@ -156,7 +151,7 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 22 "src/parser.y" /* yacc.c:1909  */
+#line 17 "src/parser.y" /* yacc.c:1909  */
 
     std::string *text;
     int ivalue;
@@ -169,7 +164,7 @@ union YYSTYPE
     IdentiferNode* identnode;
     ConstantExpression* constexpr;
 
-#line 173 "src/parser.tab.hpp" /* yacc.c:1909  */
+#line 168 "src/parser.tab.hpp" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;

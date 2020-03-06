@@ -7,9 +7,8 @@
 #ifndef AST_CONTEXT
 #define AST_CONTEXT
 
-#include "ast_node.hpp"
+#include "ast_allnodes.hpp"
 #include "visitors.hpp"
-#include "ast_expressions.hpp"
 #include <string>
 #include <vector>
 #include <unordered_map>
