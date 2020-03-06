@@ -194,6 +194,16 @@ class python_Visitor: public Visitor
         std::cout << "=";
         expr->RHS->accept(this);
     }
+	
+	/*
+		External Definitions
+	*/
+    void visit(TranslationUnit*)
+	{}
+    void visit(FunctionDefinition*)
+	{}
+    void visit(ExternalDeclaration*)
+	{}
 
     
 public:

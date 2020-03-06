@@ -1,0 +1,1675 @@
+In file included from Include/ast_context.hpp:11:0,
+                 from Include/ast_allnodes.hpp:11,
+                 from src/parser.y:5:
+Include/visitors.hpp:13:24: error: ‘Node’ has not been declared
+     virtual void visit(Node*); //If nothing defined for this type of node
+                        ^
+Include/visitors.hpp:14:24: error: ‘Constant’ has not been declared
+     virtual void visit(Constant*);
+                        ^
+Include/visitors.hpp:14:18: error: ‘virtual void Visitor::visit(int*)’ cannot be overloaded
+     virtual void visit(Constant*);
+                  ^
+Include/visitors.hpp:13:18: error: with ‘virtual void Visitor::visit(int*)’
+     virtual void visit(Node*); //If nothing defined for this type of node
+                  ^
+Include/visitors.hpp:15:24: error: ‘ArraySubscript’ has not been declared
+     virtual void visit(ArraySubscript*);
+                        ^
+Include/visitors.hpp:15:18: error: ‘virtual void Visitor::visit(int*)’ cannot be overloaded
+     virtual void visit(ArraySubscript*);
+                  ^
+Include/visitors.hpp:13:18: error: with ‘virtual void Visitor::visit(int*)’
+     virtual void visit(Node*); //If nothing defined for this type of node
+                  ^
+Include/visitors.hpp:16:24: error: ‘FuncCall’ has not been declared
+     virtual void visit(FuncCall*);
+                        ^
+Include/visitors.hpp:16:18: error: ‘virtual void Visitor::visit(int*)’ cannot be overloaded
+     virtual void visit(FuncCall*);
+                  ^
+Include/visitors.hpp:13:18: error: with ‘virtual void Visitor::visit(int*)’
+     virtual void visit(Node*); //If nothing defined for this type of node
+                  ^
+Include/visitors.hpp:17:24: error: ‘MemberAccess’ has not been declared
+     virtual void visit(MemberAccess*);
+                        ^
+Include/visitors.hpp:17:18: error: ‘virtual void Visitor::visit(int*)’ cannot be overloaded
+     virtual void visit(MemberAccess*);
+                  ^
+Include/visitors.hpp:13:18: error: with ‘virtual void Visitor::visit(int*)’
+     virtual void visit(Node*); //If nothing defined for this type of node
+                  ^
+Include/visitors.hpp:18:24: error: ‘DerefMemberAccess’ has not been declared
+     virtual void visit(DerefMemberAccess*);
+                        ^
+Include/visitors.hpp:18:18: error: ‘virtual void Visitor::visit(int*)’ cannot be overloaded
+     virtual void visit(DerefMemberAccess*);
+                  ^
+Include/visitors.hpp:13:18: error: with ‘virtual void Visitor::visit(int*)’
+     virtual void visit(Node*); //If nothing defined for this type of node
+                  ^
+Include/visitors.hpp:19:24: error: ‘PostInc’ has not been declared
+     virtual void visit(PostInc*);
+                        ^
+Include/visitors.hpp:19:18: error: ‘virtual void Visitor::visit(int*)’ cannot be overloaded
+     virtual void visit(PostInc*);
+                  ^
+Include/visitors.hpp:13:18: error: with ‘virtual void Visitor::visit(int*)’
+     virtual void visit(Node*); //If nothing defined for this type of node
+                  ^
+Include/visitors.hpp:20:24: error: ‘PostDec’ has not been declared
+     virtual void visit(PostDec*);
+                        ^
+Include/visitors.hpp:20:18: error: ‘virtual void Visitor::visit(int*)’ cannot be overloaded
+     virtual void visit(PostDec*);
+                  ^
+Include/visitors.hpp:13:18: error: with ‘virtual void Visitor::visit(int*)’
+     virtual void visit(Node*); //If nothing defined for this type of node
+                  ^
+Include/visitors.hpp:21:24: error: ‘ArgExprList’ has not been declared
+     virtual void visit(ArgExprList*);
+                        ^
+Include/visitors.hpp:21:18: error: ‘virtual void Visitor::visit(int*)’ cannot be overloaded
+     virtual void visit(ArgExprList*);
+                  ^
+Include/visitors.hpp:13:18: error: with ‘virtual void Visitor::visit(int*)’
+     virtual void visit(Node*); //If nothing defined for this type of node
+                  ^
+Include/visitors.hpp:22:24: error: ‘UnaryAddressOperator’ has not been declared
+     virtual void visit(UnaryAddressOperator*);
+                        ^
+Include/visitors.hpp:22:18: error: ‘virtual void Visitor::visit(int*)’ cannot be overloaded
+     virtual void visit(UnaryAddressOperator*);
+                  ^
+Include/visitors.hpp:13:18: error: with ‘virtual void Visitor::visit(int*)’
+     virtual void visit(Node*); //If nothing defined for this type of node
+                  ^
+Include/visitors.hpp:23:24: error: ‘UnaryDerefOperator’ has not been declared
+     virtual void visit(UnaryDerefOperator*);
+                        ^
+Include/visitors.hpp:23:18: error: ‘virtual void Visitor::visit(int*)’ cannot be overloaded
+     virtual void visit(UnaryDerefOperator*);
+                  ^
+Include/visitors.hpp:13:18: error: with ‘virtual void Visitor::visit(int*)’
+     virtual void visit(Node*); //If nothing defined for this type of node
+                  ^
+Include/visitors.hpp:24:24: error: ‘UnaryPlusOperator’ has not been declared
+     virtual void visit(UnaryPlusOperator*);
+                        ^
+Include/visitors.hpp:24:18: error: ‘virtual void Visitor::visit(int*)’ cannot be overloaded
+     virtual void visit(UnaryPlusOperator*);
+                  ^
+Include/visitors.hpp:13:18: error: with ‘virtual void Visitor::visit(int*)’
+     virtual void visit(Node*); //If nothing defined for this type of node
+                  ^
+Include/visitors.hpp:25:24: error: ‘UnaryNegOperator’ has not been declared
+     virtual void visit(UnaryNegOperator*);
+                        ^
+Include/visitors.hpp:25:18: error: ‘virtual void Visitor::visit(int*)’ cannot be overloaded
+     virtual void visit(UnaryNegOperator*);
+                  ^
+Include/visitors.hpp:13:18: error: with ‘virtual void Visitor::visit(int*)’
+     virtual void visit(Node*); //If nothing defined for this type of node
+                  ^
+Include/visitors.hpp:26:24: error: ‘UnaryBitwiseNotOperator’ has not been declared
+     virtual void visit(UnaryBitwiseNotOperator*);
+                        ^
+Include/visitors.hpp:26:18: error: ‘virtual void Visitor::visit(int*)’ cannot be overloaded
+     virtual void visit(UnaryBitwiseNotOperator*);
+                  ^
+Include/visitors.hpp:13:18: error: with ‘virtual void Visitor::visit(int*)’
+     virtual void visit(Node*); //If nothing defined for this type of node
+                  ^
+Include/visitors.hpp:27:24: error: ‘UnaryLogicalNotOperator’ has not been declared
+     virtual void visit(UnaryLogicalNotOperator*);
+                        ^
+Include/visitors.hpp:27:18: error: ‘virtual void Visitor::visit(int*)’ cannot be overloaded
+     virtual void visit(UnaryLogicalNotOperator*);
+                  ^
+Include/visitors.hpp:13:18: error: with ‘virtual void Visitor::visit(int*)’
+     virtual void visit(Node*); //If nothing defined for this type of node
+                  ^
+Include/visitors.hpp:28:24: error: ‘PreInc’ has not been declared
+     virtual void visit(PreInc*);
+                        ^
+Include/visitors.hpp:28:18: error: ‘virtual void Visitor::visit(int*)’ cannot be overloaded
+     virtual void visit(PreInc*);
+                  ^
+Include/visitors.hpp:13:18: error: with ‘virtual void Visitor::visit(int*)’
+     virtual void visit(Node*); //If nothing defined for this type of node
+                  ^
+Include/visitors.hpp:29:24: error: ‘PreDec’ has not been declared
+     virtual void visit(PreDec*);
+                        ^
+Include/visitors.hpp:29:18: error: ‘virtual void Visitor::visit(int*)’ cannot be overloaded
+     virtual void visit(PreDec*);
+                  ^
+Include/visitors.hpp:13:18: error: with ‘virtual void Visitor::visit(int*)’
+     virtual void visit(Node*); //If nothing defined for this type of node
+                  ^
+Include/visitors.hpp:30:24: error: ‘SizeofExpr’ has not been declared
+     virtual void visit(SizeofExpr*);
+                        ^
+Include/visitors.hpp:30:18: error: ‘virtual void Visitor::visit(int*)’ cannot be overloaded
+     virtual void visit(SizeofExpr*);
+                  ^
+Include/visitors.hpp:13:18: error: with ‘virtual void Visitor::visit(int*)’
+     virtual void visit(Node*); //If nothing defined for this type of node
+                  ^
+Include/visitors.hpp:31:24: error: ‘SizeofType’ has not been declared
+     virtual void visit(SizeofType*);
+                        ^
+Include/visitors.hpp:31:18: error: ‘virtual void Visitor::visit(int*)’ cannot be overloaded
+     virtual void visit(SizeofType*);
+                  ^
+Include/visitors.hpp:13:18: error: with ‘virtual void Visitor::visit(int*)’
+     virtual void visit(Node*); //If nothing defined for this type of node
+                  ^
+Include/visitors.hpp:32:24: error: ‘CastExpr’ has not been declared
+     virtual void visit(CastExpr*);
+                        ^
+Include/visitors.hpp:32:18: error: ‘virtual void Visitor::visit(int*)’ cannot be overloaded
+     virtual void visit(CastExpr*);
+                  ^
+Include/visitors.hpp:13:18: error: with ‘virtual void Visitor::visit(int*)’
+     virtual void visit(Node*); //If nothing defined for this type of node
+                  ^
+Include/visitors.hpp:33:24: error: ‘Multiply’ has not been declared
+     virtual void visit(Multiply*);
+                        ^
+Include/visitors.hpp:33:18: error: ‘virtual void Visitor::visit(int*)’ cannot be overloaded
+     virtual void visit(Multiply*);
+                  ^
+Include/visitors.hpp:13:18: error: with ‘virtual void Visitor::visit(int*)’
+     virtual void visit(Node*); //If nothing defined for this type of node
+                  ^
+Include/visitors.hpp:34:24: error: ‘Divide’ has not been declared
+     virtual void visit(Divide*);
+                        ^
+Include/visitors.hpp:34:18: error: ‘virtual void Visitor::visit(int*)’ cannot be overloaded
+     virtual void visit(Divide*);
+                  ^
+Include/visitors.hpp:13:18: error: with ‘virtual void Visitor::visit(int*)’
+     virtual void visit(Node*); //If nothing defined for this type of node
+                  ^
+Include/visitors.hpp:35:24: error: ‘Modulo’ has not been declared
+     virtual void visit(Modulo*);
+                        ^
+Include/visitors.hpp:35:18: error: ‘virtual void Visitor::visit(int*)’ cannot be overloaded
+     virtual void visit(Modulo*);
+                  ^
+Include/visitors.hpp:13:18: error: with ‘virtual void Visitor::visit(int*)’
+     virtual void visit(Node*); //If nothing defined for this type of node
+                  ^
+Include/visitors.hpp:36:24: error: ‘Add’ has not been declared
+     virtual void visit(Add*);
+                        ^
+Include/visitors.hpp:36:18: error: ‘virtual void Visitor::visit(int*)’ cannot be overloaded
+     virtual void visit(Add*);
+                  ^
+Include/visitors.hpp:13:18: error: with ‘virtual void Visitor::visit(int*)’
+     virtual void visit(Node*); //If nothing defined for this type of node
+                  ^
+Include/visitors.hpp:37:24: error: ‘Sub’ has not been declared
+     virtual void visit(Sub*);
+                        ^
+Include/visitors.hpp:37:18: error: ‘virtual void Visitor::visit(int*)’ cannot be overloaded
+     virtual void visit(Sub*);
+                  ^
+Include/visitors.hpp:13:18: error: with ‘virtual void Visitor::visit(int*)’
+     virtual void visit(Node*); //If nothing defined for this type of node
+                  ^
+Include/visitors.hpp:38:24: error: ‘ShiftLeft’ has not been declared
+     virtual void visit(ShiftLeft*);
+                        ^
+Include/visitors.hpp:38:18: error: ‘virtual void Visitor::visit(int*)’ cannot be overloaded
+     virtual void visit(ShiftLeft*);
+                  ^
+Include/visitors.hpp:13:18: error: with ‘virtual void Visitor::visit(int*)’
+     virtual void visit(Node*); //If nothing defined for this type of node
+                  ^
+Include/visitors.hpp:39:24: error: ‘ShiftRight’ has not been declared
+     virtual void visit(ShiftRight*);
+                        ^
+Include/visitors.hpp:39:18: error: ‘virtual void Visitor::visit(int*)’ cannot be overloaded
+     virtual void visit(ShiftRight*);
+                  ^
+Include/visitors.hpp:13:18: error: with ‘virtual void Visitor::visit(int*)’
+     virtual void visit(Node*); //If nothing defined for this type of node
+                  ^
+Include/visitors.hpp:40:24: error: ‘LessThan’ has not been declared
+     virtual void visit(LessThan*);
+                        ^
+Include/visitors.hpp:40:18: error: ‘virtual void Visitor::visit(int*)’ cannot be overloaded
+     virtual void visit(LessThan*);
+                  ^
+Include/visitors.hpp:13:18: error: with ‘virtual void Visitor::visit(int*)’
+     virtual void visit(Node*); //If nothing defined for this type of node
+                  ^
+Include/visitors.hpp:41:24: error: ‘GreaterThan’ has not been declared
+     virtual void visit(GreaterThan*);
+                        ^
+Include/visitors.hpp:41:18: error: ‘virtual void Visitor::visit(int*)’ cannot be overloaded
+     virtual void visit(GreaterThan*);
+                  ^
+Include/visitors.hpp:13:18: error: with ‘virtual void Visitor::visit(int*)’
+     virtual void visit(Node*); //If nothing defined for this type of node
+                  ^
+Include/visitors.hpp:42:24: error: ‘LessThanOrEqual’ has not been declared
+     virtual void visit(LessThanOrEqual*);
+                        ^
+Include/visitors.hpp:42:18: error: ‘virtual void Visitor::visit(int*)’ cannot be overloaded
+     virtual void visit(LessThanOrEqual*);
+                  ^
+Include/visitors.hpp:13:18: error: with ‘virtual void Visitor::visit(int*)’
+     virtual void visit(Node*); //If nothing defined for this type of node
+                  ^
+Include/visitors.hpp:43:24: error: ‘GreaterThanOrEqual’ has not been declared
+     virtual void visit(GreaterThanOrEqual*);
+                        ^
+Include/visitors.hpp:43:18: error: ‘virtual void Visitor::visit(int*)’ cannot be overloaded
+     virtual void visit(GreaterThanOrEqual*);
+                  ^
+Include/visitors.hpp:13:18: error: with ‘virtual void Visitor::visit(int*)’
+     virtual void visit(Node*); //If nothing defined for this type of node
+                  ^
+Include/visitors.hpp:44:24: error: ‘EqualTo’ has not been declared
+     virtual void visit(EqualTo*);
+                        ^
+Include/visitors.hpp:44:18: error: ‘virtual void Visitor::visit(int*)’ cannot be overloaded
+     virtual void visit(EqualTo*);
+                  ^
+Include/visitors.hpp:13:18: error: with ‘virtual void Visitor::visit(int*)’
+     virtual void visit(Node*); //If nothing defined for this type of node
+                  ^
+Include/visitors.hpp:45:24: error: ‘NotEqualTo’ has not been declared
+     virtual void visit(NotEqualTo*);
+                        ^
+Include/visitors.hpp:45:18: error: ‘virtual void Visitor::visit(int*)’ cannot be overloaded
+     virtual void visit(NotEqualTo*);
+                  ^
+Include/visitors.hpp:13:18: error: with ‘virtual void Visitor::visit(int*)’
+     virtual void visit(Node*); //If nothing defined for this type of node
+                  ^
+Include/visitors.hpp:46:24: error: ‘LogicalAND’ has not been declared
+     virtual void visit(LogicalAND*);
+                        ^
+Include/visitors.hpp:46:18: error: ‘virtual void Visitor::visit(int*)’ cannot be overloaded
+     virtual void visit(LogicalAND*);
+                  ^
+Include/visitors.hpp:13:18: error: with ‘virtual void Visitor::visit(int*)’
+     virtual void visit(Node*); //If nothing defined for this type of node
+                  ^
+Include/visitors.hpp:47:24: error: ‘LogicalOR’ has not been declared
+     virtual void visit(LogicalOR*);
+                        ^
+Include/visitors.hpp:47:18: error: ‘virtual void Visitor::visit(int*)’ cannot be overloaded
+     virtual void visit(LogicalOR*);
+                  ^
+Include/visitors.hpp:13:18: error: with ‘virtual void Visitor::visit(int*)’
+     virtual void visit(Node*); //If nothing defined for this type of node
+                  ^
+Include/visitors.hpp:48:24: error: ‘BitwiseAND’ has not been declared
+     virtual void visit(BitwiseAND*);
+                        ^
+Include/visitors.hpp:48:18: error: ‘virtual void Visitor::visit(int*)’ cannot be overloaded
+     virtual void visit(BitwiseAND*);
+                  ^
+Include/visitors.hpp:13:18: error: with ‘virtual void Visitor::visit(int*)’
+     virtual void visit(Node*); //If nothing defined for this type of node
+                  ^
+Include/visitors.hpp:49:24: error: ‘BitwiseOR’ has not been declared
+     virtual void visit(BitwiseOR*);
+                        ^
+Include/visitors.hpp:49:18: error: ‘virtual void Visitor::visit(int*)’ cannot be overloaded
+     virtual void visit(BitwiseOR*);
+                  ^
+Include/visitors.hpp:13:18: error: with ‘virtual void Visitor::visit(int*)’
+     virtual void visit(Node*); //If nothing defined for this type of node
+                  ^
+Include/visitors.hpp:50:24: error: ‘BitwiseXOR’ has not been declared
+     virtual void visit(BitwiseXOR*);
+                        ^
+Include/visitors.hpp:50:18: error: ‘virtual void Visitor::visit(int*)’ cannot be overloaded
+     virtual void visit(BitwiseXOR*);
+                  ^
+Include/visitors.hpp:13:18: error: with ‘virtual void Visitor::visit(int*)’
+     virtual void visit(Node*); //If nothing defined for this type of node
+                  ^
+Include/visitors.hpp:51:24: error: ‘TernaryOpExpression’ has not been declared
+     virtual void visit(TernaryOpExpression*);
+                        ^
+Include/visitors.hpp:51:18: error: ‘virtual void Visitor::visit(int*)’ cannot be overloaded
+     virtual void visit(TernaryOpExpression*);
+                  ^
+Include/visitors.hpp:13:18: error: with ‘virtual void Visitor::visit(int*)’
+     virtual void visit(Node*); //If nothing defined for this type of node
+                  ^
+Include/visitors.hpp:52:24: error: ‘AssignmentExpression’ has not been declared
+     virtual void visit(AssignmentExpression*);
+                        ^
+Include/visitors.hpp:52:18: error: ‘virtual void Visitor::visit(int*)’ cannot be overloaded
+     virtual void visit(AssignmentExpression*);
+                  ^
+Include/visitors.hpp:13:18: error: with ‘virtual void Visitor::visit(int*)’
+     virtual void visit(Node*); //If nothing defined for this type of node
+                  ^
+Include/visitors.hpp:53:24: error: ‘MulAssignment’ has not been declared
+     virtual void visit(MulAssignment*);
+                        ^
+Include/visitors.hpp:53:18: error: ‘virtual void Visitor::visit(int*)’ cannot be overloaded
+     virtual void visit(MulAssignment*);
+                  ^
+Include/visitors.hpp:13:18: error: with ‘virtual void Visitor::visit(int*)’
+     virtual void visit(Node*); //If nothing defined for this type of node
+                  ^
+Include/visitors.hpp:54:24: error: ‘DivAssignment’ has not been declared
+     virtual void visit(DivAssignment*);
+                        ^
+Include/visitors.hpp:54:18: error: ‘virtual void Visitor::visit(int*)’ cannot be overloaded
+     virtual void visit(DivAssignment*);
+                  ^
+Include/visitors.hpp:13:18: error: with ‘virtual void Visitor::visit(int*)’
+     virtual void visit(Node*); //If nothing defined for this type of node
+                  ^
+Include/visitors.hpp:55:24: error: ‘ModAssignment’ has not been declared
+     virtual void visit(ModAssignment*);
+                        ^
+Include/visitors.hpp:55:18: error: ‘virtual void Visitor::visit(int*)’ cannot be overloaded
+     virtual void visit(ModAssignment*);
+                  ^
+Include/visitors.hpp:13:18: error: with ‘virtual void Visitor::visit(int*)’
+     virtual void visit(Node*); //If nothing defined for this type of node
+                  ^
+Include/visitors.hpp:56:24: error: ‘AddAssignment’ has not been declared
+     virtual void visit(AddAssignment*);
+                        ^
+Include/visitors.hpp:56:18: error: ‘virtual void Visitor::visit(int*)’ cannot be overloaded
+     virtual void visit(AddAssignment*);
+                  ^
+Include/visitors.hpp:13:18: error: with ‘virtual void Visitor::visit(int*)’
+     virtual void visit(Node*); //If nothing defined for this type of node
+                  ^
+Include/visitors.hpp:57:24: error: ‘SubAssignment’ has not been declared
+     virtual void visit(SubAssignment*);
+                        ^
+Include/visitors.hpp:57:18: error: ‘virtual void Visitor::visit(int*)’ cannot be overloaded
+     virtual void visit(SubAssignment*);
+                  ^
+Include/visitors.hpp:13:18: error: with ‘virtual void Visitor::visit(int*)’
+     virtual void visit(Node*); //If nothing defined for this type of node
+                  ^
+Include/visitors.hpp:58:24: error: ‘ShiftLeftAssignment’ has not been declared
+     virtual void visit(ShiftLeftAssignment*);
+                        ^
+Include/visitors.hpp:58:18: error: ‘virtual void Visitor::visit(int*)’ cannot be overloaded
+     virtual void visit(ShiftLeftAssignment*);
+                  ^
+Include/visitors.hpp:13:18: error: with ‘virtual void Visitor::visit(int*)’
+     virtual void visit(Node*); //If nothing defined for this type of node
+                  ^
+Include/visitors.hpp:59:24: error: ‘ShiftRightAssignment’ has not been declared
+     virtual void visit(ShiftRightAssignment*);
+                        ^
+Include/visitors.hpp:59:18: error: ‘virtual void Visitor::visit(int*)’ cannot be overloaded
+     virtual void visit(ShiftRightAssignment*);
+                  ^
+Include/visitors.hpp:13:18: error: with ‘virtual void Visitor::visit(int*)’
+     virtual void visit(Node*); //If nothing defined for this type of node
+                  ^
+Include/visitors.hpp:60:24: error: ‘BitwiseANDAssignment’ has not been declared
+     virtual void visit(BitwiseANDAssignment*);
+                        ^
+Include/visitors.hpp:60:18: error: ‘virtual void Visitor::visit(int*)’ cannot be overloaded
+     virtual void visit(BitwiseANDAssignment*);
+                  ^
+Include/visitors.hpp:13:18: error: with ‘virtual void Visitor::visit(int*)’
+     virtual void visit(Node*); //If nothing defined for this type of node
+                  ^
+Include/visitors.hpp:61:24: error: ‘BitwiseXORAssignment’ has not been declared
+     virtual void visit(BitwiseXORAssignment*);
+                        ^
+Include/visitors.hpp:61:18: error: ‘virtual void Visitor::visit(int*)’ cannot be overloaded
+     virtual void visit(BitwiseXORAssignment*);
+                  ^
+Include/visitors.hpp:13:18: error: with ‘virtual void Visitor::visit(int*)’
+     virtual void visit(Node*); //If nothing defined for this type of node
+                  ^
+Include/visitors.hpp:62:24: error: ‘BitwiseORAssignment’ has not been declared
+     virtual void visit(BitwiseORAssignment*);
+                        ^
+Include/visitors.hpp:62:18: error: ‘virtual void Visitor::visit(int*)’ cannot be overloaded
+     virtual void visit(BitwiseORAssignment*);
+                  ^
+Include/visitors.hpp:13:18: error: with ‘virtual void Visitor::visit(int*)’
+     virtual void visit(Node*); //If nothing defined for this type of node
+                  ^
+Include/visitors.hpp:63:24: error: ‘ConstantExpression’ has not been declared
+     virtual void visit(ConstantExpression*);
+                        ^
+Include/visitors.hpp:63:18: error: ‘virtual void Visitor::visit(int*)’ cannot be overloaded
+     virtual void visit(ConstantExpression*);
+                  ^
+Include/visitors.hpp:13:18: error: with ‘virtual void Visitor::visit(int*)’
+     virtual void visit(Node*); //If nothing defined for this type of node
+                  ^
+Include/visitors.hpp:64:24: error: ‘CommaSepExpression’ has not been declared
+     virtual void visit(CommaSepExpression*);
+                        ^
+Include/visitors.hpp:64:18: error: ‘virtual void Visitor::visit(int*)’ cannot be overloaded
+     virtual void visit(CommaSepExpression*);
+                  ^
+Include/visitors.hpp:13:18: error: with ‘virtual void Visitor::visit(int*)’
+     virtual void visit(Node*); //If nothing defined for this type of node
+                  ^
+Include/visitors.hpp:67:24: error: ‘EmptyStatement’ has not been declared
+     virtual void visit(EmptyStatement*);
+                        ^
+Include/visitors.hpp:67:18: error: ‘virtual void Visitor::visit(int*)’ cannot be overloaded
+     virtual void visit(EmptyStatement*);
+                  ^
+Include/visitors.hpp:13:18: error: with ‘virtual void Visitor::visit(int*)’
+     virtual void visit(Node*); //If nothing defined for this type of node
+                  ^
+Include/visitors.hpp:68:24: error: ‘Continue’ has not been declared
+     virtual void visit(Continue*);
+                        ^
+Include/visitors.hpp:68:18: error: ‘virtual void Visitor::visit(int*)’ cannot be overloaded
+     virtual void visit(Continue*);
+                  ^
+Include/visitors.hpp:13:18: error: with ‘virtual void Visitor::visit(int*)’
+     virtual void visit(Node*); //If nothing defined for this type of node
+                  ^
+Include/visitors.hpp:69:24: error: ‘Break’ has not been declared
+     virtual void visit(Break*);
+                        ^
+Include/visitors.hpp:69:18: error: ‘virtual void Visitor::visit(int*)’ cannot be overloaded
+     virtual void visit(Break*);
+                  ^
+Include/visitors.hpp:13:18: error: with ‘virtual void Visitor::visit(int*)’
+     virtual void visit(Node*); //If nothing defined for this type of node
+                  ^
+Include/visitors.hpp:70:24: error: ‘Return’ has not been declared
+     virtual void visit(Return*);
+                        ^
+Include/visitors.hpp:70:18: error: ‘virtual void Visitor::visit(int*)’ cannot be overloaded
+     virtual void visit(Return*);
+                  ^
+Include/visitors.hpp:13:18: error: with ‘virtual void Visitor::visit(int*)’
+     virtual void visit(Node*); //If nothing defined for this type of node
+                  ^
+Include/visitors.hpp:71:24: error: ‘While’ has not been declared
+     virtual void visit(While*);
+                        ^
+Include/visitors.hpp:71:18: error: ‘virtual void Visitor::visit(int*)’ cannot be overloaded
+     virtual void visit(While*);
+                  ^
+Include/visitors.hpp:13:18: error: with ‘virtual void Visitor::visit(int*)’
+     virtual void visit(Node*); //If nothing defined for this type of node
+                  ^
+Include/visitors.hpp:72:24: error: ‘DoWhile’ has not been declared
+     virtual void visit(DoWhile*);
+                        ^
+Include/visitors.hpp:72:18: error: ‘virtual void Visitor::visit(int*)’ cannot be overloaded
+     virtual void visit(DoWhile*);
+                  ^
+Include/visitors.hpp:13:18: error: with ‘virtual void Visitor::visit(int*)’
+     virtual void visit(Node*); //If nothing defined for this type of node
+                  ^
+Include/visitors.hpp:73:24: error: ‘For’ has not been declared
+     virtual void visit(For*);
+                        ^
+Include/visitors.hpp:73:18: error: ‘virtual void Visitor::visit(int*)’ cannot be overloaded
+     virtual void visit(For*);
+                  ^
+Include/visitors.hpp:13:18: error: with ‘virtual void Visitor::visit(int*)’
+     virtual void visit(Node*); //If nothing defined for this type of node
+                  ^
+Include/visitors.hpp:74:24: error: ‘If’ has not been declared
+     virtual void visit(If*);
+                        ^
+Include/visitors.hpp:74:18: error: ‘virtual void Visitor::visit(int*)’ cannot be overloaded
+     virtual void visit(If*);
+                  ^
+Include/visitors.hpp:13:18: error: with ‘virtual void Visitor::visit(int*)’
+     virtual void visit(Node*); //If nothing defined for this type of node
+                  ^
+Include/visitors.hpp:75:24: error: ‘IfElse’ has not been declared
+     virtual void visit(IfElse*);
+                        ^
+Include/visitors.hpp:75:18: error: ‘virtual void Visitor::visit(int*)’ cannot be overloaded
+     virtual void visit(IfElse*);
+                  ^
+Include/visitors.hpp:13:18: error: with ‘virtual void Visitor::visit(int*)’
+     virtual void visit(Node*); //If nothing defined for this type of node
+                  ^
+Include/visitors.hpp:76:24: error: ‘Switch’ has not been declared
+     virtual void visit(Switch*);
+                        ^
+Include/visitors.hpp:76:18: error: ‘virtual void Visitor::visit(int*)’ cannot be overloaded
+     virtual void visit(Switch*);
+                  ^
+Include/visitors.hpp:13:18: error: with ‘virtual void Visitor::visit(int*)’
+     virtual void visit(Node*); //If nothing defined for this type of node
+                  ^
+Include/visitors.hpp:77:24: error: ‘ExpressionStatement’ has not been declared
+     virtual void visit(ExpressionStatement*);
+                        ^
+Include/visitors.hpp:77:18: error: ‘virtual void Visitor::visit(int*)’ cannot be overloaded
+     virtual void visit(ExpressionStatement*);
+                  ^
+Include/visitors.hpp:13:18: error: with ‘virtual void Visitor::visit(int*)’
+     virtual void visit(Node*); //If nothing defined for this type of node
+                  ^
+Include/visitors.hpp:78:24: error: ‘StatementList’ has not been declared
+     virtual void visit(StatementList*);
+                        ^
+Include/visitors.hpp:78:18: error: ‘virtual void Visitor::visit(int*)’ cannot be overloaded
+     virtual void visit(StatementList*);
+                  ^
+Include/visitors.hpp:13:18: error: with ‘virtual void Visitor::visit(int*)’
+     virtual void visit(Node*); //If nothing defined for this type of node
+                  ^
+Include/visitors.hpp:79:24: error: ‘CompoundStatement’ has not been declared
+     virtual void visit(CompoundStatement*);
+                        ^
+Include/visitors.hpp:79:18: error: ‘virtual void Visitor::visit(int*)’ cannot be overloaded
+     virtual void visit(CompoundStatement*);
+                  ^
+Include/visitors.hpp:13:18: error: with ‘virtual void Visitor::visit(int*)’
+     virtual void visit(Node*); //If nothing defined for this type of node
+                  ^
+Include/visitors.hpp:80:24: error: ‘CaseOrDefault’ has not been declared
+     virtual void visit(CaseOrDefault*);
+                        ^
+Include/visitors.hpp:80:18: error: ‘virtual void Visitor::visit(int*)’ cannot be overloaded
+     virtual void visit(CaseOrDefault*);
+                  ^
+Include/visitors.hpp:13:18: error: with ‘virtual void Visitor::visit(int*)’
+     virtual void visit(Node*); //If nothing defined for this type of node
+                  ^
+Include/visitors.hpp:83:24: error: ‘TranslationUnit’ has not been declared
+     virtual void visit(TranslationUnit*);
+                        ^
+Include/visitors.hpp:83:18: error: ‘virtual void Visitor::visit(int*)’ cannot be overloaded
+     virtual void visit(TranslationUnit*);
+                  ^
+Include/visitors.hpp:13:18: error: with ‘virtual void Visitor::visit(int*)’
+     virtual void visit(Node*); //If nothing defined for this type of node
+                  ^
+Include/visitors.hpp:84:24: error: ‘FunctionDefinition’ has not been declared
+     virtual void visit(FunctionDefinition*);
+                        ^
+Include/visitors.hpp:84:18: error: ‘virtual void Visitor::visit(int*)’ cannot be overloaded
+     virtual void visit(FunctionDefinition*);
+                  ^
+Include/visitors.hpp:13:18: error: with ‘virtual void Visitor::visit(int*)’
+     virtual void visit(Node*); //If nothing defined for this type of node
+                  ^
+Include/visitors.hpp:85:24: error: ‘ExternalDeclaration’ has not been declared
+     virtual void visit(ExternalDeclaration*);
+                        ^
+Include/visitors.hpp:85:18: error: ‘virtual void Visitor::visit(int*)’ cannot be overloaded
+     virtual void visit(ExternalDeclaration*);
+                  ^
+Include/visitors.hpp:13:18: error: with ‘virtual void Visitor::visit(int*)’
+     virtual void visit(Node*); //If nothing defined for this type of node
+                  ^
+In file included from src/parser.y:5:0:
+Include/ast_allnodes.hpp:77:32: error: ‘ArgExprList’ has not been declared
+     FuncCall(Expression* _LHS, ArgExprList* RHS) : PostfixExpr(_LHS), Args(RHS){}
+                                ^
+Include/ast_allnodes.hpp:78:5: error: ‘ArgExprList’ does not name a type
+     ArgExprList* Args;
+     ^
+Include/ast_allnodes.hpp: In constructor ‘FuncCall::FuncCall(Expression*, int*)’:
+Include/ast_allnodes.hpp:77:71: error: class ‘FuncCall’ does not have any field named ‘Args’
+     FuncCall(Expression* _LHS, ArgExprList* RHS) : PostfixExpr(_LHS), Args(RHS){}
+                                                                       ^
+Include/ast_allnodes.hpp: At global scope:
+Include/ast_allnodes.hpp:175:25: error: expected ‘)’ before ‘*’ token
+     SizeofType(type_name* _typ_nam) : typ_nam(_typ_nam){}
+                         ^
+Include/ast_allnodes.hpp:176:5: error: ‘type_name’ does not name a type
+     type_name* typ_nam;
+     ^
+Include/ast_allnodes.hpp:181:23: error: expected ‘)’ before ‘*’ token
+     CastExpr(type_name* _typ , Expression* _ExprToBeCast) : typ(_typ), PrefixExpr(_ExprToBeCast) {}
+                       ^
+Include/ast_allnodes.hpp:182:5: error: ‘type_name’ does not name a type
+     type_name* typ;
+     ^
+In file included from src/parser.y:5:0:
+Include/ast_allnodes.hpp: In constructor ‘CommaSepExpression::CommaSepExpression(Expression*, Expression*)’:
+Include/ast_allnodes.hpp:388:23: warning: ‘CommaSepExpression::RHS’ will be initialized after [-Wreorder]
+     Expression* LHS, *RHS;
+                       ^
+Include/ast_allnodes.hpp:388:17: warning:   ‘Expression* CommaSepExpression::LHS’ [-Wreorder]
+     Expression* LHS, *RHS;
+                 ^
+Include/ast_allnodes.hpp:386:5: warning:   when initialized here [-Wreorder]
+     CommaSepExpression(Expression* _LHS, Expression* _RHS) : RHS(_RHS), LHS(_LHS){}
+     ^
+Include/ast_allnodes.hpp: In constructor ‘DoWhile::DoWhile(Statement*, Expression*)’:
+Include/ast_allnodes.hpp:434:16: warning: ‘DoWhile::Body’ will be initialized after [-Wreorder]
+     Statement* Body;
+                ^
+Include/ast_allnodes.hpp:433:17: warning:   ‘Expression* DoWhile::ControlExpression’ [-Wreorder]
+     Expression* ControlExpression;
+                 ^
+Include/ast_allnodes.hpp:431:5: warning:   when initialized here [-Wreorder]
+     DoWhile(Statement* _Body, Expression* _Control) : Body(_Body), ControlExpression(_Control){}
+     ^
+Include/ast_allnodes.hpp: At global scope:
+Include/ast_allnodes.hpp:439:28: error: expected ‘)’ before ‘*’ token
+     For(ExpressionStatement* _init, ExpressionStatement* _control, Statement* _body) 
+                            ^
+Include/ast_allnodes.hpp:441:28: error: expected ‘)’ before ‘*’ token
+     For(ExpressionStatement* _init, ExpressionStatement* _control, Expression* _next, Statement* _body) 
+                            ^
+Include/ast_allnodes.hpp:444:5: error: ‘ExpressionStatement’ does not name a type
+     ExpressionStatement* Init, *Control;
+     ^
+Include/ast_allnodes.hpp: In constructor ‘StatementList::StatementList(StatementList*, Statement*)’:
+Include/ast_allnodes.hpp:495:5: warning: ‘StatementList::RestOfStatements’ is initialized with itself [-Winit-self]
+     StatementList(StatementList* OtherStatements, Statement* ThisStatement) : statement(ThisStatement), RestOfStatements(RestOfStatements){}
+     ^
+Include/ast_allnodes.hpp: At global scope:
+Include/ast_allnodes.hpp:506:38: error: expected ‘)’ before ‘*’ token
+     CompoundStatement(DeclarationList* _decls, StatementList* _stmnts) : Decls(_decls), Statements(_stmnts){}
+                                      ^
+Include/ast_allnodes.hpp:507:38: error: expected ‘)’ before ‘*’ token
+     CompoundStatement(DeclarationList* _decls) : Decls(_decls), Statements(NULL){}
+                                      ^
+Include/ast_allnodes.hpp:510:5: error: ‘DeclarationList’ does not name a type
+     DeclarationList* Decls;
+     ^
+Include/ast_allnodes.hpp: In constructor ‘CompoundStatement::CompoundStatement(StatementList*)’:
+Include/ast_allnodes.hpp:508:49: error: class ‘CompoundStatement’ does not have any field named ‘Decls’
+     CompoundStatement(StatementList* _stmnts) : Decls(NULL), Statements(_stmnts){}
+                                                 ^
+Include/ast_allnodes.hpp: At global scope:
+Include/ast_allnodes.hpp:529:32: error: expected ‘)’ before ‘*’ token
+     DeclarationList(declaration* _this_decl): this_decl(_this_decl), left_list(NULL){}
+                                ^
+Include/ast_allnodes.hpp:530:44: error: ‘declaration’ has not been declared
+     DeclarationList(DeclarationList* list, declaration* _this_decl): this_decl(_this_decl), left_list(list){}
+                                            ^
+Include/ast_allnodes.hpp:531:5: error: ‘declaration’ does not name a type
+     declaration* this_decl;
+     ^
+Include/ast_allnodes.hpp: In constructor ‘DeclarationList::DeclarationList(DeclarationList*, int*)’:
+Include/ast_allnodes.hpp:530:70: error: class ‘DeclarationList’ does not have any field named ‘this_decl’
+     DeclarationList(DeclarationList* list, declaration* _this_decl): this_decl(_this_decl), left_list(list){}
+                                                                      ^
+Include/ast_allnodes.hpp: At global scope:
+Include/ast_allnodes.hpp:544:5: error: ‘declaration_specifiers’ does not name a type
+     declaration_specifiers* specifier; // specifies type of declaration
+     ^
+Include/ast_allnodes.hpp:545:5: error: ‘init_declarator_list’ does not name a type
+     init_declarator_list* list; // list of variables being declared as this type, may be null
+     ^
+Include/ast_allnodes.hpp:546:40: error: expected ‘)’ before ‘*’ token
+     declaration(declaration_specifiers * _specifier ,init_declarator_list * _list = NULL) : specifier(_specifier), list(_list) {}
+                                        ^
+Include/ast_allnodes.hpp:556:5: error: ‘type_specifier’ does not name a type
+     type_specifier * type_spec;
+     ^
+Include/ast_allnodes.hpp:558:43: error: expected ‘)’ before ‘*’ token
+     declaration_specifiers(type_specifier * _type_spec, declaration_specifiers * _specifier = NULL) : type_spec(_type_spec), specifier(_specifier) {}
+                                           ^
+Include/ast_allnodes.hpp:566:5: error: ‘init_declarator’ does not name a type
+     init_declarator * init_dec;
+     ^
+Include/ast_allnodes.hpp:568:41: error: expected ‘)’ before ‘*’ token
+     init_declarator_list(init_declarator* _init_dec, init_declarator_list * _init_dec_list = NULL) : init_dec(_init_dec), init_dec_list(_init_dec_list) {}
+                                         ^
+Include/ast_allnodes.hpp:574:5: error: ‘declarator’ does not name a type
+     declarator * dec; // points to declaration, ie a name or identifier
+     ^
+Include/ast_allnodes.hpp:575:5: error: ‘initializer’ does not name a type
+     initializer * init; // points to expression being assigned to identifier, may be NULL if none is
+     ^
+Include/ast_allnodes.hpp:576:32: error: expected ‘)’ before ‘*’ token
+     init_declarator(declarator * _dec, initializer * _init = NULL) : dec(_dec), init(_init) {}
+                                ^
+Include/ast_allnodes.hpp:657:5: error: ‘direct_abstract_declarator’ does not name a type
+     direct_abstract_declarator * dabs_dec;
+     ^
+Include/ast_allnodes.hpp:658:52: error: expected ‘)’ before ‘*’ token
+     abstract_declarator(direct_abstract_declarator * _dabs_dec = NULL, pointer * point = NULL) : base_declarator(point), dabs_dec(_dabs_dec) {}
+                                                    ^
+Include/ast_allnodes.hpp:667:5: error: ‘direct_declarator’ does not name a type
+     direct_declarator * dir_dec;
+     ^
+Include/ast_allnodes.hpp:668:34: error: expected ‘)’ before ‘*’ token
+     declarator(direct_declarator * _dir_dec, pointer * point = NULL) : base_declarator(point), dir_dec(_dir_dec) {}
+                                  ^
+Include/ast_allnodes.hpp:681:5: error: ‘parameter_list’ does not name a type
+     parameter_list * para_list; // nonnull if it is a functio
+     ^
+Include/ast_allnodes.hpp:682:69: error: ‘parameter_list’ has not been declared
+     base_direct_declarator(ConstantExpression * _const_expr = NULL, parameter_list * _para_list = NULL) : const_expr (_const_expr), para_list(_para_list) {}
+                                                                     ^
+Include/ast_allnodes.hpp: In constructor ‘base_direct_declarator::base_direct_declarator(ConstantExpression*, int*)’:
+Include/ast_allnodes.hpp:682:133: error: class ‘base_direct_declarator’ does not have any field named ‘para_list’
+     base_direct_declarator(ConstantExpression * _const_expr = NULL, parameter_list * _para_list = NULL) : const_expr (_const_expr), para_list(_para_list) {}
+                                                                                                                                     ^
+Include/ast_allnodes.hpp: At global scope:
+Include/ast_allnodes.hpp:688:52: error: expected class-name before ‘{’ token
+ class empty_parameter_list : public parameter_list {};
+                                                    ^
+Include/ast_allnodes.hpp:695:159: error: ‘parameter_list’ has not been declared
+     direct_abstract_declarator(direct_abstract_declarator * _dabs_dec = NULL, abstract_declarator * _abs_dec = NULL, ConstantExpression * _const_expr = NULL, parameter_list * _para_list = NULL) 
+                                                                                                                                                               ^
+Include/ast_allnodes.hpp:705:130: error: ‘parameter_list’ has not been declared
+     direct_declarator(IdentifierNode * _ID = NULL, direct_declarator * _dir_dec = NULL, ConstantExpression * _const_expr = NULL, parameter_list * _para_list = NULL, declarator * _dec = NULL) 
+                                                                                                                                  ^
+Include/ast_allnodes.hpp:717:5: error: ‘parameter_declaration’ does not name a type
+     parameter_declaration * para_dec;
+     ^
+Include/ast_allnodes.hpp:719:42: error: expected ‘)’ before ‘*’ token
+     parameter_list(parameter_declaration * _para_dec, parameter_list * _para_list = NULL, abstract_declarator * _abs_dec = NULL) : para_list(_para_list), para_dec(_para_dec), abs_dec(_abs_dec) {}
+                                          ^
+Include/ast_allnodes.hpp:748:5: error: ‘initializer_list’ does not name a type
+     initializer_list * init_list;
+     ^
+Include/ast_allnodes.hpp:749:40: error: ‘initializer_list’ has not been declared
+     initializer(Expression* _ass_expr, initializer_list * _init_list = NULL) : ass_expr(_ass_expr), init_list(_init_list) {}
+                                        ^
+Include/ast_allnodes.hpp: In constructor ‘initializer::initializer(Expression*, int*)’:
+Include/ast_allnodes.hpp:749:101: error: class ‘initializer’ does not have any field named ‘init_list’
+     initializer(Expression* _ass_expr, initializer_list * _init_list = NULL) : ass_expr(_ass_expr), init_list(_init_list) {}
+                                                                                                     ^
+Include/ast_allnodes.hpp: At global scope:
+Include/ast_allnodes.hpp:761:7: error: redefinition of ‘class Visitor’
+ class Visitor{
+       ^
+In file included from Include/ast_context.hpp:11:0,
+                 from Include/ast_allnodes.hpp:11,
+                 from src/parser.y:5:
+Include/visitors.hpp:6:7: error: previous definition of ‘class Visitor’
+ class Visitor{
+       ^
+src/parser.y:26:5: error: ‘IdentiferNode’ does not name a type
+     IdentiferNode* identnode;
+     ^
+src/parser.y:27:25: error: expected unqualified-id before ‘constexpr’
+     ConstantExpression* constexpr;
+                         ^
+src/parser.y:27:23: error: expected ‘;’ at end of member declaration
+     ConstantExpression* constexpr;
+                       ^
+src/parser.y:27:25: error: declaration does not declare anything [-fpermissive]
+     ConstantExpression* constexpr;
+                         ^
+src/parser.y: In function ‘int yyparse()’:
+src/parser.y:114:32: error: ‘IdentiferNode’ does not name a type
+ primary_EXPR: Ident { $$ = new IdentiferNode; }
+                                ^
+src/parser.y:119:14: error: ‘YYSTYPE {aka union YYSTYPE}’ has no member named ‘identnode’
+ Ident: Identifier { $$ = new IdentiferNode($1); } 
+              ^
+src/parser.y:119:31: error: expected type-specifier before ‘IdentiferNode’
+ Ident: Identifier { $$ = new IdentiferNode($1); } 
+                               ^
+src/parser.y:131:87: error: no matching function for call to ‘FuncCall::FuncCall(Expression*&, Expression*&)’
+                   | postfix_EXPR Punctuator_par_open argument_EXPR_list Punctuator_par_close  { $$ = new FuncCall($1, $3); }
+                                                                                       ^
+In file included from src/parser.y:5:0:
+Include/ast_allnodes.hpp:77:5: note: candidate: FuncCall::FuncCall(Expression*, int*)
+     FuncCall(Expression* _LHS, ArgExprList* RHS) : PostfixExpr(_LHS), Args(RHS){}
+     ^
+Include/ast_allnodes.hpp:77:5: note:   no known conversion for argument 2 from ‘Expression*’ to ‘int*’
+Include/ast_allnodes.hpp:76:5: note: candidate: FuncCall::FuncCall(Expression*)
+     FuncCall(Expression* _LHS) : PostfixExpr(_LHS) {}
+     ^
+Include/ast_allnodes.hpp:76:5: note:   candidate expects 1 argument, 2 provided
+Include/ast_allnodes.hpp:74:7: note: candidate: constexpr FuncCall::FuncCall(const FuncCall&)
+ class FuncCall : public PostfixExpr{
+       ^
+Include/ast_allnodes.hpp:74:7: note:   candidate expects 1 argument, 2 provided
+Include/ast_allnodes.hpp:74:7: note: candidate: constexpr FuncCall::FuncCall(FuncCall&&)
+Include/ast_allnodes.hpp:74:7: note:   candidate expects 1 argument, 2 provided
+src/parser.y:132:79: error: ‘YYSTYPE {aka union YYSTYPE}’ has no member named ‘identnode’
+                   | postfix_EXPR Operator_access Ident   { $$ = new MemberAccess($1, $3); }
+                                                                               ^
+src/parser.y:133:84: error: ‘YYSTYPE {aka union YYSTYPE}’ has no member named ‘identnode’
+                   | postfix_EXPR Operator_deref_access Ident   { $$ = new DerefMemberAccess($1, $3); }
+                                                                                    ^
+src/parser.y:138:26: error: cannot convert ‘ArgExprList*’ to ‘Expression*’ in assignment
+ argument_EXPR_list: assignment_EXPR { $$ = new ArgExprList($1); }
+                          ^
+src/parser.y:139:33: error: ‘class Expression’ has no member named ‘AppendArgExpression’
+                   | argument_EXPR_list Operator_comma assignment_EXPR { ($1)->AppendArgExpression($3); }
+                                 ^
+src/parser.y:144:75: error: no matching function for call to ‘PrefixExpr::DecodeUnaryOp(Expression*&)’
+In file included from src/parser.y:5:0:
+Include/ast_allnodes.hpp:122:24: note: candidate: static PrefixExpr* PrefixExpr::DecodeUnaryOp(std::__cxx11::string*, Expression*)
+     static PrefixExpr* DecodeUnaryOp(std::string* yytext, Expression* _RHS);
+                        ^
+Include/ast_allnodes.hpp:122:24: note:   candidate expects 2 arguments, 1 provided
+src/parser.y:146:59: error: no matching function for call to ‘SizeofType::SizeofType(Node*&)’
+       | Operator_sizeof Punctuator_par_open type_name Punctuator_par_close  { $$ = new SizeofType($3); } 
+                                                           ^
+In file included from src/parser.y:5:0:
+Include/ast_allnodes.hpp:173:7: note: candidate: constexpr SizeofType::SizeofType()
+ class SizeofType : public Expression{
+       ^
+Include/ast_allnodes.hpp:173:7: note:   candidate expects 0 arguments, 1 provided
+Include/ast_allnodes.hpp:173:7: note: candidate: constexpr SizeofType::SizeofType(const SizeofType&)
+Include/ast_allnodes.hpp:173:7: note:   no known conversion for argument 1 from ‘Node*’ to ‘const SizeofType&’
+Include/ast_allnodes.hpp:173:7: note: candidate: constexpr SizeofType::SizeofType(SizeofType&&)
+Include/ast_allnodes.hpp:173:7: note:   no known conversion for argument 1 from ‘Node*’ to ‘SizeofType&&’
+src/parser.y:148:32: error: expected type-specifier before ‘string’
+ unary_operator: Operator_bit_and { $$ = new string("&");} 
+                                ^
+src/parser.y:149:32: error: expected type-specifier before ‘string’
+               | Operator_mul { $$ = new string("*");}
+                                ^
+src/parser.y:150:32: error: expected type-specifier before ‘string’
+               | Operator_add { $$ = new string("+");}
+                                ^
+src/parser.y:151:32: error: expected type-specifier before ‘string’
+               | Operator_sub { $$ = new string("-");}
+                                ^
+src/parser.y:152:32: error: expected type-specifier before ‘string’
+               | Operator_bit_not { $$ = new string("~");}
+                                ^
+src/parser.y:153:32: error: expected type-specifier before ‘string’
+               | Operator_not { $$ = new string("!");}
+                                ^
+src/parser.y:156:80: error: no matching function for call to ‘CastExpr::CastExpr(Node*&, Expression*&)’
+                | Punctuator_par_open type_name Punctuator_par_close cast_EXPR { $$ = new CastExpr($2, $4); }
+                                                                                ^
+In file included from src/parser.y:5:0:
+Include/ast_allnodes.hpp:179:7: note: candidate: constexpr CastExpr::CastExpr(const CastExpr&)
+ class CastExpr : public PrefixExpr{
+       ^
+Include/ast_allnodes.hpp:179:7: note:   candidate expects 1 argument, 2 provided
+Include/ast_allnodes.hpp:179:7: note: candidate: constexpr CastExpr::CastExpr(CastExpr&&)
+Include/ast_allnodes.hpp:179:7: note:   candidate expects 1 argument, 2 provided
+src/parser.y:185:88: error: use of deleted function ‘BitwiseAND::BitwiseAND(Expression*, Expression*)’
+In file included from src/parser.y:5:0:
+Include/ast_allnodes.hpp:285:31: note: ‘BitwiseAND::BitwiseAND(Expression*, Expression*)’ is implicitly deleted because the default definition would be ill-formed:
+     using BinaryOpExpression::BinaryOpExpression;
+                               ^
+Include/ast_allnodes.hpp:285:31: error: use of deleted function ‘BitwiseBinaryExpression::BitwiseBinaryExpression()’
+Include/ast_allnodes.hpp:277:7: note: ‘BitwiseBinaryExpression::BitwiseBinaryExpression()’ is implicitly deleted because the default definition would be ill-formed:
+ class BitwiseBinaryExpression : public BinaryOpExpression{
+       ^
+Include/ast_allnodes.hpp:277:7: error: no matching function for call to ‘BinaryOpExpression::BinaryOpExpression()’
+In file included from src/parser.y:5:0:
+Include/ast_allnodes.hpp:190:5: note: candidate: BinaryOpExpression::BinaryOpExpression(Expression*, Expression*)
+     BinaryOpExpression(Expression* _LHS, Expression* _RHS) : LHS(_LHS), RHS(_RHS){}
+     ^
+Include/ast_allnodes.hpp:190:5: note:   candidate expects 2 arguments, 0 provided
+Include/ast_allnodes.hpp:188:7: note: candidate: constexpr BinaryOpExpression::BinaryOpExpression(const BinaryOpExpression&)
+ class BinaryOpExpression : public Expression{
+       ^
+Include/ast_allnodes.hpp:188:7: note:   candidate expects 1 argument, 0 provided
+Include/ast_allnodes.hpp:188:7: note: candidate: constexpr BinaryOpExpression::BinaryOpExpression(BinaryOpExpression&&)
+Include/ast_allnodes.hpp:188:7: note:   candidate expects 1 argument, 0 provided
+src/parser.y:188:88: error: use of deleted function ‘BitwiseXOR::BitwiseXOR(Expression*, Expression*)’
+         | BIT_XBIT_OR_EXPR Operator_bit_xor BIT_AND_EXPR{ $$ = new BitwiseXOR($1, $3); }
+                                                                                        ^
+In file included from src/parser.y:5:0:
+Include/ast_allnodes.hpp:295:31: note: ‘BitwiseXOR::BitwiseXOR(Expression*, Expression*)’ is implicitly deleted because the default definition would be ill-formed:
+     using BinaryOpExpression::BinaryOpExpression;
+                               ^
+Include/ast_allnodes.hpp:295:31: error: use of deleted function ‘BitwiseBinaryExpression::BitwiseBinaryExpression()’
+src/parser.y:191:87: error: use of deleted function ‘BitwiseOR::BitwiseOR(Expression*, Expression*)’
+In file included from src/parser.y:5:0:
+Include/ast_allnodes.hpp:290:31: note: ‘BitwiseOR::BitwiseOR(Expression*, Expression*)’ is implicitly deleted because the default definition would be ill-formed:
+     using BinaryOpExpression::BinaryOpExpression;
+                               ^
+Include/ast_allnodes.hpp:290:31: error: use of deleted function ‘BitwiseBinaryExpression::BitwiseBinaryExpression()’
+src/parser.y:194:32: error: expected type-specifier before ‘LogicAND’
+               | LOGIC_AND_EXPR Operator_and BIT_OR_EXPR{ $$ = new LogicAND($1, $3); }
+                                ^
+src/parser.y:197:32: error: expected type-specifier before ‘LogicOR’
+              | LOGIC_OR_EXPR Operator_or LOGIC_AND_EXPR{ $$ = new LogicOR($1, $3); }
+                                ^
+src/parser.y:200:121: error: new initializer expression list treated as compound expression [-fpermissive]
+                 | LOGIC_OR_EXPR Operator_trinary_question EXPR Operator_trinary_choice conditional_EXPR { $$ = new TernaryOpExpression($1, $3, $5); }
+                                                                                                                         ^
+src/parser.y:200:121: error: no matching function for call to ‘TernaryOpExpression::TernaryOpExpression(Expression*&)’
+In file included from src/parser.y:5:0:
+Include/ast_allnodes.hpp:299:7: note: candidate: TernaryOpExpression::TernaryOpExpression()
+ class TernaryOpExpression : public Expression{
+       ^
+Include/ast_allnodes.hpp:299:7: note:   candidate expects 0 arguments, 1 provided
+Include/ast_allnodes.hpp:299:7: note: candidate: constexpr TernaryOpExpression::TernaryOpExpression(const TernaryOpExpression&)
+Include/ast_allnodes.hpp:299:7: note:   no known conversion for argument 1 from ‘Expression*’ to ‘const TernaryOpExpression&’
+Include/ast_allnodes.hpp:299:7: note: candidate: constexpr TernaryOpExpression::TernaryOpExpression(TernaryOpExpression&&)
+Include/ast_allnodes.hpp:299:7: note:   no known conversion for argument 1 from ‘Expression*’ to ‘TernaryOpExpression&&’
+src/parser.y:203:131: error: no matching function for call to ‘GenericAssignExpr::DecodeAssignOp(Expression*&, Expression*&, Expression*&)’
+In file included from src/parser.y:5:0:
+Include/ast_allnodes.hpp:309:31: note: candidate: static GenericAssignExpr* GenericAssignExpr::DecodeAssignOp(Expression*, std::__cxx11::string*, Expression*)
+     static GenericAssignExpr* DecodeAssignOp(Expression* LHS, std::string* yytext, Expression* RHS);
+                               ^
+Include/ast_allnodes.hpp:309:31: note:   no known conversion for argument 2 from ‘Expression*’ to ‘std::__cxx11::string* {aka std::__cxx11::basic_string<char>*}’
+src/parser.y:206:32: error: expected type-specifier before ‘string’
+ assignment: Operator_assign { $$ = new string("=");} 
+                                ^
+src/parser.y:207:32: error: expected type-specifier before ‘string’
+           | Operator_mul_assign { $$ = new string("*=");}
+                                ^
+src/parser.y:208:32: error: expected type-specifier before ‘string’
+           | Operator_div_assign { $$ = new string("/=");}
+                                ^
+src/parser.y:209:32: error: expected type-specifier before ‘string’
+           | Operator_mod_assign { $$ = new string("%=");}
+                                ^
+src/parser.y:210:32: error: expected type-specifier before ‘string’
+           | Operator_add_assign { $$ = new string("+=");}
+                                ^
+src/parser.y:211:32: error: expected type-specifier before ‘string’
+           | Operator_sub_assign { $$ = new string("-=");}
+                                ^
+src/parser.y:212:32: error: expected type-specifier before ‘string’
+           | Operator_sl_assign { $$ = new string("<<=");}
+                                ^
+src/parser.y:213:32: error: expected type-specifier before ‘string’
+           | Operator_sr_assign { $$ = new string(">>=");}
+                                ^
+src/parser.y:214:32: error: expected type-specifier before ‘string’
+           | Operator_and_assign { $$ = new string("&=");}
+                                ^
+src/parser.y:215:32: error: expected type-specifier before ‘string’
+           | Operator_xor_assign { $$ = new string("^=");}
+                                ^
+src/parser.y:216:32: error: expected type-specifier before ‘string’
+           | Operator_or_assign{ $$ = new string("|=");}
+                                ^
+src/parser.y:229:72: error: new initializer expression list treated as compound expression [-fpermissive]
+ declaration: declaration_specifiers init_declarator_list Punctuator_eol { $$ = new declaration($1, $2); }
+                                                                        ^
+src/parser.y:229:72: error: no matching function for call to ‘declaration::declaration(Node*&)’
+In file included from src/parser.y:5:0:
+Include/ast_allnodes.hpp:541:7: note: candidate: constexpr declaration::declaration()
+ class declaration : public Node
+       ^
+Include/ast_allnodes.hpp:541:7: note:   candidate expects 0 arguments, 1 provided
+Include/ast_allnodes.hpp:541:7: note: candidate: constexpr declaration::declaration(const declaration&)
+Include/ast_allnodes.hpp:541:7: note:   no known conversion for argument 1 from ‘Node*’ to ‘const declaration&’
+Include/ast_allnodes.hpp:541:7: note: candidate: constexpr declaration::declaration(declaration&&)
+Include/ast_allnodes.hpp:541:7: note:   no known conversion for argument 1 from ‘Node*’ to ‘declaration&&’
+src/parser.y:230:54: error: no matching function for call to ‘declaration::declaration(Node*&)’
+            | declaration_specifiers Punctuator_eol { $$ = new declaration($1); }
+                                                      ^
+In file included from src/parser.y:5:0:
+Include/ast_allnodes.hpp:541:7: note: candidate: constexpr declaration::declaration()
+ class declaration : public Node
+       ^
+Include/ast_allnodes.hpp:541:7: note:   candidate expects 0 arguments, 1 provided
+Include/ast_allnodes.hpp:541:7: note: candidate: constexpr declaration::declaration(const declaration&)
+Include/ast_allnodes.hpp:541:7: note:   no known conversion for argument 1 from ‘Node*’ to ‘const declaration&’
+Include/ast_allnodes.hpp:541:7: note: candidate: constexpr declaration::declaration(declaration&&)
+Include/ast_allnodes.hpp:541:7: note:   no known conversion for argument 1 from ‘Node*’ to ‘declaration&&’
+src/parser.y:234:64: error: no matching function for call to ‘declaration_specifiers::declaration_specifiers(Node*&)’
+                       | type_specifier { $$ = new declaration_specifiers($1); }
+                                                                ^
+In file included from src/parser.y:5:0:
+Include/ast_allnodes.hpp:550:7: note: candidate: declaration_specifiers::declaration_specifiers()
+ class declaration_specifiers : public Node
+       ^
+Include/ast_allnodes.hpp:550:7: note:   candidate expects 0 arguments, 1 provided
+Include/ast_allnodes.hpp:550:7: note: candidate: constexpr declaration_specifiers::declaration_specifiers(const declaration_specifiers&)
+Include/ast_allnodes.hpp:550:7: note:   no known conversion for argument 1 from ‘Node*’ to ‘const declaration_specifiers&’
+Include/ast_allnodes.hpp:550:7: note: candidate: constexpr declaration_specifiers::declaration_specifiers(declaration_specifiers&&)
+Include/ast_allnodes.hpp:550:7: note:   no known conversion for argument 1 from ‘Node*’ to ‘declaration_specifiers&&’
+src/parser.y:235:82: error: new initializer expression list treated as compound expression [-fpermissive]
+                       | type_specifier declaration_specifiers { $$ = new declaration_specifiers($1, $2); }
+                                                                                  ^
+src/parser.y:235:82: error: no matching function for call to ‘declaration_specifiers::declaration_specifiers(Node*&)’
+In file included from src/parser.y:5:0:
+Include/ast_allnodes.hpp:550:7: note: candidate: declaration_specifiers::declaration_specifiers()
+ class declaration_specifiers : public Node
+       ^
+Include/ast_allnodes.hpp:550:7: note:   candidate expects 0 arguments, 1 provided
+Include/ast_allnodes.hpp:550:7: note: candidate: constexpr declaration_specifiers::declaration_specifiers(const declaration_specifiers&)
+Include/ast_allnodes.hpp:550:7: note:   no known conversion for argument 1 from ‘Node*’ to ‘const declaration_specifiers&’
+Include/ast_allnodes.hpp:550:7: note: candidate: constexpr declaration_specifiers::declaration_specifiers(declaration_specifiers&&)
+Include/ast_allnodes.hpp:550:7: note:   no known conversion for argument 1 from ‘Node*’ to ‘declaration_specifiers&&’
+src/parser.y:239:26: error: expected type-specifier before ‘init_declaration_list’
+ init_declarator_list: init_declarator { $$ = new init_declaration_list($1); }
+                          ^
+src/parser.y:240:26: error: expected type-specifier before ‘init_declaration_list’
+                     | init_declarator_list Operator_comma init_declarator { $$ = new init_declaration_list($3, $1); }
+                          ^
+src/parser.y:242:57: error: no matching function for call to ‘init_declarator::init_declarator(Node*&)’
+ init_declarator: declarator { $$ = new init_declarator($1); }
+                                                         ^
+In file included from src/parser.y:5:0:
+Include/ast_allnodes.hpp:571:7: note: candidate: constexpr init_declarator::init_declarator()
+ class init_declarator : public Node
+       ^
+Include/ast_allnodes.hpp:571:7: note:   candidate expects 0 arguments, 1 provided
+Include/ast_allnodes.hpp:571:7: note: candidate: constexpr init_declarator::init_declarator(const init_declarator&)
+Include/ast_allnodes.hpp:571:7: note:   no known conversion for argument 1 from ‘Node*’ to ‘const init_declarator&’
+Include/ast_allnodes.hpp:571:7: note: candidate: constexpr init_declarator::init_declarator(init_declarator&&)
+Include/ast_allnodes.hpp:571:7: note:   no known conversion for argument 1 from ‘Node*’ to ‘init_declarator&&’
+src/parser.y:243:75: error: new initializer expression list treated as compound expression [-fpermissive]
+                | declarator Operator_assign initializer { $$ = new init_declarator($1, $3); }
+                                                                           ^
+src/parser.y:243:75: error: no matching function for call to ‘init_declarator::init_declarator(Node*&)’
+In file included from src/parser.y:5:0:
+Include/ast_allnodes.hpp:571:7: note: candidate: constexpr init_declarator::init_declarator()
+ class init_declarator : public Node
+       ^
+Include/ast_allnodes.hpp:571:7: note:   candidate expects 0 arguments, 1 provided
+Include/ast_allnodes.hpp:571:7: note: candidate: constexpr init_declarator::init_declarator(const init_declarator&)
+Include/ast_allnodes.hpp:571:7: note:   no known conversion for argument 1 from ‘Node*’ to ‘const init_declarator&’
+Include/ast_allnodes.hpp:571:7: note: candidate: constexpr init_declarator::init_declarator(init_declarator&&)
+Include/ast_allnodes.hpp:571:7: note:   no known conversion for argument 1 from ‘Node*’ to ‘init_declarator&&’
+src/parser.y:245:56: error: no matching function for call to ‘type_specifier::type_specifier(std::__cxx11::string*&)’
+ type_specifier: Keyword_void { $$ = new type_specifier($1); }
+                                                        ^
+In file included from src/parser.y:5:0:
+Include/ast_allnodes.hpp:602:5: note: candidate: type_specifier::type_specifier(const string&)
+     type_specifier(const std::string &Keyword = "") : type(Keyword) {}
+     ^
+Include/ast_allnodes.hpp:602:5: note:   no known conversion for argument 1 from ‘std::__cxx11::string* {aka std::__cxx11::basic_string<char>*}’ to ‘const string& {aka const std::__cxx11::basic_string<char>&}’
+Include/ast_allnodes.hpp:595:7: note: candidate: type_specifier::type_specifier(const type_specifier&)
+ class type_specifier : public Node
+       ^
+Include/ast_allnodes.hpp:595:7: note:   no known conversion for argument 1 from ‘std::__cxx11::string* {aka std::__cxx11::basic_string<char>*}’ to ‘const type_specifier&’
+Include/ast_allnodes.hpp:595:7: note: candidate: type_specifier::type_specifier(type_specifier&&)
+Include/ast_allnodes.hpp:595:7: note:   no known conversion for argument 1 from ‘std::__cxx11::string* {aka std::__cxx11::basic_string<char>*}’ to ‘type_specifier&&’
+src/parser.y:246:56: error: no matching function for call to ‘type_specifier::type_specifier(std::__cxx11::string*&)’
+               | Keyword_char { $$ = new type_specifier($1); }
+                                                        ^
+In file included from src/parser.y:5:0:
+Include/ast_allnodes.hpp:602:5: note: candidate: type_specifier::type_specifier(const string&)
+     type_specifier(const std::string &Keyword = "") : type(Keyword) {}
+     ^
+Include/ast_allnodes.hpp:602:5: note:   no known conversion for argument 1 from ‘std::__cxx11::string* {aka std::__cxx11::basic_string<char>*}’ to ‘const string& {aka const std::__cxx11::basic_string<char>&}’
+Include/ast_allnodes.hpp:595:7: note: candidate: type_specifier::type_specifier(const type_specifier&)
+ class type_specifier : public Node
+       ^
+Include/ast_allnodes.hpp:595:7: note:   no known conversion for argument 1 from ‘std::__cxx11::string* {aka std::__cxx11::basic_string<char>*}’ to ‘const type_specifier&’
+Include/ast_allnodes.hpp:595:7: note: candidate: type_specifier::type_specifier(type_specifier&&)
+Include/ast_allnodes.hpp:595:7: note:   no known conversion for argument 1 from ‘std::__cxx11::string* {aka std::__cxx11::basic_string<char>*}’ to ‘type_specifier&&’
+src/parser.y:247:56: error: no matching function for call to ‘type_specifier::type_specifier(std::__cxx11::string*&)’
+               | Keyword_short { $$ = new type_specifier($1); }
+                                                        ^
+In file included from src/parser.y:5:0:
+Include/ast_allnodes.hpp:602:5: note: candidate: type_specifier::type_specifier(const string&)
+     type_specifier(const std::string &Keyword = "") : type(Keyword) {}
+     ^
+Include/ast_allnodes.hpp:602:5: note:   no known conversion for argument 1 from ‘std::__cxx11::string* {aka std::__cxx11::basic_string<char>*}’ to ‘const string& {aka const std::__cxx11::basic_string<char>&}’
+Include/ast_allnodes.hpp:595:7: note: candidate: type_specifier::type_specifier(const type_specifier&)
+ class type_specifier : public Node
+       ^
+Include/ast_allnodes.hpp:595:7: note:   no known conversion for argument 1 from ‘std::__cxx11::string* {aka std::__cxx11::basic_string<char>*}’ to ‘const type_specifier&’
+Include/ast_allnodes.hpp:595:7: note: candidate: type_specifier::type_specifier(type_specifier&&)
+Include/ast_allnodes.hpp:595:7: note:   no known conversion for argument 1 from ‘std::__cxx11::string* {aka std::__cxx11::basic_string<char>*}’ to ‘type_specifier&&’
+src/parser.y:248:56: error: no matching function for call to ‘type_specifier::type_specifier(std::__cxx11::string*&)’
+               | Keyword_int { $$ = new type_specifier($1); }
+                                                        ^
+In file included from src/parser.y:5:0:
+Include/ast_allnodes.hpp:602:5: note: candidate: type_specifier::type_specifier(const string&)
+     type_specifier(const std::string &Keyword = "") : type(Keyword) {}
+     ^
+Include/ast_allnodes.hpp:602:5: note:   no known conversion for argument 1 from ‘std::__cxx11::string* {aka std::__cxx11::basic_string<char>*}’ to ‘const string& {aka const std::__cxx11::basic_string<char>&}’
+Include/ast_allnodes.hpp:595:7: note: candidate: type_specifier::type_specifier(const type_specifier&)
+ class type_specifier : public Node
+       ^
+Include/ast_allnodes.hpp:595:7: note:   no known conversion for argument 1 from ‘std::__cxx11::string* {aka std::__cxx11::basic_string<char>*}’ to ‘const type_specifier&’
+Include/ast_allnodes.hpp:595:7: note: candidate: type_specifier::type_specifier(type_specifier&&)
+Include/ast_allnodes.hpp:595:7: note:   no known conversion for argument 1 from ‘std::__cxx11::string* {aka std::__cxx11::basic_string<char>*}’ to ‘type_specifier&&’
+src/parser.y:249:56: error: no matching function for call to ‘type_specifier::type_specifier(std::__cxx11::string*&)’
+               | Keyword_long { $$ = new type_specifier($1); }
+                                                        ^
+In file included from src/parser.y:5:0:
+Include/ast_allnodes.hpp:602:5: note: candidate: type_specifier::type_specifier(const string&)
+     type_specifier(const std::string &Keyword = "") : type(Keyword) {}
+     ^
+Include/ast_allnodes.hpp:602:5: note:   no known conversion for argument 1 from ‘std::__cxx11::string* {aka std::__cxx11::basic_string<char>*}’ to ‘const string& {aka const std::__cxx11::basic_string<char>&}’
+Include/ast_allnodes.hpp:595:7: note: candidate: type_specifier::type_specifier(const type_specifier&)
+ class type_specifier : public Node
+       ^
+Include/ast_allnodes.hpp:595:7: note:   no known conversion for argument 1 from ‘std::__cxx11::string* {aka std::__cxx11::basic_string<char>*}’ to ‘const type_specifier&’
+Include/ast_allnodes.hpp:595:7: note: candidate: type_specifier::type_specifier(type_specifier&&)
+Include/ast_allnodes.hpp:595:7: note:   no known conversion for argument 1 from ‘std::__cxx11::string* {aka std::__cxx11::basic_string<char>*}’ to ‘type_specifier&&’
+src/parser.y:250:56: error: no matching function for call to ‘type_specifier::type_specifier(std::__cxx11::string*&)’
+               | Keyword_float { $$ = new type_specifier($1); }
+                                                        ^
+In file included from src/parser.y:5:0:
+Include/ast_allnodes.hpp:602:5: note: candidate: type_specifier::type_specifier(const string&)
+     type_specifier(const std::string &Keyword = "") : type(Keyword) {}
+     ^
+Include/ast_allnodes.hpp:602:5: note:   no known conversion for argument 1 from ‘std::__cxx11::string* {aka std::__cxx11::basic_string<char>*}’ to ‘const string& {aka const std::__cxx11::basic_string<char>&}’
+Include/ast_allnodes.hpp:595:7: note: candidate: type_specifier::type_specifier(const type_specifier&)
+ class type_specifier : public Node
+       ^
+Include/ast_allnodes.hpp:595:7: note:   no known conversion for argument 1 from ‘std::__cxx11::string* {aka std::__cxx11::basic_string<char>*}’ to ‘const type_specifier&’
+Include/ast_allnodes.hpp:595:7: note: candidate: type_specifier::type_specifier(type_specifier&&)
+Include/ast_allnodes.hpp:595:7: note:   no known conversion for argument 1 from ‘std::__cxx11::string* {aka std::__cxx11::basic_string<char>*}’ to ‘type_specifier&&’
+src/parser.y:251:56: error: no matching function for call to ‘type_specifier::type_specifier(std::__cxx11::string*&)’
+               | Keyword_double { $$ = new type_specifier($1); }
+                                                        ^
+In file included from src/parser.y:5:0:
+Include/ast_allnodes.hpp:602:5: note: candidate: type_specifier::type_specifier(const string&)
+     type_specifier(const std::string &Keyword = "") : type(Keyword) {}
+     ^
+Include/ast_allnodes.hpp:602:5: note:   no known conversion for argument 1 from ‘std::__cxx11::string* {aka std::__cxx11::basic_string<char>*}’ to ‘const string& {aka const std::__cxx11::basic_string<char>&}’
+Include/ast_allnodes.hpp:595:7: note: candidate: type_specifier::type_specifier(const type_specifier&)
+ class type_specifier : public Node
+       ^
+Include/ast_allnodes.hpp:595:7: note:   no known conversion for argument 1 from ‘std::__cxx11::string* {aka std::__cxx11::basic_string<char>*}’ to ‘const type_specifier&’
+Include/ast_allnodes.hpp:595:7: note: candidate: type_specifier::type_specifier(type_specifier&&)
+Include/ast_allnodes.hpp:595:7: note:   no known conversion for argument 1 from ‘std::__cxx11::string* {aka std::__cxx11::basic_string<char>*}’ to ‘type_specifier&&’
+src/parser.y:252:56: error: no matching function for call to ‘type_specifier::type_specifier(std::__cxx11::string*&)’
+               | Keyword_signed { $$ = new type_specifier($1); }
+                                                        ^
+In file included from src/parser.y:5:0:
+Include/ast_allnodes.hpp:602:5: note: candidate: type_specifier::type_specifier(const string&)
+     type_specifier(const std::string &Keyword = "") : type(Keyword) {}
+     ^
+Include/ast_allnodes.hpp:602:5: note:   no known conversion for argument 1 from ‘std::__cxx11::string* {aka std::__cxx11::basic_string<char>*}’ to ‘const string& {aka const std::__cxx11::basic_string<char>&}’
+Include/ast_allnodes.hpp:595:7: note: candidate: type_specifier::type_specifier(const type_specifier&)
+ class type_specifier : public Node
+       ^
+Include/ast_allnodes.hpp:595:7: note:   no known conversion for argument 1 from ‘std::__cxx11::string* {aka std::__cxx11::basic_string<char>*}’ to ‘const type_specifier&’
+Include/ast_allnodes.hpp:595:7: note: candidate: type_specifier::type_specifier(type_specifier&&)
+Include/ast_allnodes.hpp:595:7: note:   no known conversion for argument 1 from ‘std::__cxx11::string* {aka std::__cxx11::basic_string<char>*}’ to ‘type_specifier&&’
+src/parser.y:253:56: error: no matching function for call to ‘type_specifier::type_specifier(std::__cxx11::string*&)’
+               | Keyword_unsigned{ $$ = new type_specifier($1); }
+                                                        ^
+In file included from src/parser.y:5:0:
+Include/ast_allnodes.hpp:602:5: note: candidate: type_specifier::type_specifier(const string&)
+     type_specifier(const std::string &Keyword = "") : type(Keyword) {}
+     ^
+Include/ast_allnodes.hpp:602:5: note:   no known conversion for argument 1 from ‘std::__cxx11::string* {aka std::__cxx11::basic_string<char>*}’ to ‘const string& {aka const std::__cxx11::basic_string<char>&}’
+Include/ast_allnodes.hpp:595:7: note: candidate: type_specifier::type_specifier(const type_specifier&)
+ class type_specifier : public Node
+       ^
+Include/ast_allnodes.hpp:595:7: note:   no known conversion for argument 1 from ‘std::__cxx11::string* {aka std::__cxx11::basic_string<char>*}’ to ‘const type_specifier&’
+Include/ast_allnodes.hpp:595:7: note: candidate: type_specifier::type_specifier(type_specifier&&)
+Include/ast_allnodes.hpp:595:7: note:   no known conversion for argument 1 from ‘std::__cxx11::string* {aka std::__cxx11::basic_string<char>*}’ to ‘type_specifier&&’
+src/parser.y:292:52: error: no matching function for call to ‘declarator::declarator(Node*&)’
+ declarator: direct_declarator { $$ = new declarator($1); }
+                                                    ^
+In file included from src/parser.y:5:0:
+Include/ast_allnodes.hpp:663:7: note: candidate: declarator::declarator()
+ class declarator : public base_declarator
+       ^
+Include/ast_allnodes.hpp:663:7: note:   candidate expects 0 arguments, 1 provided
+Include/ast_allnodes.hpp:663:7: note: candidate: constexpr declarator::declarator(const declarator&)
+Include/ast_allnodes.hpp:663:7: note:   no known conversion for argument 1 from ‘Node*’ to ‘const declarator&’
+Include/ast_allnodes.hpp:663:7: note: candidate: constexpr declarator::declarator(declarator&&)
+Include/ast_allnodes.hpp:663:7: note:   no known conversion for argument 1 from ‘Node*’ to ‘declarator&&’
+src/parser.y:293:70: error: no matching function for call to ‘declarator::declarator(Node*&, Node*&)’
+In file included from src/parser.y:5:0:
+Include/ast_allnodes.hpp:663:7: note: candidate: declarator::declarator()
+ class declarator : public base_declarator
+       ^
+Include/ast_allnodes.hpp:663:7: note:   candidate expects 0 arguments, 2 provided
+Include/ast_allnodes.hpp:663:7: note: candidate: constexpr declarator::declarator(const declarator&)
+Include/ast_allnodes.hpp:663:7: note:   candidate expects 1 argument, 2 provided
+Include/ast_allnodes.hpp:663:7: note: candidate: constexpr declarator::declarator(declarator&&)
+Include/ast_allnodes.hpp:663:7: note:   candidate expects 1 argument, 2 provided
+src/parser.y:296:54: error: ‘YYSTYPE {aka union YYSTYPE}’ has no member named ‘identnode’
+ direct_declarator: Ident { $$ = new direct_declarator($1); }
+                                                      ^
+src/parser.y:297:78: error: no matching function for call to ‘direct_declarator::direct_declarator(NULL, NULL, NULL, Node*&)’
+      | Punctuator_par_open declarator Punctuator_par_close  { $$ = new direct_declarator(NULL, NULL, NULL, $2); }
+                                                                              ^
+In file included from src/parser.y:5:0:
+Include/ast_allnodes.hpp:705:5: note: candidate: direct_declarator::direct_declarator(IdentifierNode*, direct_declarator*, ConstantExpression*, int*, declarator*)
+     direct_declarator(IdentifierNode * _ID = NULL, direct_declarator * _dir_dec = NULL, ConstantExpression * _const_expr = NULL, parameter_list * _para_list = NULL, declarator * _dec = NULL) 
+     ^
+Include/ast_allnodes.hpp:705:5: note:   no known conversion for argument 4 from ‘Node*’ to ‘int*’
+Include/ast_allnodes.hpp:699:7: note: candidate: constexpr direct_declarator::direct_declarator(const direct_declarator&)
+ class direct_declarator : public base_direct_declarator
+       ^
+Include/ast_allnodes.hpp:699:7: note:   candidate expects 1 argument, 4 provided
+Include/ast_allnodes.hpp:699:7: note: candidate: constexpr direct_declarator::direct_declarator(direct_declarator&&)
+Include/ast_allnodes.hpp:699:7: note:   candidate expects 1 argument, 4 provided
+src/parser.y:298:97: error: use of deleted function ‘unspecified_array_length::unspecified_array_length()’
+      | direct_declarator Punctuator_squ_open Punctuator_squ_close  { $$ = new direct_declarator(NULL, $1, new unspecified_array_length()); }
+                                                                                                 ^
+In file included from src/parser.y:5:0:
+Include/ast_allnodes.hpp:686:7: note: ‘unspecified_array_length::unspecified_array_length()’ is implicitly deleted because the default definition would be ill-formed:
+ class unspecified_array_length : public ConstantExpression {};
+       ^
+Include/ast_allnodes.hpp:686:7: error: no matching function for call to ‘ConstantExpression::ConstantExpression()’
+Include/ast_allnodes.hpp:376:5: note: candidate: ConstantExpression::ConstantExpression(Expression*)
+     ConstantExpression(Expression* Expr);
+     ^
+Include/ast_allnodes.hpp:376:5: note:   candidate expects 1 argument, 0 provided
+Include/ast_allnodes.hpp:374:7: note: candidate: constexpr ConstantExpression::ConstantExpression(const ConstantExpression&)
+ class ConstantExpression : public Expression{
+       ^
+Include/ast_allnodes.hpp:374:7: note:   candidate expects 1 argument, 0 provided
+Include/ast_allnodes.hpp:374:7: note: candidate: constexpr ConstantExpression::ConstantExpression(ConstantExpression&&)
+Include/ast_allnodes.hpp:374:7: note:   candidate expects 1 argument, 0 provided
+src/parser.y:299:79: error: expected unqualified-id before ‘constexpr’
+      | direct_declarator Punctuator_squ_open constant_EXPR Punctuator_squ_close  { $$ = new direct_declarator(NULL, $1, $3); }
+                                                                               ^
+src/parser.y:299:79: error: expected ‘)’ before ‘constexpr’
+src/parser.y:300:90: error: no matching function for call to ‘direct_declarator::direct_declarator(NULL, Node*&, NULL, Node*&)’
+      | direct_declarator Punctuator_par_open parameter_type_list  Punctuator_par_close  { $$ = new direct_declarator(NULL, $1, NULL, $3); }
+                                                                                          ^
+In file included from src/parser.y:5:0:
+Include/ast_allnodes.hpp:705:5: note: candidate: direct_declarator::direct_declarator(IdentifierNode*, direct_declarator*, ConstantExpression*, int*, declarator*)
+     direct_declarator(IdentifierNode * _ID = NULL, direct_declarator * _dir_dec = NULL, ConstantExpression * _const_expr = NULL, parameter_list * _para_list = NULL, declarator * _dec = NULL) 
+     ^
+Include/ast_allnodes.hpp:705:5: note:   no known conversion for argument 4 from ‘Node*’ to ‘int*’
+Include/ast_allnodes.hpp:699:7: note: candidate: constexpr direct_declarator::direct_declarator(const direct_declarator&)
+ class direct_declarator : public base_direct_declarator
+       ^
+Include/ast_allnodes.hpp:699:7: note:   candidate expects 1 argument, 4 provided
+Include/ast_allnodes.hpp:699:7: note: candidate: constexpr direct_declarator::direct_declarator(direct_declarator&&)
+Include/ast_allnodes.hpp:699:7: note:   candidate expects 1 argument, 4 provided
+src/parser.y:305:44: error: invalid conversion from ‘Node*’ to ‘pointer*’ [-fpermissive]
+     | Operator_mul pointer { $$ = new pointer($2); }
+                                            ^
+In file included from src/parser.y:5:0:
+Include/ast_allnodes.hpp:628:5: note:   initializing argument 1 of ‘pointer::pointer(pointer*)’
+     pointer(pointer * _p = NULL) : p(_p) {}
+     ^
+src/parser.y:309:56: error: no matching function for call to ‘parameter_list::parameter_list(Node*&)’
+ parameter_list: parameter_declaration { $$ = new parameter_list($1); }
+                                                        ^
+In file included from src/parser.y:5:0:
+Include/ast_allnodes.hpp:713:7: note: candidate: parameter_list::parameter_list()
+ class parameter_list : public Node
+       ^
+Include/ast_allnodes.hpp:713:7: note:   candidate expects 0 arguments, 1 provided
+Include/ast_allnodes.hpp:713:7: note: candidate: constexpr parameter_list::parameter_list(const parameter_list&)
+Include/ast_allnodes.hpp:713:7: note:   no known conversion for argument 1 from ‘Node*’ to ‘const parameter_list&’
+Include/ast_allnodes.hpp:713:7: note: candidate: constexpr parameter_list::parameter_list(parameter_list&&)
+Include/ast_allnodes.hpp:713:7: note:   no known conversion for argument 1 from ‘Node*’ to ‘parameter_list&&’
+src/parser.y:310:74: error: new initializer expression list treated as compound expression [-fpermissive]
+       | parameter_list Operator_comma parameter_declaration { $$ = new parameter_list($1, $3) }
+                                                                          ^
+src/parser.y:310:74: error: no matching function for call to ‘parameter_list::parameter_list(Node*&)’
+In file included from src/parser.y:5:0:
+Include/ast_allnodes.hpp:713:7: note: candidate: parameter_list::parameter_list()
+ class parameter_list : public Node
+       ^
+Include/ast_allnodes.hpp:713:7: note:   candidate expects 0 arguments, 1 provided
+Include/ast_allnodes.hpp:713:7: note: candidate: constexpr parameter_list::parameter_list(const parameter_list&)
+Include/ast_allnodes.hpp:713:7: note:   no known conversion for argument 1 from ‘Node*’ to ‘const parameter_list&’
+Include/ast_allnodes.hpp:713:7: note: candidate: constexpr parameter_list::parameter_list(parameter_list&&)
+Include/ast_allnodes.hpp:713:7: note:   no known conversion for argument 1 from ‘Node*’ to ‘parameter_list&&’
+src/parser.y:312:59: error: invalid conversion from ‘Node*’ to ‘declaration_specifiers*’ [-fpermissive]
+ parameter_declaration: declaration_specifiers declarator { $$ = new parameter_declaration($1, $2); }
+                                                           ^
+In file included from src/parser.y:5:0:
+Include/ast_allnodes.hpp:727:5: note:   initializing argument 1 of ‘parameter_declaration::parameter_declaration(declaration_specifiers*, declarator*)’
+     parameter_declaration(declaration_specifiers * _dec_spec, declarator * _dec = NULL) : dec_spec(_dec_spec), dec(_dec) {}
+     ^
+src/parser.y:312:76: error: invalid conversion from ‘Node*’ to ‘declarator*’ [-fpermissive]
+ parameter_declaration: declaration_specifiers declarator { $$ = new parameter_declaration($1, $2); }
+                                                                            ^
+In file included from src/parser.y:5:0:
+Include/ast_allnodes.hpp:727:5: note:   initializing argument 2 of ‘parameter_declaration::parameter_declaration(declaration_specifiers*, declarator*)’
+     parameter_declaration(declaration_specifiers * _dec_spec, declarator * _dec = NULL) : dec_spec(_dec_spec), dec(_dec) {}
+     ^
+src/parser.y:313:58: error: invalid conversion from ‘Node*’ to ‘declaration_specifiers*’ [-fpermissive]
+       | declaration_specifiers  { $$ = new parameter_declaration($1); }
+                                                          ^
+In file included from src/parser.y:5:0:
+Include/ast_allnodes.hpp:727:5: note:   initializing argument 1 of ‘parameter_declaration::parameter_declaration(declaration_specifiers*, declarator*)’
+     parameter_declaration(declaration_specifiers * _dec_spec, declarator * _dec = NULL) : dec_spec(_dec_spec), dec(_dec) {}
+     ^
+src/parser.y:314:87: error: no matching function for call to ‘parameter_declaration::parameter_declaration(Node*&, NULL, Node*&)’
+       | declaration_specifiers abstract_declarator { $$ = new parameter_declaration($1, NULL, $2); }
+                                                                                       ^
+In file included from src/parser.y:5:0:
+Include/ast_allnodes.hpp:727:5: note: candidate: parameter_declaration::parameter_declaration(declaration_specifiers*, declarator*)
+     parameter_declaration(declaration_specifiers * _dec_spec, declarator * _dec = NULL) : dec_spec(_dec_spec), dec(_dec) {}
+     ^
+Include/ast_allnodes.hpp:727:5: note:   candidate expects 2 arguments, 3 provided
+Include/ast_allnodes.hpp:722:7: note: candidate: constexpr parameter_declaration::parameter_declaration(const parameter_declaration&)
+ class parameter_declaration : public Node
+       ^
+Include/ast_allnodes.hpp:722:7: note:   candidate expects 1 argument, 3 provided
+Include/ast_allnodes.hpp:722:7: note: candidate: constexpr parameter_declaration::parameter_declaration(parameter_declaration&&)
+Include/ast_allnodes.hpp:722:7: note:   candidate expects 1 argument, 3 provided
+src/parser.y:319:46: error: invalid conversion from ‘Node*’ to ‘specifier_list*’ [-fpermissive]
+ type_name: specifier_list { $$ = new type_name($1); }
+                                              ^
+In file included from src/parser.y:5:0:
+Include/ast_allnodes.hpp:735:5: note:   initializing argument 1 of ‘type_name::type_name(specifier_list*, abstract_declarator*)’
+     type_name(specifier_list * _spec_list, abstract_declarator * _abs_dec = NULL) : spec_list(_spec_list), abs_dec(_abs_dec) {}
+     ^
+src/parser.y:320:47: error: invalid conversion from ‘Node*’ to ‘specifier_list*’ [-fpermissive]
+    | specifier_list abstract_declarator { $$ = new type_name($1, $2); }
+                                               ^
+In file included from src/parser.y:5:0:
+Include/ast_allnodes.hpp:735:5: note:   initializing argument 1 of ‘type_name::type_name(specifier_list*, abstract_declarator*)’
+     type_name(specifier_list * _spec_list, abstract_declarator * _abs_dec = NULL) : spec_list(_spec_list), abs_dec(_abs_dec) {}
+     ^
+src/parser.y:320:64: error: invalid conversion from ‘Node*’ to ‘abstract_declarator*’ [-fpermissive]
+    | specifier_list abstract_declarator { $$ = new type_name($1, $2); }
+                                                                ^
+In file included from src/parser.y:5:0:
+Include/ast_allnodes.hpp:735:5: note:   initializing argument 2 of ‘type_name::type_name(specifier_list*, abstract_declarator*)’
+     type_name(specifier_list * _spec_list, abstract_declarator * _abs_dec = NULL) : spec_list(_spec_list), abs_dec(_abs_dec) {}
+     ^
+src/parser.y:322:67: error: no matching function for call to ‘abstract_declarator::abstract_declarator(NULL, Node*&)’
+ abstract_declarator: pointer { $$ = new abstract_declarator(NULL, $1); }
+                                                                   ^
+In file included from src/parser.y:5:0:
+Include/ast_allnodes.hpp:652:7: note: candidate: abstract_declarator::abstract_declarator()
+ class abstract_declarator : public base_declarator
+       ^
+Include/ast_allnodes.hpp:652:7: note:   candidate expects 0 arguments, 2 provided
+Include/ast_allnodes.hpp:652:7: note: candidate: constexpr abstract_declarator::abstract_declarator(const abstract_declarator&)
+Include/ast_allnodes.hpp:652:7: note:   candidate expects 1 argument, 2 provided
+Include/ast_allnodes.hpp:652:7: note: candidate: constexpr abstract_declarator::abstract_declarator(abstract_declarator&&)
+Include/ast_allnodes.hpp:652:7: note:   candidate expects 1 argument, 2 provided
+src/parser.y:323:79: error: no matching function for call to ‘abstract_declarator::abstract_declarator(Node*&, Node*&)’
+      | pointer direct_abstract_declarator { $$ = new abstract_declarator($2, $1); }
+                                                                               ^
+In file included from src/parser.y:5:0:
+Include/ast_allnodes.hpp:652:7: note: candidate: abstract_declarator::abstract_declarator()
+ class abstract_declarator : public base_declarator
+       ^
+Include/ast_allnodes.hpp:652:7: note:   candidate expects 0 arguments, 2 provided
+Include/ast_allnodes.hpp:652:7: note: candidate: constexpr abstract_declarator::abstract_declarator(const abstract_declarator&)
+Include/ast_allnodes.hpp:652:7: note:   candidate expects 1 argument, 2 provided
+Include/ast_allnodes.hpp:652:7: note: candidate: constexpr abstract_declarator::abstract_declarator(abstract_declarator&&)
+Include/ast_allnodes.hpp:652:7: note:   candidate expects 1 argument, 2 provided
+src/parser.y:324:61: error: no matching function for call to ‘abstract_declarator::abstract_declarator(Node*&)’
+      | direct_abstract_declarator { $$ = new abstract_declarator($1); }
+                                                             ^
+In file included from src/parser.y:5:0:
+Include/ast_allnodes.hpp:652:7: note: candidate: abstract_declarator::abstract_declarator()
+ class abstract_declarator : public base_declarator
+       ^
+Include/ast_allnodes.hpp:652:7: note:   candidate expects 0 arguments, 1 provided
+Include/ast_allnodes.hpp:652:7: note: candidate: constexpr abstract_declarator::abstract_declarator(const abstract_declarator&)
+Include/ast_allnodes.hpp:652:7: note:   no known conversion for argument 1 from ‘Node*’ to ‘const abstract_declarator&’
+Include/ast_allnodes.hpp:652:7: note: candidate: constexpr abstract_declarator::abstract_declarator(abstract_declarator&&)
+Include/ast_allnodes.hpp:652:7: note:   no known conversion for argument 1 from ‘Node*’ to ‘abstract_declarator&&’
+src/parser.y:326:70: error: invalid conversion from ‘Node*’ to ‘abstract_declarator*’ [-fpermissive]
+ direct_abstract_declarator: Punctuator_par_open abstract_declarator Punctuator_par_close { $$ = new direct_abstract_declarator(NULL, $2); }
+                                                                      ^
+In file included from src/parser.y:5:0:
+Include/ast_allnodes.hpp:695:5: note:   initializing argument 2 of ‘direct_abstract_declarator::direct_abstract_declarator(direct_abstract_declarator*, abstract_declarator*, ConstantExpression*, int*)’
+     direct_abstract_declarator(direct_abstract_declarator * _dabs_dec = NULL, abstract_declarator * _abs_dec = NULL, ConstantExpression * _const_expr = NULL, parameter_list * _para_list = NULL) 
+     ^
+src/parser.y:327:88: error: expected unqualified-id before ‘constexpr’
+         | direct_abstract_declarator Punctuator_squ_open constant_EXPR Punctuator_squ_close { $$ = new direct_abstract_declarator($1, NULL, $3); }
+                                                                                        ^
+src/parser.y:327:88: error: expected ‘)’ before ‘constexpr’
+src/parser.y:328:76: error: expected unqualified-id before ‘constexpr’
+         | Punctuator_squ_open constant_EXPR Punctuator_squ_close { $$ = new direct_abstract_declarator(NULL, NULL, $2); }
+                                                                            ^
+src/parser.y:328:76: error: expected ‘)’ before ‘constexpr’
+src/parser.y:329:106: error: use of deleted function ‘unspecified_array_length::unspecified_array_length()’
+         | direct_abstract_declarator Punctuator_squ_open Punctuator_squ_close { $$ = new direct_abstract_declarator($1, NULL, new unspecified_array_length()); }
+                                                                                                          ^
+src/parser.y:330:94: error: use of deleted function ‘unspecified_array_length::unspecified_array_length()’
+         | Punctuator_squ_open Punctuator_squ_close { $$ = new direct_abstract_declarator(NULL, NULL, new unspecified_array_length()); }
+                                                                                              ^
+src/parser.y:331:99: error: no matching function for call to ‘direct_abstract_declarator::direct_abstract_declarator(Node*&, NULL, NULL, Node*&)’
+         | direct_abstract_declarator Punctuator_par_open parameter_type_list Punctuator_par_close { $$ = new direct_abstract_declarator($1, NULL, NULL, $3); }
+                                                                                                   ^
+In file included from src/parser.y:5:0:
+Include/ast_allnodes.hpp:695:5: note: candidate: direct_abstract_declarator::direct_abstract_declarator(direct_abstract_declarator*, abstract_declarator*, ConstantExpression*, int*)
+     direct_abstract_declarator(direct_abstract_declarator * _dabs_dec = NULL, abstract_declarator * _abs_dec = NULL, ConstantExpression * _const_expr = NULL, parameter_list * _para_list = NULL) 
+     ^
+Include/ast_allnodes.hpp:695:5: note:   no known conversion for argument 4 from ‘Node*’ to ‘int*’
+Include/ast_allnodes.hpp:690:7: note: candidate: constexpr direct_abstract_declarator::direct_abstract_declarator(const direct_abstract_declarator&)
+ class direct_abstract_declarator : public base_direct_declarator
+       ^
+Include/ast_allnodes.hpp:690:7: note:   candidate expects 1 argument, 4 provided
+Include/ast_allnodes.hpp:690:7: note: candidate: constexpr direct_abstract_declarator::direct_abstract_declarator(direct_abstract_declarator&&)
+Include/ast_allnodes.hpp:690:7: note:   candidate expects 1 argument, 4 provided
+src/parser.y:332:87: error: no matching function for call to ‘direct_abstract_declarator::direct_abstract_declarator(NULL, NULL, NULL, Node*&)’
+         | Punctuator_par_open parameter_type_list Punctuator_par_close { $$ = new direct_abstract_declarator(NULL, NULL, NULL, $2); }
+                                                                                       ^
+In file included from src/parser.y:5:0:
+Include/ast_allnodes.hpp:695:5: note: candidate: direct_abstract_declarator::direct_abstract_declarator(direct_abstract_declarator*, abstract_declarator*, ConstantExpression*, int*)
+     direct_abstract_declarator(direct_abstract_declarator * _dabs_dec = NULL, abstract_declarator * _abs_dec = NULL, ConstantExpression * _const_expr = NULL, parameter_list * _para_list = NULL) 
+     ^
+Include/ast_allnodes.hpp:695:5: note:   no known conversion for argument 4 from ‘Node*’ to ‘int*’
+Include/ast_allnodes.hpp:690:7: note: candidate: constexpr direct_abstract_declarator::direct_abstract_declarator(const direct_abstract_declarator&)
+ class direct_abstract_declarator : public base_direct_declarator
+       ^
+Include/ast_allnodes.hpp:690:7: note:   candidate expects 1 argument, 4 provided
+Include/ast_allnodes.hpp:690:7: note: candidate: constexpr direct_abstract_declarator::direct_abstract_declarator(direct_abstract_declarator&&)
+Include/ast_allnodes.hpp:690:7: note:   candidate expects 1 argument, 4 provided
+src/parser.y:333:109: error: no matching function for call to ‘direct_abstract_declarator::direct_abstract_declarator(Node*&, NULL, NULL, empty_parameter_list*)’
+         | direct_abstract_declarator Punctuator_par_open Punctuator_par_close { $$ = new direct_abstract_declarator($1, NULL, NULL, new empty_parameter_list()); }
+                                                                                                             ^
+In file included from src/parser.y:5:0:
+Include/ast_allnodes.hpp:695:5: note: candidate: direct_abstract_declarator::direct_abstract_declarator(direct_abstract_declarator*, abstract_declarator*, ConstantExpression*, int*)
+     direct_abstract_declarator(direct_abstract_declarator * _dabs_dec = NULL, abstract_declarator * _abs_dec = NULL, ConstantExpression * _const_expr = NULL, parameter_list * _para_list = NULL) 
+     ^
+Include/ast_allnodes.hpp:695:5: note:   no known conversion for argument 4 from ‘empty_parameter_list*’ to ‘int*’
+Include/ast_allnodes.hpp:690:7: note: candidate: constexpr direct_abstract_declarator::direct_abstract_declarator(const direct_abstract_declarator&)
+ class direct_abstract_declarator : public base_direct_declarator
+       ^
+Include/ast_allnodes.hpp:690:7: note:   candidate expects 1 argument, 4 provided
+Include/ast_allnodes.hpp:690:7: note: candidate: constexpr direct_abstract_declarator::direct_abstract_declarator(direct_abstract_declarator&&)
+Include/ast_allnodes.hpp:690:7: note:   candidate expects 1 argument, 4 provided
+src/parser.y:334:97: error: no matching function for call to ‘direct_abstract_declarator::direct_abstract_declarator(NULL, NULL, NULL, empty_parameter_list*)’
+         | Punctuator_par_open Punctuator_par_close { $$ = new direct_abstract_declarator(NULL, NULL, NULL, new empty_parameter_list()); }
+                                                                                                 ^
+In file included from src/parser.y:5:0:
+Include/ast_allnodes.hpp:695:5: note: candidate: direct_abstract_declarator::direct_abstract_declarator(direct_abstract_declarator*, abstract_declarator*, ConstantExpression*, int*)
+     direct_abstract_declarator(direct_abstract_declarator * _dabs_dec = NULL, abstract_declarator * _abs_dec = NULL, ConstantExpression * _const_expr = NULL, parameter_list * _para_list = NULL) 
+     ^
+Include/ast_allnodes.hpp:695:5: note:   no known conversion for argument 4 from ‘empty_parameter_list*’ to ‘int*’
+Include/ast_allnodes.hpp:690:7: note: candidate: constexpr direct_abstract_declarator::direct_abstract_declarator(const direct_abstract_declarator&)
+ class direct_abstract_declarator : public base_direct_declarator
+       ^
+Include/ast_allnodes.hpp:690:7: note:   candidate expects 1 argument, 4 provided
+Include/ast_allnodes.hpp:690:7: note: candidate: constexpr direct_abstract_declarator::direct_abstract_declarator(direct_abstract_declarator&&)
+Include/ast_allnodes.hpp:690:7: note:   candidate expects 1 argument, 4 provided
+src/parser.y:340:60: error: no matching function for call to ‘initializer::initializer(NULL, Node*&)’
+      | Punctuator_cur_open initializer_list Punctuator_cur_close  { $$ = new initializer(NULL, $2); }
+                                                            ^
+In file included from src/parser.y:5:0:
+Include/ast_allnodes.hpp:749:5: note: candidate: initializer::initializer(Expression*, int*)
+     initializer(Expression* _ass_expr, initializer_list * _init_list = NULL) : ass_expr(_ass_expr), init_list(_init_list) {}
+     ^
+Include/ast_allnodes.hpp:749:5: note:   no known conversion for argument 2 from ‘Node*’ to ‘int*’
+Include/ast_allnodes.hpp:743:7: note: candidate: constexpr initializer::initializer(const initializer&)
+ class initializer : public Node
+       ^
+Include/ast_allnodes.hpp:743:7: note:   candidate expects 1 argument, 2 provided
+Include/ast_allnodes.hpp:743:7: note: candidate: constexpr initializer::initializer(initializer&&)
+Include/ast_allnodes.hpp:743:7: note:   candidate expects 1 argument, 2 provided
+src/parser.y:341:60: error: no matching function for call to ‘initializer::initializer(NULL, Node*&)’
+      | Punctuator_cur_open initializer_list Operator_comma Punctuator_cur_close { $$ = new initializer(NULL, $2); }
+                                                            ^
+In file included from src/parser.y:5:0:
+Include/ast_allnodes.hpp:749:5: note: candidate: initializer::initializer(Expression*, int*)
+     initializer(Expression* _ass_expr, initializer_list * _init_list = NULL) : ass_expr(_ass_expr), init_list(_init_list) {}
+     ^
+Include/ast_allnodes.hpp:749:5: note:   no known conversion for argument 2 from ‘Node*’ to ‘int*’
+Include/ast_allnodes.hpp:743:7: note: candidate: constexpr initializer::initializer(const initializer&)
+ class initializer : public Node
+       ^
+Include/ast_allnodes.hpp:743:7: note:   candidate expects 1 argument, 2 provided
+Include/ast_allnodes.hpp:743:7: note: candidate: constexpr initializer::initializer(initializer&&)
+Include/ast_allnodes.hpp:743:7: note:   candidate expects 1 argument, 2 provided
+src/parser.y:343:53: error: invalid conversion from ‘Node*’ to ‘initializer*’ [-fpermissive]
+ initializer_list: initializer  { $$ = new initializer_list($1); }
+                                                     ^
+In file included from src/parser.y:5:0:
+Include/ast_allnodes.hpp:757:5: note:   initializing argument 1 of ‘initializer_list::initializer_list(initializer*, initializer_list*)’
+     initializer_list(initializer * _init, initializer_list * _init_list = NULL) : init(_init), init_list(_init_list) {}
+     ^
+src/parser.y:344:53: error: invalid conversion from ‘Node*’ to ‘initializer*’ [-fpermissive]
+     | initializer_list Operator_comma initializer { $$ = new initializer_list($3, $1); }
+                                                     ^
+In file included from src/parser.y:5:0:
+Include/ast_allnodes.hpp:757:5: note:   initializing argument 1 of ‘initializer_list::initializer_list(initializer*, initializer_list*)’
+     initializer_list(initializer * _init, initializer_list * _init_list = NULL) : init(_init), init_list(_init_list) {}
+     ^
+src/parser.y:344:71: error: invalid conversion from ‘Node*’ to ‘initializer_list*’ [-fpermissive]
+     | initializer_list Operator_comma initializer { $$ = new initializer_list($3, $1); }
+                                                                       ^
+In file included from src/parser.y:5:0:
+Include/ast_allnodes.hpp:757:5: note:   initializing argument 2 of ‘initializer_list::initializer_list(initializer*, initializer_list*)’
+     initializer_list(initializer * _init, initializer_list * _init_list = NULL) : init(_init), init_list(_init_list) {}
+     ^
+src/parser.y:361:56: error: invalid conversion from ‘Node*’ to ‘Expression*’ [-fpermissive]
+          | EXPR_statement { $$ = new ExpressionStatement($1); }
+                                                        ^
+In file included from src/parser.y:5:0:
+Include/ast_allnodes.hpp:485:5: note:   initializing argument 1 of ‘ExpressionStatement::ExpressionStatement(Expression*)’
+     ExpressionStatement(Expression* _expr) : Expr(_expr){}
+     ^
+src/parser.y:365:51: error: expected unqualified-id before ‘constexpr’
+ labeled_statement: Keyword_case constant_EXPR Operator_trinary_choice statement { $$ = new CaseOrDefault($2, $4); }
+                                                   ^
+src/parser.y:365:51: error: expected ‘)’ before ‘constexpr’
+src/parser.y:365:78: error: no matching function for call to ‘CaseOrDefault::CaseOrDefault()’
+ labeled_statement: Keyword_case constant_EXPR Operator_trinary_choice statement { $$ = new CaseOrDefault($2, $4); }
+                                                                              ^
+In file included from src/parser.y:5:0:
+Include/ast_allnodes.hpp:519:5: note: candidate: CaseOrDefault::CaseOrDefault(Statement*)
+     CaseOrDefault(Statement* _body) : Eval(NULL), Body(_body){}
+     ^
+Include/ast_allnodes.hpp:519:5: note:   candidate expects 1 argument, 0 provided
+Include/ast_allnodes.hpp:518:5: note: candidate: CaseOrDefault::CaseOrDefault(Expression*, Statement*)
+     CaseOrDefault(Expression* _eval, Statement* _body) : Eval(_eval), Body(_body){}
+     ^
+Include/ast_allnodes.hpp:518:5: note:   candidate expects 2 arguments, 0 provided
+Include/ast_allnodes.hpp:516:7: note: candidate: constexpr CaseOrDefault::CaseOrDefault(const CaseOrDefault&)
+ class CaseOrDefault : public Statement{
+       ^
+Include/ast_allnodes.hpp:516:7: note:   candidate expects 1 argument, 0 provided
+Include/ast_allnodes.hpp:516:7: note: candidate: constexpr CaseOrDefault::CaseOrDefault(CaseOrDefault&&)
+Include/ast_allnodes.hpp:516:7: note:   candidate expects 1 argument, 0 provided
+src/parser.y:366:50: error: invalid conversion from ‘Node*’ to ‘Statement*’ [-fpermissive]
+                  | Keyword_default Operator_trinary_choice statement { $$ = new CaseOrDefault($3); }
+                                                  ^
+In file included from src/parser.y:5:0:
+Include/ast_allnodes.hpp:519:5: note:   initializing argument 1 of ‘CaseOrDefault::CaseOrDefault(Statement*)’
+     CaseOrDefault(Statement* _body) : Eval(NULL), Body(_body){}
+     ^
+src/parser.y:368:78: error: no matching function for call to ‘CompoundStatement::CompoundStatement(Node*&, Node*&)’
+ compound_statement: Punctuator_cur_open declaration_list statement_list Punctuator_cur_close { $$ = new CompoundStatement($2, $3); }
+                                                                              ^
+In file included from src/parser.y:5:0:
+Include/ast_allnodes.hpp:508:5: note: candidate: CompoundStatement::CompoundStatement(StatementList*)
+     CompoundStatement(StatementList* _stmnts) : Decls(NULL), Statements(_stmnts){}
+     ^
+Include/ast_allnodes.hpp:508:5: note:   candidate expects 1 argument, 2 provided
+Include/ast_allnodes.hpp:504:7: note: candidate: constexpr CompoundStatement::CompoundStatement(const CompoundStatement&)
+ class CompoundStatement : public Statement{
+       ^
+Include/ast_allnodes.hpp:504:7: note:   candidate expects 1 argument, 2 provided
+Include/ast_allnodes.hpp:504:7: note: candidate: constexpr CompoundStatement::CompoundStatement(CompoundStatement&&)
+Include/ast_allnodes.hpp:504:7: note:   candidate expects 1 argument, 2 provided
+src/parser.y:369:55: error: invalid conversion from ‘Node*’ to ‘StatementList*’ [-fpermissive]
+                   | Punctuator_cur_open declaration_list Punctuator_cur_close { $$ = new CompoundStatement($2);}
+                                                       ^
+In file included from src/parser.y:5:0:
+Include/ast_allnodes.hpp:508:5: note:   initializing argument 1 of ‘CompoundStatement::CompoundStatement(StatementList*)’
+     CompoundStatement(StatementList* _stmnts) : Decls(NULL), Statements(_stmnts){}
+     ^
+src/parser.y:370:55: error: invalid conversion from ‘Node*’ to ‘StatementList*’ [-fpermissive]
+                   | Punctuator_cur_open statement_list Punctuator_cur_close { $$ = new CompoundStatement($2); /*Will need to use arg overloaded constructor to differentiate between the above*/}
+                                                       ^
+In file included from src/parser.y:5:0:
+Include/ast_allnodes.hpp:508:5: note:   initializing argument 1 of ‘CompoundStatement::CompoundStatement(StatementList*)’
+     CompoundStatement(StatementList* _stmnts) : Decls(NULL), Statements(_stmnts){}
+     ^
+src/parser.y:376:50: error: invalid conversion from ‘Node*’ to ‘Statement*’ [-fpermissive]
+ statement_list: statement { $$ = new StatementList($1); }
+                                                  ^
+In file included from src/parser.y:5:0:
+Include/ast_allnodes.hpp:494:5: note:   initializing argument 1 of ‘StatementList::StatementList(Statement*)’
+     StatementList(Statement* TerminalStatement) : statement(TerminalStatement), RestOfStatements(NULL){}
+     ^
+src/parser.y:377:51: error: invalid conversion from ‘Node*’ to ‘StatementList*’ [-fpermissive]
+               | statement_list statement { $$ = new StatementList($1, $2); }
+                                                   ^
+In file included from src/parser.y:5:0:
+Include/ast_allnodes.hpp:495:5: note:   initializing argument 1 of ‘StatementList::StatementList(StatementList*, Statement*)’
+     StatementList(StatementList* OtherStatements, Statement* ThisStatement) : statement(ThisStatement), RestOfStatements(RestOfStatements){}
+     ^
+src/parser.y:377:68: error: invalid conversion from ‘Node*’ to ‘Statement*’ [-fpermissive]
+               | statement_list statement { $$ = new StatementList($1, $2); }
+                                                                    ^
+In file included from src/parser.y:5:0:
+Include/ast_allnodes.hpp:495:5: note:   initializing argument 2 of ‘StatementList::StatementList(StatementList*, Statement*)’
+     StatementList(StatementList* OtherStatements, Statement* ThisStatement) : statement(ThisStatement), RestOfStatements(RestOfStatements){}
+     ^
+src/parser.y:382:68: error: invalid conversion from ‘Node*’ to ‘Statement*’ [-fpermissive]
+ selection_statement: Keyword_if Punctuator_par_open EXPR Punctuator_par_close statement Keyword_else statement { $$ = new IfElse($3, $5, $7); }
+                                                                    ^
+In file included from src/parser.y:5:0:
+Include/ast_allnodes.hpp:467:5: note:   initializing argument 2 of ‘IfElse::IfElse(Expression*, Statement*, Statement*)’
+     IfElse(Expression* _control, Statement* _iftrue, Statement* _iffalse) 
+     ^
+src/parser.y:382:85: error: invalid conversion from ‘Node*’ to ‘Statement*’ [-fpermissive]
+ selection_statement: Keyword_if Punctuator_par_open EXPR Punctuator_par_close statement Keyword_else statement { $$ = new IfElse($3, $5, $7); }
+                                                                                     ^
+In file included from src/parser.y:5:0:
+Include/ast_allnodes.hpp:467:5: note:   initializing argument 3 of ‘IfElse::IfElse(Expression*, Statement*, Statement*)’
+     IfElse(Expression* _control, Statement* _iftrue, Statement* _iffalse) 
+     ^
+src/parser.y:383:63: error: invalid conversion from ‘Node*’ to ‘Statement*’ [-fpermissive]
+                    | Keyword_if Punctuator_par_open EXPR Punctuator_par_close statement { $$ = new If($3, $5); }
+                                                               ^
+In file included from src/parser.y:5:0:
+Include/ast_allnodes.hpp:460:5: note:   initializing argument 2 of ‘If::If(Expression*, Statement*)’
+     If(Expression* _control, Statement* _iftrue) : SelectionStatement(_control), IfTrue(_iftrue){}
+     ^
+src/parser.y:384:67: error: invalid conversion from ‘Node*’ to ‘Statement*’ [-fpermissive]
+                    | Keyword_switch Punctuator_par_open EXPR Punctuator_par_close statement { $$ = new Switch($3, $5); }
+                                                                   ^
+In file included from src/parser.y:5:0:
+Include/ast_allnodes.hpp:476:5: note:   initializing argument 2 of ‘Switch::Switch(Expression*, Statement*)’
+     Switch(Expression* _control, Statement* _body) : SelectionStatement(_control), Body(_body){}
+     ^
+src/parser.y:397:66: error: invalid conversion from ‘Node*’ to ‘Statement*’ [-fpermissive]
+ iteration_statement: Keyword_while Punctuator_par_open EXPR Punctuator_par_close statement { $$ = new While($3, $5); }
+                                                                  ^
+In file included from src/parser.y:5:0:
+Include/ast_allnodes.hpp:423:5: note:   initializing argument 2 of ‘While::While(Expression*, Statement*)’
+     While(Expression*  _Control, Statement* _Body) : ControlExpression(_Control), Body(_Body){} 
+     ^
+src/parser.y:398:45: error: invalid conversion from ‘Node*’ to ‘Statement*’ [-fpermissive]
+                    | Keyword_do statement Keyword_while Punctuator_par_open EXPR Punctuator_par_close Punctuator_eol { $$ = new DoWhile($2, $5); }
+                                             ^
+In file included from src/parser.y:5:0:
+Include/ast_allnodes.hpp:431:5: note:   initializing argument 1 of ‘DoWhile::DoWhile(Statement*, Expression*)’
+     DoWhile(Statement* _Body, Expression* _Control) : Body(_Body), ControlExpression(_Control){}
+     ^
+src/parser.y:399:102: error: new initializer expression list treated as compound expression [-fpermissive]
+                    | Keyword_for Punctuator_par_open EXPR_statement EXPR_statement EXPR Punctuator_par_close statement { $$ = new For($3,$4,$5,$7);}
+                                                                                                      ^
+src/parser.y:399:102: error: no matching function for call to ‘For::For(Node*&)’
+In file included from src/parser.y:5:0:
+Include/ast_allnodes.hpp:437:7: note: candidate: For::For()
+ class For : public Statement{
+       ^
+Include/ast_allnodes.hpp:437:7: note:   candidate expects 0 arguments, 1 provided
+Include/ast_allnodes.hpp:437:7: note: candidate: constexpr For::For(const For&)
+Include/ast_allnodes.hpp:437:7: note:   no known conversion for argument 1 from ‘Node*’ to ‘const For&’
+Include/ast_allnodes.hpp:437:7: note: candidate: constexpr For::For(For&&)
+Include/ast_allnodes.hpp:437:7: note:   no known conversion for argument 1 from ‘Node*’ to ‘For&&’
+src/parser.y:400:79: error: new initializer expression list treated as compound expression [-fpermissive]
+                    | Keyword_for Punctuator_par_open EXPR_statement EXPR_statement Punctuator_par_close statement { $$ = new For($3,$4,$6);}
+                                                                               ^
+src/parser.y:400:79: error: no matching function for call to ‘For::For(Node*&)’
+In file included from src/parser.y:5:0:
+Include/ast_allnodes.hpp:437:7: note: candidate: For::For()
+ class For : public Statement{
+       ^
+Include/ast_allnodes.hpp:437:7: note:   candidate expects 0 arguments, 1 provided
+Include/ast_allnodes.hpp:437:7: note: candidate: constexpr For::For(const For&)
+Include/ast_allnodes.hpp:437:7: note:   no known conversion for argument 1 from ‘Node*’ to ‘const For&’
+Include/ast_allnodes.hpp:437:7: note: candidate: constexpr For::For(For&&)
+Include/ast_allnodes.hpp:437:7: note:   no known conversion for argument 1 from ‘Node*’ to ‘For&&’
+src/parser.y: At global scope:
+src/parser.y:442:6: warning: ISO C++ forbids declaration of ‘main’ with no type [-Wreturn-type]
+ main()
+      ^
+make: *** [src/parser.tab.o] Error 1
