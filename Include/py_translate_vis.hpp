@@ -199,11 +199,26 @@ class python_Visitor: public Visitor
 		External Definitions
 	*/
     void visit(TranslationUnit*)
-	{}
-    void visit(FunctionDefinition*)
-	{}
+	{
+        for (std::vector<GenericAssignExpr>::iterator it = decls.begin(); it != decls.end(); it++)
+        {
+            it->accept(this);
+        }
+    }
+    void visit(FunctionDefinition* fd)
+	{
+        std::cout << fd->decl->dir_dec->ID->Name;
+        std::cout << '(';
+        fd->decl_list->accept(this);
+        std::cout << "):"
+        indentation++;
+        fd->Body->accept(this);
+        indentation--;
+    }
     void visit(ExternalDeclaration*)
-	{}
+	{
+    
+    }
 
     
 public:

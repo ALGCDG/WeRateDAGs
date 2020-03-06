@@ -43,7 +43,6 @@ class SizeofExpr;
 class SizeofType;
 class CastExpr;
 class BinaryOpExpression;
-class declarator;
 class direct_declarator;
 
 class Multiply;
@@ -486,7 +485,8 @@ public:
 
 class ConstantExpression : public Expression{
 public:
-    ConstantExpression(Expression* Expr);
+    ConstantExpression(){}
+    ConstantExpression(Expression* Expr): ConstantSubtree(Expr){}
 private:
     Expression* ConstantSubtree;
 };
@@ -654,7 +654,7 @@ Declarations and types
 class declaration : public Node
 {
 public:
-    declaration_specifiers* specifier; // specifies type of declaration
+    specifiers* specifier; // specifies type of declaration
     init_declarator_list* list; // list of variables being declared as this type, may be null
     declaration(declaration_specifiers * _specifier ,init_declarator_list * _list = NULL) : specifier(_specifier), list(_list) {}
 };
@@ -708,16 +708,17 @@ enum C_types
 
 class type_specifier : public Node
 {
-
+public:
     /*
     enum C_types basic_type;
     */
-    std::string type;
-    type_specifier(const std::string &Keyword = "") : type(Keyword) {}
+    std::string* type;
+    type_specifier( std::string* Keyword) : type(Keyword) {}
 };
 
 class specifier_list : public Node
 {
+public:
     type_specifier * type_spec;
     specifier_list * spec_list; // cascades, may be null
     specifier_list(type_specifier * _type_spec, specifier_list * _spec_list = NULL) : type_spec(_type_spec), spec_list(_spec_list) {}
@@ -776,6 +777,7 @@ public:
 
 class declarator : public base_declarator
 {
+public:
     // asserts link between symbol and operand
     /* pointer* p*/
     direct_declarator * dir_dec;
@@ -797,9 +799,10 @@ public:
 };
 
 // a class used to signify that an array declaration does not specify array length
-class unspecified_array_length : public ConstantExpression {};
-// a class used to signify that a parameter list is empty
-class empty_parameter_list : public parameter_list {};
+class unspecified_array_length : public ConstantExpression {
+public:
+    
+};
 
 class direct_abstract_declarator : public base_direct_declarator
 {
@@ -831,6 +834,12 @@ public:
     parameter_declaration * para_dec;
     abstract_declarator * abs_dec;
     parameter_list(parameter_declaration * _para_dec, parameter_list * _para_list = NULL, abstract_declarator * _abs_dec = NULL) : para_list(_para_list), para_dec(_para_dec), abs_dec(_abs_dec) {}
+    parameter_list():para_list(NULL), para_dec(NULL), abs_dec(NULL){}
+};
+// a class used to signify that a parameter list is empty
+class empty_parameter_list : public parameter_list {
+public:
+    empty_parameter_list();
 };
 
 class parameter_declaration : public Node
