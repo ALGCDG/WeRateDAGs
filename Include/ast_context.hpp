@@ -33,9 +33,10 @@ class ConstantExpression;
 */
 namespace Context
 {
-    class Record{
 
-};
+    class Record{
+    //needs to store some stuff
+    };
 
 
 class typePart{

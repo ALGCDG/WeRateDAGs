@@ -5,8 +5,9 @@
 #include <unordered_set>
 
 #include "visitors.hpp"
-#include "ast_expressions.hpp"
-#include "ast_statements.hpp"
+#include "ast_allnodes.hpp"
+
+//? WHY ARE THE DEFINITIONS IN THE HPP?
 
 class python_Visitor: public Visitor
 {
@@ -96,7 +97,7 @@ class python_Visitor: public Visitor
         }
         std::cout << std::endl;
     }
-    void visit(init_declaration_list * il)
+    void visit(init_declarator_list * il)
     {
         il->init_dec->accept(this);
         if(il->init_dec_list != NULL)
@@ -104,7 +105,7 @@ class python_Visitor: public Visitor
             il->init_dec_list->accept(this);
         }
     }
-    void visit(init_declaration * id)
+    void visit(init_declarator * id)
     {
         // getting variable name
         auto name = id->dec->dir_dec->ID->Name;

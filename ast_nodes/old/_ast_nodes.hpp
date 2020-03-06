@@ -143,7 +143,7 @@ private:
     std::vector<Expression*> Args;
 };
 
-class Identifier: public Expression{
+class IdentifierNode: public Expression{
 private:
     std::string name;
 };
@@ -174,7 +174,7 @@ class Declaration{
 /*Possibility that there are other top level declaration classes so leave NamedDeclaration as a child for now*/
 class NamedDeclaration : public Declaration{
 private:
-    Identifier* ID;
+    IdentifierNode* ID;
     //Specifiers
 };
 

@@ -10,6 +10,7 @@
 //!Change type to type specifier
 // !Identifier is not a type
 
+
 class TypedefSpecifier : public Node{
 
 };
@@ -50,7 +51,7 @@ private:
 
 class StructDeclaration : public Node{
 private:
-    TypeSpecifier* DeclaratorListType;
+    TypeSpecifier* DeclaratorListType;//TODO
     StructDeclaratorList* DeclaratorList; 
 };
 
