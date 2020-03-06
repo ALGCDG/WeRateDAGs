@@ -3,22 +3,23 @@
 
 #include <string>
 #include <vector>
+#include "ast_basenode.hpp"
 
-#include "visitors.hpp"
-//FORWARD DECLARE VISITOR
-class Visitor;
+// #include "visitors.hpp"
+// //FORWARD DECLARE VISITOR
+// class Visitor;
 
 #include "ast_context.hpp"
 //CONTEXT DOES NOT NEED TO KNOW THESE NODES, HANDLED BY VISITOR
 //NO FORWARD DECLARATION NEEDED
 
 
-class Node{
-public:
-    void accept(Visitor* AVisitor);
-private:
+// class Node{
+// public:
+//     void accept(Visitor* AVisitor);
+// private:
     
-};
+// };
 
 /*
 EXPRESSIONS
@@ -755,6 +756,30 @@ public:
     initializer * init;
     initializer_list * init_list; // cascades may be null
     initializer_list(initializer * _init, initializer_list * _init_list = NULL) : init(_init), init_list(_init_list) {}
+};
+
+
+class TranslationUnit : public Node
+{
+private:
+    std::vector<GenericExternalDeclaration*> Units;
+public:
+    TranslationUnit(GenericExternalDeclaration* _externaldef) : Units(_externaldef) {}
+};
+
+class GenericExternalDeclaration : public Node{};
+
+class FunctionDefinition : public GenericExternalDeclaration{
+public:
+    declaration_specifiers* specs;
+    declarator* decl;
+    declaration_list* decl_list;
+    CompoundStatement* Body;
+};
+
+class ExternalDeclaration : public GenericExternalDeclaration{
+public:
+    declaration* decl;
 };
 
 #endif
