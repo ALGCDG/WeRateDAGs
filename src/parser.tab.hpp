@@ -160,10 +160,12 @@ union YYSTYPE
 	  long double ldvalue;
     Node* node;
     Expression* expression;
-    IdentiferNode* identnode;
+    ArgExprList* argexprlist;
+    IdentifierNode* identnode;
+    type_name* _typename;
     ConstantExpression* constexpr;
 
-#line 167 "src/parser.tab.hpp" /* yacc.c:1909  */
+#line 169 "src/parser.tab.hpp" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;

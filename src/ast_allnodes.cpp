@@ -1,12 +1,16 @@
 #include "ast_allnodes.hpp"
 
-void ArgExprList::AppendArgExpression(Expression* ArgExpr){
-    Args.push_back(ArgExpr);
-}
+// ArgExprList::ArgExprList(Expression* Arg){
+//     Args.push_back(Arg);
+// }
 
-void TranslationUnit::AppendDeclaration(GenericExternalDeclaration* _decl){
-    decls.push_back(_decl);
-}
+// void ArgExprList::AppendArgExpression(Expression* ArgExpr){
+//     Args.push_back(ArgExpr);
+// }
+
+// void TranslationUnit::AppendDeclaration(GenericExternalDeclaration* _decl){
+//     decls.push_back(_decl);
+// }
 
 /*static*/
 PrefixExpr* PrefixExpr::DecodeUnaryOp(std::string* yytext, Expression* _RHS){
@@ -36,4 +40,3 @@ GenericAssignExpr* GenericAssignExpr::DecodeAssignOp(Expression* LHS, std::strin
     else if(op == "|=") return new BitwiseORAssignment(LHS,RHS);
     else return NULL;
 }
-
