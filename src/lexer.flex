@@ -3,7 +3,7 @@
 %{
 #include <iostream>
 #include <sstream>
-#include "basic.tab.hpp"
+#include "parser.tab.hpp"
 extern "C" int fileno(FILE *stream); // fixing bug in flex
 %}
 

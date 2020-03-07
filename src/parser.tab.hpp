@@ -30,8 +30,8 @@
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
-#ifndef YY_YY_PARSER_TAB_H_INCLUDED
-# define YY_YY_PARSER_TAB_H_INCLUDED
+#ifndef YY_YY_SRC_PARSER_TAB_HPP_INCLUDED
+# define YY_YY_SRC_PARSER_TAB_HPP_INCLUDED
 /* Debug traces.  */
 #ifndef YYDEBUG
 # define YYDEBUG 0
@@ -54,7 +54,7 @@ extern int yydebug;
   int yylex(void);
   void yyerror(const char *);
 
-#line 58 "parser.tab.h" /* yacc.c:1909  */
+#line 58 "src/parser.tab.hpp" /* yacc.c:1909  */
 
 /* Token type.  */
 #ifndef YYTOKENTYPE
@@ -163,28 +163,31 @@ union YYSTYPE
     ArgExprList* argexprlist;
     IdentifierNode* identnode;
     type_name* _typename;
-    ConstantExpression* constexpr;
-declaration       *    t_declaration;
-declaration_specifiers * t_declaration_specifiers;
-storage_class_specifier * t_storage_class_specifier;
-init_declarator_list  * t_init_declarator_list;
-init_declarator       * t_init_declarator;
-type_specifier        * t_type_specifier;
-specifier_list        * t_specifier_list;
-declarator            * t_declarator;
-direct_declarator     * t_direct_declarator;
-pointer               * t_pointer;
-parameter_type_list  *  t_parameter_type_list;
-parameter_list       *  t_parameter_list;
-parameter_declaration * t_parameter_declaration;
-identifier_list       * t_identifier_list;
-type_name            *  t_type_name;
-abstract_declarator *   t_abstract_declarator;
-direct_abstract_declarator t_direct_abstract_declarator;
-initializer * t_initializer;
-initializer_list * t_initializer_list;
+    ConstantExpression* constexp;
+    Statement* stmt;
+    StatementList* stmtlist;
+    ExpressionStatement* exprstmt;
+    DeclarationList*  t_declist;
+    declaration       *    t_declaration;
+    declaration_specifiers * t_declaration_specifiers;
+    TypedefNode * t_storage_class_specifier;
+    init_declarator_list  * t_init_declarator_list;
+    init_declarator       * t_init_declarator;
+    type_specifier        * t_type_specifier;
+    specifier_list        * t_specifier_list;
+    declarator            * t_declarator;
+    direct_declarator     * t_direct_declarator;
+    pointer               * t_pointer;
+    /*parameter_type_list  *  t_parameter_type_list;*/
+    parameter_list       *  t_parameter_list;
+    parameter_declaration * t_parameter_declaration;
+    type_name            *  t_type_name;
+    abstract_declarator *   t_abstract_declarator;
+    direct_abstract_declarator * t_direct_abstract_declarator;
+    initializer * t_initializer;
+    initializer_list * t_initializer_list;
 
-#line 188 "parser.tab.h" /* yacc.c:1909  */
+#line 191 "src/parser.tab.hpp" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;
@@ -197,4 +200,4 @@ extern YYSTYPE yylval;
 
 int yyparse (void);
 
-#endif /* !YY_YY_PARSER_TAB_H_INCLUDED  */
+#endif /* !YY_YY_SRC_PARSER_TAB_HPP_INCLUDED  */

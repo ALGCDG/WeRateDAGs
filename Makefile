@@ -1,6 +1,6 @@
   
 CPPFLAGS += -std=c++11 -W -Wall -g -Wno-unused-parameter
-CPPFLAGS += -I Include
+CPPFLAGS += -I inc
 
 all : bin/translator
 
@@ -17,6 +17,8 @@ bin/translator : src/parser.tab.o src/lexer.yy.o
 clean :
 	rm -f src/*.o
 	rm -f bin/*
-	rm -f src/*.tab.*
+	rm -f *.tab.*
 	rm -f src/*.yy.*
-	
+	rm -f *.out
+	rm -f out
+	rm -f *.output
