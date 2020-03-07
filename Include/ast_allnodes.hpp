@@ -126,7 +126,7 @@ class ExternalDeclaration;
 class Node{
 public:
     void accept(Visitor* AVisitor);
-private:
+
     
 };
 
@@ -192,7 +192,7 @@ public:
 class ArraySubscript : public PostfixExpr{
 public:
     ArraySubscript(Expression* _LHS, Expression* _Subscript) : PostfixExpr(_LHS), Subscript(_Subscript){}
-private:
+
     Expression* Subscript;
 };
 
@@ -207,14 +207,14 @@ public:
 class MemberAccess : public PostfixExpr{
 public:
     MemberAccess(Expression* _LHS, IdentifierNode* _ID) : PostfixExpr(_LHS), ID(_ID){}
-private:
+
     IdentifierNode* ID;
 };
 
 class DerefMemberAccess : public PostfixExpr{
 public:
     DerefMemberAccess(Expression* _LHS, IdentifierNode* _ID) : PostfixExpr(_LHS), ID(_ID){}
-private:
+
     IdentifierNode* ID;
 };
 
@@ -236,7 +236,7 @@ public:
     PrefixExpr(Expression* _RHS) : RHS(_RHS){}
     //returns correct unary operator node, described below
     static PrefixExpr* DecodeUnaryOp(std::string* yytext, Expression* _RHS);
-private:
+
     Expression* RHS;
 };
 
@@ -492,7 +492,7 @@ class ConstantExpression : public Expression{
 public:
     ConstantExpression(){}
     ConstantExpression(Expression* Expr): ConstantSubtree(Expr){}
-private:
+
     Expression* ConstantSubtree;
 };
 
@@ -502,7 +502,7 @@ private:
 class CommaSepExpression : public Expression{
 public:
     CommaSepExpression(Expression* _LHS, Expression* _RHS) : RHS(_RHS), LHS(_LHS){}
-private:
+
     Expression* RHS, *LHS;
 };
 
@@ -538,7 +538,6 @@ public:
 class While : public Statement{
 public:
     While(Expression*  _Control, Statement* _Body) : ControlExpression(_Control), Body(_Body){} 
-private:
     Expression* ControlExpression;
     Statement* Body;
 };
@@ -546,7 +545,7 @@ private:
 class DoWhile : public Statement{
 public:
     DoWhile(Statement* _Body, Expression* _Control) : Body(_Body), ControlExpression(_Control){}
-private:
+
     Statement* Body;
     Expression* ControlExpression;
 };
@@ -557,7 +556,7 @@ public:
             : Init(_init), Control(_control), Next(NULL), Body(_body){}
     For(ExpressionStatement* _init, ExpressionStatement* _control, Expression* _next, Statement* _body) 
             : Init(_init), Control(_control), Next(_next), Body(_body){}
-private:
+
     ExpressionStatement* Init, *Control;
     Expression* Next;
     Statement* Body;
@@ -568,14 +567,14 @@ private:
 class SelectionStatement : public Statement{
 public:
     SelectionStatement(Expression* _control) : ControlExpression(_control){}
-protected:
+
     Expression* ControlExpression;
 };
 
 class If : public SelectionStatement{
 public:
     If(Expression* _control, Statement* _iftrue) : SelectionStatement(_control), IfTrue(_iftrue){}
-private:
+
     Statement* IfTrue;
 };
 
@@ -583,7 +582,7 @@ class IfElse : public SelectionStatement{
 public:
     IfElse(Expression* _control, Statement* _iftrue, Statement* _iffalse) 
             : SelectionStatement(_control), IfTrue(_iftrue), IfFalse(_iffalse){}
-private:
+
     Statement* IfTrue;
     Statement* IfFalse;
 };
@@ -591,7 +590,7 @@ private:
 class Switch : public SelectionStatement{
 public:
     Switch(Expression* _control, Statement* _body) : SelectionStatement(_control), Body(_body){}
-private:
+
     Statement* Body;
 };
 
@@ -614,7 +613,7 @@ public:
     StatementList(Statement* TerminalStatement) : statement(TerminalStatement), RestOfStatements(NULL){}
     StatementList(StatementList* OtherStatements, Statement* ThisStatement) : statement(ThisStatement), RestOfStatements(RestOfStatements){}
     bool isTerminalStatement() const;
-private:
+
     Statement* statement;
     StatementList* RestOfStatements;
 };
@@ -888,7 +887,7 @@ class GenericExternalDeclaration : public Node{};
 
 class TranslationUnit : public Node
 {
-private:
+
 public:
     std::vector<GenericExternalDeclaration*> decls;
     TranslationUnit(GenericExternalDeclaration* _externaldef){ decls.push_back(_externaldef); }

@@ -22,7 +22,7 @@ int main(int argc, char** argv)
 	}
 	
 	// creating visitor
-	Visitor language_processor = translate_flag ? python_Visitor() : Visitor() ;
+	Visitor* language_processor = translate_flag ? new python_Visitor() : new Visitor ;
 	// visiting ast
     ast->accept(language_processor);
     return 0;

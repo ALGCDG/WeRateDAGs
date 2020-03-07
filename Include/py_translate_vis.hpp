@@ -3,6 +3,7 @@
 
 #include <string>
 #include <unordered_set>
+#include <iostream>
 
 #include "visitors.hpp"
 #include "ast_allnodes.hpp"
@@ -11,6 +12,8 @@
 
 class python_Visitor: public Visitor
 {
+public:
+    python_Visitor():indentation(0){}
     int indentation;
     // an unordered set used to store the global names
     std::unordered_set<std::string> global; 
@@ -58,7 +61,7 @@ class python_Visitor: public Visitor
     void visit(Return* r)
     {
         std::cout << gentabs() << "return ";
-        if (r->ReturnType != NULL)
+        if (r->ReturnExpression != NULL)
         {
             r->ReturnExpression->accept(this);
         }
@@ -78,10 +81,10 @@ class python_Visitor: public Visitor
     }
     void visit(StatementList* sl)
     {
-        sl->statement->visit(this);
-        if (cs->RestOfStatements != NULL)
+        sl->statement->accept(this);
+        if (sl->RestOfStatements != NULL)
         {
-            cs->RestOfStatements->accept(this);
+            sl->RestOfStatements->accept(this);
         }
     }
     /*
@@ -89,7 +92,7 @@ class python_Visitor: public Visitor
     */
     void visit(declaration* dec)
     {
-        std::cout << gentab();
+        std::cout << gentabs();
         // we can assume it is a function or an int
         if (dec->list != NULL)
         {
@@ -198,7 +201,9 @@ class python_Visitor: public Visitor
 	/*
 		External Definitions
 	*/
-    void visit(TranslationUnit*)
+
+    //TODO This isn't right?
+    void visit(TranslationUnit* unit)
 	{
         for (std::vector<GenericAssignExpr>::iterator it = decls.begin(); it != decls.end(); it++)
         {
@@ -210,7 +215,7 @@ class python_Visitor: public Visitor
         std::cout << fd->decl->dir_dec->ID->Name;
         std::cout << '(';
         fd->decl_list->accept(this);
-        std::cout << "):"
+        std::cout << "):";
         indentation++;
         fd->Body->accept(this);
         indentation--;
