@@ -1,9 +1,9 @@
-void f(int,int){
-    ;
-}
+int f(int []);
 
 
 int main()
 {
-    f(4,3);
+  ;
 }
+
+/*gcc -std=c90 -pedantic -Werror typedef.c*/

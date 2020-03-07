@@ -43,7 +43,6 @@ class SizeofExpr;
 class SizeofType;
 class CastExpr;
 class BinaryOpExpression;
-class declarator;
 class direct_declarator;
 
 class Multiply;
@@ -127,7 +126,7 @@ class ExternalDeclaration;
 class Node{
 public:
     void accept(Visitor* AVisitor);
-private:
+
     
 };
 
@@ -149,6 +148,7 @@ public:
     Context::Record* ContextRecord;
 };
 
+
 class Constant : public Expression{
 public:
     Constant();//TODO
@@ -167,6 +167,10 @@ public:
     StringLiteral(std::string _str, bool L = false) : wide(L), str(_str){}
     bool wide;
     std::string str;
+};
+
+class TypedefNode : public Node{
+
 };
 //---------------------------------------------------------
 class PostfixExpr : public Expression{
@@ -188,7 +192,7 @@ public:
 class ArraySubscript : public PostfixExpr{
 public:
     ArraySubscript(Expression* _LHS, Expression* _Subscript) : PostfixExpr(_LHS), Subscript(_Subscript){}
-private:
+
     Expression* Subscript;
 };
 
@@ -203,25 +207,25 @@ public:
 class MemberAccess : public PostfixExpr{
 public:
     MemberAccess(Expression* _LHS, IdentifierNode* _ID) : PostfixExpr(_LHS), ID(_ID){}
-private:
+
     IdentifierNode* ID;
 };
 
 class DerefMemberAccess : public PostfixExpr{
 public:
     DerefMemberAccess(Expression* _LHS, IdentifierNode* _ID) : PostfixExpr(_LHS), ID(_ID){}
-private:
+
     IdentifierNode* ID;
 };
 
 class PostInc : public PostfixExpr{
 public:
-    using PostfixExpr::PostfixExpr;
+    PostInc(Expression* _LHS) : PostfixExpr(_LHS){}
 };
 
 class PostDec : public PostfixExpr{
 public:
-    using PostfixExpr::PostfixExpr;
+    PostDec(Expression* _LHS) : PostfixExpr(_LHS){}
 };
 
 
@@ -232,54 +236,54 @@ public:
     PrefixExpr(Expression* _RHS) : RHS(_RHS){}
     //returns correct unary operator node, described below
     static PrefixExpr* DecodeUnaryOp(std::string* yytext, Expression* _RHS);
-private:
+
     Expression* RHS;
 };
 
 class UnaryAddressOperator : public PrefixExpr{
 public:
-    using PrefixExpr::PrefixExpr;
+    UnaryAddressOperator(Expression* _RHS) : PrefixExpr(_RHS){}
 };
 
 class UnaryDerefOperator : public PrefixExpr{
 public:
-    using PrefixExpr::PrefixExpr;
+    UnaryDerefOperator(Expression* _RHS) : PrefixExpr(_RHS){}
 };
 
 class UnaryPlusOperator : public PrefixExpr{
 public:
-    using PrefixExpr::PrefixExpr;
+    UnaryPlusOperator(Expression* _RHS) : PrefixExpr(_RHS){}
 };
 
 class UnaryNegOperator : public PrefixExpr{
 public:
-    using PrefixExpr::PrefixExpr;
+    UnaryNegOperator(Expression* _RHS) : PrefixExpr(_RHS){}
 };
 
 class UnaryBitwiseNotOperator : public PrefixExpr{
 public:
-    using PrefixExpr::PrefixExpr;
+    UnaryBitwiseNotOperator(Expression* _RHS) : PrefixExpr(_RHS){}
 };
 
 class UnaryLogicalNotOperator : public PrefixExpr{
 public:
-    using PrefixExpr::PrefixExpr;
+    UnaryLogicalNotOperator(Expression* _RHS) : PrefixExpr(_RHS){}
 };
 
 //The rest of the prefix types:
 class PreInc : public PrefixExpr{
 public:
-    using PrefixExpr::PrefixExpr;
+    PreInc(Expression* _RHS) : PrefixExpr(_RHS){}
 };
 
 class PreDec : public PrefixExpr{
 public:
-    using PrefixExpr::PrefixExpr;
+    PreDec(Expression* _RHS) : PrefixExpr(_RHS){}
 };
 
 class SizeofExpr : public PrefixExpr{
 public:
-    using PrefixExpr::PrefixExpr;
+    SizeofExpr(Expression* _RHS) : PrefixExpr(_RHS){}
 };
 
 class SizeofType : public Expression{
@@ -305,37 +309,37 @@ public:
 
 class Multiply : public BinaryOpExpression{
 public:
-    using BinaryOpExpression::BinaryOpExpression;
+    Multiply(Expression* _LHS, Expression* _RHS) : BinaryOpExpression(_LHS, _RHS){}
 };
 
 class Divide : public BinaryOpExpression{
 public:
-    using BinaryOpExpression::BinaryOpExpression;
+    Divide(Expression* _LHS, Expression* _RHS) : BinaryOpExpression(_LHS, _RHS){}
 };
 
 class Modulo : public BinaryOpExpression{
 public:
-    using BinaryOpExpression::BinaryOpExpression;
+    Modulo(Expression* _LHS, Expression* _RHS) : BinaryOpExpression(_LHS, _RHS){}
 };
 
 class Add : public BinaryOpExpression{
 public:
-    using BinaryOpExpression::BinaryOpExpression;
+    Add(Expression* _LHS, Expression* _RHS) : BinaryOpExpression(_LHS, _RHS){}
 };
 
 class Sub : public BinaryOpExpression{
 public:
-    using BinaryOpExpression::BinaryOpExpression;
+    Sub(Expression* _LHS, Expression* _RHS) : BinaryOpExpression(_LHS, _RHS){}
 };
 
 class ShiftLeft : public BinaryOpExpression{
 public:
-    using BinaryOpExpression::BinaryOpExpression;
+    ShiftLeft(Expression* _LHS, Expression* _RHS) : BinaryOpExpression(_LHS, _RHS){}
 };
 
 class ShiftRight : public BinaryOpExpression{
 public:
-    using BinaryOpExpression::BinaryOpExpression;
+    ShiftRight(Expression* _LHS, Expression* _RHS) : BinaryOpExpression(_LHS, _RHS){}
 };
 
 //------------
@@ -347,70 +351,71 @@ public:
 
 class LessThan : public LogicalBinaryExpression{
 public:
-    using LogicalBinaryExpression::LogicalBinaryExpression;
+    LessThan(Expression* _LHS, Expression* _RHS) : LogicalBinaryExpression(_LHS, _RHS){}
 };
 
 class GreaterThan : public LogicalBinaryExpression{
 public:
-    using LogicalBinaryExpression::LogicalBinaryExpression;
+    GreaterThan(Expression* _LHS, Expression* _RHS) : LogicalBinaryExpression(_LHS, _RHS){}
 };
 
 class LessThanOrEqual : public LogicalBinaryExpression{
 public:
-    using LogicalBinaryExpression::LogicalBinaryExpression;
+    LessThanOrEqual(Expression* _LHS, Expression* _RHS) : LogicalBinaryExpression(_LHS, _RHS){}
 };
 
 class GreaterThanOrEqual : public LogicalBinaryExpression{
 public:
-    using LogicalBinaryExpression::LogicalBinaryExpression;
+    GreaterThanOrEqual(Expression* _LHS, Expression* _RHS) : LogicalBinaryExpression(_LHS, _RHS){}
 };
 
 class EqualTo : public LogicalBinaryExpression{
 public:
-    using LogicalBinaryExpression::LogicalBinaryExpression;
+    EqualTo(Expression* _LHS, Expression* _RHS) : LogicalBinaryExpression(_LHS, _RHS){}
 };
 
 class NotEqualTo : public LogicalBinaryExpression{
 public:
-    using LogicalBinaryExpression::LogicalBinaryExpression;
+    NotEqualTo(Expression* _LHS, Expression* _RHS) : LogicalBinaryExpression(_LHS, _RHS){}
 };
 
 class LogicalAND : public LogicalBinaryExpression{
 public:
-    using LogicalBinaryExpression::LogicalBinaryExpression;
+    LogicalAND(Expression* _LHS, Expression* _RHS) : LogicalBinaryExpression(_LHS, _RHS){}
 };
 
 class LogicalOR : public LogicalBinaryExpression{
 public:
-    using LogicalBinaryExpression::LogicalBinaryExpression;
+    LogicalOR(Expression* _LHS, Expression* _RHS) : LogicalBinaryExpression(_LHS, _RHS){}
 };
 
 //------------
 class BitwiseBinaryExpression : public BinaryOpExpression{
 //type depends on input
 public:
-    using BinaryOpExpression::BinaryOpExpression;
+    BitwiseBinaryExpression(Expression* _LHS, Expression* _RHS) : BinaryOpExpression(_LHS, _RHS){}
 };
 
 class BitwiseAND : public BitwiseBinaryExpression{
 public:
-    using BinaryOpExpression::BinaryOpExpression;
+    BitwiseAND(Expression* _LHS, Expression* _RHS) : BitwiseBinaryExpression(_LHS, _RHS){}
 };
 
 class BitwiseOR : public BitwiseBinaryExpression{
 public:
-    using BinaryOpExpression::BinaryOpExpression;
+    BitwiseOR(Expression* _LHS, Expression* _RHS) : BitwiseBinaryExpression(_LHS, _RHS){}
 };
 
 class BitwiseXOR : public BitwiseBinaryExpression{
 public:
-    using BinaryOpExpression::BinaryOpExpression;
+    BitwiseXOR(Expression* _LHS, Expression* _RHS) : BitwiseBinaryExpression(_LHS, _RHS){}
 };
 //---------------------------------------------------------
 
 class TernaryOpExpression : public Expression{
-private:
-    Expression* Condition, IfTrue, IfFalse;
+public:
+    TernaryOpExpression(Expression* cond, Expression* _true, Expression* _false) : Condition(cond), IfTrue(_true), IfFalse(_false){}
+    Expression* Condition, *IfTrue, *IfFalse;
 };
 
 //---------------------------------------------------------
@@ -428,65 +433,66 @@ public:
 
 class AssignmentExpression : public GenericAssignExpr{
 public:
-    using GenericAssignExpr::GenericAssignExpr;
+    AssignmentExpression(Expression* _LHS, Expression* _RHS) : GenericAssignExpr(_LHS, _RHS){}
 };
 
 class MulAssignment : public GenericAssignExpr{
 public:
-    using GenericAssignExpr::GenericAssignExpr;
+    MulAssignment(Expression* _LHS, Expression* _RHS) : GenericAssignExpr(_LHS, _RHS){}
 };
 
 class DivAssignment : public GenericAssignExpr{
 public:
-    using GenericAssignExpr::GenericAssignExpr;
+    DivAssignment(Expression* _LHS, Expression* _RHS) : GenericAssignExpr(_LHS, _RHS){}
 };
 
 class ModAssignment : public GenericAssignExpr{
 public:
-    using GenericAssignExpr::GenericAssignExpr;
+    ModAssignment(Expression* _LHS, Expression* _RHS) : GenericAssignExpr(_LHS, _RHS){}
 };
 
 class AddAssignment : public GenericAssignExpr{
 public:
-    using GenericAssignExpr::GenericAssignExpr;
+    AddAssignment(Expression* _LHS, Expression* _RHS) : GenericAssignExpr(_LHS, _RHS){}
 };
 
 class SubAssignment : public GenericAssignExpr{
 public:
-    using GenericAssignExpr::GenericAssignExpr;
+    SubAssignment(Expression* _LHS, Expression* _RHS) : GenericAssignExpr(_LHS, _RHS){}
 };
 
 class ShiftLeftAssignment : public GenericAssignExpr{
 public:
-    using GenericAssignExpr::GenericAssignExpr;
+    ShiftLeftAssignment(Expression* _LHS, Expression* _RHS) : GenericAssignExpr(_LHS, _RHS){}
 };
 
 class ShiftRightAssignment : public GenericAssignExpr{
 public:
-    using GenericAssignExpr::GenericAssignExpr;
+    ShiftRightAssignment(Expression* _LHS, Expression* _RHS) : GenericAssignExpr(_LHS, _RHS){}
 };
 
 class BitwiseANDAssignment : public GenericAssignExpr{
 public:
-    using GenericAssignExpr::GenericAssignExpr;
+    BitwiseANDAssignment(Expression* _LHS, Expression* _RHS) : GenericAssignExpr(_LHS, _RHS){}
 };
 
 class BitwiseXORAssignment : public GenericAssignExpr{
 public:
-    using GenericAssignExpr::GenericAssignExpr;
+    BitwiseXORAssignment(Expression* _LHS, Expression* _RHS) : GenericAssignExpr(_LHS, _RHS){}
 };
 
 class BitwiseORAssignment : public GenericAssignExpr{
 public:
-    using GenericAssignExpr::GenericAssignExpr;
+    BitwiseORAssignment(Expression* _LHS, Expression* _RHS) : GenericAssignExpr(_LHS, _RHS){}
 };
 
 //---------------------------------------------------------
 
 class ConstantExpression : public Expression{
 public:
-    ConstantExpression(Expression* Expr);
-private:
+    ConstantExpression(){}
+    ConstantExpression(Expression* Expr): ConstantSubtree(Expr){}
+
     Expression* ConstantSubtree;
 };
 
@@ -496,7 +502,7 @@ private:
 class CommaSepExpression : public Expression{
 public:
     CommaSepExpression(Expression* _LHS, Expression* _RHS) : RHS(_RHS), LHS(_LHS){}
-private:
+
     Expression* RHS, *LHS;
 };
 
@@ -511,7 +517,6 @@ class Statement : public Node{
 
 };
 
-class EmptyStatement : public Statement{};
 
 //----------------------------
 
@@ -533,7 +538,6 @@ public:
 class While : public Statement{
 public:
     While(Expression*  _Control, Statement* _Body) : ControlExpression(_Control), Body(_Body){} 
-private:
     Expression* ControlExpression;
     Statement* Body;
 };
@@ -541,7 +545,7 @@ private:
 class DoWhile : public Statement{
 public:
     DoWhile(Statement* _Body, Expression* _Control) : Body(_Body), ControlExpression(_Control){}
-private:
+
     Statement* Body;
     Expression* ControlExpression;
 };
@@ -552,7 +556,7 @@ public:
             : Init(_init), Control(_control), Next(NULL), Body(_body){}
     For(ExpressionStatement* _init, ExpressionStatement* _control, Expression* _next, Statement* _body) 
             : Init(_init), Control(_control), Next(_next), Body(_body){}
-private:
+
     ExpressionStatement* Init, *Control;
     Expression* Next;
     Statement* Body;
@@ -563,14 +567,14 @@ private:
 class SelectionStatement : public Statement{
 public:
     SelectionStatement(Expression* _control) : ControlExpression(_control){}
-protected:
+
     Expression* ControlExpression;
 };
 
 class If : public SelectionStatement{
 public:
     If(Expression* _control, Statement* _iftrue) : SelectionStatement(_control), IfTrue(_iftrue){}
-private:
+
     Statement* IfTrue;
 };
 
@@ -578,7 +582,7 @@ class IfElse : public SelectionStatement{
 public:
     IfElse(Expression* _control, Statement* _iftrue, Statement* _iffalse) 
             : SelectionStatement(_control), IfTrue(_iftrue), IfFalse(_iffalse){}
-private:
+
     Statement* IfTrue;
     Statement* IfFalse;
 };
@@ -586,7 +590,7 @@ private:
 class Switch : public SelectionStatement{
 public:
     Switch(Expression* _control, Statement* _body) : SelectionStatement(_control), Body(_body){}
-private:
+
     Statement* Body;
 };
 
@@ -595,10 +599,13 @@ private:
 class ExpressionStatement : public Statement{
 public:
     ExpressionStatement(Expression* _expr) : Expr(_expr){}
-private:
     Expression* Expr;
 };
 
+class EmptyStatement : public ExpressionStatement{
+public:
+    EmptyStatement(): ExpressionStatement(NULL){}
+};
 //------------------------------
 
 class StatementList : public Node{
@@ -606,7 +613,7 @@ public:
     StatementList(Statement* TerminalStatement) : statement(TerminalStatement), RestOfStatements(NULL){}
     StatementList(StatementList* OtherStatements, Statement* ThisStatement) : statement(ThisStatement), RestOfStatements(RestOfStatements){}
     bool isTerminalStatement() const;
-private:
+
     Statement* statement;
     StatementList* RestOfStatements;
 };
@@ -618,7 +625,6 @@ public:
     CompoundStatement(DeclarationList* _decls, StatementList* _stmnts) : Decls(_decls), Statements(_stmnts){}
     CompoundStatement(DeclarationList* _decls) : Decls(_decls), Statements(NULL){}
     CompoundStatement(StatementList* _stmnts) : Decls(NULL), Statements(_stmnts){}
-private:
     DeclarationList* Decls;
     StatementList* Statements;
 };
@@ -629,9 +635,6 @@ class CaseOrDefault : public Statement{
 public:
     CaseOrDefault(Expression* _eval, Statement* _body) : Eval(_eval), Body(_body){}
     CaseOrDefault(Statement* _body) : Eval(NULL), Body(_body){}
-
-    bool isDefault() const;
-private:
     Expression* Eval;
     Statement* Body;
 };
@@ -667,7 +670,8 @@ public:
     // again cascades
     type_specifier * type_spec;
     declaration_specifiers * specifier; // may be null if there is none
-    declaration_specifiers(type_specifier * _type_spec, declaration_specifiers * _specifier = NULL) : type_spec(_type_spec), specifier(_specifier) {}
+    TypedefNode * storage_class_specifier;
+    declaration_specifiers(type_specifier * _type_spec, declaration_specifiers * _specifier = NULL, TypedefNode* stor_spec=NULL) : type_spec(_type_spec), specifier(_specifier), storage_class_specifier(stor_spec)  {}
 };
 
 class init_declarator_list : public Node
@@ -682,6 +686,7 @@ public:
 
 class init_declarator : public Node
 {
+public:
     // a single atomic declaration
     declarator * dec; // points to declaration, ie a name or identifier
     initializer * init; // points to expression being assigned to identifier, may be NULL if none is
@@ -706,16 +711,17 @@ enum C_types
 
 class type_specifier : public Node
 {
-
+public:
     /*
     enum C_types basic_type;
     */
-    std::string type;
-    type_specifier(const std::string &Keyword = "") : type(Keyword) {}
+    std::string* type;
+    type_specifier( std::string* Keyword) : type(Keyword) {}
 };
 
 class specifier_list : public Node
 {
+public:
     type_specifier * type_spec;
     specifier_list * spec_list; // cascades, may be null
     specifier_list(type_specifier * _type_spec, specifier_list * _spec_list = NULL) : type_spec(_type_spec), spec_list(_spec_list) {}
@@ -774,6 +780,7 @@ public:
 
 class declarator : public base_declarator
 {
+public:
     // asserts link between symbol and operand
     /* pointer* p*/
     direct_declarator * dir_dec;
@@ -795,9 +802,10 @@ public:
 };
 
 // a class used to signify that an array declaration does not specify array length
-class unspecified_array_length : public ConstantExpression {};
-// a class used to signify that a parameter list is empty
-class empty_parameter_list : public parameter_list {};
+class unspecified_array_length : public ConstantExpression {
+public:
+    
+};
 
 class direct_abstract_declarator : public base_direct_declarator
 {
@@ -829,14 +837,20 @@ public:
     parameter_declaration * para_dec;
     abstract_declarator * abs_dec;
     parameter_list(parameter_declaration * _para_dec, parameter_list * _para_list = NULL, abstract_declarator * _abs_dec = NULL) : para_list(_para_list), para_dec(_para_dec), abs_dec(_abs_dec) {}
+    parameter_list():para_list(NULL), para_dec(NULL), abs_dec(NULL){}
+};
+// a class used to signify that a parameter list is empty
+class empty_parameter_list : public parameter_list {
+public:
+    empty_parameter_list();
 };
 
 class parameter_declaration : public Node
 {
 public:
     declaration_specifiers * dec_spec;
-    declarator * dec;
-    parameter_declaration(declaration_specifiers * _dec_spec, declarator * _dec = NULL) : dec_spec(_dec_spec), dec(_dec) {}
+    base_declarator * dec;
+    parameter_declaration(declaration_specifiers * _dec_spec, base_declarator * _dec = NULL) : dec_spec(_dec_spec), dec(_dec) {}
 };
 
 class type_name : public Node
@@ -873,7 +887,7 @@ class GenericExternalDeclaration : public Node{};
 
 class TranslationUnit : public Node
 {
-private:
+
 public:
     std::vector<GenericExternalDeclaration*> decls;
     TranslationUnit(GenericExternalDeclaration* _externaldef){ decls.push_back(_externaldef); }
