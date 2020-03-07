@@ -28,9 +28,9 @@ private:
 
     decTypeInfo* descendDeclarator(direct_declarator* _dir_dec);
     decTypeInfo* descendDeclarator(IdentifierNode* _id);
-    decTypeInfo* descendDeclarator(parameter_list* _par_list);
+    Context::argPart* descendDeclarator(parameter_list* _par_list);
         decTypeInfo* descendDeclarator(parameter_declaration* _par_dec);
-            decTypeInfo* descendDeclarator(declaration_specifiers* _decl_spec);
+            Context::baseSpecPart* descendDeclarator(declaration_specifiers* _decl_spec);
             decTypeInfo* descendDeclarator(abstract_declarator* _decl);
                 decTypeInfo* descendDeclarator(direct_abstract_declarator* _dir_abs_dec);
 

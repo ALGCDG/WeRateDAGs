@@ -2,25 +2,39 @@
 
 ContextTable* ContextTable::Instance(){
     //only one instance of context table
-    if(!table_instance){ table_instance = new ContextTable; }
+    static 
     return table_instance;
 }
 
+
+//TODO redo for new vector based context table
 void ContextTable::NewScope(){
-    table_data.push_front(std::unordered_map<std::string, Context::Record*>());
+    
+    Context::ScopeRecord* newScopeTable = new Context::ScopeRecord(currParentScopePtr);
+    if(currParentScopePtr==NULL){
+        table_data.push_back(newScopeTable);
+    }
+    else{
+        currParentScopePtr->SubTable.push_back(newScopeTable);
+    }
+    currParentScopePtr = newScopeTable;
+    
 }
 
 void ContextTable::PopScope(){
-    table_data.pop_front();
+    currParentScopePtr=currParentScopePtr->parent;
 }
 
-void ContextTable::AddObjectRecord(std::string _ID, Context::Record* _rec){
-    table_data[0][_ID] = _rec;
+void ContextTable::AddNamedRecord(Context::NamedRecord* _rec){
+    
 }
 
-Context::Record* ContextTable::GetObjectRecord(std::string _ID){
-    for(std::deque<LocalTable>::iterator it = table_data.begin(); it < table_data.end(); it++){
-        LocalTable::iterator find_it = it->find(_ID);
-        if(find_it != it->end()) return find_it->second;
-    }
+
+void ContextTable::AddToActiveTable(Context::Record* _rec){
+    if(currParentScopePtr == NULL) table_data.push_back(_rec);
+    else{ currParentScopePtr->SubTable.push_back(_rec); }
+}
+
+Context::ScopeRecord* ContextTable::GetCurrParentScopePtr(){
+    return currParentScopePtr;
 }
