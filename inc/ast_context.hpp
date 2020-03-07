@@ -43,11 +43,20 @@ class typePart{
     //pointer to primitive type
     //array of size, of type
     //canonical type or type name
+    public:
+        virtual void AddChild(typePart* _child);
 };
-
+class IDPart : public typePart{
+public:
+    IDPart(IdentifierNode* _ID, typePart* _child) : ID(_ID), definedToBe(_child){}
+    IdentifierNode* ID;
+    typePart* definedToBe;
+};
 class pointerPart : public Context::typePart{
 public:
+    pointerPart(Context::typePart* _pointerto) : pointerTo(_pointerto){}
     Context::typePart* pointerTo;
+    void AddChild(typePart* _child){;}//define
 };
 
 class argPart : public Context::typePart{
@@ -57,13 +66,15 @@ public:
 
 class funcPart : public Context::typePart{
 public:
+    funcPart(Context::argPart* _args, Context::typePart* _returns) : returns(_returns), args(_args){}
     Context::typePart* returns;
     Context::argPart* args;
 };
 
 class arrayPart : public Context::typePart{
 public:
-    ConstantExpression* size;
+    arrayPart(int _size, Context::typePart* _type) : size(_size), ofType(_type){}
+    int size;
     Context::typePart* ofType;
 };
 

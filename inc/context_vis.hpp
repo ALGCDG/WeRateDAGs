@@ -5,7 +5,7 @@
 #include "visitors.hpp"
 #include "ast_allnodes.hpp"
 
-#include <tuple>
+#include <utility> //std::pair
 
 class ContextVisitor : public Visitor{
 public:
@@ -23,18 +23,30 @@ private:
     Context::Record* CreateRecord(declaration* _dect); //calls descendDeclarator
     
     //<ID at bottom, top type part in hierarchy, pointer to next type part that needs to be filled in> 
-    typedef std::tuple<std::string,Context::typePart*, Context::typePart*> decTypeInfo;  
-    decTypeInfo* descendDeclarator(direct_abstract_declarator* _dir_abs_dec);
-    decTypeInfo* descendDeclarator(direct_declarator* _dir_dec);
     decTypeInfo* descendDeclarator(declarator* _decl);
-    decTypeInfo* descendDeclarator(init_declarator* _in_decl);
-    decTypeInfo* descendDeclarator(init_declarator_list* _dir_abs_dec);
+    decTypeInfo* descendDeclarator(pointer* _ptr);
+
+    decTypeInfo* descendDeclarator(direct_declarator* _dir_dec);
+    decTypeInfo* descendDeclarator(IdentifierNode* _id);
+    decTypeInfo* descendDeclarator(parameter_list* _par_list);
+        decTypeInfo* descendDeclarator(parameter_declaration* _par_dec);
+            decTypeInfo* descendDeclarator(declaration_specifiers* _decl_spec);
+            decTypeInfo* descendDeclarator(abstract_declarator* _decl);
+                decTypeInfo* descendDeclarator(direct_abstract_declarator* _dir_abs_dec);
+
+
+    
 
 
 
 
-    //evaluates constant expression
-    void SimplifyConstantExpression(ConstantExpression* _const_expr);
+    //evaluates constant expression, (returns -1 if unspecified size)
+    int EvalConstantExpression(ConstantExpression* _const_expr);
 };
+
+namespace{
+    //linked list of type parts, head and tail
+    typedef std::pair<Context::typePart*, Context::typePart*> decTypeInfo;  
+}
 
 #endif
