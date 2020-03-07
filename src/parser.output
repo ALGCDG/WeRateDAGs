@@ -1,8 +1,3 @@
-Nonterminals useless in grammar
-
-   identifier_list
-
-
 Terminals unused in grammar
 
    Operator
@@ -12,12 +7,6 @@ Terminals unused in grammar
    Keyword_enum
    Keyword_struct
    Punctuator
-
-
-Rules useless in grammar
-
-  176 identifier_list: Ident
-  177                | identifier_list Operator_comma Ident
 
 
 State 17 conflicts: 10 shift/reduce

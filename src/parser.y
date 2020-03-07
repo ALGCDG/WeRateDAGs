@@ -25,14 +25,14 @@
     ArgExprList* argexprlist;
     IdentifierNode* identnode;
     type_name* _typename;
-    ConstantExpression* constexpr;
+    ConstantExpression* constexp;
     Statement* stmt;
     StatementList* stmtlist;
     ExpressionStatement* exprstmt;
     DeclarationList*  t_declist;
     declaration       *    t_declaration;
     declaration_specifiers * t_declaration_specifiers;
-    storage_class_specifier * t_storage_class_specifier;
+    TypedefNode * t_storage_class_specifier;
     init_declarator_list  * t_init_declarator_list;
     init_declarator       * t_init_declarator;
     type_specifier        * t_type_specifier;
@@ -40,10 +40,9 @@
     declarator            * t_declarator;
     direct_declarator     * t_direct_declarator;
     pointer               * t_pointer;
-    parameter_type_list  *  t_parameter_type_list;
+    /*parameter_type_list  *  t_parameter_type_list;*/
     parameter_list       *  t_parameter_list;
     parameter_declaration * t_parameter_declaration;
-    identifier_list       * t_identifier_list;
     type_name            *  t_type_name;
     abstract_declarator *   t_abstract_declarator;
     direct_abstract_declarator * t_direct_abstract_declarator;
@@ -91,7 +90,7 @@
 %type <expression> assignment_EXPR
 %type <text> assignment
 %type <expression> EXPR
-%type <constexpr> constant_EXPR
+%type <constexp> constant_EXPR
 
 %type <t_declaration> declaration
 %type <t_declaration_specifiers> declaration_specifiers
@@ -103,10 +102,9 @@
 %type <t_declarator> declarator
 %type <t_direct_declarator> direct_declarator
 %type <t_pointer> pointer
-%type <t_parameter_type_list> parameter_type_list
+%type <t_parameter_list> parameter_type_list
 %type <t_parameter_list> parameter_list
 %type <t_parameter_declaration> parameter_declaration
-%type <t_identifier_list> identifier_list
 %type <t_type_name> type_name
 %type <t_abstract_declarator> abstract_declarator
 %type <t_direct_abstract_declarator> direct_abstract_declarator
@@ -250,12 +248,12 @@ DECLARATIONS
 declaration: declaration_specifiers init_declarator_list Punctuator_eol { $$ = new declaration($1, $2); }
            | declaration_specifiers Punctuator_eol { $$ = new declaration($1); }
 
-declaration_specifiers: storage_class_specifier { std::cerr << "stor" << std::endl; }
-                      | storage_class_specifier declaration_specifiers { std::cerr << "stor decspec" << std::endl; }
+declaration_specifiers: storage_class_specifier { $$ = new declaration_specifiers(NULL,NULL,$1); }
+                      | storage_class_specifier declaration_specifiers { $$ = new declaration_specifiers(NULL,$2,$1); }
                       | type_specifier { $$ = new declaration_specifiers($1); }
                       | type_specifier declaration_specifiers { $$ = new declaration_specifiers($1, $2); }
 
-storage_class_specifier: Keyword_typedef { std::cerr << "typedef" << std::endl; }
+storage_class_specifier: Keyword_typedef { $$ = new TypedefNode; }
 
 init_declarator_list: init_declarator { $$ = new init_declarator_list($1); }
                     | init_declarator_list Operator_comma init_declarator { $$ = new init_declarator_list($3, $1); }
@@ -328,14 +326,16 @@ pointer: Operator_mul { $$ = new pointer(); }
 parameter_type_list: parameter_list
 
 parameter_list: parameter_declaration { $$ = new parameter_list($1); }
-		 	  | parameter_list Operator_comma parameter_declaration { $$ = new parameter_list($1, $3) }
+		 	  | parameter_list Operator_comma parameter_declaration { $$ = new parameter_list($3, $1); }
 
 parameter_declaration: declaration_specifiers declarator { $$ = new parameter_declaration($1, $2); }
 					 | declaration_specifiers  { $$ = new parameter_declaration($1); }
-					 | declaration_specifiers abstract_declarator { $$ = new parameter_declaration($1, NULL, $2); }
+					 | declaration_specifiers abstract_declarator { $$ = new parameter_declaration($1, $2); }
 
-identifier_list: Ident
+/*identifier_list: Ident
 			   | identifier_list Operator_comma Ident
+K&R -> don't need
+*/
 
 type_name: specifier_list { $$ = new type_name($1); }
 		 | specifier_list abstract_declarator { $$ = new type_name($1, $2); }

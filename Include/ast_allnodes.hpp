@@ -148,6 +148,7 @@ public:
     Context::Record* ContextRecord;
 };
 
+
 class Constant : public Expression{
 public:
     Constant();//TODO
@@ -166,6 +167,10 @@ public:
     StringLiteral(std::string _str, bool L = false) : wide(L), str(_str){}
     bool wide;
     std::string str;
+};
+
+class TypedefNode : public Node{
+
 };
 //---------------------------------------------------------
 class PostfixExpr : public Expression{
@@ -512,7 +517,6 @@ class Statement : public Node{
 
 };
 
-class EmptyStatement : public Statement{};
 
 //----------------------------
 
@@ -596,10 +600,13 @@ private:
 class ExpressionStatement : public Statement{
 public:
     ExpressionStatement(Expression* _expr) : Expr(_expr){}
-private:
     Expression* Expr;
 };
 
+class EmptyStatement : public ExpressionStatement{
+public:
+    EmptyStatement(): ExpressionStatement(NULL){}
+};
 //------------------------------
 
 class StatementList : public Node{
@@ -619,7 +626,6 @@ public:
     CompoundStatement(DeclarationList* _decls, StatementList* _stmnts) : Decls(_decls), Statements(_stmnts){}
     CompoundStatement(DeclarationList* _decls) : Decls(_decls), Statements(NULL){}
     CompoundStatement(StatementList* _stmnts) : Decls(NULL), Statements(_stmnts){}
-private:
     DeclarationList* Decls;
     StatementList* Statements;
 };
@@ -630,9 +636,6 @@ class CaseOrDefault : public Statement{
 public:
     CaseOrDefault(Expression* _eval, Statement* _body) : Eval(_eval), Body(_body){}
     CaseOrDefault(Statement* _body) : Eval(NULL), Body(_body){}
-
-    bool isDefault() const;
-private:
     Expression* Eval;
     Statement* Body;
 };
@@ -654,7 +657,7 @@ Declarations and types
 class declaration : public Node
 {
 public:
-    specifiers* specifier; // specifies type of declaration
+    declaration_specifiers* specifier; // specifies type of declaration
     init_declarator_list* list; // list of variables being declared as this type, may be null
     declaration(declaration_specifiers * _specifier ,init_declarator_list * _list = NULL) : specifier(_specifier), list(_list) {}
 };
@@ -668,7 +671,8 @@ public:
     // again cascades
     type_specifier * type_spec;
     declaration_specifiers * specifier; // may be null if there is none
-    declaration_specifiers(type_specifier * _type_spec, declaration_specifiers * _specifier = NULL) : type_spec(_type_spec), specifier(_specifier) {}
+    TypedefNode * storage_class_specifier;
+    declaration_specifiers(type_specifier * _type_spec, declaration_specifiers * _specifier = NULL, TypedefNode* stor_spec=NULL) : type_spec(_type_spec), specifier(_specifier), storage_class_specifier(stor_spec)  {}
 };
 
 class init_declarator_list : public Node
@@ -846,8 +850,8 @@ class parameter_declaration : public Node
 {
 public:
     declaration_specifiers * dec_spec;
-    declarator * dec;
-    parameter_declaration(declaration_specifiers * _dec_spec, declarator * _dec = NULL) : dec_spec(_dec_spec), dec(_dec) {}
+    base_declarator * dec;
+    parameter_declaration(declaration_specifiers * _dec_spec, base_declarator * _dec = NULL) : dec_spec(_dec_spec), dec(_dec) {}
 };
 
 class type_name : public Node
