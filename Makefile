@@ -17,8 +17,8 @@ bin/translator : src/parser.tab.o src/lexer.yy.o
 clean :
 	rm -f src/*.o
 	rm -f bin/*
-	rm -f *.tab.*
+	rm -f src/*.tab.*
 	rm -f src/*.yy.*
 	rm -f *.out
 	rm -f out
-	rm -f *.output
+	rm -f src/*.output
