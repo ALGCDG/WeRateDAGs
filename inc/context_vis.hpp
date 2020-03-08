@@ -19,8 +19,8 @@ public:
 
 */
 private:
-    Context::Record* GetRecord(const std::string &_id);
-    Context::Record* CreateRecord(declaration* _dect); //calls descendDeclarator
+    ContextData::Record* GetRecord(const std::string &_id);
+    ContextData::Record* CreateRecord(declaration* _dect); //calls descendDeclarator
     
     //<ID at bottom, top type part in hierarchy, pointer to next type part that needs to be filled in> 
     decTypeInfo* descendDeclarator(declarator* _decl);
@@ -28,9 +28,9 @@ private:
 
     decTypeInfo* descendDeclarator(direct_declarator* _dir_dec);
     decTypeInfo* descendDeclarator(IdentifierNode* _id);
-    Context::argPart* descendDeclarator(parameter_list* _par_list);
+    ContextData::argPart* descendDeclarator(parameter_list* _par_list);
         decTypeInfo* descendDeclarator(parameter_declaration* _par_dec);
-            Context::baseSpecPart* descendDeclarator(declaration_specifiers* _decl_spec);
+            ContextData::baseSpecPart* descendDeclarator(declaration_specifiers* _decl_spec);
             decTypeInfo* descendDeclarator(abstract_declarator* _decl);
                 decTypeInfo* descendDeclarator(direct_abstract_declarator* _dir_abs_dec);
 
@@ -46,7 +46,7 @@ private:
 
 namespace{
     //linked list of type parts, head and tail
-    typedef std::pair<Context::typePart*, Context::typePart*> decTypeInfo;  
+    typedef std::pair<ContextData::typePart*, ContextData::typePart*> decTypeInfo;  
 }
 
 #endif

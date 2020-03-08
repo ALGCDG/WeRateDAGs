@@ -14,6 +14,7 @@
 #include <unordered_map>
 #include <deque>
 #include <string>
+#include <algorithm>
 
 class ConstantExpression;
 /*  Don't need as much of a robust class hierarchy
@@ -30,31 +31,39 @@ class ConstantExpression;
     - OR symbol tables, as linked data structures using pointers
 
 */
-namespace Context
+
+//Not to be accessed outside of the table
+namespace ContextData
 {
     /*==============================
     Records for the context table
     */
     class Record{
     public:
-        Record() : parent(ContextTable::Instance().GetCurrParentScopePtr()){}
+        Record() : parent(NULL){}
+        //all records have parents
+        void SetParent(ScopeRecord* _parent); //non virtual
+        ScopeRecord* GetParent(); //non virtual
+        virtual std::string* Name(){ return NULL; }
+    protected:
         ScopeRecord* parent;
-    //needs to store some stuff
     };
 
+    //contains sub scope record
     class ScopeRecord : public Record{
-    //just a wrapper for the vector
     public:
-        ScopeRecord() : Record(){}
+        ScopeRecord() : Record(){} //set parent to null
+        void AddRecord(Record* _rec); //wrapper for push_back
         std::vector<Record*> SubTable;
     };
+
 
     class NamedRecord : public Record{
     public:
         NamedRecord(std::string* _name): Record(), name(_name){}
         std::string* name;
+        std::string* Name(){ return name; }
     };
-
 
     /*==============================
     Sub classes for named records
@@ -69,13 +78,13 @@ namespace Context
     /*==============================
     Type parts for the context table
     */
+    //function: return, args with type
+    //pointer to primitive type
+    //array of size, of type
+    //canonical type or type name
     class typePart{
-        //function: return, args with type
-        //pointer to primitive type
-        //array of size, of type
-        //canonical type or type name
-        public:
-            virtual void AddChild(typePart* _child);
+    public:
+        virtual void AddChild(typePart* _child);
     };
     class IDPart : public typePart{
     public:
@@ -84,46 +93,47 @@ namespace Context
         typePart* definedToBe;
         void AddChild(typePart* _child);
     };
-    class pointerPart : public Context::typePart{
+    class pointerPart : public typePart{
     public:
-        pointerPart(Context::typePart* _pointerto) : pointerTo(_pointerto){}
-        Context::typePart* pointerTo;
-        void AddChild(typePart* _child){;}//define
+        pointerPart(typePart* _pointerto) : pointerTo(_pointerto){}
+        typePart* pointerTo;
+        void AddChild(typePart* _child);//define
     };
 
-    class argPart : public Context::typePart{
+    class argPart : public typePart{
     public:
-        std::vector<Context::typePart*> argTypes;
+        std::vector<typePart*> argTypes;
     };
 
-    class funcPart : public Context::typePart{
+    class funcPart : public typePart{
     public:
-        funcPart(Context::argPart* _args, Context::typePart* _returns) : returns(_returns), args(_args){}
-        Context::typePart* returns;
-        Context::argPart* args;
+        funcPart(argPart* _args, typePart* _returns) : returns(_returns), args(_args){}
+        typePart* returns;
+        argPart* args;
         void AddChild(typePart* _child);
     };
 
-    class arrayPart : public Context::typePart{
+    class arrayPart : public typePart{
     public:
-        arrayPart(int _size, Context::typePart* _type) : size(_size), ofType(_type){}
+        arrayPart(int _size, typePart* _type) : size(_size), ofType(_type){}
         int size;
-        Context::typePart* ofType;
+        typePart* ofType;
         void AddChild(typePart* _child);
     };
 
-    class baseSpecPart : public Context::typePart{
+    class baseSpecPart : public typePart{
     //parent class for both canonical and user typedef'd type specifiers, and typedef node
     public:
         baseSpecPart* otherSpecs;
         baseSpecPart(baseSpecPart* _other) : otherSpecs(_other){}
+        void AddChild(baseSpecPart* _child);
     };
 
     class canonSpecPart : public baseSpecPart{
     //for canonical type specs
     public:
         std::string* specKeyword;
-        void AddChild(baseSpecPart* _child);
+        //void AddChild(baseSpecPart* _child); use basespecpart child adder
         canonSpecPart(std::string* _key, baseSpecPart* _other) : baseSpecPart(_other), specKeyword(_key){}
     };
 
@@ -132,7 +142,7 @@ namespace Context
     public:
         std::string* specKeyword;
         typePart* definition; // get from context table
-        void AddChild(baseSpecPart* _child);
+        //void AddChild(baseSpecPart* _child);
 
         userSpecPart(std::string* spec, baseSpecPart* otherspecs ,typePart* def) : baseSpecPart(otherspecs), specKeyword(spec), definition(def){} //links to context table
     };
@@ -150,24 +160,22 @@ namespace Context
 //maps name directly to node
 class ContextTable{
 public:
-    Context::Record* GetObjectRecord(std::string _ID); //definition?
-    void AddObjectRecord(std::string _ID, Context::Record* _node); //and definition? for functions?
+    ContextTable() : table_data(), currParentScopePtr(NULL){}
+
     void NewScope();
     void PopScope();
+    ContextData::Record* GetObjectRecord(const std::string& _ID); //definition?
+    void AddObjectRecord(ContextData::NamedRecord* _node); //and definition? for functions?
     bool IdentifierIsGlobal(std::string _ID); // not defined yet
-
     //searches symbol table for appearance and returns constructed userSpec or canon spec with pointer to definition if user
-    Context::baseSpecPart* TypeIsUserOrCanon(std::string* keyword, Context::baseSpecPart* otherSpecs);
-    static ContextTable& Instance();
-    Context::ScopeRecord* GetCurrParentScopePtr();
-private:
-    //private constructor for singleton pattern
-    ContextTable() : table_data(), currParentScopePtr(NULL){}
-    std::vector<Context::Record*> table_data;
-    Context::ScopeRecord* currParentScopePtr;//NULL if at global scope
-    static ContextTable table_instance;
-    void AddToActiveTable(Context::Record* _rec);
-};
+    ContextData::baseSpecPart* TypeIsUserOrCanon(std::string* keyword, ContextData::baseSpecPart* otherSpecs);
 
+private:
+    std::vector<ContextData::Record*> table_data;
+    ContextData::ScopeRecord* currParentScopePtr;//NULL if at global scope
+    void AddToActiveTable(ContextData::Record* _rec);
+    std::vector<ContextData::Record*>& GetActiveTable();
+    ContextData::Record* FindNameInActiveTable(const std::string& _name);
+};
 
 #endif

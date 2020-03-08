@@ -17,13 +17,13 @@ decTypeInfo* ContextVisitor::descendDeclarator(pointer* _ptr)
 {
     if(_ptr->p == NULL){
         //create pointer part, as both the head and tail of the linked list
-        Context::pointerPart* bottomPointer = new Context::pointerPart(NULL);
+        ContextData::pointerPart* bottomPointer = new ContextData::pointerPart(NULL);
         return new decTypeInfo(bottomPointer, bottomPointer);
     }
     else{
         decTypeInfo* below = descendDeclarator(_ptr->p);
         //construct new pointer part with the previous head as its child
-        Context::pointerPart* thisPointer = new Context::pointerPart(below->first);
+        ContextData::pointerPart* thisPointer = new ContextData::pointerPart(below->first);
         below->first = thisPointer;
         return below;
     }
@@ -45,14 +45,14 @@ decTypeInfo* ContextVisitor::descendDeclarator(direct_declarator* _this_dir_dec)
         decTypeInfo* below = descendDeclarator(_this_dir_dec->dir_dec);
         if(_this_dir_dec->const_expr != NULL){
             int size = EvalConstantExpression(_this_dir_dec->const_expr);
-            Context::arrayPart* this_array = new Context::arrayPart(size, NULL);
+            ContextData::arrayPart* this_array = new ContextData::arrayPart(size, NULL);
             below->second->AddChild(this_array); //add array to linked list
             below->second = this_array; //make bottom of list this array
             return below;
         }
         else if(_this_dir_dec->para_list!=NULL){
-            Context::argPart* args = descendDeclarator(_this_dir_dec->para_list);
-            Context::funcPart* this_func = new Context::funcPart(args, NULL);
+            ContextData::argPart* args = descendDeclarator(_this_dir_dec->para_list);
+            ContextData::funcPart* this_func = new ContextData::funcPart(args, NULL);
             below->second->AddChild(this_func);
             below->second = this_func;
             return below;
@@ -62,11 +62,11 @@ decTypeInfo* ContextVisitor::descendDeclarator(direct_declarator* _this_dir_dec)
 }
 decTypeInfo* descendDeclarator(IdentifierNode* _id)
 {
-    Context::IDPart* head = new Context::IDPart(_id, NULL);
+    ContextData::IDPart* head = new ContextData::IDPart(_id, NULL);
     return new decTypeInfo(head,head);
 }
 
-Context::argPart* descendDeclarator(parameter_list* _par_list)
+ContextData::argPart* descendDeclarator(parameter_list* _par_list)
 {
 
 }
@@ -74,10 +74,10 @@ decTypeInfo* descendDeclarator(parameter_declaration* _par_dec)
 {
 
 }
-Context::baseSpecPart* descendDeclarator(declaration_specifiers* _decl_spec){
-    Context::baseSpecPart* otherSpecs = NULL;
+ContextData::baseSpecPart* descendDeclarator(declaration_specifiers* _decl_spec){
+    ContextData::baseSpecPart* otherSpecs = NULL;
     if(_decl_spec->specifier!=NULL){ otherSpecs = descendDeclarator(_decl_spec->specifier); }
-    if(_decl_spec->storage_class_specifier!=NULL){ return new Context::typedefSpecPart(otherSpecs); }
+    if(_decl_spec->storage_class_specifier!=NULL){ return new ContextData::typedefSpecPart(otherSpecs); }
     else if(_decl_spec->type_spec != NULL){ return ContextTable::Instance()->TypeIsUserOrCanon(_decl_spec->type_spec->type, otherSpecs); }
 }
 decTypeInfo* descendDeclarator(abstract_declarator* _decl );
