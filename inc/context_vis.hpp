@@ -4,6 +4,7 @@
 #include "ast_context.hpp"
 #include "visitors.hpp"
 #include "ast_allnodes.hpp"
+#include <cassert>
 
 #include <utility> //std::pair
 
@@ -18,6 +19,10 @@ public:
         Stack frame / pointer locations
 
 */
+    ContextVisitor(ContextTable* _table) : TableInstance(_table){
+        //make sure to construct visitor with instance of table
+        assert(_table);
+    }
 private:
     ContextData::Record* GetRecord(const std::string &_id);
     ContextData::Record* CreateRecord(declaration* _dect); //calls descendDeclarator
@@ -34,14 +39,9 @@ private:
             decTypeInfo* descendDeclarator(abstract_declarator* _decl);
                 decTypeInfo* descendDeclarator(direct_abstract_declarator* _dir_abs_dec);
 
-
-    
-
-
-
-
     //evaluates constant expression, (returns -1 if unspecified size)
     int EvalConstantExpression(ConstantExpression* _const_expr);
+    ContextTable* TableInstance;
 };
 
 namespace{
