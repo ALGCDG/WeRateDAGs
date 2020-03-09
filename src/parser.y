@@ -436,16 +436,15 @@ ROOT: statement { std::cerr << "Its a valid program" << std::endl; }
 /*
 External definitions
 */
-translation_unit: external_declaration
-                | translation_unit external_declaration
+translation_unit: external_declaration { $$ = new TranslationUnit($1); }
+                | translation_unit external_declaration { ($1)->AppendDeclaration($2); }
 
-external_declaration: function_definition {/* $$ = new FunctionDefinition(); */ }
-                    | declaration { /*$$ = new declaration(); */}
+external_declaration: function_definition { $$ = $1; }
+                    | declaration { $$ = new ExternalDeclaration($1); }
 
-function_definition: declarator compound_statement
-                   | declarator declaration_list compound_statement
-                   | declaration_specifiers declarator compound_statement
-                   | declaration_specifiers declaration declaration_list compound_statement/*TODO is this right?*/
+function_definition: declarator compound_statement { $$ = new FunctionDefinition($1, $2); }
+                   | declaration_specifiers declarator compound_statement { $$ = new FunctionDefinition($1, $2, $3); }
+                   /*| declaration_specifiers declaration declaration_list compound_statement -> only for K&R*/
 
 
 ROOT: translation_unit { std::cerr << "Its a valid program" << std::endl; g_root = $1; }
