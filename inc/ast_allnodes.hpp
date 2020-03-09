@@ -5,7 +5,6 @@
 #include <vector>
 // #include "ast_basenode.hpp"
 
-// #include "visitors.hpp"
 // //FORWARD DECLARE VISITOR
 // class Visitor;
 
@@ -125,9 +124,7 @@ class ExternalDeclaration;
 
 class Node{
 public:
-    void accept(Visitor* AVisitor) {}
-
-    
+    void accept(Visitor* AVisitor);
 };
 
 /*
@@ -625,6 +622,7 @@ public:
     CompoundStatement(DeclarationList* _decls, StatementList* _stmnts) : Decls(_decls), Statements(_stmnts){}
     CompoundStatement(DeclarationList* _decls) : Decls(_decls), Statements(NULL){}
     CompoundStatement(StatementList* _stmnts) : Decls(NULL), Statements(_stmnts){}
+    CompoundStatement() : Decls(NULL), Statements(NULL) {}
     DeclarationList* Decls;
     StatementList* Statements;
 };

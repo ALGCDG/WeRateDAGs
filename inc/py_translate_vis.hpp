@@ -205,6 +205,7 @@ public:
     //TODO 
     void visit(TranslationUnit* unit)
 	{
+        std::cerr << "top of tree" << std::endl;
         for (std::vector<GenericExternalDeclaration*>::iterator it = unit->decls.begin(); it < unit->decls.end(); it++)
         {
             (*it)->accept(this);
@@ -214,7 +215,6 @@ public:
 	{
         std::cout << fd->decl->dir_dec->ID->Name;
         std::cout << '(';
-        fd->decl_list->accept(this);
         std::cout << "):";
         indentation++;
         fd->Body->accept(this);
@@ -224,7 +224,10 @@ public:
 	{
     
     }
-
+    void visit(Node * n)
+    {
+        std::cerr << "visiting node, not supported" << std::endl;
+    }
 };
 
 #endif

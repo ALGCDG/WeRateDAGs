@@ -2,6 +2,6 @@
 #define COMPILER_HPP
 #include "ast_allnodes.hpp"
 
-extern Node *parseAST();
+extern TranslationUnit *parseAST();
 
 #endif

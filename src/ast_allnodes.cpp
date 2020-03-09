@@ -1,4 +1,5 @@
 #include "ast_allnodes.hpp"
+#include "visitors.hpp"
 
 // ArgExprList::ArgExprList(Expression* Arg){
 //     Args.push_back(Arg);
@@ -39,4 +40,9 @@ GenericAssignExpr* GenericAssignExpr::DecodeAssignOp(Expression* LHS, std::strin
     else if(op == "^=") return new BitwiseXORAssignment(LHS,RHS);
     else if(op == "|=") return new BitwiseORAssignment(LHS,RHS);
     else return NULL;
+}
+
+void Node::accept(Visitor *AVisitor)
+{
+    AVisitor->visit(this);
 }

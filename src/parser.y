@@ -4,7 +4,7 @@
   #include<string>
   #include "./ast_allnodes.hpp"
 
-  extern Node *g_root; // A way of getting the AST out
+  extern TranslationUnit *g_root; // A way of getting the AST out
   //! This is to fix problems when generating C++
   // We are declaring the functions provided by Flex, so
   // that Bison generated code can call them.
@@ -48,9 +48,12 @@
     direct_abstract_declarator * t_direct_abstract_declarator;
     initializer * t_initializer;
     initializer_list * t_initializer_list;
-
+    CompoundStatement * cmpstmt;
 
     TranslationUnit * t_translation_unit;
+    GenericExternalDeclaration * t_external_declaration;
+    FunctionDefinition * t_function_definition;
+
 };
 
 %token Constant_int Constant_char Constant_double Constant_float Constant_long_double
@@ -116,7 +119,7 @@
 
 %type <stmt> statement
 %type <stmt> labeled_statement
-%type <stmt> compound_statement
+%type <cmpstmt> compound_statement
 %type <t_declist> declaration_list
 %type <stmtlist> statement_list
 %type <exprstmt> EXPR_statement
@@ -125,6 +128,10 @@
 %type <stmt> jump_statement 
 
 %type <t_translation_unit> translation_unit
+%type <t_external_declaration> external_declaration
+%type <t_function_definition> function_definition
+
+
 
 %start ROOT
 
@@ -394,7 +401,7 @@ labeled_statement: Keyword_case constant_EXPR Operator_trinary_choice statement 
 compound_statement: Punctuator_cur_open declaration_list statement_list Punctuator_cur_close { $$ = new CompoundStatement($2, $3); }
                   | Punctuator_cur_open declaration_list Punctuator_cur_close { $$ = new CompoundStatement($2);}
                   | Punctuator_cur_open statement_list Punctuator_cur_close { $$ = new CompoundStatement($2); /*Will need to use arg overloaded constructor to differentiate between the above*/}
-                  | Punctuator_cur_open Punctuator_cur_close { $$ = new EmptyStatement; }
+                  | Punctuator_cur_open Punctuator_cur_close { $$ = new CompoundStatement(); }
 
 declaration_list: declaration {$$ = new DeclarationList($1); }
                 | declaration_list declaration { $$ = new DeclarationList($1, $2); }
@@ -451,9 +458,9 @@ ROOT: translation_unit { std::cerr << "Its a valid program" << std::endl; g_root
 
 %%
 
-Node *g_root; // Definition of variable (to match declaration earlier)
+TranslationUnit *g_root; // Definition of variable (to match declaration earlier)
 
-Node * parseAST()
+TranslationUnit * parseAST()
 {
   std::cerr << "parsing" << std::endl;
   g_root = 0;
