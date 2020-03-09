@@ -1,11 +1,11 @@
-#include "context_vis.hpp"
+#include "AST_Processor.hpp"
 
 //remember:
 //linked list of type parts, head and tail
 //typedef std::tuple<Context::typePart*, Context::typePart*> decTypeInfo; 
 
 //getting information out of declarator for use in records
-decTypeInfo* ContextVisitor::descendDeclarator(declarator* _decl)
+decTypeInfo* ASTProcessorVis::descendDeclarator(declarator* _decl)
 {
     //declarator has member data:
         // pointer (optional)
@@ -13,7 +13,7 @@ decTypeInfo* ContextVisitor::descendDeclarator(declarator* _decl)
 
     
 }
-decTypeInfo* ContextVisitor::descendDeclarator(pointer* _ptr)
+decTypeInfo* ASTProcessorVis::descendDeclarator(pointer* _ptr)
 {
     if(_ptr->p == NULL){
         //create pointer part, as both the head and tail of the linked list
@@ -28,7 +28,7 @@ decTypeInfo* ContextVisitor::descendDeclarator(pointer* _ptr)
         return below;
     }
 }
-decTypeInfo* ContextVisitor::descendDeclarator(direct_declarator* _this_dir_dec)
+decTypeInfo* ASTProcessorVis::descendDeclarator(direct_declarator* _this_dir_dec)
 {
     //TODO empty parameter list added to grammar
     /** Member data:
@@ -60,28 +60,28 @@ decTypeInfo* ContextVisitor::descendDeclarator(direct_declarator* _this_dir_dec)
     }
 
 }
-decTypeInfo* ContextVisitor::descendDeclarator(IdentifierNode* _id)
+decTypeInfo* ASTProcessorVis::descendDeclarator(IdentifierNode* _id)
 {
     ContextData::IDPart* head = new ContextData::IDPart(_id, NULL);
     return new decTypeInfo(head,head);
 }
 
-ContextData::argPart* ContextVisitor::descendDeclarator(parameter_list* _par_list)
+ContextData::argPart* ASTProcessorVis::descendDeclarator(parameter_list* _par_list)
 {
 
 }
-decTypeInfo* ContextVisitor::descendDeclarator(parameter_declaration* _par_dec)
+decTypeInfo* ASTProcessorVis::descendDeclarator(parameter_declaration* _par_dec)
 {
 
 }
-ContextData::baseSpecPart* ContextVisitor::descendDeclarator(declaration_specifiers* _decl_spec){
+ContextData::baseSpecPart* ASTProcessorVis::descendDeclarator(declaration_specifiers* _decl_spec){
     ContextData::baseSpecPart* otherSpecs = NULL;
     if(_decl_spec->specifier!=NULL){ otherSpecs = descendDeclarator(_decl_spec->specifier); }
     if(_decl_spec->storage_class_specifier!=NULL){ return new ContextData::typedefSpecPart(otherSpecs); }
     else if(_decl_spec->type_spec != NULL){ return TableInstance->TypeIsUserOrCanon(_decl_spec->type_spec->type, otherSpecs); }
 }
-decTypeInfo* ContextVisitor::descendDeclarator(abstract_declarator* _decl ){}
-decTypeInfo* ContextVisitor::descendDeclarator(direct_abstract_declarator* _dir_abs_dec){}
+decTypeInfo* ASTProcessorVis::descendDeclarator(abstract_declarator* _decl ){}
+decTypeInfo* ASTProcessorVis::descendDeclarator(direct_abstract_declarator* _dir_abs_dec){}
 
 //void visit(Node*); //If nothing defined for this type of node
 //might require special handling 

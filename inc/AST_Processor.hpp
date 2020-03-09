@@ -8,7 +8,7 @@
 
 #include <utility> //std::pair
 
-class ContextVisitor : public Visitor{
+class ASTProcessorVis : public Visitor{
 public:
 /*  Needs to link all identifiers in the ast with info in the table
     Needs to intereact with table for scope changes, add records, change records?
@@ -19,7 +19,7 @@ public:
         Stack frame / pointer locations
 
 */
-    ContextVisitor(ContextTable* _table) : TableInstance(_table){
+    ASTProcessorVis(ContextTable* _table) : TableInstance(_table){
         //make sure to construct visitor with instance of table
         assert(_table);
     }
