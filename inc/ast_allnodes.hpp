@@ -887,7 +887,6 @@ class GenericExternalDeclaration : public Node{};
 
 class TranslationUnit : public Node
 {
-
 public:
     std::vector<GenericExternalDeclaration*> decls;
     TranslationUnit(GenericExternalDeclaration* _externaldef){ decls.push_back(_externaldef); }
@@ -897,14 +896,17 @@ public:
 
 class FunctionDefinition : public GenericExternalDeclaration{
 public:
+    FunctionDefinition(declaration_specifiers* _specs, declarator* _decl, CompoundStatement* _stmt) : specs(_specs), decl(_decl), Body(_stmt){}
+    FunctionDefinition(declarator* _decl, CompoundStatement* _stmt) : FunctionDefinition(NULL, _decl, _stmt){}
     declaration_specifiers* specs;
     declarator* decl;
-    DeclarationList* decl_list;
+    //DeclarationList* decl_list; only needed for k&r
     CompoundStatement* Body;
 };
 
 class ExternalDeclaration : public GenericExternalDeclaration{
 public:
+    ExternalDeclaration(declaration* _decl) : decl(_decl){}
     declaration* decl;
 };
 
