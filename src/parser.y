@@ -2,9 +2,9 @@
 
   #include<iostream>
   #include<string>
-  #include "ast_allnodes.hpp"
+  #include "./ast_allnodes.hpp"
 
-  extern const Node *g_root; // A way of getting the AST out
+  extern Node *g_root; // A way of getting the AST out
   //! This is to fix problems when generating C++
   // We are declaring the functions provided by Flex, so
   // that Bison generated code can call them.
@@ -48,6 +48,9 @@
     direct_abstract_declarator * t_direct_abstract_declarator;
     initializer * t_initializer;
     initializer_list * t_initializer_list;
+
+
+    TranslationUnit * t_translation_unit;
 };
 
 %token Constant_int Constant_char Constant_double Constant_float Constant_long_double
@@ -121,8 +124,10 @@
 %type <stmt> iteration_statement
 %type <stmt> jump_statement 
 
+%type <t_translation_unit> translation_unit
 
 %start ROOT
+
 
 %%
 
@@ -434,8 +439,8 @@ External definitions
 translation_unit: external_declaration
                 | translation_unit external_declaration
 
-external_declaration: function_definition
-                    | declaration
+external_declaration: function_definition {/* $$ = new FunctionDefinition(); */ }
+                    | declaration { /*$$ = new declaration(); */}
 
 function_definition: declarator compound_statement
                    | declarator declaration_list compound_statement
@@ -443,23 +448,20 @@ function_definition: declarator compound_statement
                    | declaration_specifiers declaration declaration_list compound_statement/*TODO is this right?*/
 
 
-ROOT: translation_unit { std::cerr << "Its a valid program" << std::endl; }
+ROOT: translation_unit { std::cerr << "Its a valid program" << std::endl; g_root = $1; }
 
 %%
-/*
-const Expression *g_root; // Definition of variable (to match declaration earlier)
-*/
 
-void parseAST()
+Node *g_root; // Definition of variable (to match declaration earlier)
+
+Node * parseAST()
 {
   std::cerr << "parsing" << std::endl;
-  for(;;)
-  {
-  	yyparse();
-  }
-  return;
+  g_root = 0;
+  yyparse();
+  return g_root;
 }
-
+/*
 main()
 {
 	std::cerr << "starting parser" << std::endl;
@@ -468,3 +470,4 @@ main()
 		parseAST();
 	}
 }
+*/

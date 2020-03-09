@@ -125,7 +125,7 @@ class ExternalDeclaration;
 
 class Node{
 public:
-    void accept(Visitor* AVisitor);
+    void accept(Visitor* AVisitor) {}
 
     
 };
@@ -842,7 +842,7 @@ public:
 // a class used to signify that a parameter list is empty
 class empty_parameter_list : public parameter_list {
 public:
-    empty_parameter_list();
+    empty_parameter_list() {}
 };
 
 class parameter_declaration : public Node

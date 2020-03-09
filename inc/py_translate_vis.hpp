@@ -111,17 +111,17 @@ public:
     void visit(init_declarator * id)
     {
         // getting variable name
-        auto name = id->dec->dir_dec->ID->Name;
+        auto name = *(id->dec->dir_dec->ID->Name);
         if (global.find(name) !=  global.end())
         {
             // variable is referenced in global scope
-            std::cout << "global "
+            std::cout << "global ";
         }
         id->dec->dir_dec->ID->accept(this);
         if (indentation == 0)
         {
             // if we are in the global scope, we add it to the set
-            global.insert(id->dec->dir_dec->ID->Name);
+            global.insert(*(id->dec->dir_dec->ID->Name));
         }
         std::cout << "=";
         if (id->init == NULL)
@@ -225,12 +225,6 @@ public:
     
     }
 
-    
-public:
-    python_Visitor()
-    {
-        indentation = 0;
-    }
 };
 
 #endif
