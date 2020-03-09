@@ -27,7 +27,7 @@ class IdentifierNode : public Expression{
 public:
     IdentifierNode(std::string _name) : Name(_name){}
     std::string Name;
-    Context::Record* ContextRecord;
+    ContextData::Record* ContextRecord;
 };
 
 class Constant : public Expression{

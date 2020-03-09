@@ -202,12 +202,12 @@ public:
 		External Definitions
 	*/
 
-    //TODO This isn't right?
+    //TODO 
     void visit(TranslationUnit* unit)
 	{
-        for (std::vector<GenericAssignExpr>::iterator it = decls.begin(); it != decls.end(); it++)
+        for (std::vector<GenericExternalDeclaration*>::iterator it = unit->decls.begin(); it < unit->decls.end(); it++)
         {
-            it->accept(this);
+            (*it)->accept(this);
         }
     }
     void visit(FunctionDefinition* fd)
@@ -234,4 +234,3 @@ public:
 };
 
 #endif
-

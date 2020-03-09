@@ -12,7 +12,7 @@
 // #include "ast_context.hpp"
 //CONTEXT DOES NOT NEED TO KNOW THESE NODES, HANDLED BY VISITOR
 //NO FORWARD DECLARATION NEEDED
-namespace Context{
+namespace ContextData{
     class Record;
 }
 class Visitor;
@@ -145,7 +145,7 @@ class IdentifierNode : public Expression{
 public:
     IdentifierNode(std::string* _name) : Name(_name){}
     std::string* Name;
-    Context::Record* ContextRecord;
+    ContextData::Record* ContextRecord;
 };
 
 

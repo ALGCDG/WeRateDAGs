@@ -285,7 +285,7 @@ struct_declaration_list: struct_declaration
 
 struct_declaration: specifier_list struct_declarator_list
 */
-specifier_list: type_specifier  { std::cerr << "tysp" << std::endl; }
+specifier_list: type_specifier  { std::cerr << "tysp" << std::endl; } /*TODO!*/
 						| type_specifier specifier_list { std::cerr << "tysp spli" << std::endl; }
 /*
 struct_declarator_list: struct_declarator
@@ -440,7 +440,7 @@ external_declaration: function_definition
 function_definition: declarator compound_statement
                    | declarator declaration_list compound_statement
                    | declaration_specifiers declarator compound_statement
-                   | declaration_specifiers declaration declaration_list compound_statement
+                   | declaration_specifiers declaration declaration_list compound_statement/*TODO is this right?*/
 
 
 ROOT: translation_unit { std::cerr << "Its a valid program" << std::endl; }
