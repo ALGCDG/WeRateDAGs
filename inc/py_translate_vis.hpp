@@ -66,7 +66,7 @@ public:
         {
             r->ReturnExpression->accept(this);
         }
-        std::cout << std::endl;
+        // std::cout << std::endl;
     }
     void visit(CompoundStatement* cs)
     {
@@ -270,6 +270,11 @@ public:
         {
             (*it)->accept(this);
         }
+        // inserting boilerplate main thread handling stuff
+        std::cout << "if __name__ == \"__main__\":" << std::endl;
+        std::cout << "\timport sys" << std::endl;
+        std::cout << "\tret=main()" << std::endl;
+        std::cout << "\tsys.exit(ret)" << std::endl;
     }
     void visit(FunctionDefinition* fd)
 	{
