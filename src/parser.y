@@ -335,7 +335,7 @@ direct_declarator: Ident { $$ = new direct_declarator($1); }
 pointer: Operator_mul { $$ = new pointer(); }
 	   | Operator_mul pointer { $$ = new pointer($2); }
 
-parameter_type_list: parameter_list
+parameter_type_list: parameter_list { $$ = $1; }
 
 parameter_list: parameter_declaration { $$ = new parameter_list($1); }
 		 	  | parameter_list Operator_comma parameter_declaration { $$ = new parameter_list($3, $1); }

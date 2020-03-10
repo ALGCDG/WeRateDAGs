@@ -147,6 +147,7 @@ public:
     }
     void visit(parameter_list * pl)
     {
+        std::cerr << "parameter list" << std::endl;
         pl->para_dec->accept(this);
         if (pl->para_list != NULL)
         {
@@ -155,10 +156,11 @@ public:
     }
     void visit(parameter_declaration * pd)
     {
+        std::cerr << "parameter declaration" << std::endl;
         std::cerr<< "parameter declaration" << std::endl;
         if (pd->dec != NULL)
         {
-            std::cout << *(pd->dec->dir_dec->ID->Name) << std::endl;
+            std::cout << *(pd->dec->dir_dec->ID->Name);
         }
     }
 
@@ -249,12 +251,15 @@ public:
     }
     void visit(FunctionDefinition* fd)
 	{
-        // getting function name
-        std::cout << *(fd->decl->dir_dec->ID->Name);
-        std::cout << '(';
-        // fd->decl->dir_dec->para_list->accept(this);
+        // // getting function name
+        std::cerr << "function definition" << std::endl;
+        // std::cout << *(fd->decl->dir_dec->ID->Name);
+        // std::cout << '(';
+        // // fd->decl->dir_dec->para_list->accept(this);
+        // std::cerr << *(fd->decl->dir_dec) << std::endl;
+        fd->decl->dir_dec->accept(this);
         std::cerr << (fd->decl->dir_dec->para_list == NULL) << std::endl;
-        std::cout << "):" << std::endl;
+        // std::cout << "):" << std::endl;
         indentation++;
         fd->Body->accept(this);
         indentation--;
@@ -268,6 +273,29 @@ public:
     void visit(Node * n)
     {
         std::cerr << "visiting node, not supported" << std::endl;
+    }
+    void visit(direct_declarator * dd)
+    {
+        std::cerr << "direct declarator" << std::endl;
+        if (dd->dir_dec != NULL)
+        {
+            dd->dir_dec->accept(this);
+            std::cout << '(';
+            if (dd->para_list != NULL)
+            {
+                std::cerr << "going to visit parameters: " << dd->para_list << std::endl;
+                dd->para_list->accept(this);
+            }
+            std::cout << "):" << std::endl;
+        }
+        else if (dd->ID != NULL)
+        {
+            std::cout << *(dd->ID->Name);
+        }
+        else
+        {
+            std::cerr << "nothing" << std::endl;
+        }
     }
 };
 

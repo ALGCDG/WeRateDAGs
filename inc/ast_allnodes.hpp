@@ -196,8 +196,11 @@ public:
     virtual void visit(specifier_list *) {}
     virtual void visit(pointer *) {}
     virtual void visit(base_declarator *) {}
+    virtual void visit(direct_declarator *) {}
     virtual void visit(abstract_declarator *) {}
     virtual void visit(declarator *) {}
+    virtual void visit(parameter_list *) {}
+    virtual void visit(parameter_declaration *) {}
 
     //Statements
     virtual void visit(EmptyStatement *) {}
