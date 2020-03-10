@@ -1,12 +1,13 @@
 #include "compiler.hpp"
 #include "ast_allnodes.hpp"
-#include "visitors.hpp"
+// #include "visitors.hpp"
 #include "py_translate_vis.hpp"
+#include <iostream>
 int main(int argc, char** argv)
 {
 	// creating ast
-    Node *ast=parseAST();
-
+    TranslationUnit *ast=parseAST();
+	std::cerr << "finished parsing, start compiling" << std::endl;
 	// checking if we are translating
 	auto output_filename = "a.out";
 	auto translate_flag = false;
@@ -24,8 +25,11 @@ int main(int argc, char** argv)
 	}
 	
 	// creating visitor
+	std::cerr << "creating visitor" << std::endl;
+	translate_flag=true; //TESTING translator
 	Visitor* language_processor = translate_flag ? new python_Visitor() : new Visitor() ;
 	// visiting ast
     ast->accept(language_processor);
+	delete language_processor;
     return 0;
 }
