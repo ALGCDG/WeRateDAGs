@@ -310,7 +310,7 @@ public: void accept(Visitor * AVisitor) override { AVisitor->visit(this); }};
 
 class FuncCall : public PostfixExpr{
 public:
-    FuncCall(Expression* _LHS) : PostfixExpr(_LHS) {}
+    FuncCall(Expression* _LHS) : PostfixExpr(_LHS), Args(NULL) {}
     FuncCall(Expression* _LHS, ArgExprList* RHS) : PostfixExpr(_LHS), Args(RHS){}
     ArgExprList* Args;
 
