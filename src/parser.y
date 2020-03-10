@@ -143,17 +143,17 @@ EXPRESSIONS
 */
 
 primary_EXPR: Ident { $$ = $1; }
-                 | Constant { std::cerr << "CONSTANT" << std::endl; }
+                 | Constant { $$ = $1; }
                   | String { std::cerr << "STRING" << std::endl; }
               | Punctuator_par_open EXPR Punctuator_par_close { std::cout << "(x)" << std::endl; }
 
 Ident: Identifier { $$ = new IdentifierNode($1); } 
 
-Constant: Constant_int {}  
-		| Constant_char {}
-		| Constant_double {}
-		| Constant_float {}
-		| Constant_long_double {}
+Constant: Constant_int { $$ = new constant_int($1); }  
+		| Constant_char  { $$ = new Constant(); }  
+		| Constant_double { $$ = new Constant(); }  
+		| Constant_float { $$ = new Constant(); }  
+		| Constant_long_double { $$ = new Constant(); }  
 
 
 postfix_EXPR: primary_EXPR { $$ = $1; } /*Pass through*/
@@ -342,7 +342,7 @@ parameter_list: parameter_declaration { $$ = new parameter_list($1); }
 
 parameter_declaration: declaration_specifiers declarator { $$ = new parameter_declaration($1, $2); }
 					 | declaration_specifiers  { $$ = new parameter_declaration($1); }
-					 | declaration_specifiers abstract_declarator { $$ = new parameter_declaration($1, $2); }
+					 | declaration_specifiers abstract_declarator { $$ = new parameter_declaration($1, NULL, $2); }
 
 /*identifier_list: Ident
 			   | identifier_list Operator_comma Ident

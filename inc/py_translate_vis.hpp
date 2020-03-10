@@ -4,8 +4,8 @@
 #include <string>
 #include <unordered_set>
 #include <iostream>
-
-#include "visitors.hpp"
+#include <typeinfo>
+// #include "visitors.hpp"
 #include "ast_allnodes.hpp"
 
 //? WHY ARE THE DEFINITIONS IN THE HPP?
@@ -19,6 +19,7 @@ public:
     std::unordered_set<std::string> global; 
     std::string gentabs()
     {
+        std::cerr << "generating tabs" << std::endl;
         std::string indent = "";
         for (int i = 0; i < indentation; i++)
         {
@@ -92,6 +93,7 @@ public:
     */
     void visit(declaration* dec)
     {
+        std::cerr << "declaration" << std::endl;
         std::cout << gentabs();
         // we can assume it is a function or an int
         if (dec->list != NULL)
@@ -102,6 +104,7 @@ public:
     }
     void visit(init_declarator_list * il)
     {
+        std::cerr << "init declarator list" << std::endl;
         il->init_dec->accept(this);
         if(il->init_dec_list != NULL)
         {
@@ -110,19 +113,24 @@ public:
     }
     void visit(init_declarator * id)
     {
+        std::cerr << "init declarator";
         // getting variable name
         auto name = *(id->dec->dir_dec->ID->Name);
+        std::cerr << " name is: " << name << std::endl;
         if (global.find(name) !=  global.end())
         {
             // variable is referenced in global scope
             std::cout << "global ";
         }
+        std::cerr << "checked global" << std::endl;
+        std::cout << name;
         id->dec->dir_dec->ID->accept(this);
         if (indentation == 0)
         {
             // if we are in the global scope, we add it to the set
             global.insert(*(id->dec->dir_dec->ID->Name));
         }
+        std::cerr << "added to global" << std::endl;
         std::cout << "=";
         if (id->init == NULL)
         {
@@ -132,7 +140,25 @@ public:
         else if (id->init->ass_expr != NULL)
         {
             // assigning int value
+            std::cerr << "going to assignment expression: " << std::endl;
             id->init->ass_expr->accept(this);
+            std::cerr << "done" << std::endl;
+        }
+    }
+    void visit(parameter_list * pl)
+    {
+        pl->para_dec->accept(this);
+        if (pl->para_list != NULL)
+        {
+            pl->para_list->accept(this);
+        }
+    }
+    void visit(parameter_declaration * pd)
+    {
+        std::cerr<< "parameter declaration" << std::endl;
+        if (pd->dec != NULL)
+        {
+            std::cout << *(pd->dec->dir_dec->ID->Name) << std::endl;
         }
     }
 
@@ -193,12 +219,22 @@ public:
     }
 
     void visit(AssignmentExpression* expr){
+        std::cerr << "assignment expression" << std::endl;
         expr->LHS->accept(this);
         std::cout << "=";
         expr->RHS->accept(this);
     }
-	
-	/*
+    void visit(Expression *expr)
+    {
+        std::cerr << "expression" << std::endl;
+    }
+    void visit(constant_int *ci)
+    {
+        std::cerr << "constant int value" << std::endl;
+        std::cout << ci->value << std::endl;
+    }
+
+    /*
 		External Definitions
 	*/
 
@@ -213,15 +249,20 @@ public:
     }
     void visit(FunctionDefinition* fd)
 	{
-        std::cout << fd->decl->dir_dec->ID->Name;
+        // getting function name
+        std::cout << *(fd->decl->dir_dec->ID->Name);
         std::cout << '(';
-        std::cout << "):";
+        // fd->decl->dir_dec->para_list->accept(this);
+        std::cerr << (fd->decl->dir_dec->para_list == NULL) << std::endl;
+        std::cout << "):" << std::endl;
         indentation++;
         fd->Body->accept(this);
         indentation--;
     }
-    void visit(ExternalDeclaration*)
+    void visit(ExternalDeclaration * ed)
 	{
+        std::cerr << "ex dec" << std::endl;
+        ed->decl->accept(this);
     
     }
     void visit(Node * n)
