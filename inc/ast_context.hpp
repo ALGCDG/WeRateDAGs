@@ -42,7 +42,7 @@ namespace ContextData
     public:
         Record() : parent(NULL){}
         //all records have parents
-        void SetParent(ScopeRecord* _parent); //non virtual
+        void SetScopeParent(ScopeRecord* _parent); //non virtual
         ScopeRecord* GetParent(); //non virtual
         virtual std::string* Name(){ return NULL; }
     protected:
@@ -54,10 +54,21 @@ namespace ContextData
     public:
         ScopeRecord() : Record(){} //set parent to null
         void AddRecord(Record* _rec); //wrapper for push_back
+        virtual std::vector<Record*>& GetSubTable();
+    protected:
         std::vector<Record*> SubTable;
     };
 
-
+    class FunctionScopeRecord : public ScopeRecord{
+    public:
+        FunctionScopeRecord() : ScopeRecord(){}
+        //need to make function params decl available as declaration to
+        //subscope 
+        std::vector<Record*>& GetSubTable() override; 
+        void SetDeclarationPtr(FunctionDefOrDec* def);
+        FunctionDefOrDec* declaration;
+    };
+    //===========================
     class NamedRecord : public Record{
     public:
         NamedRecord(std::string* _name): Record(), name(_name){}
@@ -72,6 +83,14 @@ namespace ContextData
     public:
         VariableDeclaration(std::string* _name, typePart* _type):NamedRecord(_name), type(_type){} 
         typePart* type;
+    };
+    class FunctionDefOrDec : public NamedRecord{
+    public:
+        FunctionDefOrDec(std::string* _name, typePart* _info): NamedRecord(_name),info(_info){}
+        typePart* info;
+        FunctionScopeRecord* definition;
+        void SetDefRecordPtr(FunctionScopeRecord* scopeptr);
+        std::vector<Record*> exposeNamedParams();
     };
 
 
@@ -88,8 +107,8 @@ namespace ContextData
     };
     class IDPart : public typePart{
     public:
-        IDPart(IdentifierNode* _ID, typePart* _child) : ID(_ID), definedToBe(_child){}
-        IdentifierNode* ID;
+        IDPart(IdentifierNode* _ID, typePart* _child) : ast_node(_ID), definedToBe(_child){}
+        IdentifierNode* ast_node;
         typePart* definedToBe;
         void AddChild(typePart* _child);
     };
@@ -100,16 +119,21 @@ namespace ContextData
         void AddChild(typePart* _child);//define
     };
 
+    class argsPart : public typePart{
+    public:
+        std::vector<argPart*> argTypes;
+    };
     class argPart : public typePart{
     public:
-        std::vector<typePart*> argTypes;
+        argPart(typePart* _info) : argInfo(_info){}
+        typePart* argInfo;
     };
 
     class funcPart : public typePart{
     public:
-        funcPart(argPart* _args, typePart* _returns) : returns(_returns), args(_args){}
+        funcPart(argsPart* _args, typePart* _returns) : returns(_returns), args(_args){}
         typePart* returns;
-        argPart* args;
+        argsPart* args;
         void AddChild(typePart* _child);
     };
 
@@ -160,7 +184,7 @@ namespace ContextData
 //maps name directly to node
 class ContextTable{
 public:
-    ContextTable() : table_data(), currParentScopePtr(NULL){}
+    ContextTable() : table_data(), currScopePtr(NULL){}
 
     void NewScope();
     void PopScope();
@@ -169,10 +193,12 @@ public:
     bool IdentifierIsGlobal(std::string _ID); // not defined yet
     //searches symbol table for appearance and returns constructed userSpec or canon spec with pointer to definition if user
     ContextData::baseSpecPart* TypeIsUserOrCanon(std::string* keyword, ContextData::baseSpecPart* otherSpecs);
-
+    
+    //link together and set scope ptr correctly
+    void AddFunctionDecAndBody(ContextData::FunctionDefOrDec* def, ContextData::FunctionScopeRecord* body);
 private:
     std::vector<ContextData::Record*> table_data;
-    ContextData::ScopeRecord* currParentScopePtr;//NULL if at global scope
+    ContextData::ScopeRecord* currScopePtr;//NULL if at global scope
     void AddToActiveTable(ContextData::Record* _rec);
     std::vector<ContextData::Record*>& GetActiveTable();
     ContextData::Record* FindNameInActiveTable(const std::string& _name);

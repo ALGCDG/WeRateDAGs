@@ -835,9 +835,9 @@ class parameter_list : public Node
 public:
     parameter_list * para_list;// cascades, may be null
     parameter_declaration * para_dec;
-    abstract_declarator * abs_dec;
-    parameter_list(parameter_declaration * _para_dec, parameter_list * _para_list = NULL, abstract_declarator * _abs_dec = NULL) : para_list(_para_list), para_dec(_para_dec), abs_dec(_abs_dec) {}
-    parameter_list():para_list(NULL), para_dec(NULL), abs_dec(NULL){}
+    //abstract_declarator * abs_dec;
+    parameter_list(parameter_declaration * _para_dec, parameter_list * _para_list = NULL, abstract_declarator * _abs_dec = NULL) : para_list(_para_list), para_dec(_para_dec){}
+    parameter_list():para_list(NULL), para_dec(NULL){}
 };
 // a class used to signify that a parameter list is empty
 class empty_parameter_list : public parameter_list {

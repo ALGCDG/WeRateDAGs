@@ -6,6 +6,7 @@
 #include "ast_allnodes.hpp"
 #include <cassert>
 
+#include <algorithm> //for_each
 #include <utility> //std::pair
 
 class ASTProcessorVis : public Visitor{
@@ -33,15 +34,16 @@ private:
     //will return a linked list something like unsigned -> long -> int
     ContextData::baseSpecPart* descendDecSpecs(declaration_specifiers* _decl_spec);
 
-    std::vector<decTypeInfo*>& descendInitDecList(init_declarator_list* _list);
+    std::vector<decTypeInfo>& descendInitDecList(init_declarator_list* _list);
     decTypeInfo descendInitDec(init_declarator* _init_dec); //basically just ignore init part, not relevant for table
     decTypeInfo descendDeclarator(pointer* _ptr);
     decTypeInfo descendDeclarator(declarator* _decl);
 
     decTypeInfo descendDeclarator(direct_declarator* _dir_dec);
     decTypeInfo descendDeclarator(IdentifierNode* _id);
-    ContextData::argPart* descendDeclarator(parameter_list* _par_list);
-    decTypeInfo descendDeclarator(parameter_declaration* _par_dec);
+    ContextData::argsPart* descendDeclarator(parameter_list* _par_list);
+    ContextData::argPart* descendDeclarator(parameter_declaration* _par_dec);
+    decTypeInfo ASTProcessorVis::descendDeclarator(base_declarator * _decl);
     decTypeInfo descendDeclarator(abstract_declarator* _decl);
     decTypeInfo descendDeclarator(direct_abstract_declarator* _dir_abs_dec);
 
@@ -137,6 +139,7 @@ private:
     void visit(FunctionDefinition* _funcdef);
     void visit(ExternalDeclaration* _extdec);
     
+
 };
 
 namespace{

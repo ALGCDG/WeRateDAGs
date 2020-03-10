@@ -13,7 +13,7 @@ ContextData::baseSpecPart* ASTProcessorVis::descendDecSpecs(declaration_specifie
 }
 
 //get decType info from each of the items in the list
-std::vector<decTypeInfo>& descendInitDecList(init_declarator_list* _list){
+std::vector<decTypeInfo>& ASTProcessorVis::descendInitDecList(init_declarator_list* _list){
     std::vector<decTypeInfo> listDecInfo;
     init_declarator_list* traversePtr = _list;
     do{
@@ -24,7 +24,7 @@ std::vector<decTypeInfo>& descendInitDecList(init_declarator_list* _list){
 }
 
 //get the info from the declaration
-decTypeInfo descendInitDec(init_declarator* _init_dec);{
+decTypeInfo ASTProcessorVis::descendInitDec(init_declarator* _init_dec){
     return descendDeclarator(_init_dec->dec);
 }
 
@@ -58,7 +58,7 @@ decTypeInfo ASTProcessorVis::descendDeclarator(declarator* _decl)
         dir_dec_info.second = pointer_info.second;   
         //make tail of pointer chain tail of total list
     }
-
+    
     return dir_dec_info;
 
     
@@ -86,14 +86,13 @@ decTypeInfo ASTProcessorVis::descendDeclarator(direct_declarator* _this_dir_dec)
             return below;
         }
         else if(_this_dir_dec->para_list!=NULL){
-            ContextData::argPart* args = descendDeclarator(_this_dir_dec->para_list);
+            ContextData::argsPart* args = descendDeclarator(_this_dir_dec->para_list);
             ContextData::funcPart* this_func = new ContextData::funcPart(args, NULL);
             below.second->AddChild(this_func);
             below.second = this_func;
             return below;
         }
     }
-
 }
 
 decTypeInfo ASTProcessorVis::descendDeclarator(IdentifierNode* _id)
@@ -102,16 +101,44 @@ decTypeInfo ASTProcessorVis::descendDeclarator(IdentifierNode* _id)
     return decTypeInfo(head,head);
 }
 
-ContextData::argPart* ASTProcessorVis::descendDeclarator(parameter_list* _par_list)
-{
-    //TODO
+ContextData::argsPart* ASTProcessorVis::descendDeclarator(parameter_list* _par_list)
+{   
+    //TODO empty params?
+    ContextData::argsPart* args = new ContextData::argsPart();
+    parameter_list* list_traverser = _par_list;
+    do{
+        ContextData::argPart* argInfo = descendDeclarator(list_traverser->para_dec);
+        args->argTypes.push_back(argInfo);//add head to params
+        list_traverser = list_traverser->para_list;
+    }while(list_traverser!=NULL);
+    //reverse, params accessed from right to left
+    std::reverse(args->argTypes.begin(),args->argTypes.end());
+    return args;
 }
-decTypeInfo ASTProcessorVis::descendDeclarator(parameter_declaration* _par_dec)
+
+ContextData::argPart* ASTProcessorVis::descendDeclarator(parameter_declaration* _par_dec)
 {
-    //TODO
+    //param decl contains:
+    // dec specs
+    // dec specs, abstract decl
+    // dec specs, declarator
+    ContextData::baseSpecPart* decspecs = descendDecSpecs(_par_dec->dec_spec);
+    decTypeInfo argInfo = decTypeInfo(NULL,NULL); //init as empty
+    if(_par_dec->dec!=NULL){
+        argInfo = descendDeclarator(_par_dec->dec);
+        //TODO remember abstracc params
+        argInfo.second->AddChild(decspecs);
+    }
+    else{
+        argInfo.first = decspecs;
+    }
+    return new ContextData::argPart(argInfo.first);
+}
+decTypeInfo ASTProcessorVis::descendDeclarator(base_declarator * _decl){
+    throw("base declarator encountered instead of specic abstract or direct:(");
 }
 decTypeInfo ASTProcessorVis::descendDeclarator(abstract_declarator* _decl ){
-    //TODO
+    
 }
 decTypeInfo ASTProcessorVis::descendDeclarator(direct_abstract_declarator* _dir_abs_dec){
     //TODO
@@ -195,7 +222,9 @@ decTypeInfo ASTProcessorVis::descendDeclarator(direct_abstract_declarator* _dir_
     void ASTProcessorVis::visit(CompoundStatement* _compstat){}
 
     //scope changing
-    void ASTProcessorVis::visit(While* _whi){}
+    void ASTProcessorVis::visit(While* _whi){
+        
+    }
     void ASTProcessorVis::visit(DoWhile* _dowhi){}
     void ASTProcessorVis::visit(For* _for){}
     void ASTProcessorVis::visit(If* _if){}
@@ -205,7 +234,43 @@ decTypeInfo ASTProcessorVis::descendDeclarator(direct_abstract_declarator* _dir_
 
     //External definitions
     void ASTProcessorVis::visit(TranslationUnit* _trans){
-        
+        for (auto el : _trans->decls){
+            el->accept(this);
+        }
     }
-    void ASTProcessorVis::visit(FunctionDefinition* _funcdef){}
-    void ASTProcessorVis::visit(ExternalDeclaration* _extdec){}
+    void ASTProcessorVis::visit(FunctionDefinition* _funcdef){
+        //TODO consider declaratinos preceding definitions
+        ContextData::baseSpecPart* spec_info;
+        if(_funcdef->specs != NULL){
+            spec_info = descendDecSpecs(_funcdef->specs);
+        }
+        else{
+            //presume integer
+            spec_info = new ContextData::canonSpecPart(new std::string("int"),NULL);
+        }
+        decTypeInfo decl_info = descendDeclarator(_funcdef->decl);
+        decl_info.second->AddChild(spec_info);
+        decl_info.second = spec_info;
+        //head of list is deffo identifier, so can do this
+        ContextData::IDPart* id = static_cast<ContextData::IDPart*>(decl_info.first);
+        ContextData::FunctionDefOrDec* funcdefrecord = new ContextData::FunctionDefOrDec(id->ast_node->Name, decl_info.first);
+        
+        // TableInstance->AddObjectRecord(funcdefrecord);
+        id->ast_node->ContextRecord = funcdefrecord; //link id node in ast to def in table
+        auto scopeRecord = new ContextData::FunctionScopeRecord();
+        // //link together dec and def
+        // scopeRecord->SetDeclarationPtr(funcdefrecord);
+        // funcdefrecord->SetDefRecordPtr(scopeRecord);
+        // TableInstance->SetActiveScope(scopeRecord);
+        // _funcdef->Body->accept(this);
+        // TableInstance->SetActiveScope()
+
+        TableInstance->AddFunctionDecAndBody(funcdefrecord, scopeRecord);
+        _funcdef->Body->accept(this);
+        //leave function scope
+        TableInstance->PopScope();
+    }
+    void ASTProcessorVis::visit(ExternalDeclaration* _extdec){
+        //hop straight down to the declaration
+        _extdec->decl->accept(this);
+    }

@@ -2,7 +2,7 @@
 
 namespace ContextData
 {
-    void Record::SetParent(ScopeRecord* _parent){
+    void Record::SetScopeParent(ScopeRecord* _parent){
         parent = _parent;
     }
 
@@ -14,7 +14,17 @@ namespace ContextData
     void ScopeRecord::AddRecord(Record* _rec){
         SubTable.push_back(_rec);
     }
+    std::vector<Record*>& ScopeRecord::GetSubTable(){
+        return SubTable;
+    }
 
+    std::vector<Record*>& FunctionScopeRecord::GetSubTable(){
+        //gets parameters and creates a new vector
+        //with those parameters at the start of the decls
+        std::vector<Record*> paramDecls = declaration->exposeNamedParams();
+        paramDecls.insert(paramDecls.end(), SubTable.begin(), SubTable.end());
+        return paramDecls;
+    }
     void IDPart::AddChild(typePart* _child){
         definedToBe = _child;
     }
@@ -43,13 +53,13 @@ namespace ContextData
 
 void ContextTable::NewScope(){
     ContextData::ScopeRecord* newScopeTable = new ContextData::ScopeRecord();
-    newScopeTable->SetParent(currParentScopePtr);
+    newScopeTable->SetScopeParent(currScopePtr);
     AddToActiveTable(newScopeTable);
-    currParentScopePtr = newScopeTable;
+    currScopePtr = newScopeTable;
 }
 
 void ContextTable::PopScope(){
-    currParentScopePtr=currParentScopePtr->GetParent();//step up one level
+    currScopePtr=currScopePtr->GetParent();//step up one level
 }
 
 void ContextTable::AddObjectRecord(ContextData::NamedRecord* _rec){
@@ -57,17 +67,18 @@ void ContextTable::AddObjectRecord(ContextData::NamedRecord* _rec){
 }
 
 void ContextTable::AddToActiveTable(ContextData::Record* _rec){
-    if(currParentScopePtr == NULL) table_data.push_back(_rec);
-    else{ currParentScopePtr->AddRecord(_rec); }
+    if(currScopePtr == NULL) table_data.push_back(_rec);
+    else{ currScopePtr->AddRecord(_rec); }
 }
 
 std::vector<ContextData::Record*>& ContextTable::GetActiveTable(){
-    if(currParentScopePtr == NULL) return table_data;
-    else{ return currParentScopePtr->SubTable; }
+    if(currScopePtr == NULL) return table_data;
+    else{ return currScopePtr->GetSubTable(); }
 }
 
 ContextData::Record* ContextTable::FindNameInActiveTable(const std::string& _name){
     std::vector<ContextData::Record*> currTable = GetActiveTable();
+    //find most recent addition (reverse search, as push_back to add new entries)
     auto result = std::find_if(currTable.rbegin(), currTable.rend(), [&_name](ContextData::Record* entry)
         { 
             return *(entry->Name()) == _name;
@@ -78,19 +89,28 @@ ContextData::Record* ContextTable::FindNameInActiveTable(const std::string& _nam
 }
 
 ContextData::Record* ContextTable::GetObjectRecord(const std::string& _ID){
-    ContextData::ScopeRecord* backupPtr = currParentScopePtr;
+    ContextData::ScopeRecord* backupPtr = currScopePtr;
     bool end = false;
     while(!end){
-        end = (currParentScopePtr==NULL);
+        end = (currScopePtr==NULL);
         auto result = FindNameInActiveTable(_ID);
         if (result != NULL){ 
-            currParentScopePtr=backupPtr;
+            currScopePtr=backupPtr;
             return result; 
         }
         else{
-            currParentScopePtr=currParentScopePtr->GetParent();
+            currScopePtr=currScopePtr->GetParent();
         }
     }
-    currParentScopePtr=backupPtr;
+    currScopePtr=backupPtr;
     return NULL;
+}
+
+void ContextTable::AddFunctionDecAndBody(ContextData::FunctionDefOrDec* def, ContextData::FunctionScopeRecord* body){
+    def->SetScopeParent(currScopePtr);//belongs to this parent scope
+    body->SetScopeParent(currScopePtr);//body also is in this scope
+    body->SetDeclarationPtr(def);//but is linked to the def/dec for its param decls
+    //sort of like a 'virtual' scope
+    AddObjectRecord(def);
+    currScopePtr = body;
 }
