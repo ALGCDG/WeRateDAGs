@@ -70,6 +70,7 @@ public:
     }
     void visit(CompoundStatement* cs)
     {
+        std::cerr << "compound satement" << std::endl;
         // handling sequences
         if (cs->Decls != NULL)
         {
@@ -78,15 +79,33 @@ public:
         if (cs->Statements != NULL)
         {
             cs->Statements->accept(this);
-        }   
+        }
     }
     void visit(StatementList* sl)
     {
-        sl->statement->accept(this);
+        std::cerr << "statement list: " << sl->RestOfStatements << std::endl;
         if (sl->RestOfStatements != NULL)
         {
+            std::cerr << "going to other statement" << std::endl;
             sl->RestOfStatements->accept(this);
         }
+        sl->statement->accept(this);
+        std::cout << std::endl;
+    }
+    void visit(DeclarationList *dl)
+    {
+        std::cerr << "declaration list: " << dl->left_list << std::endl;
+        if (dl->left_list!=NULL)
+        {
+            dl->left_list->accept(this);
+        }
+        dl->this_decl->accept(this);
+
+    }
+    void visit(ExpressionStatement * es)
+    {
+        std::cout << gentabs();
+        es->Expr->accept(this);
     }
     /*
     Declarations
@@ -124,13 +143,13 @@ public:
         }
         std::cerr << "checked global" << std::endl;
         std::cout << name;
-        id->dec->dir_dec->ID->accept(this);
+        // id->dec->dir_dec->ID->accept(this);
         if (indentation == 0)
         {
             // if we are in the global scope, we add it to the set
             global.insert(*(id->dec->dir_dec->ID->Name));
+            std::cerr << "added to global" << std::endl;
         }
-        std::cerr << "added to global" << std::endl;
         std::cout << "=";
         if (id->init == NULL)
         {
@@ -140,7 +159,7 @@ public:
         else if (id->init->ass_expr != NULL)
         {
             // assigning int value
-            std::cerr << "going to assignment expression: " << std::endl;
+            std::cerr << "going to assignment expression: " << typeid(*(id->init->ass_expr)).name() << std::endl;
             id->init->ass_expr->accept(this);
             std::cerr << "done" << std::endl;
         }
@@ -148,11 +167,12 @@ public:
     void visit(parameter_list * pl)
     {
         std::cerr << "parameter list" << std::endl;
-        pl->para_dec->accept(this);
         if (pl->para_list != NULL)
         {
             pl->para_list->accept(this);
+            std::cout << ", ";
         }
+        pl->para_dec->accept(this);
     }
     void visit(parameter_declaration * pd)
     {
@@ -216,12 +236,8 @@ public:
             (*it)->accept(this);
         }
     }
-    void visit(IdentifierNode* ID){
-        std::cout << ID->Name;
-    }
-
     void visit(AssignmentExpression* expr){
-        std::cerr << "assignment expression" << std::endl;
+        std::cerr << "assignment expression: " << typeid(*(expr->LHS)).name() << std::endl;
         expr->LHS->accept(this);
         std::cout << "=";
         expr->RHS->accept(this);
@@ -233,8 +249,14 @@ public:
     void visit(constant_int *ci)
     {
         std::cerr << "constant int value" << std::endl;
-        std::cout << ci->value << std::endl;
+        std::cout << ci->value;
     }
+    void visit(IdentifierNode * in)
+    {
+        std::cerr << "identifier" << std::endl;
+        std::cout << *(in->Name);
+    }
+
 
     /*
 		External Definitions
@@ -270,32 +292,34 @@ public:
         ed->decl->accept(this);
     
     }
-    void visit(Node * n)
-    {
-        std::cerr << "visiting node, not supported" << std::endl;
-    }
+    // void visit(Node * n)
+    // {
+    //     std::cerr << "visiting node, not supported: " << typeid(*n).name() << std::endl;
+    // }
     void visit(direct_declarator * dd)
     {
         std::cerr << "direct declarator" << std::endl;
-        if (dd->dir_dec != NULL)
-        {
-            dd->dir_dec->accept(this);
-            std::cout << '(';
-            if (dd->para_list != NULL)
-            {
-                std::cerr << "going to visit parameters: " << dd->para_list << std::endl;
-                dd->para_list->accept(this);
-            }
-            std::cout << "):" << std::endl;
-        }
-        else if (dd->ID != NULL)
+        if (dd->ID != NULL)
         {
             std::cout << *(dd->ID->Name);
         }
-        else
-        {
-            std::cerr << "nothing" << std::endl;
+        else{
+            if (dd->dir_dec != NULL)
+            {
+                dd->dir_dec->accept(this);
+                std::cout << '(';
+                if (dd->para_list != NULL)
+                {
+                    std::cerr << "going to visit parameters: " << dd->para_list << std::endl;
+                    dd->para_list->accept(this);
+                }
+                std::cout << "):" << std::endl;
+            }
         }
+    }
+    void visit(empty_parameter_list * epl)
+    {
+
     }
 };
 

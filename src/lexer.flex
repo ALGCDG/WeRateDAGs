@@ -105,7 +105,7 @@ Operator [+\-*/%&|^><=!~?:.,#\[\]\(\)\{\}]
             return Identifier;
 }
 
-{Sign}?{Decimal}*\.{Decimal}*({Exponent}{Sign}?{Decimal}+)?   {
+{Decimal}*\.{Decimal}*({Exponent}{Sign}?{Decimal}+)?   {
         /*
         double constant
         */
@@ -113,7 +113,7 @@ Operator [+\-*/%&|^><=!~?:.,#\[\]\(\)\{\}]
 		return Constant_double;
 }
 
-{Sign}?{Decimal}*\.{Decimal}*({Exponent}{Sign}?{Decimal}+)?{Float}   {
+{Decimal}*\.{Decimal}*({Exponent}{Sign}?{Decimal}+)?{Float}   {
         /*
         float constant
         */
@@ -121,7 +121,7 @@ Operator [+\-*/%&|^><=!~?:.,#\[\]\(\)\{\}]
 		return Constant_float;
 }
 
-{Sign}?{Decimal}*\.{Decimal}*({Exponent}{Sign}?{Decimal}+)?{Long}   {
+{Decimal}*\.{Decimal}*({Exponent}{Sign}?{Decimal}+)?{Long}   {
         /*
         long double constant
         */
@@ -130,7 +130,7 @@ Operator [+\-*/%&|^><=!~?:.,#\[\]\(\)\{\}]
 }
 
 
-{Sign}?{NonZero}{Decimal}*   {
+{NonZero}{Decimal}*   {
         /*
         decimal constant
         */

@@ -142,7 +142,7 @@
 EXPRESSIONS
 */
 
-primary_EXPR: Ident { $$ = $1; }
+primary_EXPR: Ident { std::cerr << "parsed id"<<std::endl;$$ = $1; }
                  | Constant { $$ = $1; }
                   | String { std::cerr << "STRING" << std::endl; }
               | Punctuator_par_open EXPR Punctuator_par_close { std::cout << "(x)" << std::endl; }
@@ -330,7 +330,7 @@ direct_declarator: Ident { $$ = new direct_declarator($1); }
 				 | direct_declarator Punctuator_squ_open constant_EXPR Punctuator_squ_close  { $$ = new direct_declarator(NULL, $1, $3); }
 				 | direct_declarator Punctuator_par_open parameter_type_list  Punctuator_par_close  { $$ = new direct_declarator(NULL, $1, NULL, $3); }
 				 /*| direct_declarator Punctuator_par_open identifier_list Punctuator_par_close { std::cerr << "still not sure what this does" << std::endl; } k&r style, not needed*/
-				 | direct_declarator Punctuator_par_open Punctuator_par_close { std::cerr << "function taking 0 args" << std::endl; }
+				 | direct_declarator Punctuator_par_open Punctuator_par_close { $$ = new direct_declarator(NULL, $1, NULL, new empty_parameter_list()); }
 
 pointer: Operator_mul { $$ = new pointer(); }
 	   | Operator_mul pointer { $$ = new pointer($2); }
@@ -406,7 +406,7 @@ compound_statement: Punctuator_cur_open declaration_list statement_list Punctuat
 declaration_list: declaration {$$ = new DeclarationList($1); }
                 | declaration_list declaration { $$ = new DeclarationList($1, $2); }
 
-statement_list: statement { $$ = new StatementList($1); }
+statement_list: statement { std::cerr << "parsing single statement" << std::endl;$$ = new StatementList($1); }
               | statement_list statement { $$ = new StatementList($1, $2); }
 
 EXPR_statement: EXPR Punctuator_eol { $$ = new ExpressionStatement($1); }

@@ -110,7 +110,7 @@ class abstract_declarator;
 class declarator;
 class base_direct_declarator;
 class unspecified_array_length;
-class empty_parameter_list_list;
+class empty_parameter_list;
 class direct_abstract_declarator;
 class direct_declarator;
 class direct_declarator_direct_declarator;
@@ -133,6 +133,7 @@ public:
     //potential to combine some of the visits into the same overload?
     //Expressions
     virtual void visit(Node *) {} //If nothing defined for this type of node
+    virtual void visit(IdentifierNode *) {}
     virtual void visit(Constant *) {}
     virtual void visit(constant_int *) {}
     virtual void visit(ArraySubscript *) {}
@@ -200,6 +201,7 @@ public:
     virtual void visit(abstract_declarator *) {}
     virtual void visit(declarator *) {}
     virtual void visit(parameter_list *) {}
+    virtual void visit(empty_parameter_list *) {}
     virtual void visit(parameter_declaration *) {}
 
     //Statements
@@ -215,6 +217,7 @@ public:
     virtual void visit(Switch *) {}
     virtual void visit(ExpressionStatement *) {}
     virtual void visit(StatementList *) {}
+    virtual void visit(DeclarationList *) {}
     virtual void visit(CompoundStatement *) {}
     virtual void visit(CaseOrDefault *) {}
 
@@ -720,7 +723,7 @@ public: void accept(Visitor * AVisitor) override { AVisitor->visit(this); }};
 class StatementList : public Node{
 public:
     StatementList(Statement* TerminalStatement) : statement(TerminalStatement), RestOfStatements(NULL){}
-    StatementList(StatementList* OtherStatements, Statement* ThisStatement) : statement(ThisStatement), RestOfStatements(RestOfStatements){}
+    StatementList(StatementList *OtherStatements, Statement *ThisStatement) : statement(ThisStatement), RestOfStatements(OtherStatements) {}
     bool isTerminalStatement() const;
 
     Statement* statement;
