@@ -138,10 +138,11 @@ decTypeInfo ASTProcessorVis::descendDeclarator(base_declarator * _decl){
     throw("base declarator encountered instead of specic abstract or direct:(");
 }
 decTypeInfo ASTProcessorVis::descendDeclarator(abstract_declarator* _decl ){
-    
+    throw("abstract processor not yet implemented");
 }
 decTypeInfo ASTProcessorVis::descendDeclarator(direct_abstract_declarator* _dir_abs_dec){
-    //TODO
+    throw("direct abstract proessor not yet implemented");
+
 }
 
 //void visit(Node*); //If nothing defined for this type of node
@@ -201,11 +202,37 @@ decTypeInfo ASTProcessorVis::descendDeclarator(direct_abstract_declarator* _dir_
     void ASTProcessorVis::visit(CommaSepExpression* _comsep){}
 
     //Declarations
-    void ASTProcessorVis::visit(declaration* _dectn){}
-    void ASTProcessorVis::visit(declaration_specifiers* _decspec){}
-    void ASTProcessorVis::visit(init_declarator_list* _indeclis){}
-    void ASTProcessorVis::visit(init_declarator* _indec){}
-    void ASTProcessorVis::visit(type_specifier* _typespec){}
+    void ASTProcessorVis::visit(declaration* _dectn){
+        //TODO
+        if(_dectn->list!=NULL){
+            ContextData::baseSpecPart* specs = descendDecSpecs(_dectn->specifier);
+            std::vector<decTypeInfo> initList_info = descendInitDecList(_dectn->list);
+            for(auto info : initList_info){
+                //deep copy the dec specs, so that seperate decls in the list aren't connected
+                ContextData::baseSpecPart* specCpy = ContextData::baseSpecPart::CopySpecList(specs);
+                info.second->AddChild(specCpy);
+                ContextData::IDPart* id = static_cast<ContextData::IDPart*>(info.first);
+                std::string* name = new std::string(*(id->ast_node->Name));
+                ContextData::VariableDeclarationRec* rec = new ContextData::VariableDeclarationRec(name, info.first);
+                TableInstance->AddObjectRecord(rec);
+            }
+            delete specs;
+        }
+        //do nothing otherwise
+    }
+    void ASTProcessorVis::visit(declaration_specifiers* _decspec){
+        //TODO possibly will never visit (access through descender)
+        throw("should not be visiting dec specs with processor");
+    }
+    void ASTProcessorVis::visit(init_declarator_list* _indeclis){
+        throw("should not be visiting init dec list");
+    }
+    void ASTProcessorVis::visit(init_declarator* _indec){
+        throw("should not be visiting int dec");
+    }
+    void ASTProcessorVis::visit(type_specifier* _typespec){
+        throw("")
+    }
     void ASTProcessorVis::visit(specifier_list* _speclist){}
     void ASTProcessorVis::visit(pointer* _pt){}
     void ASTProcessorVis::visit(base_declarator* _basedec){}
@@ -223,10 +250,21 @@ decTypeInfo ASTProcessorVis::descendDeclarator(direct_abstract_declarator* _dir_
 
     //scope changing
     void ASTProcessorVis::visit(While* _whi){
+        _whi->ControlExpression->accept(this);
+        TableInstance->NewScope();
+        _whi->Body->accept(this);
+        TableInstance->PopScope();
+    }
+    void ASTProcessorVis::visit(DoWhile* _dowhi){
+        TableInstance->NewScope();
+        _dowhi->Body->accept(this);
+        TableInstance->PopScope();
+        //control expression is in scope above the body
+        _dowhi->ControlExpression->accept(this);
+    }
+    void ASTProcessorVis::visit(For* _for){
         
     }
-    void ASTProcessorVis::visit(DoWhile* _dowhi){}
-    void ASTProcessorVis::visit(For* _for){}
     void ASTProcessorVis::visit(If* _if){}
     void ASTProcessorVis::visit(IfElse* _ifelse){}
     void ASTProcessorVis::visit(Switch* _swi){}
@@ -253,7 +291,7 @@ decTypeInfo ASTProcessorVis::descendDeclarator(direct_abstract_declarator* _dir_
         decl_info.second = spec_info;
         //head of list is deffo identifier, so can do this
         ContextData::IDPart* id = static_cast<ContextData::IDPart*>(decl_info.first);
-        ContextData::FunctionDefOrDec* funcdefrecord = new ContextData::FunctionDefOrDec(id->ast_node->Name, decl_info.first);
+        ContextData::FunctionDef* funcdefrecord = new ContextData::FunctionDef(id->ast_node->Name, decl_info.first);
         
         // TableInstance->AddObjectRecord(funcdefrecord);
         id->ast_node->ContextRecord = funcdefrecord; //link id node in ast to def in table

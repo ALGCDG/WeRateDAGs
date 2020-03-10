@@ -45,6 +45,7 @@ namespace ContextData
         void SetScopeParent(ScopeRecord* _parent); //non virtual
         ScopeRecord* GetParent(); //non virtual
         virtual std::string* Name(){ return NULL; }
+        virtual std::string What(){ return "generic record"; }
     protected:
         ScopeRecord* parent;
     };
@@ -55,6 +56,7 @@ namespace ContextData
         ScopeRecord() : Record(){} //set parent to null
         void AddRecord(Record* _rec); //wrapper for push_back
         virtual std::vector<Record*>& GetSubTable();
+        std::string What() override{ return "scope"; }
     protected:
         std::vector<Record*> SubTable;
     };
@@ -65,8 +67,9 @@ namespace ContextData
         //need to make function params decl available as declaration to
         //subscope 
         std::vector<Record*>& GetSubTable() override; 
-        void SetDeclarationPtr(FunctionDefOrDec* def);
-        FunctionDefOrDec* declaration;
+        void SetDeclarationPtr(FunctionDef* def);
+        std::string What() override{ return "funcscope"; }
+        FunctionDef* declaration;
     };
     //===========================
     class NamedRecord : public Record{
@@ -74,23 +77,26 @@ namespace ContextData
         NamedRecord(std::string* _name): Record(), name(_name){}
         std::string* name;
         std::string* Name(){ return name; }
+        std::string What() override{ return "named"; }
     };
 
     /*==============================
     Sub classes for named records
     */
-    class VariableDeclaration : public NamedRecord{
+    class VariableDeclarationRec : public NamedRecord{
     public:
-        VariableDeclaration(std::string* _name, typePart* _type):NamedRecord(_name), type(_type){} 
+        VariableDeclarationRec(std::string* _name, typePart* _type):NamedRecord(_name), type(_type){} 
         typePart* type;
+        std::string What() override { return "variabledec"; }
     };
-    class FunctionDefOrDec : public NamedRecord{
+    class FunctionDef : public NamedRecord{
     public:
-        FunctionDefOrDec(std::string* _name, typePart* _info): NamedRecord(_name),info(_info){}
+        FunctionDef(std::string* _name, typePart* _info): NamedRecord(_name),info(_info){}
         typePart* info;
         FunctionScopeRecord* definition;
         void SetDefRecordPtr(FunctionScopeRecord* scopeptr);
         std::vector<Record*> exposeNamedParams();
+        std::string What() override { return "funcdefordec"; }
     };
 
 
@@ -104,6 +110,7 @@ namespace ContextData
     class typePart{
     public:
         virtual void AddChild(typePart* _child);
+        virtual std::string WhatPart(){ return "genericpart"; }
     };
     class IDPart : public typePart{
     public:
@@ -111,22 +118,27 @@ namespace ContextData
         IdentifierNode* ast_node;
         typePart* definedToBe;
         void AddChild(typePart* _child);
+        std::string WhatPart(){ return "IDpart"; }
     };
     class pointerPart : public typePart{
     public:
         pointerPart(typePart* _pointerto) : pointerTo(_pointerto){}
         typePart* pointerTo;
         void AddChild(typePart* _child);//define
+        std::string WhatPart() override { return "ptrpart"; }
     };
 
     class argsPart : public typePart{
     public:
         std::vector<argPart*> argTypes;
+        std::string WhatPart() override { return "argspart"; }
+
     };
     class argPart : public typePart{
     public:
         argPart(typePart* _info) : argInfo(_info){}
         typePart* argInfo;
+        std::string WhatPart() override { return "argpart"; }
     };
 
     class funcPart : public typePart{
@@ -135,6 +147,8 @@ namespace ContextData
         typePart* returns;
         argsPart* args;
         void AddChild(typePart* _child);
+        std::string WhatPart() override { return "funcpart"; }
+
     };
 
     class arrayPart : public typePart{
@@ -143,6 +157,8 @@ namespace ContextData
         int size;
         typePart* ofType;
         void AddChild(typePart* _child);
+        std::string WhatPart() override { return "arrpart"; }
+
     };
 
     class baseSpecPart : public typePart{
@@ -151,6 +167,9 @@ namespace ContextData
         baseSpecPart* otherSpecs;
         baseSpecPart(baseSpecPart* _other) : otherSpecs(_other){}
         void AddChild(baseSpecPart* _child);
+        static ContextData::baseSpecPart* CopySpecList(baseSpecPart* head);
+        std::string WhatPart() override { return "basespecpart"; }
+
     };
 
     class canonSpecPart : public baseSpecPart{
@@ -159,6 +178,8 @@ namespace ContextData
         std::string* specKeyword;
         //void AddChild(baseSpecPart* _child); use basespecpart child adder
         canonSpecPart(std::string* _key, baseSpecPart* _other) : baseSpecPart(_other), specKeyword(_key){}
+        std::string WhatPart() override { return "canonspecpart"; }
+
     };
 
     class userSpecPart : public baseSpecPart{
@@ -169,11 +190,15 @@ namespace ContextData
         //void AddChild(baseSpecPart* _child);
 
         userSpecPart(std::string* spec, baseSpecPart* otherspecs ,typePart* def) : baseSpecPart(otherspecs), specKeyword(spec), definition(def){} //links to context table
+        std::string WhatPart() override { return "userspecpart"; }
+
     };
 
     class typedefSpecPart : public baseSpecPart{
     public:
         typedefSpecPart(baseSpecPart* otherspecs) : baseSpecPart(otherspecs){}
+        std::string WhatPart() override { return "typedefspecpart"; }
+
     };
 
 }
@@ -195,7 +220,7 @@ public:
     ContextData::baseSpecPart* TypeIsUserOrCanon(std::string* keyword, ContextData::baseSpecPart* otherSpecs);
     
     //link together and set scope ptr correctly
-    void AddFunctionDecAndBody(ContextData::FunctionDefOrDec* def, ContextData::FunctionScopeRecord* body);
+    void AddFunctionDecAndBody(ContextData::FunctionDef* def, ContextData::FunctionScopeRecord* body);
 private:
     std::vector<ContextData::Record*> table_data;
     ContextData::ScopeRecord* currScopePtr;//NULL if at global scope

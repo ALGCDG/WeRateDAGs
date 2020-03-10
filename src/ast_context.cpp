@@ -49,8 +49,6 @@ namespace ContextData
 
 }
 
-
-
 void ContextTable::NewScope(){
     ContextData::ScopeRecord* newScopeTable = new ContextData::ScopeRecord();
     newScopeTable->SetScopeParent(currScopePtr);
@@ -106,7 +104,7 @@ ContextData::Record* ContextTable::GetObjectRecord(const std::string& _ID){
     return NULL;
 }
 
-void ContextTable::AddFunctionDecAndBody(ContextData::FunctionDefOrDec* def, ContextData::FunctionScopeRecord* body){
+void ContextTable::AddFunctionDecAndBody(ContextData::FunctionDef* def, ContextData::FunctionScopeRecord* body){
     def->SetScopeParent(currScopePtr);//belongs to this parent scope
     body->SetScopeParent(currScopePtr);//body also is in this scope
     body->SetDeclarationPtr(def);//but is linked to the def/dec for its param decls
