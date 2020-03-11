@@ -14,17 +14,20 @@ namespace ContextData
     void ScopeRecord::AddRecord(Record* _rec){
         SubTable.push_back(_rec);
     }
+
     std::vector<Record*>& ScopeRecord::GetSubTable(){
         return SubTable;
     }
 
-    std::vector<Record*>& FunctionScopeRecord::GetSubTable(){
-        //gets parameters and creates a new vector
-        //with those parameters at the start of the decls
-        std::vector<Record*> paramDecls = declaration->exposeNamedParams();
-        paramDecls.insert(paramDecls.end(), SubTable.begin(), SubTable.end());
-        return paramDecls;
-    }
+    //deprecated, functin definition has own param sub table
+    // std::vector<Record*>& FunctionScopeRecord::GetSubTable(){
+    //     //gets parameters and creates a new vector
+    //     //with those parameters at the start of the decls
+    //     std::vector<Record*> paramDecls = declaration->exposeNamedParams();
+    //     paramDecls.insert(paramDecls.end(), SubTable.begin(), SubTable.end());
+    //     return paramDecls;
+    // }
+
     void IDPart::AddChild(typePart* _child){
         definedToBe = _child;
     }
@@ -104,15 +107,15 @@ ContextData::Record* ContextTable::GetObjectRecord(const std::string& _ID){
     return NULL;
 }
 
-void ContextTable::AddFunctionDecAndBody(ContextData::FunctionDef* def, ContextData::FunctionScopeRecord* body){
-    def->SetScopeParent(currScopePtr);//belongs to this parent scope
-    body->SetScopeParent(currScopePtr);//body also is in this scope
-    body->SetDeclarationPtr(def);//but is linked to the def/dec for its param decls
-    //sort of like a 'virtual' scope
-    AddObjectRecord(def);
-    currScopePtr = body;
-}
+// void ContextTable::AddFunctionDecAndBody(ContextData::FunctionDef* def, ContextData::FunctionScopeRecord* body){
+//     def->SetScopeParent(currScopePtr);//belongs to this parent scope
+//     body->SetScopeParent(currScopePtr);//body also is in this scope
+//     body->SetDeclarationPtr(def);//but is linked to the def/dec for its param decls
+//     //sort of like a 'virtual' scope
+//     AddObjectRecord(def);
+//     currScopePtr = body;
+// }
 
-std::vector<ContextData::Record*> ContextData::FunctionDef::exposeNamedParams(){
-    argPart* getArgs()
-}
+// std::vector<ContextData::Record*> ContextData::FunctionDef::exposeNamedParams(){
+//     argPart* getArgs()
+// }

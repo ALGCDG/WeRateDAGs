@@ -1,7 +1,7 @@
-char (*(*x)(int))(int);
+
 int main()
 {
-  return 2;
+  if()
 }
 
 

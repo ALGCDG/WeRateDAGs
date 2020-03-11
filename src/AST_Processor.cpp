@@ -212,9 +212,8 @@ decTypeInfo ASTProcessorVis::descendDeclarator(direct_abstract_declarator* _dir_
                 ContextData::baseSpecPart* specCpy = ContextData::baseSpecPart::CopySpecList(specs);
                 info.second->AddChild(specCpy);
                 ContextData::IDPart* id = static_cast<ContextData::IDPart*>(info.first);
-                std::string* name = new std::string(*(id->ast_node->Name));
-                ContextData::VariableDeclarationRec* rec = new ContextData::VariableDeclarationRec(name, info.first);
-                TableInstance->AddObjectRecord(rec);
+                std::string name = std::string(*(id->ast_node->Name));
+                TableInstance->ProcessIDDecl(name, info.first->GetChild());
             }
             delete specs;
         }
@@ -277,7 +276,36 @@ decTypeInfo ASTProcessorVis::descendDeclarator(direct_abstract_declarator* _dir_
         }
     }
     void ASTProcessorVis::visit(FunctionDefinition* _funcdef){
-        //TODO consider declaratinos preceding definitions
+        // //TODO consider declaratinos preceding definitions
+        // ContextData::baseSpecPart* spec_info;
+        // if(_funcdef->specs != NULL){
+        //     spec_info = descendDecSpecs(_funcdef->specs);
+        // }
+        // else{
+        //     //presume integer
+        //     spec_info = new ContextData::canonSpecPart(new std::string("int"),NULL);
+        // }
+        // decTypeInfo decl_info = descendDeclarator(_funcdef->decl);
+        // decl_info.second->AddChild(spec_info);
+        // decl_info.second = spec_info;
+        // //head of list is deffo identifier, so can do this
+        // ContextData::IDPart* id = static_cast<ContextData::IDPart*>(decl_info.first);
+        // ContextData::FunctionDef* funcdefrecord = new ContextData::FunctionDef(id->ast_node->Name, decl_info.first);
+        
+        // // TableInstance->AddObjectRecord(funcdefrecord);
+        // id->ast_node->ContextRecord = funcdefrecord; //link id node in ast to def in table
+        // auto scopeRecord = new ContextData::FunctionScopeRecord();
+        // // //link together dec and def
+        // // scopeRecord->SetDeclarationPtr(funcdefrecord);
+        // // funcdefrecord->SetDefRecordPtr(scopeRecord);
+        // // TableInstance->SetActiveScope(scopeRecord);
+        // // _funcdef->Body->accept(this);
+        // // TableInstance->SetActiveScope()
+
+        // TableInstance->AddFunctionDecAndBody(funcdefrecord, scopeRecord);
+        // _funcdef->Body->accept(this);
+        // //leave function scope
+        // TableInstance->PopScope();
         ContextData::baseSpecPart* spec_info;
         if(_funcdef->specs != NULL){
             spec_info = descendDecSpecs(_funcdef->specs);
@@ -286,26 +314,14 @@ decTypeInfo ASTProcessorVis::descendDeclarator(direct_abstract_declarator* _dir_
             //presume integer
             spec_info = new ContextData::canonSpecPart(new std::string("int"),NULL);
         }
-        decTypeInfo decl_info = descendDeclarator(_funcdef->decl);
-        decl_info.second->AddChild(spec_info);
-        decl_info.second = spec_info;
-        //head of list is deffo identifier, so can do this
-        ContextData::IDPart* id = static_cast<ContextData::IDPart*>(decl_info.first);
-        ContextData::FunctionDef* funcdefrecord = new ContextData::FunctionDef(id->ast_node->Name, decl_info.first);
-        
-        // TableInstance->AddObjectRecord(funcdefrecord);
-        id->ast_node->ContextRecord = funcdefrecord; //link id node in ast to def in table
-        auto scopeRecord = new ContextData::FunctionScopeRecord();
-        // //link together dec and def
-        // scopeRecord->SetDeclarationPtr(funcdefrecord);
-        // funcdefrecord->SetDefRecordPtr(scopeRecord);
-        // TableInstance->SetActiveScope(scopeRecord);
-        // _funcdef->Body->accept(this);
-        // TableInstance->SetActiveScope()
-
-        TableInstance->AddFunctionDecAndBody(funcdefrecord, scopeRecord);
+        decTypeInfo declInf = descendDeclarator(_funcdef->decl);
+        declInf.second->AddChild(spec_info);
+        declInf.second = spec_info;
+        //head is always id for func defs
+        std::string funcName = *static_cast<ContextData::IDPart*>(declInf.first)->ast_node->Name;
+        TableInstance->ProcessIDDecl(funcName, declInf.first->GetChild());
+        TableInstance->PrepareForFuncDef(funcName);
         _funcdef->Body->accept(this);
-        //leave function scope
         TableInstance->PopScope();
     }
     void ASTProcessorVis::visit(ExternalDeclaration* _extdec){
