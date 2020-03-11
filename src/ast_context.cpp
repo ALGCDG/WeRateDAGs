@@ -112,3 +112,7 @@ void ContextTable::AddFunctionDecAndBody(ContextData::FunctionDef* def, ContextD
     AddObjectRecord(def);
     currScopePtr = body;
 }
+
+std::vector<ContextData::Record*> ContextData::FunctionDef::exposeNamedParams(){
+    argPart* getArgs()
+}

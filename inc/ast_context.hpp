@@ -8,7 +8,7 @@
 #define AST_CONTEXT
 
 #include "ast_allnodes.hpp"
-#include "visitors.hpp"
+// #include "visitors.hpp"
 #include <string>
 #include <vector>
 #include <unordered_map>
@@ -38,11 +38,12 @@ namespace ContextData
     /*==============================
     Records for the context table
     */
+    class ScopeRecord;
     class Record{
     public:
         Record() : parent(NULL){}
         //all records have parents
-        void SetScopeParent(ScopeRecord* _parent); //non virtual
+        void SetScopeParent(ContextData::ScopeRecord* _parent); //non virtual
         ScopeRecord* GetParent(); //non virtual
         virtual std::string* Name(){ return NULL; }
         virtual std::string What(){ return "generic record"; }
@@ -61,6 +62,7 @@ namespace ContextData
         std::vector<Record*> SubTable;
     };
 
+    class FunctionDef;
     class FunctionScopeRecord : public ScopeRecord{
     public:
         FunctionScopeRecord() : ScopeRecord(){}
@@ -83,6 +85,7 @@ namespace ContextData
     /*==============================
     Sub classes for named records
     */
+    class typePart;
     class VariableDeclarationRec : public NamedRecord{
     public:
         VariableDeclarationRec(std::string* _name, typePart* _type):NamedRecord(_name), type(_type){} 
@@ -128,17 +131,17 @@ namespace ContextData
         std::string WhatPart() override { return "ptrpart"; }
     };
 
-    class argsPart : public typePart{
-    public:
-        std::vector<argPart*> argTypes;
-        std::string WhatPart() override { return "argspart"; }
-
-    };
     class argPart : public typePart{
     public:
         argPart(typePart* _info) : argInfo(_info){}
         typePart* argInfo;
         std::string WhatPart() override { return "argpart"; }
+    };
+    class argsPart : public typePart{
+    public:
+        std::vector<argPart*> argTypes;
+        std::string WhatPart() override { return "argspart"; }
+
     };
 
     class funcPart : public typePart{

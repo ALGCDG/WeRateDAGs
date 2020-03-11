@@ -2,13 +2,17 @@
 #define CONTEXTVIS_HPP
 
 #include "ast_context.hpp"
-#include "visitors.hpp"
+// #include "visitors.hpp"
 #include "ast_allnodes.hpp"
 #include <cassert>
 
 #include <algorithm> //for_each
 #include <utility> //std::pair
 
+namespace{
+    //linked list of type parts, head and tail
+    typedef std::pair<ContextData::typePart*, ContextData::typePart*> decTypeInfo;  
+}
 class ASTProcessorVis : public Visitor{
 public:
 /*  Needs to link all identifiers in the ast with info in the table
@@ -43,14 +47,14 @@ private:
     decTypeInfo descendDeclarator(IdentifierNode* _id);
     ContextData::argsPart* descendDeclarator(parameter_list* _par_list);
     ContextData::argPart* descendDeclarator(parameter_declaration* _par_dec);
-    decTypeInfo ASTProcessorVis::descendDeclarator(base_declarator * _decl);
+    decTypeInfo descendDeclarator(base_declarator * _decl);
     decTypeInfo descendDeclarator(abstract_declarator* _decl);
     decTypeInfo descendDeclarator(direct_abstract_declarator* _dir_abs_dec);
 
     //evaluates constant expression, (returns -1 if unspecified size)
     int EvalConstantExpression(ConstantExpression* _const_expr);
     ContextTable* TableInstance;
-    void visit(ArraySubscript* _subcr){}
+    void visit(ArraySubscript* _subcr);
     void visit(FuncCall* _funccall);
     void visit(MemberAccess* _memberaccess);
     void visit(DerefMemberAccess* _derefmemberacc);
@@ -126,7 +130,7 @@ private:
     void visit(CompoundStatement* _compstat);
 
     //scope changing
-    void visit(While* _whi){}
+    void visit(While* _whi);
     void visit(DoWhile* _dowhi);
     void visit(For* _for);
     void visit(If* _if);
@@ -142,9 +146,5 @@ private:
 
 };
 
-namespace{
-    //linked list of type parts, head and tail
-    typedef std::pair<ContextData::typePart*, ContextData::typePart*> decTypeInfo;  
-}
 
 #endif

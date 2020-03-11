@@ -231,7 +231,7 @@ decTypeInfo ASTProcessorVis::descendDeclarator(direct_abstract_declarator* _dir_
         throw("should not be visiting int dec");
     }
     void ASTProcessorVis::visit(type_specifier* _typespec){
-        throw("")
+        throw("");
     }
     void ASTProcessorVis::visit(specifier_list* _speclist){}
     void ASTProcessorVis::visit(pointer* _pt){}
@@ -263,7 +263,7 @@ decTypeInfo ASTProcessorVis::descendDeclarator(direct_abstract_declarator* _dir_
         _dowhi->ControlExpression->accept(this);
     }
     void ASTProcessorVis::visit(For* _for){
-        
+
     }
     void ASTProcessorVis::visit(If* _if){}
     void ASTProcessorVis::visit(IfElse* _ifelse){}

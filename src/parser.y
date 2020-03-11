@@ -2,9 +2,9 @@
 
   #include<iostream>
   #include<string>
-  #include "ast_allnodes.hpp"
+  #include "./ast_allnodes.hpp"
 
-  extern const Node *g_root; // A way of getting the AST out
+  extern TranslationUnit *g_root; // A way of getting the AST out
   //! This is to fix problems when generating C++
   // We are declaring the functions provided by Flex, so
   // that Bison generated code can call them.
@@ -48,6 +48,12 @@
     direct_abstract_declarator * t_direct_abstract_declarator;
     initializer * t_initializer;
     initializer_list * t_initializer_list;
+    CompoundStatement * cmpstmt;
+
+    TranslationUnit * t_translation_unit;
+    GenericExternalDeclaration * t_external_declaration;
+    FunctionDefinition * t_function_definition;
+
 };
 
 %token Constant_int Constant_char Constant_double Constant_float Constant_long_double
@@ -113,7 +119,7 @@
 
 %type <stmt> statement
 %type <stmt> labeled_statement
-%type <stmt> compound_statement
+%type <cmpstmt> compound_statement
 %type <t_declist> declaration_list
 %type <stmtlist> statement_list
 %type <exprstmt> EXPR_statement
@@ -121,8 +127,14 @@
 %type <stmt> iteration_statement
 %type <stmt> jump_statement 
 
+%type <t_translation_unit> translation_unit
+%type <t_external_declaration> external_declaration
+%type <t_function_definition> function_definition
+
+
 
 %start ROOT
+
 
 %%
 
@@ -130,18 +142,18 @@
 EXPRESSIONS
 */
 
-primary_EXPR: Ident { $$ = $1; }
-                 | Constant { std::cerr << "CONSTANT" << std::endl; }
+primary_EXPR: Ident { std::cerr << "parsed id"<<std::endl;$$ = $1; }
+                 | Constant { $$ = $1; }
                   | String { std::cerr << "STRING" << std::endl; }
               | Punctuator_par_open EXPR Punctuator_par_close { std::cout << "(x)" << std::endl; }
 
 Ident: Identifier { $$ = new IdentifierNode($1); } 
 
-Constant: Constant_int {}  
-		| Constant_char {}
-		| Constant_double {}
-		| Constant_float {}
-		| Constant_long_double {}
+Constant: Constant_int { $$ = new constant_int($1); }  
+		| Constant_char  { $$ = new Constant(); }  
+		| Constant_double { $$ = new Constant(); }  
+		| Constant_float { $$ = new Constant(); }  
+		| Constant_long_double { $$ = new Constant(); }  
 
 
 postfix_EXPR: primary_EXPR { $$ = $1; } /*Pass through*/
@@ -318,19 +330,19 @@ direct_declarator: Ident { $$ = new direct_declarator($1); }
 				 | direct_declarator Punctuator_squ_open constant_EXPR Punctuator_squ_close  { $$ = new direct_declarator(NULL, $1, $3); }
 				 | direct_declarator Punctuator_par_open parameter_type_list  Punctuator_par_close  { $$ = new direct_declarator(NULL, $1, NULL, $3); }
 				 /*| direct_declarator Punctuator_par_open identifier_list Punctuator_par_close { std::cerr << "still not sure what this does" << std::endl; } k&r style, not needed*/
-				 | direct_declarator Punctuator_par_open Punctuator_par_close { std::cerr << "function taking 0 args" << std::endl; }
+				 | direct_declarator Punctuator_par_open Punctuator_par_close { $$ = new direct_declarator(NULL, $1, NULL, new empty_parameter_list()); }
 
 pointer: Operator_mul { $$ = new pointer(); }
 	   | Operator_mul pointer { $$ = new pointer($2); }
 
-parameter_type_list: parameter_list
+parameter_type_list: parameter_list { $$ = $1; }
 
 parameter_list: parameter_declaration { $$ = new parameter_list($1); }
 		 	  | parameter_list Operator_comma parameter_declaration { $$ = new parameter_list($3, $1); }
 
 parameter_declaration: declaration_specifiers declarator { $$ = new parameter_declaration($1, $2); }
 					 | declaration_specifiers  { $$ = new parameter_declaration($1); }
-					 | declaration_specifiers abstract_declarator { $$ = new parameter_declaration($1, $2); }
+					 | declaration_specifiers abstract_declarator { $$ = new parameter_declaration($1, NULL, $2); }
 
 /*identifier_list: Ident
 			   | identifier_list Operator_comma Ident
@@ -389,12 +401,12 @@ labeled_statement: Keyword_case constant_EXPR Operator_trinary_choice statement 
 compound_statement: Punctuator_cur_open declaration_list statement_list Punctuator_cur_close { $$ = new CompoundStatement($2, $3); }
                   | Punctuator_cur_open declaration_list Punctuator_cur_close { $$ = new CompoundStatement($2);}
                   | Punctuator_cur_open statement_list Punctuator_cur_close { $$ = new CompoundStatement($2); /*Will need to use arg overloaded constructor to differentiate between the above*/}
-                  | Punctuator_cur_open Punctuator_cur_close { $$ = new EmptyStatement; }
+                  | Punctuator_cur_open Punctuator_cur_close { $$ = new CompoundStatement(); }
 
 declaration_list: declaration {$$ = new DeclarationList($1); }
                 | declaration_list declaration { $$ = new DeclarationList($1, $2); }
 
-statement_list: statement { $$ = new StatementList($1); }
+statement_list: statement { std::cerr << "parsing single statement" << std::endl;$$ = new StatementList($1); }
               | statement_list statement { $$ = new StatementList($1, $2); }
 
 EXPR_statement: EXPR Punctuator_eol { $$ = new ExpressionStatement($1); }
@@ -442,23 +454,20 @@ function_definition: declarator compound_statement { $$ = new FunctionDefinition
                    /*| declaration_specifiers declaration declaration_list compound_statement -> only for K&R*/
 
 
-ROOT: translation_unit { std::cerr << "Its a valid program" << std::endl; }
+ROOT: translation_unit { std::cerr << "Its a valid program" << std::endl; g_root = $1; }
 
 %%
-/*
-const Expression *g_root; // Definition of variable (to match declaration earlier)
-*/
 
-void parseAST()
+TranslationUnit *g_root; // Definition of variable (to match declaration earlier)
+
+TranslationUnit * parseAST()
 {
   std::cerr << "parsing" << std::endl;
-  for(;;)
-  {
-  	yyparse();
-  }
-  return;
+  g_root = 0;
+  yyparse();
+  return g_root;
 }
-
+/*
 main()
 {
 	std::cerr << "starting parser" << std::endl;
@@ -467,3 +476,4 @@ main()
 		parseAST();
 	}
 }
+*/

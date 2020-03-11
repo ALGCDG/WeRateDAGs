@@ -10,7 +10,7 @@ src/parser.tab.cpp Include/parser.tab.hpp : src/parser.y
 src/lexer.yy.cpp : src/lexer.flex Include/parser.tab.hpp
 	flex -o src/lexer.yy.cpp  src/lexer.flex
 
-bin/translator : src/parser.tab.o src/lexer.yy.o
+bin/translator : src/parser.tab.o src/lexer.yy.o src/compiler.o src/ast_allnodes.o src/AST_Processor.o src/ast_context.o
 	mkdir -p bin
 	g++ $(CPPFLAGS) -o bin/translator $^
 	
