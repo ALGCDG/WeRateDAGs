@@ -1,9 +1,8 @@
-#include <cstddef>
+#include <stack>
+#include <vector>
 int main(){
-    int* a = NULL;
-    int b = 2;
-    int * c = &b;
-    if(a) return 1;
-    if(c) return 2;
-    else return 3;
+    std::stack<std::vector<int> > stk;
+    stk.push(std::vector<int>());
+    stk.top().push_back(2);
+    return (stk.top().back());
 }

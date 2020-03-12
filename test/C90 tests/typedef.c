@@ -1,7 +1,7 @@
-
+typedef int a,*b;
 int main()
 {
-  if()
+  return 0;
 }
 
 

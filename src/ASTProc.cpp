@@ -202,12 +202,24 @@
         TableInstance->clearDecSpecs();
     }
     void ASTProcVis::visit(declaration_specifiers* _decspec){
-        //TODO
+        if(_decspec->type_spec!=NULL){
+            _decspec->type_spec->accept(this);
+        }
+        else if(_decspec->storage_class_specifier!=NULL){
+            _decspec->storage_class_specifier->accept(this);
+        }
+        if(_decspec->specifier!=NULL){
+            _decspec->specifier->accept(this);
+        }
+    }
+    void ASTProcVis::visit(storage_class_specifier* _typedef){
+        TableInstance->PushTypedef();
     }
     void ASTProcVis::visit(init_declarator_list* _indeclis){
         if(_indeclis->init_dec_list!=NULL) _indeclis->init_dec_list->accept(this);
-        TableInstance->DistinctRecord();
+        TableInstance->awaitDeclarator();
         _indeclis->init_dec->accept(this);
+        TableInstance->endAwaitDeclarator();
         TableInstance->AppendCachedDecSpecs();
     }
     void ASTProcVis::visit(init_declarator* _indec){
@@ -215,7 +227,7 @@
         _indec->dec->accept(this);
     }
     void ASTProcVis::visit(type_specifier* _typespec){
-        //TODO
+        TableInstance->PushDecSpec(*(_typespec->type));
     }
     void ASTProcVis::visit(specifier_list* _speclist){}
     void ASTProcVis::visit(pointer* _pt){
@@ -279,13 +291,15 @@
     }
     void ASTProcVis::visit(parameter_list* _paramlist){
         if(_paramlist->para_list!=NULL){ _paramlist->para_list->accept(this); }
-        TableInstance->DistinctRecord();
+        TableInstance->awaitParamDec();
         _paramlist->para_dec->accept(this);
+        TableInstance->endAwaitParamDec();
     }
     void ASTProcVis::visit(parameter_declaration* _pardec){
         TableInstance->awaitDecSpecs();
         _pardec->dec_spec->accept(this);
         TableInstance->endAwaitDecSpecs();
+        TableInstance->awaitDeclarator();
         if(_pardec->dec!=NULL){
             _pardec->dec->accept(this);
         }
@@ -296,6 +310,7 @@
         else{
             TableInstance->AddUnnamedParam();
         }
+        TableInstance->endAwaitDeclarator();
         TableInstance->AppendCachedDecSpecs();
     }
     //Statements

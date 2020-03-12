@@ -1,6 +1,10 @@
 #include "ast_context.hpp"
+#include "ast_allnodes.hpp"
 
-class ASTProcVis{
+#include <stack>
+#include <vector>
+
+class ASTProcVis : public Visitor{
 public:
     void visit(ArraySubscript* _subcr);
     void visit(FuncCall* _funccall);
@@ -93,4 +97,18 @@ public:
     void visit(TranslationUnit* _trans);
     void visit(FunctionDefinition* _funcdef);
     void visit(ExternalDeclaration* _extdec);
+
+private:
+    std::stack<std::vector<std::string> >decspecStack;
+
 };
+
+struct Table{
+    std::vector<Record*> Data;
+    Table* Parent;
+}
+
+struct Record{
+    std::string Name;
+    
+}
