@@ -213,7 +213,7 @@
         }
     }
     void ASTProcVis::visit(storage_class_specifier* _typedef){
-        TableInstance->PushTypedef();
+        TableInstance->AssertTypedef();
     }
     void ASTProcVis::visit(init_declarator_list* _indeclis){
         if(_indeclis->init_dec_list!=NULL) _indeclis->init_dec_list->accept(this);
@@ -258,9 +258,9 @@
             }
             else if(_absdec->para_list!=NULL){
                 TableInstance->AddFuncToCurrRecord();
-                TableInstance->AwaitFunctionParameters();
+                TableInstance->AwaitFuncParams();
                 _absdec->para_list->accept(this);
-                TableInstance->EndAwaitFunctionParameters();
+                TableInstance->EndAwaitFuncParams();
             }
         }
     }
@@ -283,9 +283,9 @@
             }
             else if(_dirdec->para_list!=NULL){
                 TableInstance->AddFuncToCurrRecord();
-                TableInstance->AwaitFunctionParameters();
+                TableInstance->AwaitFuncParams();
                 _dirdec->para_list->accept(this);
-                TableInstance->EndAwaitFunctionParameters();
+                TableInstance->EndAwaitFuncParams();
             }
         }
     }
@@ -396,6 +396,7 @@
         _funcdef->specs->accept(this);
         TableInstance->stopAwaitDecSpecs();
         _funcdef->decl->accept(this);
+        TableInstance->AppendCachedDecSpecs();
         TableInstance->NewScope();
         _funcdef->Body->accept(this);
         TableInstance->PopScope();

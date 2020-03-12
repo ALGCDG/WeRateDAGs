@@ -1,5 +1,6 @@
 #include <vector>
 #include <string>
+#include <stack>
 
 struct genericConstituentType{
     virtual void AddNextType(genericConstituentType* nexttype){}
@@ -41,8 +42,8 @@ struct pointerType : public genericConstituentType{
 };
 
 struct typeSpecifiers : public genericConstituentType{
-    typeSpecifiers* otherSpecs;
-    void AddNextType(typeSpecifiers* specs);
+    std::vector<std::string> specs;
+    void AddNextType(std::string spec);
 };
 
 struct funcArgs{
@@ -50,3 +51,71 @@ struct funcArgs{
     std::vector<std::pair<std::string, genericConstituentType*> > args;
 };
 
+
+
+
+struct Record{
+    virtual bool hasID(const std::string& _id){ return false; }
+    virtual void SetName(const std::string& _id){}
+};
+
+struct Table : public Record{
+    std::vector<Record*> subRecords;
+    Table* parentTable;
+};
+
+struct VariableDeclaration : public Record{
+    bool hasID(const std::string& _id) override;
+    std::string id;
+    //sets all others to null explicitly
+    void AddPrimary(pointerType* _primaryPt);
+    void AddPrimary(arrayType* _primaryArr);
+    void AddPrimary(functionType* _primaryFunc);
+    void AddPrimary(typeSpecifiers* _primaryTypespec);
+    
+    //can be only one of the below
+    pointerType* primaryPt;
+    arrayType* primaryArr;
+    functionType* primaryFunc;
+    typeSpecifiers* primaryTypespec;
+
+};
+
+struct FunctionDefinition : public Record{
+    bool hasID(const std::string& _io) override;
+    std::string id;
+     
+};
+
+class SymbolTable{
+public:
+    void awaitDecSpecs();
+    void stopAwaitDecSpecs();
+    void AssertTypedef();
+    void awaitDeclarator();
+    void endAwaitDeclarator();
+    void AppendCachedDecSpecs();
+    void clearDecSpecs();
+    void PushDecSpec(const std::string& _id);
+    void AddPtrToCurrRecord();
+    void AddArrayToCurrRecord(int _size);
+    void AddFuncToCurrRecord();
+    void AwaitFuncParams();
+    void EndAwaitFuncParams();
+    void AddIDtoCurrRecord();
+    void awaitParamDec();
+    void endAwaitParamDec();
+    void AddUnnamedParam();
+    void NewScope();
+    void PopScope();
+private:
+    std::stack<funcArgs*> funcargsStack;
+    std::stack<std::vector<genericConstituentType*> > declPartsStack;
+    genericConstituentType* AccumulateDeclParts();
+    
+    std::stack<std::vector<std::string> >decspecStack;
+    Table* Data;
+};
+
+
+    

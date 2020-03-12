@@ -1,8 +1,6 @@
-#include "ast_context.hpp"
+#include "ast_context2.hpp"
 #include "ast_allnodes.hpp"
 
-#include <stack>
-#include <vector>
 
 class ASTProcVis : public Visitor{
 public:
@@ -98,17 +96,9 @@ public:
     void visit(FunctionDefinition* _funcdef);
     void visit(ExternalDeclaration* _extdec);
 
+
+
 private:
-    std::stack<std::vector<std::string> >decspecStack;
+    SymbolTable* TableInstance;
 
 };
-
-struct Table{
-    std::vector<Record*> Data;
-    Table* Parent;
-}
-
-struct Record{
-    std::string Name;
-    
-}
