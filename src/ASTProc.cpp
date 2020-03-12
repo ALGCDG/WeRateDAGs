@@ -217,9 +217,8 @@
     }
     void ASTProcVis::visit(init_declarator_list* _indeclis){
         if(_indeclis->init_dec_list!=NULL) _indeclis->init_dec_list->accept(this);
-        TableInstance->awaitDeclarator();
+        TableInstance->StartNewDeclaration();
         _indeclis->init_dec->accept(this);
-        TableInstance->endAwaitDeclarator();
         TableInstance->AppendCachedDecSpecs();
     }
     void ASTProcVis::visit(init_declarator* _indec){
@@ -229,7 +228,9 @@
     void ASTProcVis::visit(type_specifier* _typespec){
         TableInstance->PushDecSpec(*(_typespec->type));
     }
-    void ASTProcVis::visit(specifier_list* _speclist){}
+    void ASTProcVis::visit(specifier_list* _speclist){
+        //TODO?
+    }
     void ASTProcVis::visit(pointer* _pt){
         TableInstance->AddPtrToCurrRecord();
         if (_pt->p!=NULL){_pt->p->accept(this); }
@@ -258,9 +259,8 @@
             }
             else if(_absdec->para_list!=NULL){
                 TableInstance->AddFuncToCurrRecord();
-                TableInstance->AwaitFuncParams();
                 _absdec->para_list->accept(this);
-                TableInstance->EndAwaitFuncParams();
+                TableInstance->EndFuncParams();
             }
         }
     }
@@ -285,7 +285,7 @@
                 TableInstance->AddFuncToCurrRecord();
                 TableInstance->AwaitFuncParams();
                 _dirdec->para_list->accept(this);
-                TableInstance->EndAwaitFuncParams();
+                TableInstance->EndFuncParams();
             }
         }
     }
