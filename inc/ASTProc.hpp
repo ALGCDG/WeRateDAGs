@@ -1,59 +1,7 @@
-#ifndef CONTEXTVIS_HPP
-#define CONTEXTVIS_HPP
-
 #include "ast_context.hpp"
-// #include "visitors.hpp"
-#include "ast_allnodes.hpp"
-#include <cassert>
 
-#include <algorithm> //for_each
-#include <utility> //std::pair
-
-namespace{
-    //linked list of type parts, head and tail
-    typedef std::pair<ContextData::typePart*, ContextData::typePart*> decTypeInfo;  
-}
-class ASTProcVis : public Visitor{
+class ASTProcessorVis{
 public:
-/*  Needs to link all identifiers in the ast with info in the table
-    Needs to intereact with table for scope changes, add records, change records?
-    Also needs to provide algorithms for getting:
-        ID from declaration
-        Type as type parts from declaration
-
-        Stack frame / pointer locations
-
-*/
-    ASTProcVis(ContextTable* _table) : TableInstance(_table){
-        //make sure to construct visitor with instance of table
-        assert(_table);
-    }
-    void ProcessAST(Node* root);
-private:
-    ContextData::Record* GetRecord(const std::string &_id);
-    //ContextData::Record* CreateRecord(declaration* _dect);
-    
-    //<ID at bottom, top type part in hierarchy, pointer to next type part that needs to be filled in> 
-
-    //will return a linked list something like unsigned -> long -> int
-    ContextData::baseSpecPart* descendDecSpecs(declaration_specifiers* _decl_spec);
-
-    std::vector<decTypeInfo>& descendInitDecList(init_declarator_list* _list);
-    decTypeInfo descendInitDec(init_declarator* _init_dec); //basically just ignore init part, not relevant for table
-    decTypeInfo descendDeclarator(pointer* _ptr);
-    decTypeInfo descendDeclarator(declarator* _decl);
-
-    decTypeInfo descendDeclarator(direct_declarator* _dir_dec);
-    decTypeInfo descendDeclarator(IdentifierNode* _id);
-    ContextData::argsPart* descendDeclarator(parameter_list* _par_list);
-    ContextData::argPart* descendDeclarator(parameter_declaration* _par_dec);
-    decTypeInfo descendDeclarator(base_declarator * _decl);
-    decTypeInfo descendDeclarator(abstract_declarator* _decl);
-    decTypeInfo descendDeclarator(direct_abstract_declarator* _dir_abs_dec);
-
-    //evaluates constant expression, (returns -1 if unspecified size)
-    int EvalConstantExpression(ConstantExpression* _const_expr);
-    ContextTable* TableInstance;
     void visit(ArraySubscript* _subcr);
     void visit(FuncCall* _funccall);
     void visit(MemberAccess* _memberaccess);
@@ -68,7 +16,6 @@ private:
     void visit(CastExpr* _castexpr);
     void visit(AssignmentExpression* _assignexpr);
 
-    //might not need to handle with this visitor
     void visit(Constant* _constant);
     void visit(UnaryPlusOperator* _unaryplus);
     void visit(UnaryNegOperator* _unaryneg);
@@ -108,7 +55,7 @@ private:
     void visit(ConstantExpression* _constexpr);
     void visit(CommaSepExpression* _comsep);
 
-    //Declarations
+    //Dec
     void visit(declaration* _dectn);
     void visit(declaration_specifiers* _decspec);
     void visit(init_declarator_list* _indeclis);
@@ -118,33 +65,32 @@ private:
     void visit(pointer* _pt);
     void visit(base_declarator* _basedec);
     void visit(abstract_declarator* _absdec);
+    void visit(direct_abstract_declarator* _absdec);
     void visit(declarator* _declr);
-
-    //Statements
-    void visit(EmptyStatement* _emptmnt);
-    void visit(Continue* _cont);
-    void visit(Break* _brk);
+    void visit(direct_declarator* _dirdec);
+    void visit(parameter_list* _paramlist);
+    void visit(parameter_declaration* _pardec);
+    //Sta
+    void visit(EmptyStatement* _emptmnt);//do nothing
+    void visit(Continue* _cont);//do nothing
+    void visit(Break* _brk);//do nothing
     void visit(Return* _ret);
     void visit(ExpressionStatement* _exprstmnt);
     void visit(StatementList* _stmntlist);
     void visit(CompoundStatement* _compstat);
 
-    //scope changing
+    //sco
     void visit(While* _whi);
     void visit(DoWhile* _dowhi);
     void visit(For* _for);
     void visit(If* _if);
     void visit(IfElse* _ifelse);
     void visit(Switch* _swi);
+
     void visit(CaseOrDefault* _caseordef);
 
-    //External definitions
+    //Ext
     void visit(TranslationUnit* _trans);
     void visit(FunctionDefinition* _funcdef);
     void visit(ExternalDeclaration* _extdec);
-    
-
 };
-
-
-#endif

@@ -1,229 +1,229 @@
-#include "AST_Processor.hpp"
+#include "ASTProc.hpp"
 
 
     //void visit(Node*); //If nothing defined for this type of node
-    void ASTProcessorVis::visit(ArraySubscript* _subcr){
+    void ASTProcVis::visit(ArraySubscript* _subcr){
         _subcr->Subscript->accept(this);
         _subcr->LHS->accept(this);
     }
-    void ASTProcessorVis::visit(FuncCall* _funccall){
+    void ASTProcVis::visit(FuncCall* _funccall){
         if(_funccall->Args!=NULL){ _funccall->Args->accept(this); }
         _funccall->LHS->accept(this);
     }
-    void ASTProcessorVis::visit(MemberAccess* _memberaccess){
+    void ASTProcVis::visit(MemberAccess* _memberaccess){
         _memberaccess->ID->accept(this);
         _memberaccess->LHS->accept(this);
     }
-    void ASTProcessorVis::visit(DerefMemberAccess* _derefmemberacc){
+    void ASTProcVis::visit(DerefMemberAccess* _derefmemberacc){
         _derefmemberacc->ID->accept(this);
         _derefmemberacc->LHS->accept(this);
     }
-    void ASTProcessorVis::visit(ArgExprList* _argexprlist){
+    void ASTProcVis::visit(ArgExprList* _argexprlist){
         for(auto i : _argexprlist->Args){
             i->accept(this);
         }
     }
-    void ASTProcessorVis::visit(SizeofExpr* _sizeofexpr){
+    void ASTProcVis::visit(SizeofExpr* _sizeofexpr){
         _sizeofexpr->RHS->accept(this);
     }
-    void ASTProcessorVis::visit(SizeofType* _sizeoftype){
+    void ASTProcVis::visit(SizeofType* _sizeoftype){
         _sizeoftype->typ_nam->accept(this);//TODO more of
     }
-    void ASTProcessorVis::visit(UnaryAddressOperator* _addrOp){
+    void ASTProcVis::visit(UnaryAddressOperator* _addrOp){
         _addrOp->RHS->accept(this);
     }
-    void ASTProcessorVis::visit(UnaryDerefOperator* derefOp){
+    void ASTProcVis::visit(UnaryDerefOperator* derefOp){
         derefOp->RHS->accept(this);
     }
-    void ASTProcessorVis::visit(PostInc* _postinc){
+    void ASTProcVis::visit(PostInc* _postinc){
         _postinc->LHS->accept(this);
     }
-    void ASTProcessorVis::visit(PostDec* _postdec){
+    void ASTProcVis::visit(PostDec* _postdec){
         _postdec->LHS->accept(this);
     }
-    void ASTProcessorVis::visit(CastExpr* _castexpr){
+    void ASTProcVis::visit(CastExpr* _castexpr){
         _castexpr->typ->accept(this);
         _castexpr->RHS->accept(this);
     }
-    void ASTProcessorVis::visit(AssignmentExpression* _assignexpr){
+    void ASTProcVis::visit(AssignmentExpression* _assignexpr){
         _assignexpr->RHS->accept(this);
         _assignexpr->LHS->accept(this);
     }
 
-    void ASTProcessorVis::visit(Constant* _constant){}
-    void ASTProcessorVis::visit(UnaryPlusOperator* _unaryplus){
+    void ASTProcVis::visit(Constant* _constant){}
+    void ASTProcVis::visit(UnaryPlusOperator* _unaryplus){
         _unaryplus->RHS->accept(this);
     }
-    void ASTProcessorVis::visit(UnaryNegOperator* _unaryneg){
+    void ASTProcVis::visit(UnaryNegOperator* _unaryneg){
         _unaryneg->RHS->accept(this);
     }
-    void ASTProcessorVis::visit(UnaryBitwiseNotOperator* _unaryBitNot){
+    void ASTProcVis::visit(UnaryBitwiseNotOperator* _unaryBitNot){
         _unaryBitNot->RHS->accept(this);
     }
-    void ASTProcessorVis::visit(UnaryLogicalNotOperator* _unaryLogNot){
+    void ASTProcVis::visit(UnaryLogicalNotOperator* _unaryLogNot){
         _unaryLogNot->RHS->accept(this);
     }
-    void ASTProcessorVis::visit(PreInc* _preinc){
+    void ASTProcVis::visit(PreInc* _preinc){
         _preinc->RHS->accept(this);
     }
-    void ASTProcessorVis::visit(PreDec* _predec){
+    void ASTProcVis::visit(PreDec* _predec){
         _predec->RHS->accept(this);
     }
-    void ASTProcessorVis::visit(Multiply* _mul){
+    void ASTProcVis::visit(Multiply* _mul){
         _mul->RHS->accept(this);
         _mul->LHS->accept(this);
     }
-    void ASTProcessorVis::visit(Divide* _div){
+    void ASTProcVis::visit(Divide* _div){
         _div->RHS->accept(this);
         _div->LHS->accept(this);
     }
-    void ASTProcessorVis::visit(Modulo* _mod){
+    void ASTProcVis::visit(Modulo* _mod){
         _mod->RHS->accept(this);
         _mod->LHS->accept(this);
     }
-    void ASTProcessorVis::visit(Add* _add){
+    void ASTProcVis::visit(Add* _add){
         _add->RHS->accept(this);
         _add->LHS->accept(this);
     }
-    void ASTProcessorVis::visit(Sub* _sub){
+    void ASTProcVis::visit(Sub* _sub){
         _sub->RHS->accept(this);
         _sub->LHS->accept(this);
     }
-    void ASTProcessorVis::visit(ShiftLeft* _shl){
+    void ASTProcVis::visit(ShiftLeft* _shl){
         _shl->RHS->accept(this);
         _shl->LHS->accept(this);
     }
-    void ASTProcessorVis::visit(ShiftRight* _shr){
+    void ASTProcVis::visit(ShiftRight* _shr){
         _shr->RHS->accept(this);
         _shr->LHS->accept(this);
     }
-    void ASTProcessorVis::visit(LessThan* _lt){
+    void ASTProcVis::visit(LessThan* _lt){
         _lt->RHS->accept(this);
         _lt->LHS->accept(this);
     }
-    void ASTProcessorVis::visit(GreaterThan* _gt){
+    void ASTProcVis::visit(GreaterThan* _gt){
         _gt->RHS->accept(this);
         _gt->LHS->accept(this);
     }
-    void ASTProcessorVis::visit(LessThanOrEqual* _lte){
+    void ASTProcVis::visit(LessThanOrEqual* _lte){
         _lte->RHS->accept(this);
         _lte->LHS->accept(this);
     }
-    void ASTProcessorVis::visit(GreaterThanOrEqual* _gte){
+    void ASTProcVis::visit(GreaterThanOrEqual* _gte){
         _gte->RHS->accept(this);
         _gte->LHS->accept(this);
     }
-    void ASTProcessorVis::visit(EqualTo* _eq){
+    void ASTProcVis::visit(EqualTo* _eq){
         _eq->RHS->accept(this);
         _eq->LHS->accept(this);
     }
-    void ASTProcessorVis::visit(NotEqualTo* _ne){
+    void ASTProcVis::visit(NotEqualTo* _ne){
         _ne->RHS->accept(this);
         _ne->LHS->accept(this);
     }
-    void ASTProcessorVis::visit(LogicalAND* _logand){
+    void ASTProcVis::visit(LogicalAND* _logand){
         _logand->RHS->accept(this);
         _logand->LHS->accept(this);
     }
-    void ASTProcessorVis::visit(LogicalOR* _logor){
+    void ASTProcVis::visit(LogicalOR* _logor){
         _logor->RHS->accept(this);
         _logor->LHS->accept(this);
     }
-    void ASTProcessorVis::visit(BitwiseAND* _bitand){
+    void ASTProcVis::visit(BitwiseAND* _bitand){
         _bitand->RHS->accept(this);
         _bitand->LHS->accept(this);
     }
-    void ASTProcessorVis::visit(BitwiseOR* _bitor){
+    void ASTProcVis::visit(BitwiseOR* _bitor){
         _bitor->RHS->accept(this);
         _bitor->LHS->accept(this);
     }
-    void ASTProcessorVis::visit(BitwiseXOR* _bitxor){
+    void ASTProcVis::visit(BitwiseXOR* _bitxor){
         _bitxor->RHS->accept(this);
         _bitxor->LHS->accept(this);
     }
-    void ASTProcessorVis::visit(TernaryOpExpression* _tern){
+    void ASTProcVis::visit(TernaryOpExpression* _tern){
         _tern->Condition->accept(this);
         _tern->IfFalse->accept(this);
         _tern->IfTrue->accept(this);
     }
-    void ASTProcessorVis::visit(MulAssignment* _mulass){
+    void ASTProcVis::visit(MulAssignment* _mulass){
         _mulass->RHS->accept(this);
         _mulass->LHS->accept(this);
     }
-    void ASTProcessorVis::visit(DivAssignment* _divass){
+    void ASTProcVis::visit(DivAssignment* _divass){
         _divass->RHS->accept(this);
         _divass->LHS->accept(this);
     }
-    void ASTProcessorVis::visit(ModAssignment* _modass){
+    void ASTProcVis::visit(ModAssignment* _modass){
         _modass->RHS->accept(this);
         _modass->LHS->accept(this);
     }
-    void ASTProcessorVis::visit(AddAssignment* _addass){
+    void ASTProcVis::visit(AddAssignment* _addass){
         _addass->RHS->accept(this);
         _addass->LHS->accept(this);
     }
-    void ASTProcessorVis::visit(SubAssignment* _subass){
+    void ASTProcVis::visit(SubAssignment* _subass){
         _subass->RHS->accept(this);
         _subass->LHS->accept(this);
     }
-    void ASTProcessorVis::visit(ShiftLeftAssignment* _shlass){
+    void ASTProcVis::visit(ShiftLeftAssignment* _shlass){
         _shlass->RHS->accept(this);
         _shlass->LHS->accept(this);
     }
-    void ASTProcessorVis::visit(ShiftRightAssignment* _shrass){
+    void ASTProcVis::visit(ShiftRightAssignment* _shrass){
         _shrass->RHS->accept(this);
         _shrass->LHS->accept(this);
     }
-    void ASTProcessorVis::visit(BitwiseANDAssignment* _bANDass){
+    void ASTProcVis::visit(BitwiseANDAssignment* _bANDass){
         _bANDass->RHS->accept(this);
         _bANDass->LHS->accept(this);
     }
-    void ASTProcessorVis::visit(BitwiseXORAssignment* _xorass){
+    void ASTProcVis::visit(BitwiseXORAssignment* _xorass){
         _xorass->RHS->accept(this);
         _xorass->LHS->accept(this);
     }
-    void ASTProcessorVis::visit(BitwiseORAssignment* _bORass){
+    void ASTProcVis::visit(BitwiseORAssignment* _bORass){
         _bORass->RHS->accept(this);
         _bORass->LHS->accept(this);
     }
-    void ASTProcessorVis::visit(ConstantExpression* _constexpr){
+    void ASTProcVis::visit(ConstantExpression* _constexpr){
         _constexpr->ConstantSubtree->accept(this);
     }
-    void ASTProcessorVis::visit(CommaSepExpression* _comsep){
+    void ASTProcVis::visit(CommaSepExpression* _comsep){
         throw("comma sep expr not to be used");
     }
 
     //Declarations
-    void ASTProcessorVis::visit(declaration* _dectn){
+    void ASTProcVis::visit(declaration* _dectn){
         TableInstance->awaitDecSpecs();
         _dectn->specifier->accept(this);
         TableInstance->stopAwaitDecSpecs();
         _dectn->list->accept(this);
         TableInstance->clearDecSpecs();
     }
-    void ASTProcessorVis::visit(declaration_specifiers* _decspec){
+    void ASTProcVis::visit(declaration_specifiers* _decspec){
         //TODO
     }
-    void ASTProcessorVis::visit(init_declarator_list* _indeclis){
+    void ASTProcVis::visit(init_declarator_list* _indeclis){
         if(_indeclis->init_dec_list!=NULL) _indeclis->init_dec_list->accept(this);
         TableInstance->DistinctRecord();
         _indeclis->init_dec->accept(this);
         TableInstance->AppendCachedDecSpecs();
     }
-    void ASTProcessorVis::visit(init_declarator* _indec){
+    void ASTProcVis::visit(init_declarator* _indec){
         if(_indec->init!=NULL) _indec->init->accept(this);
         _indec->dec->accept(this);
     }
-    void ASTProcessorVis::visit(type_specifier* _typespec){
+    void ASTProcVis::visit(type_specifier* _typespec){
         //TODO
     }
-    void ASTProcessorVis::visit(specifier_list* _speclist){}
-    void ASTProcessorVis::visit(pointer* _pt){
+    void ASTProcVis::visit(specifier_list* _speclist){}
+    void ASTProcVis::visit(pointer* _pt){
         TableInstance->AddPtrToCurrRecord();
         if (_pt->p!=NULL){_pt->p->accept(this); }
     }
-    void ASTProcessorVis::visit(base_declarator* _basedec){}
-    void ASTProcessorVis::visit(abstract_declarator* _absdec){
+    void ASTProcVis::visit(base_declarator* _basedec){}
+    void ASTProcVis::visit(abstract_declarator* _absdec){
         if(_absdec->p!=NULL){
             if(_absdec->dabs_dec!=NULL){
                 _absdec->dabs_dec->accept(this);
@@ -234,7 +234,7 @@
             _absdec->dabs_dec->accept(this);
         }
     }
-    void ASTProcessorVis::visit(direct_abstract_declarator* _absdec){
+    void ASTProcVis::visit(direct_abstract_declarator* _absdec){
         if(_absdec->abs_dec!=NULL){ _absdec->abs_dec->accept(this); }
         else{
             if(_absdec->dabs_dec!=NULL){ 
@@ -252,11 +252,11 @@
             }
         }
     }
-    void ASTProcessorVis::visit(declarator* _declr){
+    void ASTProcVis::visit(declarator* _declr){
         _declr->dir_dec->accept(this);
         if(_declr->dir_dec!=NULL) _declr->dir_dec->accept(this);
     }
-    void ASTProcessorVis::visit(direct_declarator* _dirdec){
+    void ASTProcVis::visit(direct_declarator* _dirdec){
         if(_dirdec->ID != NULL){
             TableInstance->AddIDtoCurrRecord(_dirdec->ID->Name);
         }
@@ -277,12 +277,12 @@
             }
         }
     }
-    void ASTProcessorVis::visit(parameter_list* _paramlist){
+    void ASTProcVis::visit(parameter_list* _paramlist){
         if(_paramlist->para_list!=NULL){ _paramlist->para_list->accept(this); }
         TableInstance->DistinctRecord();
         _paramlist->para_dec->accept(this);
     }
-    void ASTProcessorVis::visit(parameter_declaration* _pardec){
+    void ASTProcVis::visit(parameter_declaration* _pardec){
         TableInstance->awaitDecSpecs();
         _pardec->dec_spec->accept(this);
         TableInstance->endAwaitDecSpecs();
@@ -299,41 +299,41 @@
         TableInstance->AppendCachedDecSpecs();
     }
     //Statements
-    void ASTProcessorVis::visit(EmptyStatement* _emptmnt){}//do nothing
-    void ASTProcessorVis::visit(Continue* _cont){}//do nothing
-    void ASTProcessorVis::visit(Break* _brk){}//do nothing
-    void ASTProcessorVis::visit(Return* _ret){
+    void ASTProcVis::visit(EmptyStatement* _emptmnt){}//do nothing
+    void ASTProcVis::visit(Continue* _cont){}//do nothing
+    void ASTProcVis::visit(Break* _brk){}//do nothing
+    void ASTProcVis::visit(Return* _ret){
         if(_ret->ReturnExpression!=NULL){
             _ret->ReturnExpression->accept(this);
         }
     }
-    void ASTProcessorVis::visit(ExpressionStatement* _exprstmnt){
+    void ASTProcVis::visit(ExpressionStatement* _exprstmnt){
         _exprstmnt->Expr->accept(this);
     }
-    void ASTProcessorVis::visit(StatementList* _stmntlist){
+    void ASTProcVis::visit(StatementList* _stmntlist){
         if(_stmntlist->RestOfStatements!=NULL){_stmntlist->RestOfStatements->accept(this);}
         _stmntlist->statement->accept(this);
     }
-    void ASTProcessorVis::visit(CompoundStatement* _compstat){
+    void ASTProcVis::visit(CompoundStatement* _compstat){
         if(_compstat->Decls!=NULL){ _compstat->Decls->accept(this); }
         if(_compstat->Statements!=NULL){ _compstat->Statements->accept(this); }
     }
 
     //scope changing
-    void ASTProcessorVis::visit(While* _whi){
+    void ASTProcVis::visit(While* _whi){
         _whi->ControlExpression->accept(this);
         TableInstance->NewScope();
         _whi->Body->accept(this);
         TableInstance->PopScope();
     }
-    void ASTProcessorVis::visit(DoWhile* _dowhi){
+    void ASTProcVis::visit(DoWhile* _dowhi){
         TableInstance->NewScope();
         _dowhi->Body->accept(this);
         TableInstance->PopScope();
         //control expression is in scope above the body
         _dowhi->ControlExpression->accept(this);
     }
-    void ASTProcessorVis::visit(For* _for){
+    void ASTProcVis::visit(For* _for){
         _for->Init->accept(this);
         _for->Control->accept(this);
         _for->Next->accept(this);
@@ -342,13 +342,13 @@
         TableInstance->PopScope();
 
     }
-    void ASTProcessorVis::visit(If* _if){
+    void ASTProcVis::visit(If* _if){
         _if->ControlExpression->accept(this);
         TableInstance->NewScope();
         _if->IfTrue->accept(this);
         TableInstance->PopScope();
     }
-    void ASTProcessorVis::visit(IfElse* _ifelse){
+    void ASTProcVis::visit(IfElse* _ifelse){
         _ifelse->ControlExpression->accept(this);
         TableInstance->NewScope();
         _ifelse->IfTrue->accept(this);
@@ -357,26 +357,26 @@
         _ifelse->IfFalse->accept(this);
         TableInstance->PopScope();
     }
-    void ASTProcessorVis::visit(Switch* _swi){
+    void ASTProcVis::visit(Switch* _swi){
         _swi->ControlExpression->accept(this);
         TableInstance->NewScope();
         _swi->Body->accept(this);
         TableInstance->PopScope();
     }
 
-    void ASTProcessorVis::visit(CaseOrDefault* _caseordef){
+    void ASTProcVis::visit(CaseOrDefault* _caseordef){
         TableInstance->NewScope();
         _caseordef->Body->accept(this);
         TableInstance->PopScope();
     }
 
     //External definitions
-    void ASTProcessorVis::visit(TranslationUnit* _trans){
+    void ASTProcVis::visit(TranslationUnit* _trans){
         for (auto el : _trans->decls){
             el->accept(this);
         }
     }
-    void ASTProcessorVis::visit(FunctionDefinition* _funcdef){
+    void ASTProcVis::visit(FunctionDefinition* _funcdef){
         TableInstance->awaitDecSpecs();
         _funcdef->specs->accept(this);
         TableInstance->stopAwaitDecSpecs();
@@ -385,7 +385,7 @@
         _funcdef->Body->accept(this);
         TableInstance->PopScope();
     }
-    void ASTProcessorVis::visit(ExternalDeclaration* _extdec){
+    void ASTProcVis::visit(ExternalDeclaration* _extdec){
         //hop straight down to the declaration
         _extdec->decl->accept(this);
     }
