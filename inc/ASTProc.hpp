@@ -1,6 +1,6 @@
 #include "ast_context.hpp"
 
-class ASTProcessorVis{
+class ASTProcVis{
 public:
     void visit(ArraySubscript* _subcr);
     void visit(FuncCall* _funccall);

@@ -27,7 +27,7 @@ int main(int argc, char** argv)
 	}
 	//processing ast
 	ContextTable* Table = new ContextTable();
-	ASTProcessorVis* astproc = new ASTProcessorVis(Table);
+	ASTProcVis* astproc = new ASTProcVis(Table);
 	ast->accept(astproc);
 
 	// creating visitor
