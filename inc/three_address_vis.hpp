@@ -20,7 +20,7 @@ class three_address_Visitor : public Visitor
     std::stack<std::string> return_register; // a stack which tracks which of the two return registers to use
     std::stack<std::string> continue_to; // stores where a continue should jump to
     std::stack<std::string> break_to; // stores where a break should jump to 
-
+    // std::stack<std::string> temporary_words; 
     std::stack<std::pair<std::string,Expression*>> cases; // a stack sructure used when generating switch case code
     std::string default_label; // used as a seperate place to store a default label for switch cases
     std::string gen_name(const std::string &prefix)
@@ -59,11 +59,16 @@ class three_address_Visitor : public Visitor
     void visit(DerefMemberAccess *) {}
     void visit(PostInc * pi)
     {
-        // return_register.push(return_register.top());
-        // pi->LHS->accept(this);
-        // std::cout << "addui ";
+        // // expression of postinc must be a variable
+        // std::cout << "move $v0" << *(pi->LHS->Name) << std::endl;
+        // std::cout << "addui " << *(pi->LHS->Name) << " $v0 1"<< std::endl;
     }
-    void visit(PostDec *) {}
+    void visit(PostDec * pd)
+    {
+        // // expression of postinc must be a variable
+        // std::cout << "move $v0" << *(pd->LHS->Name) << std::endl;
+        // std::cout << "addui " << *(pd->LHS->Name) << " $v0 -1"<< std::endl;
+    }
     void visit(ArgExprList *) {}
     void visit(UnaryAddressOperator *) {}
     void visit(UnaryDerefOperator *) {}
@@ -490,6 +495,11 @@ class three_address_Visitor : public Visitor
     }
     void visit(For * f)
     {
+        // doing inital statement
+        if (f->Init != NULL)
+        {
+            f->Init->accept(this);
+        }
         // creating entry label
         auto beginning = gen_name("for_begin");
         // creating loop exit
@@ -497,7 +507,27 @@ class three_address_Visitor : public Visitor
         // adding beginning and end as pair to boundry stacks
         continue_to.push(beginning);
         break_to.push(end);
+        // writing start
+        std::cout << beginning << ':' << std::endl;
+        // doing control statement
+        if (f->Control != NULL)
+        {
+            f->Control->accept(this);
+        }
+        // jump to end if control fails
+        std::cout << "beq $v0 $zero " << end << std::endl;
+        // executing body
         f->Body->accept(this);
+        // do iteration statement
+        if (f->Next != NULL)
+        {
+            f->Next->accept(this);
+        }
+        // jump to beginning
+        std::cout << "beq $v0 $zero " << beginning << std::endl;
+        // writing end
+        std::cout << end << ':' << std::endl;
+        // clearing continue and break
         continue_to.pop();
         break_to.pop();
     }
