@@ -15,10 +15,12 @@
 class three_address_Visitor : public Visitor
 {
     public:
-    three_address_Visitor(): counter(0), return_register(), bounding_labels(), cases() {}
+    three_address_Visitor(): counter(0), return_register(), continue_to(), break_to(), cases() {}
     int counter;
     std::stack<std::string> return_register; // a stack which tracks which of the two return registers to use
-    std::stack<std::pair<std::string,std::string>> bounding_labels; // a stack for the end label of a structure, used by 
+    std::stack<std::string> continue_to; // stores where a continue should jump to
+    std::stack<std::string> break_to; // stores where a break should jump to 
+
     std::stack<std::pair<std::string,Expression*>> cases; // a stack sructure used when generating switch case code
     std::string default_label; // used as a seperate place to store a default label for switch cases
     std::string gen_name(const std::string &prefix)
@@ -57,7 +59,9 @@ class three_address_Visitor : public Visitor
     void visit(DerefMemberAccess *) {}
     void visit(PostInc * pi)
     {
+        // return_register.push(return_register.top());
         // pi->LHS->accept(this);
+        // std::cout << "addui ";
     }
     void visit(PostDec *) {}
     void visit(ArgExprList *) {}
@@ -174,12 +178,38 @@ class three_address_Visitor : public Visitor
         return_register.pop();
         std::cout << "slt " << return_reg << " $v0 $v1" << std::endl;
     }
-    void visit(GreaterThan *) {}
+    void visit(GreaterThan * gt)
+    {
+        descend(gt);
+        std::cout << "sub $v0 $zero $v0" << std::endl;
+        std::cout << "sub $v1 $zero $v1" << std::endl;
+        std::cout << "slt " << return_register.top() << " $v0 $v1" << std::endl;
+        return_register.pop();
+    }
     void visit(LessThanOrEqual *) {}
     void visit(GreaterThanOrEqual *) {}
-    void visit(EqualTo *) {}
-    void visit(NotEqualTo *) {}
-    void visit(LogicalAND *) {}
+    void visit(EqualTo * et)
+    {
+        descend(et);
+        std::cout << "xor $v0 $v0 $v1" << std::endl;
+        std::cout << "li $v1 0xffffffff" << std::endl;
+        std::cout << "xor $v0 $v0 $v1" << std::endl;
+        std::cout << "li $v1 0xfffffffe" << std::endl;
+        std::cout << "sltu " << return_register.top() << " $v0 $v1" << std::endl;
+        return_register.pop();
+    }
+    void visit(NotEqualTo * net)
+    {
+        descend(net);
+        std::cout << "xor " << return_register.top() << " $v0 $v1" << std::endl;
+        return_register.pop();
+    }
+    void visit(LogicalAND * la)
+    {
+        // descend(la);
+        // std::cout << "and " << return_register.top() << " $v0 $v1" << std::endl;
+        // return_register.pop();
+    }
     void visit(LogicalOR *) {}
     void visit(BitwiseAND * ba)
     {
@@ -235,18 +265,86 @@ class three_address_Visitor : public Visitor
         ae->LHS->accept(this);
         std::cout << " $v0 $zero" << std::endl;
     }
+    void descend(GenericAssignExpr * gae)
+    {
+        return_register.push("$v0");
+        gae->LHS->accept(this);
+        return_register.push("$v1");
+        gae->RHS->accept(this);
+    }
     void visit(MulAssignment * ma)
     {
+        descend(ma);
+        std::cout << "mult $v0, $v1" << std::endl;
+        std::cout << "mflo ";
+        ma->LHS->accept(this);
+        std::cout << std::endl; 
     }
-    void visit(DivAssignment *) {}
-    void visit(ModAssignment *) {}
-    void visit(AddAssignment *) {}
-    void visit(SubAssignment *) {}
-    void visit(ShiftLeftAssignment *) {}
-    void visit(ShiftRightAssignment *) {}
-    void visit(BitwiseANDAssignment *) {}
-    void visit(BitwiseXORAssignment *) {}
-    void visit(BitwiseORAssignment *) {}
+    void visit(DivAssignment * da)
+    {
+        descend(da);
+        std::cout << "div $v0, $v1" << std::endl;
+        std::cout << "mfhi ";
+        da->LHS->accept(this);
+        std::cout << std::endl; 
+    }
+    void visit(ModAssignment * ma)
+    {
+        descend(ma);
+        std::cout << "div $v0, $v1" << std::endl;
+        std::cout << "mflo ";
+        ma->LHS->accept(this);
+        std::cout << std::endl; 
+    }
+    void visit(AddAssignment * aa)
+    {
+        descend(aa);
+        std::cout << "addu ";
+        aa->LHS->accept(this);
+        std::cout << " $v0, $v1" << std::endl;
+    }
+    void visit(SubAssignment * sa)
+    {
+        descend(sa);
+        std::cout << "subu ";
+        sa->LHS->accept(this);
+        std::cout << " $v0, $v1" << std::endl;
+    }
+    void visit(ShiftLeftAssignment * sla)
+    {
+        descend(sla);
+        std::cout << "sllv ";
+        sla->LHS->accept(this);
+        std::cout << " $v0, $v1" << std::endl;
+    }
+    void visit(ShiftRightAssignment * sra)
+    {
+        descend(sra);
+        std::cout << "srlv ";
+        sra->LHS->accept(this);
+        std::cout << " $v0, $v1" << std::endl;
+    }
+    void visit(BitwiseANDAssignment * baa)
+    {
+        descend(baa);
+        std::cout << "and ";
+        baa->LHS->accept(this);
+        std::cout << " $v0, $v1" << std::endl;
+    }
+    void visit(BitwiseXORAssignment * bxa)
+    {
+        descend(bxa);
+        std::cout << "xor ";
+        bxa->LHS->accept(this);
+        std::cout << " $v0, $v1" << std::endl;
+    }
+    void visit(BitwiseORAssignment * boa)
+    {
+        descend(boa);
+        std::cout << "or ";
+        boa->LHS->accept(this);
+        std::cout << " $v0, $v1" << std::endl;
+    }
     void visit(ConstantExpression *) {}
     void visit(CommaSepExpression *) {}
 
@@ -324,11 +422,11 @@ class three_address_Visitor : public Visitor
     void visit(EmptyStatement *) {}
     void visit(Continue *)
     {
-        std::cout << "beq $zero $zero " << bounding_labels.top().first << std::endl;
+        std::cout << "beq $zero $zero " << continue_to.top() << std::endl;
     }
     void visit(Break *)
     {
-        std::cout << "beq $zero $zero " << bounding_labels.top().second << std::endl;
+        std::cout << "beq $zero $zero " << break_to.top() << std::endl;
     }
     void visit(Return * r)
     {
@@ -338,7 +436,7 @@ class three_address_Visitor : public Visitor
             r->ReturnExpression->accept(this);
         }
         std::cout << "jr $ra" << std::endl;
-
+        std::cout << "nop" << std::endl;
     }
     void visit(While * w) 
     {
@@ -348,7 +446,8 @@ class three_address_Visitor : public Visitor
         // creating loop exit
         auto end = gen_name("while_end");
         // adding beginning and end as pair to boundry stacks
-        bounding_labels.push(make_pair(beginning, end));
+        continue_to.push(beginning);
+        break_to.push(end);
         // evaluate condition
         auto condition = gen_name("while_condition");
         w->ControlExpression->accept(this);
@@ -356,7 +455,8 @@ class three_address_Visitor : public Visitor
         std::cout << "beq " << "$v0" << ' ' << "$zero" << ' ' << end << std::endl;
         // do body
         w->Body->accept(this);
-        bounding_labels.pop();
+        continue_to.pop();
+        break_to.pop();
         // branch to beginning
         std::cout << "beq " << "$zero" << ' ' << "$zero" << ' ' << beginning << std::endl;
         //end
@@ -371,7 +471,8 @@ class three_address_Visitor : public Visitor
         // creating loop exit
         auto end = gen_name("while_end");
         // adding beginning and end as pair to boundry stacks
-        bounding_labels.push(make_pair(beginning, end));
+        continue_to.push(beginning);
+        break_to.push(end);
         // evaluate condition
         auto condition = gen_name("while_condition");
         dw->ControlExpression->accept(this);
@@ -379,7 +480,8 @@ class three_address_Visitor : public Visitor
         std::cout << "beq " << "$v0" << ' ' << "$zero" << ' ' << end << std::endl;
         // do body
         dw->Body->accept(this);
-        bounding_labels.pop();
+        continue_to.pop();
+        break_to.pop();
         // branch to beginning
         std::cout << "beq " << "$zero" << ' ' << "$zero" << ' ' << beginning << std::endl;
         //end
@@ -393,9 +495,11 @@ class three_address_Visitor : public Visitor
         // creating loop exit
         auto end = gen_name("for_end");
         // adding beginning and end as pair to boundry stacks
-        bounding_labels.push(make_pair(beginning, end));
+        continue_to.push(beginning);
+        break_to.push(end);
         f->Body->accept(this);
-        bounding_labels.pop();
+        continue_to.pop();
+        break_to.pop();
     }
     void visit(If * i)
     {
@@ -474,12 +578,12 @@ class three_address_Visitor : public Visitor
         auto end = gen_name("switch_end");
         auto decision = gen_name("switch_decision");
         // adding beginning and end as pair to boundry stacks
-        bounding_labels.push(make_pair(beginning, end));
+        break_to.push(end);
         // jumping to decision
         std::cout << "beq $zero $zero " << decision << std::endl;
         // making case
         s->Body->accept(this);
-        bounding_labels.pop();
+        break_to.pop();
         std::cout << "beq $zero $zero " << end << std::endl;
         //evaluate switch expression
         std::cout << decision << ':' << std::endl;

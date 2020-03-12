@@ -220,6 +220,8 @@ Operator [+\-*/%&|^><=!~?:.,#\[\]\(\)\{\}]
         */
 }
 
+\n {}
+
 %%
 
 void yyerror (char const *s)
