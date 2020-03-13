@@ -73,10 +73,13 @@ struct ParameterTable : public Table{
 
 struct NamedRecord : public Record{
     bool hasID(const std::string& _id) override;
+    //use this to check on receipt of named record which type it is
+    virtual bool isFunctionDefinition(){return false; }
     std::string id;
 };
 
 struct VariableDeclaration : public NamedRecord{
+    bool isFunctionDefinition(){ return false; }
     //sets all others to null explicitly
     void AddPrimary(genericConstituentType* _generic){ throw "uh oh?"; }
     void AddPrimary(pointerType* _primaryPt);
@@ -94,6 +97,7 @@ struct VariableDeclaration : public NamedRecord{
 
 
 struct FunctionDefinition : public NamedRecord{
+    bool isFunctionDefinition(){ return true; }
     functionType* funcInfo;
     Table* body;
     void AddPrimary(genericConstituentType* _generic){ throw "uh oh?3"; }
@@ -128,24 +132,25 @@ public:
     // void awaitParamDec();
     // void endAwaitParamDec();
     void AddUnnamedtoCurrRecord();
-    void StartNewFuncDef();
-    void EndFuncDef();
+    void StartNewFuncDef();//done
+    void EndFuncDef();//done
     void StartNewDeclaration();//done
     void EndDeclaration();//done
     void NewScope();//done
     void PopScope();//done
+
+    NamedRecord* GetIDRecord(const std::string& _ID);
+
 private:
+    NamedRecord* SearchUp(const std::string& _ID, Table* scope);
     // std::stack<funcArgs*> funcargsStack;
     std::stack<std::vector<genericConstituentType*> > declPartsStack;
     genericConstituentType* AccumulateDeclParts();
     std::stack<VariableDeclaration*> declarationStack;
     std::stack<std::vector<std::string> >decspecStack;
     Table* trans_unit;
-    Table* ActiveScope;
-    FunctionDefinition* ActiveFuncDef;
-    NamedRecord* ActiveRecord;
+    Table* ActiveScopePtr;
+    FunctionDefinition* ActiveFuncDefPtr;
+    NamedRecord* ActiveRecordPtr;
     // funcArgs* ActiveFuncArgs;
 };
-
-
-    

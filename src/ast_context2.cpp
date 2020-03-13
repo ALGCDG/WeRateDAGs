@@ -2,26 +2,26 @@
 #include <numeric> //accumulate
 
 SymbolTable::SymbolTable(){
-    Data = new Table(ActiveScope);
-    ActiveScope = Data;
+    trans_unit = new Table(ActiveScopePtr);
+    ActiveScopePtr = trans_unit;
 
     declarationStack.push(NULL);//so never empty completely
-    ActiveRecord = declarationStack.top();
+    ActiveRecordPtr = declarationStack.top();
 }
 
 void SymbolTable::NewScope(){
-    Table* newScope = new Table(ActiveScope);
-    ActiveScope->subRecords.push_back(newScope);
-    ActiveScope = newScope;
+    Table* newScope = new Table(ActiveScopePtr);
+    ActiveScopePtr->subRecords.push_back(newScope);
+    ActiveScopePtr = newScope;
 }
 
 void SymbolTable::PopScope(){
-    ActiveScope = ActiveScope->parentTable;
+    ActiveScopePtr = ActiveScopePtr->parentTable;
 }
 
 void SymbolTable::StartNewDeclaration(){
     VariableDeclaration* dec = new VariableDeclaration();
-    ActiveRecord = dec;
+    ActiveRecordPtr = dec;
     declarationStack.push(dec);
 }
 
@@ -39,9 +39,9 @@ void SymbolTable::PushDecSpec(std::string _specid){
 
 void SymbolTable::EndDeclaration(){
     declarationStack.top()->AddPrimary(AccumulateDeclParts());
-    ActiveScope->subRecords.push_back(declarationStack.top());
+    ActiveScopePtr->subRecords.push_back(declarationStack.top());
     declarationStack.pop();
-    ActiveRecord = declarationStack.top();
+    ActiveRecordPtr = declarationStack.top();
 }
 
 void SymbolTable::AddArrayToCurrRecord(int size){
@@ -49,11 +49,11 @@ void SymbolTable::AddArrayToCurrRecord(int size){
 }
 
 void SymbolTable::AddIDtoCurrRecord(std::string _id){
-    ActiveRecord->SetName(_id);
+    ActiveRecordPtr->SetName(_id);
 }
 
 void SymbolTable::AssertTypedef(){
-    ActiveRecord->isTypedef=true;
+    ActiveRecordPtr->isTypedef=true;
 }
 
 void SymbolTable::AppendCachedDecSpecs(){
@@ -75,8 +75,8 @@ void SymbolTable::AddPtrToCurrRecord(){
 void SymbolTable::AddFuncToCurrRecord(){
     functionType* newFunc = new functionType;
     declPartsStack.top().push_back(newFunc);
-    ParameterTable* params = new ParameterTable(ActiveScope);
-    ActiveScope = params;
+    ParameterTable* params = new ParameterTable(ActiveScopePtr);
+    ActiveScopePtr = params;
 }
 
 void SymbolTable::StartParamDeclaration(){
@@ -86,30 +86,30 @@ void SymbolTable::EndParamDeclaration(){
     EndDeclaration();
 }
 void SymbolTable::EndFuncParams(){
-    ActiveScope = ActiveScope->parentTable;
+    ActiveScopePtr = ActiveScopePtr->parentTable;
 }
 
 void SymbolTable::StartNewFuncDef(){
     FunctionDefinition* def = new FunctionDefinition;
-    ActiveFuncDef = def;
+    ActiveFuncDefPtr = def;
     //no nested function definitions in c90 so this is ok
     //no need to push to a stack
 }
 
 void SymbolTable::AddFuncRecordBody(){
-    if(ActiveFuncDef==NULL){ throw "uh oh, 2"; }
+    if(ActiveFuncDefPtr==NULL){ throw "uh oh, 2"; }
     else{
-        ActiveFuncDef->body = new Table(ActiveFuncDef->funcInfo->arguments);
-        ActiveScope = ActiveFuncDef->body;
+        ActiveFuncDefPtr->body = new Table(ActiveFuncDefPtr->funcInfo->arguments);
+        ActiveScopePtr = ActiveFuncDefPtr->body;
     }
 }
 
 void SymbolTable::EndFuncDef(){
     // go up through the parameter table
-    ActiveScope = ActiveScope->parentTable->parentTable;
-    ActiveFuncDef->AddPrimary(AccumulateDeclParts());
-    ActiveScope->subRecords.push_back(ActiveFuncDef);
-    ActiveFuncDef = NULL;
+    ActiveScopePtr = ActiveScopePtr->parentTable->parentTable;
+    ActiveFuncDefPtr->AddPrimary(AccumulateDeclParts());
+    ActiveScopePtr->subRecords.push_back(ActiveFuncDefPtr);
+    ActiveFuncDefPtr = NULL;
 }
 
 genericConstituentType* SymbolTable::AccumulateDeclParts(){
@@ -126,6 +126,22 @@ genericConstituentType* SymbolTable::AccumulateDeclParts(){
             }
         );
         return decls[0];
+    }
+}
+
+NamedRecord* SymbolTable::GetIDRecord(const std::string& _ID){
+    return SearchUp(_ID, ActiveScopePtr);
+}
+
+NamedRecord* SymbolTable::SearchUp(const std::string& _ID, Table* scope){
+    for(auto i = scope->subRecords.rbegin(); i < scope->subRecords.rend(); i++){
+        if((*i)->hasID(_ID)) return static_cast<NamedRecord*>(*i); //only named records have names -> less overhead than dynamic cast
+    }
+    if(scope->parentTable!=NULL){
+        return SearchUp(_ID, scope->parentTable);
+    }
+    else{
+        return NULL;//not found :(
     }
 }
 

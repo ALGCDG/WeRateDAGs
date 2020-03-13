@@ -96,9 +96,7 @@ public:
     void visit(FunctionDefinition* _funcdef);
     void visit(ExternalDeclaration* _extdec);
 
-
-
 private:
     SymbolTable* TableInstance;
-
+    
 };
