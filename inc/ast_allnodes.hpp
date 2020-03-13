@@ -193,6 +193,8 @@ public:
     virtual void visit(declaration_specifiers *) {}
     virtual void visit(init_declarator_list *) {}
     virtual void visit(init_declarator *) {}
+    virtual void visit(initializer *) {}
+    virtual void visit(initializer_list *) {}
     virtual void visit(type_specifier *) {}
     virtual void visit(specifier_list *) {}
     virtual void visit(pointer *) {}

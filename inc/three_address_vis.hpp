@@ -15,12 +15,13 @@
 class three_address_Visitor : public Visitor
 {
     public:
-    three_address_Visitor(): counter(0), return_register(), continue_to(), break_to(), cases() {}
+    three_address_Visitor(): counter(0), return_register(), continue_to(), break_to(), cases(), global(true) {}
     int counter;
     std::stack<std::string> return_register; // a stack which tracks which of the two return registers to use
     std::stack<std::string> continue_to; // stores where a continue should jump to
     std::stack<std::string> break_to; // stores where a break should jump to 
     // std::stack<std::string> temporary_words; 
+    bool global; // a flag for tracking if declaration is global or is in a scope.
     std::stack<std::pair<std::string,Expression*>> cases; // a stack sructure used when generating switch case code
     std::string default_label; // used as a seperate place to store a default label for switch cases
     std::string gen_name(const std::string &prefix)
@@ -49,9 +50,16 @@ class three_address_Visitor : public Visitor
     void visit(Constant *) {}
     void visit(constant_int * ci)
     {
-        auto return_reg = return_register.top();
-        return_register.pop();
-        std::cout << "li " << return_reg << ' ' << ci->value << std::endl;
+        if (return_register.empty())
+        {
+            std::cout << ci->value;
+        }
+        else
+        {
+            auto return_reg = return_register.top();
+            return_register.pop();
+            std::cout << "li " << return_reg << ' ' << ci->value << std::endl;
+        }
     }
     void visit(ArraySubscript *) {}
     void visit(FuncCall *) {}
@@ -373,18 +381,56 @@ class three_address_Visitor : public Visitor
     }
     void visit(init_declarator *id)
     {
-        if (id->init!=NULL)
+        if (global)
         {
-            if (id->init->ass_expr!=NULL)
+            id->dec->accept(this);
+            std::cout << ": ";
+            id->init->accept(this);
+
+        }
+        else
+        {
+            if (id->init!=NULL)
             {
-                return_register.push("$v0");
-                id->init->ass_expr->accept(this);
-                std::cout << "addu ";
-                id->dec->accept(this);
-                std::cout << " $v0 $zero" << std::endl;
+                if (id->init->ass_expr!=NULL)
+                {
+                    return_register.push("$v0");
+                    id->init->ass_expr->accept(this);
+                    std::cout << "addu ";
+                    id->dec->accept(this);
+                    std::cout << " $v0 $zero" << std::endl;
+                }
             }
         }
     }
+    void visit(initializer * i)
+    {
+        if(global)
+        {
+
+            if (i->ass_expr != NULL)
+            {
+                std::cout << ".word ";
+                i->ass_expr->accept(this);
+                std::cout << std::endl;
+            }
+            else if (i->init_list != NULL)
+            {
+                std::cout << std::endl;
+                i->init_list->accept(this);
+
+            }
+        }
+    }
+    void visit(initializer_list * il)
+    {
+        if (il->init_list != NULL)
+        {
+            il->init_list->accept(this);
+        }
+        il->init->accept(this);
+    }
+
     void visit(type_specifier *) {}
     void visit(specifier_list *) {}
     void visit(pointer *) {}
@@ -666,7 +712,9 @@ class three_address_Visitor : public Visitor
         std::cout << ':' << std::endl;
         // std::cout << *(fd->decl->dir_dec->ID->Name) << ':' << std::endl;
         // return value using return regesters
+        global = false;
         fd->Body->accept(this);
+        global = true;
     }
     void visit(ExternalDeclaration * ed)
     {
