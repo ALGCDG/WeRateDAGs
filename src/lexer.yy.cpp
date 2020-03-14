@@ -379,8 +379,8 @@ static void yy_fatal_error (yyconst char msg[]  );
 	*yy_cp = '\0'; \
 	(yy_c_buf_p) = yy_cp;
 
-#define YY_NUM_RULES 73
-#define YY_END_OF_BUFFER 74
+#define YY_NUM_RULES 74
+#define YY_END_OF_BUFFER 75
 /* This struct is not used in this scanner,
    but its presence is necessary. */
 struct yy_trans_info
@@ -390,7 +390,7 @@ struct yy_trans_info
 	};
 static yyconst flex_int16_t yy_accept[150] =
     {   0,
-        0,    0,   74,   72,   73,   11,   72,    8,   19,   72,
+        0,    0,   75,   72,   73,   11,   72,    8,   19,   72,
        66,   67,    6,    2,   40,    3,   56,    7,   62,   59,
        39,   65,   16,   12,   15,   38,   55,   68,   69,   22,
        55,   55,   55,   55,   55,   55,   55,   55,   55,   55,
@@ -1107,7 +1107,7 @@ YY_RULE_SETUP
 case 48:
 YY_RULE_SETUP
 #line 90 "src/lexer.flex"
-{ return Keyword_default; }
+{ return Keyword_for; }
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
@@ -1323,11 +1323,17 @@ YY_RULE_SETUP
 }
 	YY_BREAK
 case 73:
+/* rule 73 can match eol */
 YY_RULE_SETUP
 #line 223 "src/lexer.flex"
+{}
+	YY_BREAK
+case 74:
+YY_RULE_SETUP
+#line 225 "src/lexer.flex"
 ECHO;
 	YY_BREAK
-#line 1331 "src/lexer.yy.cpp"
+#line 1337 "src/lexer.yy.cpp"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -2328,7 +2334,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 223 "src/lexer.flex"
+#line 225 "src/lexer.flex"
 
 
 

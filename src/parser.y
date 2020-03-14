@@ -147,7 +147,7 @@ primary_EXPR: Ident { std::cerr << "parsed id"<<std::endl;$$ = $1; }
                   | String { std::cerr << "STRING" << std::endl; }
               | Punctuator_par_open EXPR Punctuator_par_close { $$ = $2; }
 
-Ident: Identifier { $$ = new IdentifierNode($1); } 
+Ident: Identifier { $$ = new IdentifierNode(*($1)); } 
 
 Constant: Constant_int { $$ = new constant_int($1); }  
 		| Constant_char  { $$ = new Constant(); }  
@@ -273,15 +273,15 @@ init_declarator_list: init_declarator { $$ = new init_declarator_list($1); }
 init_declarator: declarator { $$ = new init_declarator($1); }
                | declarator Operator_assign initializer { $$ = new init_declarator($1, $3); }
 
-type_specifier: Keyword_void { $$ = new type_specifier($1); }
-              | Keyword_char { $$ = new type_specifier($1); }
-              | Keyword_short { $$ = new type_specifier($1); }
-              | Keyword_int { $$ = new type_specifier($1); }
-              | Keyword_long { $$ = new type_specifier($1); }
-              | Keyword_float { $$ = new type_specifier($1); }
-              | Keyword_double { $$ = new type_specifier($1); }
-              | Keyword_signed { $$ = new type_specifier($1); }
-              | Keyword_unsigned{ $$ = new type_specifier($1); }
+type_specifier: Keyword_void { $$ = new type_specifier("void"); }
+              | Keyword_char { $$ = new type_specifier("char"); }
+              | Keyword_short { $$ = new type_specifier("short"); }
+              | Keyword_int { $$ = new type_specifier("int"); }
+              | Keyword_long { $$ = new type_specifier("long"); }
+              | Keyword_float { $$ = new type_specifier("float"); }
+              | Keyword_double { $$ = new type_specifier("double"); }
+              | Keyword_signed { $$ = new type_specifier("signed"); }
+              | Keyword_unsigned{ $$ = new type_specifier("unsigned"); }
 /*              | struct_specifier { std::cerr << "struct" << std::endl; }
               | enum_specifier { std::cerr << "enum" << std::endl; }
               | typedef_name { std::cerr << "typedef type" << std::endl; }

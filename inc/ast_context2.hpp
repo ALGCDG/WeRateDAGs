@@ -12,11 +12,10 @@ struct pointerType;
 struct functionType;
 
 namespace prPr{
-    static int tabs;
+    extern int tabs;
     void Tabsplus();
     void Tabsminus();
     std::string genTabs();
-
 }
 
 struct genericConstituentType{
@@ -25,7 +24,7 @@ struct genericConstituentType{
     virtual void AddNextType(functionType* func){}
     virtual void AddNextType(arrayType* arr){}
     virtual void AddNextType(pointerType* point){}
-    virtual void Show();
+    virtual void Show(){}
 };
 struct functionType : public genericConstituentType{
     void AddNextType(typeSpecifiers* specs) override;
@@ -53,6 +52,7 @@ struct pointerType : public genericConstituentType{
     void AddNextType(arrayType* arr) override;
     void AddNextType(pointerType* pnt) override;
     void AddNextType(typeSpecifiers* typ) override;
+    void AddNextType(functionType* func) override;
     pointerType* ptToPointer;
     arrayType* ptToArray;
     typeSpecifiers* ptToBasetype;
@@ -95,7 +95,7 @@ struct ParameterTable : public Table{
 
 
 struct NamedRecord : public Record{
-    bool hasID(const std::string& _id) override;
+    bool hasID(const std::string& _id) override { return _id == id; }
     //use this to check on receipt of named record which type it is
     virtual bool isFunctionDefinition(){return false; }
     std::string id;

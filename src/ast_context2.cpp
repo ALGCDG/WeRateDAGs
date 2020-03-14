@@ -3,7 +3,9 @@
 #include <iostream>
 
 //For pretty printing-----------
-int prPr::tabs = 0;
+namespace prPr{
+    int tabs = 0;
+}
 std::string prPr::genTabs(){
     std::string tabstr;
     for(int i = prPr::tabs; i!=0; i--){
@@ -88,7 +90,58 @@ void typeSpecifiers::Show(){
     }
 }
 
-//--------------------------------
+//For adding types to chain
+
+void functionType::AddNextType(typeSpecifiers* specs){
+    basetypeReturnType = specs;
+    pointerReturnType = NULL;
+}void functionType::AddNextType(pointerType* point){
+    basetypeReturnType = NULL;
+    pointerReturnType = point;
+}
+
+void arrayType::AddNextType(arrayType* arr){
+    nextArray = arr;
+    pointerElementType = NULL;
+    basetypeElementType = NULL;
+}void arrayType::AddNextType(pointerType* pnt){
+    nextArray = NULL;
+    pointerElementType = pnt;
+    basetypeElementType = NULL;
+}void arrayType::AddNextType(typeSpecifiers* typ){
+    nextArray = NULL;
+    pointerElementType = NULL;
+    basetypeElementType = typ;
+}
+
+void pointerType::AddNextType(arrayType* arr){
+    ptToPointer = NULL;
+    ptToArray = arr;
+    ptToBasetype = NULL;
+    ptToFunc = NULL;
+}void pointerType::AddNextType(pointerType* pnt){
+    ptToPointer = pnt;
+    ptToArray = NULL;
+    ptToBasetype = NULL;
+    ptToFunc = NULL;
+}void pointerType::AddNextType(typeSpecifiers* typ){
+    ptToPointer = NULL;
+    ptToArray = NULL;
+    ptToBasetype = typ;
+    ptToFunc = NULL;
+}void pointerType::AddNextType(functionType* func){
+    ptToPointer = NULL;
+    ptToArray = NULL;
+    ptToBasetype = NULL;
+    ptToFunc = func;
+}
+
+void typeSpecifiers::AddNextType(std::string spec){
+    specs.push_back(spec);
+}
+//---------------------
+
+
 SymbolTable::SymbolTable(){
     trans_unit = new Table(ActiveScopePtr);
     ActiveScopePtr = trans_unit;
@@ -140,6 +193,10 @@ void SymbolTable::AddArrayToCurrRecord(int size){
 
 void SymbolTable::AddIDtoCurrRecord(std::string _id){
     ActiveRecordPtr->SetName(_id);
+}
+
+void SymbolTable::AddUnnamedtoCurrRecord(){
+    AddIDtoCurrRecord("");
 }
 
 void SymbolTable::AssertTypedef(){
@@ -215,12 +272,12 @@ genericConstituentType* SymbolTable::AccumulateDeclParts(){
         genericConstituentType* tmp = NULL;//workaround for accumulate
         std::vector<genericConstituentType*> decls = declPartsStack.top();
         genericConstituentType* top = std::accumulate(decls.begin(),decls.end(), tmp,
-            [](auto left, auto right){
+            [](genericConstituentType* left, genericConstituentType* right){
                 left->AddNextType(right);
                 return left;
             }
         );
-        return decls[0];
+        return top;
     }
 }
 

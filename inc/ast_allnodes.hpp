@@ -251,8 +251,8 @@ public: void accept(Visitor * AVisitor) override { AVisitor->visit(this); }};
 //primary expr
 class IdentifierNode : public Expression{
 public:
-    IdentifierNode(std::string* _name) : Name(_name){}
-    std::string* Name;
+    IdentifierNode(std::string _name) : Name(_name){}
+    std::string Name;
     NamedRecord* ContextRecord;
 public: void accept(Visitor * AVisitor) override { AVisitor->visit(this); }};
 
@@ -831,8 +831,8 @@ public:
     /*
     enum C_types basic_type;
     */
-    std::string* type;
-    type_specifier( std::string* Keyword) : type(Keyword) {}
+    std::string type;
+    type_specifier( std::string Keyword) : type(Keyword) {}
 public: void accept(Visitor * AVisitor) override { AVisitor->visit(this); }};
 
 class specifier_list : public Node

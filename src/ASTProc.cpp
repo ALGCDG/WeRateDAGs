@@ -3,14 +3,17 @@
 
     //void visit(Node*); //If nothing defined for this type of node
     void ASTProcVis::visit(ArraySubscript* _subcr){
+        std::cout << "visit " << "arraysubsr" << std::endl;
         _subcr->Subscript->accept(this);
         _subcr->LHS->accept(this);
     }
     void ASTProcVis::visit(FuncCall* _funccall){
+        std::cout << "visit " << "FuncCall" << std::endl;
         if(_funccall->Args!=NULL){ _funccall->Args->accept(this); }
         _funccall->LHS->accept(this);
     }
     void ASTProcVis::visit(MemberAccess* _memberaccess){
+        std::cout << "visit " << "MemberAccess" << std::endl;
         _memberaccess->ID->accept(this);
         _memberaccess->LHS->accept(this);
     }
@@ -195,6 +198,7 @@
 
     //Declarations
     void ASTProcVis::visit(declaration* _dectn){
+        std::cout << "visit " << "declaration" << std::endl;
         TableInstance->awaitDecSpecs();//new vector on top
         _dectn->specifier->accept(this);
         // TableInstance->stopAwaitDecSpecs();
@@ -204,12 +208,15 @@
     void ASTProcVis::visit(declaration_specifiers* _decspec){
         //TODO if not a canonical type, link in the record somehow
         if(_decspec->type_spec!=NULL){
+            std::cerr << "visiting type specs" << std::endl;
             _decspec->type_spec->accept(this);
         }
         else if(_decspec->storage_class_specifier!=NULL){
+            std::cerr << "visiting typedef" << std::endl;
             _decspec->storage_class_specifier->accept(this);
         }
         if(_decspec->specifier!=NULL){
+            std::cerr << "visiting other specs" << std::endl;
             _decspec->specifier->accept(this);
         }
     }
@@ -228,7 +235,9 @@
         _indec->dec->accept(this);
     }
     void ASTProcVis::visit(type_specifier* _typespec){
-        TableInstance->PushDecSpec(*(_typespec->type));
+        TableInstance->PushDecSpec((_typespec->type));
+        std::cerr << "pushed dec specs" << std::endl;
+
     }
     void ASTProcVis::visit(specifier_list* _speclist){
         _speclist->type_spec->accept(this);
@@ -268,12 +277,15 @@
         }
     }
     void ASTProcVis::visit(declarator* _declr){
+        std::cerr << "visiting dir dec" << std::endl;
         _declr->dir_dec->accept(this);
         if(_declr->dir_dec!=NULL) _declr->dir_dec->accept(this);
     }
     void ASTProcVis::visit(direct_declarator* _dirdec){
         if(_dirdec->ID != NULL){
-            TableInstance->AddIDtoCurrRecord(*(_dirdec->ID->Name));
+            std::cerr << "adding id to curr rec " <<  _dirdec->ID->Name << std::endl;
+            TableInstance->AddIDtoCurrRecord(_dirdec->ID->Name);
+            std::cerr << "added id to curr rec" << std::endl;
         }
         else if(_dirdec->dec != NULL){
             _dirdec->dec->accept(this);
@@ -386,15 +398,21 @@
 
     //External definitions
     void ASTProcVis::visit(TranslationUnit* _trans){
+        std::cerr << "visit " << "TranslationUnit" << std::endl;
         for (auto el : _trans->decls){
             el->accept(this);
         }
     }
     void ASTProcVis::visit(FunctionDefinition* _funcdef){
+        std::cerr << "visit " << "FunctionDefinition" << std::endl;
         TableInstance->StartNewFuncDef();
+        std::cerr << "started func def " << std::endl;
         TableInstance->awaitDecSpecs();
+        std::cerr << "await decs" << std::endl;
         _funcdef->specs->accept(this);
+        std::cerr << "visited dec specs" << std::endl;
         _funcdef->decl->accept(this);
+        std::cerr << "visited declarator" << std::endl;
         TableInstance->AppendCachedDecSpecs();
         TableInstance->clearDecSpecs();
         TableInstance->EndFuncDfDeclaration();
@@ -404,10 +422,11 @@
         // TableInstance->PopScope();
     }
     void ASTProcVis::visit(ExternalDeclaration* _extdec){
+        std::cerr << "visit " << "ExternalDeclaration" << std::endl;
         //hop straight down to the declaration
         _extdec->decl->accept(this);
     }
 
     void ASTProcVis::visit(IdentifierNode* _idnode){
-        _idnode->ContextRecord = TableInstance->GetIDRecord(*(_idnode->Name));
+        _idnode->ContextRecord = TableInstance->GetIDRecord((_idnode->Name));
     }

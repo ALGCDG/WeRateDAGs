@@ -12,7 +12,13 @@ src/parser.tab.cpp Include/parser.tab.hpp : src/parser.y
 src/lexer.yy.cpp : src/lexer.flex Include/parser.tab.hpp
 	flex -o src/lexer.yy.cpp  src/lexer.flex
 
-bin/compiler : src/parser.tab.o src/lexer.yy.o src/compiler.o src/ast_allnodes.o
+# src/ast_context2.o : src/ast_context2.cpp
+# 	g++ $(CPPFLAGS) -o src/ast_context2.o $^
+
+# src/ASTProc.o : src/ASTProc.cpp src/ast_context2.o src/ast_allnodes.o
+# 	g++ $(CPPFLAGS) -o src/ASTProc.o $^
+
+bin/compiler : src/parser.tab.o src/lexer.yy.o src/compiler.o src/ast_allnodes.o src/ASTProc.o src/ast_context2.o
 	mkdir -p bin
 	g++ $(CPPFLAGS) -o bin/compiler $^
 	

@@ -1762,13 +1762,13 @@ yyreduce:
 
   case 5:
 #line 148 "src/parser.y" /* yacc.c:1646  */
-    { std::cout << "(x)" << std::endl; }
+    { (yyval.expression) = (yyvsp[-1].expression); }
 #line 1767 "src/parser.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 6:
 #line 150 "src/parser.y" /* yacc.c:1646  */
-    { (yyval.identnode) = new IdentifierNode((yyvsp[0].text)); }
+    { (yyval.identnode) = new IdentifierNode(*((yyvsp[0].text))); }
 #line 1773 "src/parser.tab.cpp" /* yacc.c:1646  */
     break;
 
@@ -2284,55 +2284,55 @@ yyreduce:
 
   case 93:
 #line 276 "src/parser.y" /* yacc.c:1646  */
-    { (yyval.t_type_specifier) = new type_specifier((yyvsp[0].text)); }
+    { (yyval.t_type_specifier) = new type_specifier("void"); }
 #line 2289 "src/parser.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 94:
 #line 277 "src/parser.y" /* yacc.c:1646  */
-    { (yyval.t_type_specifier) = new type_specifier((yyvsp[0].text)); }
+    { (yyval.t_type_specifier) = new type_specifier("char"); }
 #line 2295 "src/parser.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 95:
 #line 278 "src/parser.y" /* yacc.c:1646  */
-    { (yyval.t_type_specifier) = new type_specifier((yyvsp[0].text)); }
+    { (yyval.t_type_specifier) = new type_specifier("short"); }
 #line 2301 "src/parser.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 96:
 #line 279 "src/parser.y" /* yacc.c:1646  */
-    { (yyval.t_type_specifier) = new type_specifier((yyvsp[0].text)); }
+    { (yyval.t_type_specifier) = new type_specifier("int"); }
 #line 2307 "src/parser.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 97:
 #line 280 "src/parser.y" /* yacc.c:1646  */
-    { (yyval.t_type_specifier) = new type_specifier((yyvsp[0].text)); }
+    { (yyval.t_type_specifier) = new type_specifier("long"); }
 #line 2313 "src/parser.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 98:
 #line 281 "src/parser.y" /* yacc.c:1646  */
-    { (yyval.t_type_specifier) = new type_specifier((yyvsp[0].text)); }
+    { (yyval.t_type_specifier) = new type_specifier("float"); }
 #line 2319 "src/parser.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 99:
 #line 282 "src/parser.y" /* yacc.c:1646  */
-    { (yyval.t_type_specifier) = new type_specifier((yyvsp[0].text)); }
+    { (yyval.t_type_specifier) = new type_specifier("double"); }
 #line 2325 "src/parser.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 100:
 #line 283 "src/parser.y" /* yacc.c:1646  */
-    { (yyval.t_type_specifier) = new type_specifier((yyvsp[0].text)); }
+    { (yyval.t_type_specifier) = new type_specifier("signed"); }
 #line 2331 "src/parser.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 101:
 #line 284 "src/parser.y" /* yacc.c:1646  */
-    { (yyval.t_type_specifier) = new type_specifier((yyvsp[0].text)); }
+    { (yyval.t_type_specifier) = new type_specifier("unsigned"); }
 #line 2337 "src/parser.tab.cpp" /* yacc.c:1646  */
     break;
 
