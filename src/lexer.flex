@@ -87,7 +87,7 @@ Operator [+\-*/%&|^><=!~?:.,#\[\]\(\)\{\}]
 "switch" { return Keyword_switch; }
 "case" { return Keyword_case; }
 "default" { return Keyword_default; }
-"for" { return Keyword_default; }
+"for" { return Keyword_for; }
 "continue" { return Keyword_continue; }
 "break" { return Keyword_break; }
 "return" { return Keyword_return; }

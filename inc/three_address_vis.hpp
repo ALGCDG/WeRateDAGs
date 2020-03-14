@@ -15,13 +15,14 @@
 class three_address_Visitor : public Visitor
 {
     public:
-    three_address_Visitor(): counter(0), return_register(), continue_to(), break_to(), cases(), global(true) {}
+    three_address_Visitor(): counter(0), return_register(), continue_to(), break_to(), cases(), global(true), global_labels() {}
     int counter;
     std::stack<std::string> return_register; // a stack which tracks which of the two return registers to use
     std::stack<std::string> continue_to; // stores where a continue should jump to
     std::stack<std::string> break_to; // stores where a break should jump to 
     // std::stack<std::string> temporary_words; 
     bool global; // a flag for tracking if declaration is global or is in a scope.
+    std::stack<std::string> global_labels;
     std::stack<std::pair<std::string,Expression*>> cases; // a stack sructure used when generating switch case code
     std::string default_label; // used as a seperate place to store a default label for switch cases
     std::string gen_name(const std::string &prefix)
@@ -38,6 +39,10 @@ class three_address_Visitor : public Visitor
         {
             //function definition
             std::cout << *(in->Name);
+            if (global)
+            {
+                global_labels.push(*(in->Name));
+            }
         }
         else
         {
@@ -61,8 +66,35 @@ class three_address_Visitor : public Visitor
             std::cout << "li " << return_reg << ' ' << ci->value << std::endl;
         }
     }
-    void visit(ArraySubscript *) {}
-    void visit(FuncCall *) {}
+    void visit(ArraySubscript * as)
+    {
+        // get return register
+        auto return_reg = return_register.top();
+        // get subscript expression
+        return_register.push("$v0");
+        as->Subscript->accept(this);
+        // if array is global
+            // get array address
+            std::cout << "la $v1 ";
+            as->LHS->accept(this);
+            std::cout << std::endl;
+            // add subscript and 
+            std::cout << "addu $v0 $v0 $v1";
+            // load relevant word
+            std::cout << "lw " << return_reg << " $v0" << std::endl;
+        // if array is local
+        // ???
+        return_register.pop();
+    }
+    void visit(FuncCall * fc)
+    {
+        // insert arguments
+        fc->Args->accept(this);
+        // jump and link
+        std::cout << "jal ";
+        fc->LHS->accept(this);
+        std::cout << std::endl;
+    }
     void visit(MemberAccess *) {}
     void visit(DerefMemberAccess *) {}
     void visit(PostInc * pi)
@@ -77,7 +109,23 @@ class three_address_Visitor : public Visitor
         // std::cout << "move $v0" << *(pd->LHS->Name) << std::endl;
         // std::cout << "addui " << *(pd->LHS->Name) << " $v0 -1"<< std::endl;
     }
-    void visit(ArgExprList *) {}
+    void visit(ArgExprList * ael)
+    {
+        int words = 0;
+        for (std::vector<Expression *>::iterator it = ael->Args.begin(); it != ael->Args.end(); it++)
+        {
+            if (words < 4)
+            {
+                // move first 4 args into relevant registers
+                std::cout << "move $a" << words << " " << std::endl;
+            }
+            else
+            {
+                // move other args into stack
+            }
+            words++;
+        }
+    }
     void visit(UnaryAddressOperator *) {}
     void visit(UnaryDerefOperator *) {}
     void visit(UnaryPlusOperator * upo)
@@ -439,7 +487,8 @@ class three_address_Visitor : public Visitor
     {
         if (dd->ID != NULL)
         {
-            std::cout << *(dd->ID->Name);
+            dd->ID->accept(this);
+            // std::cout << *(dd->ID->Name);
         }
         else if (dd->dec!=NULL)
         {
@@ -704,17 +753,27 @@ class three_address_Visitor : public Visitor
         {
             (*it)->accept(this);
         }
+        while (!global_labels.empty())
+        {
+            std::cout << ".global " << global_labels.top() << std::endl;
+            global_labels.pop();
+        }
     }
     void visit(FunctionDefinition * fd)
     {
         // create function label and parameters
         fd->decl->accept(this);
         std::cout << ':' << std::endl;
-        // std::cout << *(fd->decl->dir_dec->ID->Name) << ':' << std::endl;
+        // std::cout << "addiu $sp $sp -8" << std::endl; // moving the stack pointer down by two
+        // std::cout << "sw $fp 4($sp)" << std::endl; //storing the previous stack pointer in the second/first word of the new stack
+        // std::cout << "move $fp $sp" << std::endl; 
         // return value using return regesters
         global = false;
         fd->Body->accept(this);
         global = true;
+        // if no return statement is used must still jump back
+        std::cout << "jr $ra" << std::endl;
+        std::cout << "nop" << std::endl;
     }
     void visit(ExternalDeclaration * ed)
     {
