@@ -195,6 +195,8 @@ public:
     virtual void visit(declaration_specifiers *) {}
     virtual void visit(init_declarator_list *) {}
     virtual void visit(init_declarator *) {}
+    virtual void visit(initializer *) {}
+    virtual void visit(initializer_list *) {}
     virtual void visit(type_specifier *) {}
     virtual void visit(specifier_list *) {}
     virtual void visit(pointer *) {}
@@ -312,7 +314,7 @@ public: void accept(Visitor * AVisitor) override { AVisitor->visit(this); }};
 
 class FuncCall : public PostfixExpr{
 public:
-    FuncCall(Expression* _LHS) : PostfixExpr(_LHS) {}
+    FuncCall(Expression* _LHS) : PostfixExpr(_LHS), Args(NULL) {}
     FuncCall(Expression* _LHS, ArgExprList* RHS) : PostfixExpr(_LHS), Args(RHS){}
     ArgExprList* Args;
 

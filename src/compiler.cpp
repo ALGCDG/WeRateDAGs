@@ -4,6 +4,7 @@
 #include "py_translate_vis.hpp"
 #include "ast_context2.hpp"
 #include "ASTProc.hpp"
+#include "three_address_vis.hpp"
 #include <iostream>
 int main(int argc, char** argv)
 {
@@ -33,8 +34,11 @@ int main(int argc, char** argv)
 
 	// creating visitor
 	std::cerr << "creating visitor" << std::endl;
-	translate_flag=true; //TESTING translator
-	Visitor* language_processor = translate_flag ? new python_Visitor() : new Visitor() ;
+	// translate_flag=true; //TESTING translator
+	// Visitor* language_processor = translate_flag ? new python_Visitor() : new three_address_Visitor() ;
+	Visitor *language_processor;
+	if (translate_flag)	language_processor=new python_Visitor();
+	else language_processor = new three_address_Visitor();
 	// visiting ast
     ast->accept(language_processor);
 	delete language_processor;

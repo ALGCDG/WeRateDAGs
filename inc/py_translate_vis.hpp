@@ -223,9 +223,13 @@ public:
     }
     
     void visit(FuncCall* call){
+        std::cerr << "function call" << std::endl;
         call->LHS->accept(this);
         std::cout << "(";
-        call->Args->accept(this);
+        if (call->Args!=NULL)
+        {
+            call->Args->accept(this);
+        }
         std::cout << ")";
     }
     //argexprlist
@@ -284,10 +288,16 @@ public:
         // std::cout << '(';
         // // fd->decl->dir_dec->para_list->accept(this);
         // std::cerr << *(fd->decl->dir_dec) << std::endl;
+        std::cout << "def ";
         fd->decl->dir_dec->accept(this);
         std::cerr << (fd->decl->dir_dec->para_list == NULL) << std::endl;
         // std::cout << "):" << std::endl;
         indentation++;
+        // doing global
+        for (std::unordered_set<std::string>::iterator it = global.begin(); it != global.end(); it++)
+        {
+            std::cout << gentabs() << "global " << *it << std::endl; 
+        }
         fd->Body->accept(this);
         indentation--;
     }

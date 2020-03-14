@@ -2,7 +2,9 @@
 CPPFLAGS += -std=c++11 -W -Wall -g -Wno-unused-parameter
 CPPFLAGS += -I inc
 
-all : bin/translator
+all : bin/compiler src/wrapper.sh
+	cp src/wrapper.sh bin/c_compiler
+	chmod u+x bin/c_compiler
 
 src/parser.tab.cpp Include/parser.tab.hpp : src/parser.y
 	bison -v -d src/parser.y -o src/parser.tab.cpp
@@ -10,9 +12,9 @@ src/parser.tab.cpp Include/parser.tab.hpp : src/parser.y
 src/lexer.yy.cpp : src/lexer.flex Include/parser.tab.hpp
 	flex -o src/lexer.yy.cpp  src/lexer.flex
 
-bin/translator : src/parser.tab.o src/lexer.yy.o src/compiler.o src/ast_allnodes.o src/AST_Processor.o src/ast_context.o
+bin/compiler : src/parser.tab.o src/lexer.yy.o src/compiler.o src/ast_allnodes.o
 	mkdir -p bin
-	g++ $(CPPFLAGS) -o bin/translator $^
+	g++ $(CPPFLAGS) -o bin/compiler $^
 	
 clean :
 	rm -f src/*.o

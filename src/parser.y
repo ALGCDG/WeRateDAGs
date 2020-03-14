@@ -145,7 +145,7 @@ EXPRESSIONS
 primary_EXPR: Ident { std::cerr << "parsed id"<<std::endl;$$ = $1; }
                  | Constant { $$ = $1; }
                   | String { std::cerr << "STRING" << std::endl; }
-              | Punctuator_par_open EXPR Punctuator_par_close { std::cout << "(x)" << std::endl; }
+              | Punctuator_par_open EXPR Punctuator_par_close { $$ = $2; }
 
 Ident: Identifier { $$ = new IdentifierNode($1); } 
 
