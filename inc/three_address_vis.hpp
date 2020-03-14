@@ -346,8 +346,8 @@ class three_address_Visitor : public Visitor
     }
     std::pair<std::string,std::string> descend(GenericAssignExpr *gae)
     {
-        auto ret_A = gen_name("ret_A_");
-        auto ret_B = gen_name("ret_B_");
+        auto ret_A = get_temp_register(gen_name("ret_A_"));
+        auto ret_B = get_temp_register(gen_name("ret_B_"));
         return_register.push(ret_A);
         gae->LHS->accept(this);
         return_register.push(ret_B);
@@ -464,6 +464,7 @@ class three_address_Visitor : public Visitor
                 {
                     return_register.push("$v0");
                     id->init->ass_expr->accept(this);
+                    while (!intermediate_values.empty()) intermediate_values.pop();
                     std::cout << "move ";
                     id->dec->accept(this);
                     std::cout << ", $v0" << std::endl;
@@ -687,6 +688,7 @@ class three_address_Visitor : public Visitor
     void visit(ExpressionStatement * es)
     {
         es->Expr->accept(this);
+        while (!intermediate_values.empty()) intermediate_values.pop();
     }
     void visit(StatementList * sl)
     {
