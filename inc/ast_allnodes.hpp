@@ -12,6 +12,7 @@
 // #include "ast_context.hpp"
 //CONTEXT DOES NOT NEED TO KNOW THESE NODES, HANDLED BY VISITOR
 //NO FORWARD DECLARATION NEEDED
+class NamedRecord;
 namespace ContextData{
     class Record;
 }
@@ -123,6 +124,7 @@ class GenericExternalDeclaration;
 class TranslationUnit;
 class FunctionDefinition;
 class ExternalDeclaration;
+class TypedefNode;
 
 class Visitor
 {
@@ -225,7 +227,7 @@ public:
     virtual void visit(TranslationUnit *) {}
     virtual void visit(FunctionDefinition *) {}
     virtual void visit(ExternalDeclaration *) {}
-
+    virtual void visit(TypedefNode*){}
     //Declarations
 };
 
@@ -249,7 +251,7 @@ class IdentifierNode : public Expression{
 public:
     IdentifierNode(std::string* _name) : Name(_name){}
     std::string* Name;
-    ContextData::Record* ContextRecord;
+    NamedRecord* ContextRecord;
 public: void accept(Visitor * AVisitor) override { AVisitor->visit(this); }};
 
 
@@ -773,7 +775,6 @@ public:
     init_declarator_list* list; // list of variables being declared as this type, may be null
     declaration(declaration_specifiers * _specifier ,init_declarator_list * _list = NULL) : specifier(_specifier), list(_list) {}
 public: void accept(Visitor * AVisitor) override { AVisitor->visit(this); }};
-
 
 class declaration_specifiers : public Node
 {

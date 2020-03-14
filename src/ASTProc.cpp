@@ -195,13 +195,14 @@
 
     //Declarations
     void ASTProcVis::visit(declaration* _dectn){
-        TableInstance->awaitDecSpecs();
+        TableInstance->awaitDecSpecs();//new vector on top
         _dectn->specifier->accept(this);
-        TableInstance->stopAwaitDecSpecs();
+        // TableInstance->stopAwaitDecSpecs();
         _dectn->list->accept(this);
         TableInstance->clearDecSpecs();
     }
     void ASTProcVis::visit(declaration_specifiers* _decspec){
+        //TODO if not a canonical type, link in the record somehow
         if(_decspec->type_spec!=NULL){
             _decspec->type_spec->accept(this);
         }
@@ -212,14 +213,15 @@
             _decspec->specifier->accept(this);
         }
     }
-    void ASTProcVis::visit(storage_class_specifier* _typedef){
-        TableInstance->AssertTypedef();
+    void ASTProcVis::visit(TypedefNode* _typedef){
+        TableInstance->AssertTypedef();//TODO add base class visitor for typedef node
     }
     void ASTProcVis::visit(init_declarator_list* _indeclis){
         if(_indeclis->init_dec_list!=NULL) _indeclis->init_dec_list->accept(this);
         TableInstance->StartNewDeclaration();
         _indeclis->init_dec->accept(this);
-        TableInstance->AppendCachedDecSpecs();
+        TableInstance->AppendCachedDecSpecs();//adds dec specs to vec
+        TableInstance->EndDeclaration();//combines dec specs right to left
     }
     void ASTProcVis::visit(init_declarator* _indec){
         if(_indec->init!=NULL) _indec->init->accept(this);
@@ -229,7 +231,8 @@
         TableInstance->PushDecSpec(*(_typespec->type));
     }
     void ASTProcVis::visit(specifier_list* _speclist){
-        //TODO?
+        _speclist->type_spec->accept(this);
+        if(_speclist->spec_list!=NULL){ _speclist->spec_list->accept(this); }
     }
     void ASTProcVis::visit(pointer* _pt){
         TableInstance->AddPtrToCurrRecord();
@@ -270,7 +273,7 @@
     }
     void ASTProcVis::visit(direct_declarator* _dirdec){
         if(_dirdec->ID != NULL){
-            TableInstance->AddIDtoCurrRecord(_dirdec->ID->Name);
+            TableInstance->AddIDtoCurrRecord(*(_dirdec->ID->Name));
         }
         else if(_dirdec->dec != NULL){
             _dirdec->dec->accept(this);
@@ -283,7 +286,6 @@
             }
             else if(_dirdec->para_list!=NULL){
                 TableInstance->AddFuncToCurrRecord();
-                TableInstance->AwaitFuncParams();
                 _dirdec->para_list->accept(this);
                 TableInstance->EndFuncParams();
             }
@@ -291,26 +293,23 @@
     }
     void ASTProcVis::visit(parameter_list* _paramlist){
         if(_paramlist->para_list!=NULL){ _paramlist->para_list->accept(this); }
-        TableInstance->awaitParamDec();
+        TableInstance->StartParamDeclaration();
         _paramlist->para_dec->accept(this);
-        TableInstance->endAwaitParamDec();
+        TableInstance->EndParamDeclaration();
     }
     void ASTProcVis::visit(parameter_declaration* _pardec){
         TableInstance->awaitDecSpecs();
         _pardec->dec_spec->accept(this);
-        TableInstance->endAwaitDecSpecs();
-        TableInstance->awaitDeclarator();
         if(_pardec->dec!=NULL){
             _pardec->dec->accept(this);
         }
         else if(_pardec->abs_dec!=NULL){
-            TableInstance->AddUnnamedParam();
+            TableInstance->AddUnnamedtoCurrRecord();
             _pardec->abs_dec->accept(this);
         }
         else{
-            TableInstance->AddUnnamedParam();
+            TableInstance->AddUnnamedtoCurrRecord();
         }
-        TableInstance->endAwaitDeclarator();
         TableInstance->AppendCachedDecSpecs();
     }
     //Statements
@@ -392,16 +391,23 @@
         }
     }
     void ASTProcVis::visit(FunctionDefinition* _funcdef){
+        TableInstance->StartNewFuncDef();
         TableInstance->awaitDecSpecs();
         _funcdef->specs->accept(this);
-        TableInstance->stopAwaitDecSpecs();
         _funcdef->decl->accept(this);
         TableInstance->AppendCachedDecSpecs();
-        TableInstance->NewScope();
+        TableInstance->clearDecSpecs();
+        TableInstance->EndFuncDfDeclaration();
+        TableInstance->AddFuncRecordBody();
         _funcdef->Body->accept(this);
-        TableInstance->PopScope();
+        TableInstance->EndFuncDef();
+        // TableInstance->PopScope();
     }
     void ASTProcVis::visit(ExternalDeclaration* _extdec){
         //hop straight down to the declaration
         _extdec->decl->accept(this);
+    }
+
+    void ASTProcVis::visit(IdentifierNode* _idnode){
+        _idnode->ContextRecord = TableInstance->GetIDRecord(*(_idnode->Name));
     }

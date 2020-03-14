@@ -1,22 +1,39 @@
+#ifndef AST_CONT2_HPP
+#define AST_CONT2_HPP
+
 #include <vector>
 #include <string>
 #include <stack>
 
+struct typeSpecifiers;
+struct ParameterTable;
+struct arrayType;
+struct pointerType;
+struct functionType;
+
+namespace prPr{
+    static int tabs;
+    void Tabsplus();
+    void Tabsminus();
+    std::string genTabs();
+
+}
+
 struct genericConstituentType{
     virtual void AddNextType(genericConstituentType* nexttype){}
     virtual void AddNextType(typeSpecifiers* specs){}
-    virtual void AddNextType(typeSpecifiers* typ){}
     virtual void AddNextType(functionType* func){}
     virtual void AddNextType(arrayType* arr){}
     virtual void AddNextType(pointerType* point){}
+    virtual void Show();
 };
-struct ParameterTable;
 struct functionType : public genericConstituentType{
     void AddNextType(typeSpecifiers* specs) override;
     void AddNextType(pointerType* point) override;
     typeSpecifiers* basetypeReturnType;
     pointerType* pointerReturnType;
     ParameterTable* arguments;
+    void Show();
 };
 
 struct arrayType : public genericConstituentType{
@@ -29,6 +46,7 @@ struct arrayType : public genericConstituentType{
     arrayType* nextArray;
     pointerType* pointerElementType;
     typeSpecifiers* basetypeElementType;
+    void Show();
 };
 
 struct pointerType : public genericConstituentType{
@@ -39,11 +57,13 @@ struct pointerType : public genericConstituentType{
     arrayType* ptToArray;
     typeSpecifiers* ptToBasetype;
     functionType* ptToFunc;
+    void Show();
 };
 
 struct typeSpecifiers : public genericConstituentType{
     std::vector<std::string> specs;
     void AddNextType(std::string spec);
+    void Show();
 };
 
 // struct funcArgs{
@@ -58,16 +78,19 @@ struct Record{
     virtual bool hasID(const std::string& _id){ return false; }
     virtual void SetName(const std::string& _id){}
     bool isTypedef = false;
+    virtual void PrettyPrint(){}
 };
 
 struct Table : public Record{
     Table(Table* _parentTable) : parentTable(_parentTable){}
     std::vector<Record*> subRecords;
     Table* parentTable;
+    void PrettyPrint() override;
 };
 
 struct ParameterTable : public Table{
     ParameterTable(Table* _parentTable) : Table(_parentTable){}
+    void PrettyPrint() override;
 };
 
 
@@ -93,46 +116,44 @@ struct VariableDeclaration : public NamedRecord{
     functionType* primaryFunc;
     typeSpecifiers* primaryTypespec;
 
+    void PrettyPrint() override;
 };
 
 
-struct FunctionDefinition : public NamedRecord{
+struct FunctionDefinitionRec : public NamedRecord{
     bool isFunctionDefinition(){ return true; }
     functionType* funcInfo;
     Table* body;
     void AddPrimary(genericConstituentType* _generic){ throw "uh oh?3"; }
-    void AddPrimary(pointerType* _primaryPt);
+    // void AddPrimary(pointerType* _primaryPt);
     // void AddPrimary(arrayType* _primaryArr);
-    // void AddPrimary(functionType* _primaryFunc);
-    void AddPrimary(typeSpecifiers* _primaryTypespec);
-    pointerType* primaryPt;
-    typeSpecifiers* primaryTypespec;
+    void AddPrimary(functionType* _Func);
+    // void AddPrimary(typeSpecifiers* _primaryTypespec);
+    // pointerType* primaryPt;
+    // typeSpecifiers* primaryTypespec;
+    void PrettyPrint() override;
 };
 
 class SymbolTable{
 public:
     SymbolTable();
+    void PrettyPrint() { trans_unit->PrettyPrint(); }
     void awaitDecSpecs();//done
-    // void stopAwaitDecSpecs();//
     void AssertTypedef();//done
-    // void awaitDeclarator();
-    // void endAwaitDeclarator();
     void AppendCachedDecSpecs();//done
     void clearDecSpecs();//done
     void PushDecSpec(std::string _specid);//done
     void AddPtrToCurrRecord();//done
     void AddArrayToCurrRecord(int _size);//done
     void AddFuncToCurrRecord();//done
-    // void AwaitFuncParams();
     void StartParamDeclaration();//done
     void EndParamDeclaration();//done
     void EndFuncParams();//done
     void AddFuncRecordBody();
     void AddIDtoCurrRecord(std::string _id);//done
-    // void awaitParamDec();
-    // void endAwaitParamDec();
     void AddUnnamedtoCurrRecord();
     void StartNewFuncDef();//done
+    void EndFuncDfDeclaration();
     void EndFuncDef();//done
     void StartNewDeclaration();//done
     void EndDeclaration();//done
@@ -150,7 +171,9 @@ private:
     std::stack<std::vector<std::string> >decspecStack;
     Table* trans_unit;
     Table* ActiveScopePtr;
-    FunctionDefinition* ActiveFuncDefPtr;
+    FunctionDefinitionRec* ActiveFuncDefPtr;
     NamedRecord* ActiveRecordPtr;
     // funcArgs* ActiveFuncArgs;
 };
+
+#endif

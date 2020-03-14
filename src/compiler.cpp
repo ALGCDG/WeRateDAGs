@@ -2,8 +2,8 @@
 #include "ast_allnodes.hpp"
 // #include "visitors.hpp"
 #include "py_translate_vis.hpp"
-#include "ast_context.hpp"
-#include "AST_Processor.hpp"
+#include "ast_context2.hpp"
+#include "ASTProc.hpp"
 #include <iostream>
 int main(int argc, char** argv)
 {
@@ -26,9 +26,10 @@ int main(int argc, char** argv)
 		}
 	}
 	//processing ast
-	ContextTable* Table = new ContextTable();
+	SymbolTable* Table = new SymbolTable();
 	ASTProcVis* astproc = new ASTProcVis(Table);
-	ast->accept(astproc);
+	astproc->ProcessAST(ast);
+	Table->PrettyPrint();
 
 	// creating visitor
 	std::cerr << "creating visitor" << std::endl;

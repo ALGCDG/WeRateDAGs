@@ -52,7 +52,6 @@ private:
     decTypeInfo descendDeclarator(direct_abstract_declarator* _dir_abs_dec);
 
     //evaluates constant expression, (returns -1 if unspecified size)
-    int EvalConstantExpression(ConstantExpression* _const_expr);
     ContextTable* TableInstance;
     void visit(ArraySubscript* _subcr);
     void visit(FuncCall* _funccall);

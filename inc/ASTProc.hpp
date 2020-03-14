@@ -1,9 +1,18 @@
+#ifndef ASTPROC_HPP
+#define ASTPROC_HPP
+
 #include "ast_context2.hpp"
 #include "ast_allnodes.hpp"
-
+#include <cassert>
 
 class ASTProcVis : public Visitor{
 public:
+    ASTProcVis(SymbolTable* _table) : TableInstance(_table){
+            //make sure to construct visitor with instance of table
+        assert(_table);
+    }
+    void ProcessAST(TranslationUnit* root){ root->accept(this); }
+
     void visit(ArraySubscript* _subcr);
     void visit(FuncCall* _funccall);
     void visit(MemberAccess* _memberaccess);
@@ -95,8 +104,12 @@ public:
     void visit(TranslationUnit* _trans);
     void visit(FunctionDefinition* _funcdef);
     void visit(ExternalDeclaration* _extdec);
-
+    void visit(IdentifierNode* _idnode);
+    void visit(TypedefNode* _typedef);
 private:
     SymbolTable* TableInstance;
-    
+    std::stack<IdentifierNode*> IDstack;
+    int EvalConstantExpression(ConstantExpression* _const_expr){ return 2; }//TODO
 };
+
+#endif
