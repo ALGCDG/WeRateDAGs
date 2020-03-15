@@ -143,6 +143,7 @@ struct FunctionDefinitionRec : public NamedRecord{
     functionType* funcInfo;
     Table* body;
     void AddPrimary(genericConstituentType* _generic){ std::cout << "hmm";}
+    void AddPrimary(typeSpecifiers* _typ){ std::cout << "hmm2"; }
     // void AddPrimary(pointerType* _primaryPt);
     // void AddPrimary(arrayType* _primaryArr);
     void AddPrimary(functionType* _Func);

@@ -8,7 +8,7 @@
         _subcr->LHS->accept(this);
     }
     void ASTProcVis::visit(FuncCall* _funccall){
-        std::cout << "visit " << "FuncCall" << std::endl;
+        std::cerr << "visiting func call" << std::endl;
         if(_funccall->Args!=NULL){ _funccall->Args->accept(this); }
         _funccall->LHS->accept(this);
     }
@@ -22,6 +22,7 @@
         _derefmemberacc->LHS->accept(this);
     }
     void ASTProcVis::visit(ArgExprList* _argexprlist){
+        std::cerr << "visiting arg expr list" << std::endl;
         for(auto i : _argexprlist->Args){
             i->accept(this);
         }
@@ -198,7 +199,7 @@
 
     //Declarations
     void ASTProcVis::visit(declaration* _dectn){
-        std::cout << "visit " << "declaration" << std::endl;
+        std::cerr << "visiting declaration" << std::endl;
         TableInstance->awaitDecSpecs();//new vector on top
         _dectn->specifier->accept(this);
         // TableInstance->stopAwaitDecSpecs();
@@ -206,6 +207,7 @@
         TableInstance->clearDecSpecs();
     }
     void ASTProcVis::visit(declaration_specifiers* _decspec){
+        std::cerr << "visiting dec specs" << std::endl;
         //TODO if not a canonical type, link in the record somehow
         if(_decspec->type_spec!=NULL){
             
@@ -221,9 +223,11 @@
         }
     }
     void ASTProcVis::visit(TypedefNode* _typedef){
+        std::cerr << "visiting typedef node" << std::endl;
         TableInstance->AssertTypedef();//TODO add base class visitor for typedef node
     }
     void ASTProcVis::visit(init_declarator_list* _indeclis){
+        std::cerr << "visiting init dec list" << std::endl;
         if(_indeclis->init_dec_list!=NULL) _indeclis->init_dec_list->accept(this);
         TableInstance->StartNewDeclaration();
         _indeclis->init_dec->accept(this);
@@ -231,24 +235,29 @@
         TableInstance->EndDeclaration();//combines dec specs right to left
     }
     void ASTProcVis::visit(init_declarator* _indec){
+        std::cerr << "visiting init declarator" << std::endl;
         if(_indec->init!=NULL) _indec->init->accept(this);
         _indec->dec->accept(this);
     }
     void ASTProcVis::visit(type_specifier* _typespec){
+        std::cerr << "visiting type spec" << std::endl;
         TableInstance->PushDecSpec((_typespec->type));
         
 
     }
     void ASTProcVis::visit(specifier_list* _speclist){
+        std::cerr << "visiting specifier list" << std::endl;
         _speclist->type_spec->accept(this);
         if(_speclist->spec_list!=NULL){ _speclist->spec_list->accept(this); }
     }
     void ASTProcVis::visit(pointer* _pt){
+        std::cerr << "visiting pointer" << std::endl;
         TableInstance->AddPtrToCurrRecord();
         if (_pt->p!=NULL){_pt->p->accept(this); }
     }
     void ASTProcVis::visit(base_declarator* _basedec){}
     void ASTProcVis::visit(abstract_declarator* _absdec){
+        std::cerr << "visiting abstract declarator" << std::endl;
         if(_absdec->p!=NULL){
             if(_absdec->dabs_dec!=NULL){
                 _absdec->dabs_dec->accept(this);
@@ -260,6 +269,7 @@
         }
     }
     void ASTProcVis::visit(direct_abstract_declarator* _absdec){
+        std::cerr << "visiting direct abstract decl" << std::endl;
         if(_absdec->abs_dec!=NULL){ _absdec->abs_dec->accept(this); }
         else{
             if(_absdec->dabs_dec!=NULL){ 
@@ -277,10 +287,13 @@
         }
     }
     void ASTProcVis::visit(declarator* _declr){
+        std::cerr << "visiting declarator" << std::endl;
         _declr->dir_dec->accept(this);
+        std::cerr << "visited dir dec" << std::endl;
         if(_declr->p!=NULL) _declr->p->accept(this);
     }
     void ASTProcVis::visit(direct_declarator* _dirdec){
+        std::cerr << "visiting direct dec" << std::endl;
         if(_dirdec->ID != NULL){
             TableInstance->AddIDtoCurrRecord(_dirdec->ID->Name);
             
@@ -295,6 +308,7 @@
                 TableInstance->AddArrayToCurrRecord(size);
             }
             else if(_dirdec->para_list!=NULL){
+                std::cerr << "adding func to curr record" << std::endl;
                 TableInstance->AddFuncToCurrRecord();
                 _dirdec->para_list->accept(this);
                 TableInstance->EndFuncParams();
@@ -302,12 +316,16 @@
         }
     }
     void ASTProcVis::visit(parameter_list* _paramlist){
+        std::cerr << "visiting param list" << std::endl;
         if(_paramlist->para_list!=NULL){ _paramlist->para_list->accept(this); }
         TableInstance->StartParamDeclaration();
         _paramlist->para_dec->accept(this);
+        std::cerr << "ending param declaration" << std::endl;
         TableInstance->EndParamDeclaration();
+        std::cerr << "stopped visiting param list" << std::endl;
     }
     void ASTProcVis::visit(parameter_declaration* _pardec){
+        std::cerr << "visiting param declaration" << std::endl;
         TableInstance->awaitDecSpecs();
         _pardec->dec_spec->accept(this);
         if(_pardec->dec!=NULL){
@@ -335,10 +353,12 @@
         _exprstmnt->Expr->accept(this);
     }
     void ASTProcVis::visit(StatementList* _stmntlist){
+        std::cerr << "visiting statement list" << std::endl;
         if(_stmntlist->RestOfStatements!=NULL){_stmntlist->RestOfStatements->accept(this);}
         _stmntlist->statement->accept(this);
     }
     void ASTProcVis::visit(CompoundStatement* _compstat){
+        std::cerr << "visiting compound statement" << std::endl;
         if(_compstat->Decls!=NULL){ _compstat->Decls->accept(this); }
         if(_compstat->Statements!=NULL){ _compstat->Statements->accept(this); }
     }
@@ -387,7 +407,6 @@
         _swi->Body->accept(this);
         TableInstance->PopScope();
     }
-
     void ASTProcVis::visit(CaseOrDefault* _caseordef){
         TableInstance->NewScope();
         _caseordef->Body->accept(this);
@@ -396,18 +415,24 @@
 
     //External definitions
     void ASTProcVis::visit(TranslationUnit* _trans){
+        std::cerr << "visiting transl unit" << std::endl;
         for (auto el : _trans->decls){
             el->accept(this);
         }
     }
     void ASTProcVis::visit(FunctionDefinition* _funcdef){
-        std::cerr << "visiting func def" << std::endl;
+                std::cerr << "visiting func def" << std::endl;
+
         TableInstance->StartNewFuncDef();
         TableInstance->awaitDecSpecs();
         _funcdef->specs->accept(this);
+        std::cerr << " visiting declarator" << std::endl;
         _funcdef->decl->accept(this);
+        std::cerr << "appending cahced specs" << std::endl;
         TableInstance->AppendCachedDecSpecs();
+        std::cerr << "appended cached specs" << std::endl;
         TableInstance->clearDecSpecs();
+        std::cerr << "cleared dec specs" << std::endl;
         TableInstance->EndFuncDfDeclaration();
         TableInstance->AddFuncRecordBody();
         
@@ -416,11 +441,13 @@
         // TableInstance->PopScope();
     }
     void ASTProcVis::visit(ExternalDeclaration* _extdec){
-        std::cerr << "visiting external declaration" << std::endl;
+        std::cerr << "visiting extern dec" << std::endl;
+
         //hop straight down to the declaration
         _extdec->decl->accept(this);
     }
 
     void ASTProcVis::visit(IdentifierNode* _idnode){
+        std::cerr << "visiting idnode" << std::endl;
         _idnode->ContextRecord = TableInstance->GetIDRecord((_idnode->Name));
     }

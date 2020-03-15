@@ -1,9 +1,9 @@
 
-int main()
+int main(int b)
 {
   int a;
 }
-int b;
+
 
 
 
