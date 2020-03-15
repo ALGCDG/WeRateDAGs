@@ -277,48 +277,37 @@
         }
     }
     void ASTProcVis::visit(declarator* _declr){
-        std::cerr << "visiting declarator" << std::endl;
         _declr->dir_dec->accept(this);
-        
         if(_declr->p!=NULL) _declr->p->accept(this);
     }
     void ASTProcVis::visit(direct_declarator* _dirdec){
-        std::cerr << "visiting direct declarator" << std::endl;
         if(_dirdec->ID != NULL){
-            std::cerr << "\t for ID" << std::endl;
             TableInstance->AddIDtoCurrRecord(_dirdec->ID->Name);
             
         }
         else if(_dirdec->dec != NULL){
-            std::cerr << "\t for (declarator)" << std::endl;
             _dirdec->dec->accept(this);
         }
         else if(_dirdec->dir_dec != NULL){
-            std::cerr << "\t for direct declarator";
             _dirdec->dir_dec->accept(this);
             if(_dirdec->const_expr != NULL){
-            std::cerr << "[const expression]"<< std::endl;
                 int size = EvalConstantExpression(_dirdec->const_expr);
                 TableInstance->AddArrayToCurrRecord(size);
             }
             else if(_dirdec->para_list!=NULL){
-                std::cerr << "(params)" << std::endl;
                 TableInstance->AddFuncToCurrRecord();
-                
                 _dirdec->para_list->accept(this);
                 TableInstance->EndFuncParams();
             }
         }
     }
     void ASTProcVis::visit(parameter_list* _paramlist){
-        std::cerr << "visiting parameter list" << std::endl;
         if(_paramlist->para_list!=NULL){ _paramlist->para_list->accept(this); }
         TableInstance->StartParamDeclaration();
         _paramlist->para_dec->accept(this);
         TableInstance->EndParamDeclaration();
     }
     void ASTProcVis::visit(parameter_declaration* _pardec){
-        std::cerr << "visiting param declaration" << std::endl;
         TableInstance->awaitDecSpecs();
         _pardec->dec_spec->accept(this);
         if(_pardec->dec!=NULL){
@@ -350,7 +339,6 @@
         _stmntlist->statement->accept(this);
     }
     void ASTProcVis::visit(CompoundStatement* _compstat){
-        std::cerr << "visiting compound statment" << std::endl;
         if(_compstat->Decls!=NULL){ _compstat->Decls->accept(this); }
         if(_compstat->Statements!=NULL){ _compstat->Statements->accept(this); }
     }
@@ -408,28 +396,19 @@
 
     //External definitions
     void ASTProcVis::visit(TranslationUnit* _trans){
-        std::cerr << "visiting translation unit" << std::endl;
         for (auto el : _trans->decls){
             el->accept(this);
         }
     }
     void ASTProcVis::visit(FunctionDefinition* _funcdef){
-        std::cerr << "visiting function definition" << std::endl;
-        std::cerr << "|\t to start new func def" << std::endl;
+        std::cerr << "visiting func def" << std::endl;
         TableInstance->StartNewFuncDef();
-        std::cerr << "|\t to await dec specs" << std::endl;
         TableInstance->awaitDecSpecs();
-        std::cerr << "|\t to visit the specs" << std::endl;
         _funcdef->specs->accept(this);
-        std::cerr << "|\t to visit the declarator" << std::endl;
         _funcdef->decl->accept(this);
-        std::cerr << "|\t to append these specs" << std::endl;
         TableInstance->AppendCachedDecSpecs();
-        std::cerr << "|\t to clear the specs" << std::endl;
         TableInstance->clearDecSpecs();
-        std::cerr << "|\t to end func def" << std::endl;
         TableInstance->EndFuncDfDeclaration();
-        std::cerr << "|\t to add body" << std::endl;
         TableInstance->AddFuncRecordBody();
         
         _funcdef->Body->accept(this);
@@ -443,6 +422,5 @@
     }
 
     void ASTProcVis::visit(IdentifierNode* _idnode){
-        std::cerr << "visiting ident node" << std::endl;
         _idnode->ContextRecord = TableInstance->GetIDRecord((_idnode->Name));
     }

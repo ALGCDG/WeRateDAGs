@@ -11,7 +11,8 @@ struct ParameterTable;
 struct arrayType;
 struct pointerType;
 struct functionType;
-
+struct VariableDeclaration;
+struct FunctionDefinitionRec;
 namespace prPr{
     extern int tabs;
     void Tabsplus();
@@ -20,6 +21,9 @@ namespace prPr{
 }
 
 struct genericConstituentType{
+    virtual void BeAppended(genericConstituentType* other) = 0;
+    virtual void BeAppended(VariableDeclaration* vardec) = 0;
+    virtual void BeAppended(FunctionDefinitionRec* funcdec) = 0;
     virtual void AddNextType(genericConstituentType* nexttype){}
     virtual void AddNextType(typeSpecifiers* specs){}
     virtual void AddNextType(functionType* func){}
@@ -28,6 +32,9 @@ struct genericConstituentType{
     virtual void Show(){}
 };
 struct functionType : public genericConstituentType{
+    void BeAppended(genericConstituentType* other);
+    void BeAppended(VariableDeclaration* vardec);
+    void BeAppended(FunctionDefinitionRec* funcdec);
     void AddNextType(typeSpecifiers* specs) override;
     void AddNextType(pointerType* point) override;
     typeSpecifiers* basetypeReturnType;
@@ -37,6 +44,9 @@ struct functionType : public genericConstituentType{
 };
 
 struct arrayType : public genericConstituentType{
+    void BeAppended(genericConstituentType* other);
+    void BeAppended(VariableDeclaration* vardec);
+    void BeAppended(FunctionDefinitionRec* funcdec);
     arrayType(int _size) : size(_size){}
     int size;
     void AddNextType(arrayType* arr) override;
@@ -50,6 +60,9 @@ struct arrayType : public genericConstituentType{
 };
 
 struct pointerType : public genericConstituentType{
+    void BeAppended(genericConstituentType* other);
+    void BeAppended(VariableDeclaration* vardec);
+    void BeAppended(FunctionDefinitionRec* funcdec);
     void AddNextType(arrayType* arr) override;
     void AddNextType(pointerType* pnt) override;
     void AddNextType(typeSpecifiers* typ) override;
@@ -62,6 +75,9 @@ struct pointerType : public genericConstituentType{
 };
 
 struct typeSpecifiers : public genericConstituentType{
+    void BeAppended(genericConstituentType* other);
+    void BeAppended(VariableDeclaration* vardec);
+    void BeAppended(FunctionDefinitionRec* funcdec);
     std::vector<std::string> specs;
     void AddNextType(std::string spec);
     void Show();
@@ -99,6 +115,7 @@ struct NamedRecord : public Record{
     bool hasID(const std::string& _id) override { return _id == id; }
     //use this to check on receipt of named record which type it is
     virtual bool isFunctionDefinition(){return false; }
+    void SetName(const std::string& _id){ id = _id; }
     std::string id;
 };
 

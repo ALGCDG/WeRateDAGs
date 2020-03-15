@@ -22,6 +22,7 @@ void prPr::Tabsplus(){
 void Table::PrettyPrint(){
     prPr::Tabsplus();
     for (auto rec : subRecords){
+        std::cerr << "printing sub record" << std::endl;
         rec->PrettyPrint();
     }
     prPr::Tabsminus();
@@ -57,13 +58,13 @@ void VariableDeclaration::PrettyPrint(){
 void FunctionDefinitionRec::PrettyPrint(){
     std::cout << prPr::genTabs() << id << " is ";
     funcInfo->Show();
-    std::cout << prPr::genTabs() << "With body: ";
+    std::cout << std::endl <<prPr::genTabs() << "With body: " << std::endl;
     prPr::Tabsplus();
     body->PrettyPrint();
     prPr::Tabsminus();
 }
 void functionType::Show(){
-    std::cout << prPr::genTabs() << "function ";
+    std::cout << "function " << std::endl;
     arguments->PrettyPrint();
     std::cout << prPr::genTabs() << "that returns ";
     if(basetypeReturnType!=NULL){ basetypeReturnType->Show(); }
@@ -93,43 +94,52 @@ void typeSpecifiers::Show(){
 //For adding types to chain
 
 void functionType::AddNextType(typeSpecifiers* specs){
+    
     basetypeReturnType = specs;
     pointerReturnType = NULL;
 }void functionType::AddNextType(pointerType* point){
+    
     basetypeReturnType = NULL;
     pointerReturnType = point;
 }
 
 void arrayType::AddNextType(arrayType* arr){
+    
     nextArray = arr;
     pointerElementType = NULL;
     basetypeElementType = NULL;
 }void arrayType::AddNextType(pointerType* pnt){
+    
     nextArray = NULL;
     pointerElementType = pnt;
     basetypeElementType = NULL;
 }void arrayType::AddNextType(typeSpecifiers* typ){
+    
     nextArray = NULL;
     pointerElementType = NULL;
     basetypeElementType = typ;
 }
 
 void pointerType::AddNextType(arrayType* arr){
+    
     ptToPointer = NULL;
     ptToArray = arr;
     ptToBasetype = NULL;
     ptToFunc = NULL;
 }void pointerType::AddNextType(pointerType* pnt){
+    
     ptToPointer = pnt;
     ptToArray = NULL;
     ptToBasetype = NULL;
     ptToFunc = NULL;
 }void pointerType::AddNextType(typeSpecifiers* typ){
+    
     ptToPointer = NULL;
     ptToArray = NULL;
     ptToBasetype = typ;
     ptToFunc = NULL;
 }void pointerType::AddNextType(functionType* func){
+    
     ptToPointer = NULL;
     ptToArray = NULL;
     ptToBasetype = NULL;
@@ -137,9 +147,26 @@ void pointerType::AddNextType(arrayType* arr){
 }
 
 void typeSpecifiers::AddNextType(std::string spec){
-    specs.push_back(spec);
+        specs.push_back(spec);
 }
 
+void functionType::BeAppended(genericConstituentType* other){ other->AddNextType(this); }
+void functionType::BeAppended(VariableDeclaration* vardec){ vardec->AddPrimary(this); }
+void functionType::BeAppended(FunctionDefinitionRec* funcdec){ funcdec->AddPrimary(this); }
+
+void arrayType::BeAppended(genericConstituentType* other){ other->AddNextType(this); }
+void arrayType::BeAppended(VariableDeclaration* vardec){ vardec->AddPrimary(this); }
+void arrayType::BeAppended(FunctionDefinitionRec* funcdec){ funcdec->AddPrimary(this); }
+
+void pointerType::BeAppended(genericConstituentType* other){ other->AddNextType(this); }
+void pointerType::BeAppended(VariableDeclaration* vardec){ vardec->AddPrimary(this); }
+void pointerType::BeAppended(FunctionDefinitionRec* funcdec){ funcdec->AddPrimary(this); }
+
+void typeSpecifiers::BeAppended(genericConstituentType* other){ other->AddNextType(this); }
+void typeSpecifiers::BeAppended(VariableDeclaration* vardec){ vardec->AddPrimary(this); }
+void typeSpecifiers::BeAppended(FunctionDefinitionRec* funcdec){ funcdec->AddPrimary(this); }
+
+//--------------------
 void VariableDeclaration::AddPrimary(pointerType* _primaryPt){
     primaryPt = _primaryPt;
     primaryArr = NULL;
@@ -234,9 +261,10 @@ void SymbolTable::AddIDtoCurrRecord(std::string _id){
     if(FuncDefIsFocus){
         
         ActiveFuncDefPtr->SetName(_id);
+        // std::cerr << "set func name " + ActiveFuncDefPtr->id << std::endl;
     }
     else{
-        
+        // std::cerr << "set var name " + _id << std::endl;
         ActiveRecordPtr->SetName(_id);
     }
     
@@ -312,10 +340,8 @@ void SymbolTable::EndFuncDfDeclaration(){
     // ActiveFuncDefPtr->AddPrimary(parts);
     // 
     AccumulateDeclParts();
-    std::cerr << "accumulated" << std::endl;
-    PopDeclParts();
-    std::cerr << "popped parts" << std::endl;
-    DefocusFunc();
+        PopDeclParts();
+        DefocusFunc();
 }
 
 void SymbolTable::EndFuncDef(){
@@ -341,20 +367,23 @@ void SymbolTable::AccumulateDeclParts(){
         //     }
         // );
         genericConstituentType* acc = NULL;
-        for(auto i = decls.rbegin(); i < decls.rend(); i++){
-            (*i)->AddNextType(acc);
-            acc = *i;
+        // for(auto i = decls.rbegin(); i < decls.rend(); i++){
+        //             //     (*i)->AddNextType(acc);
+        //     acc = *i;
             
+        // }
+        for(int i = decls.size() - 1; i > 0; i--){
+            decls[i]->BeAppended(decls[i-1]);
         }
     
     // }
     if(FuncDefIsFocus){
         
-        ActiveFuncDefPtr->AddPrimary(decls[0]);
+        decls[0]->BeAppended(ActiveFuncDefPtr);
     }
     else{
-        
-        declarationStack.top()->AddPrimary(decls[0]);
+        decls[0]->BeAppended(declarationStack.top());
+        // declarationStack.top()->AddPrimary(decls[0]);
     }
     
 
