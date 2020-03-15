@@ -1,9 +1,2 @@
-
-int main(int b)
-{
-  int a;
-}
-
-
-
-
+int* a[10];
+int b;

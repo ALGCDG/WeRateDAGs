@@ -246,6 +246,7 @@ void SymbolTable::PushDecSpec(std::string _specid){
 void SymbolTable::EndDeclaration(){
     //declarationStack.top()->AddPrimary(AccumulateDeclParts());
     AccumulateDeclParts();
+    std::cerr << "adding " + declarationStack.top()->id + " to record" << std::endl;
     ActiveScopePtr->subRecords.push_back(declarationStack.top());
     std::cerr << "pushing back declaration stack" << std::endl;
     declarationStack.pop();
