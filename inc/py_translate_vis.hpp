@@ -134,7 +134,7 @@ public:
     {
         std::cerr << "init declarator";
         // getting variable name
-        auto name = *(id->dec->dir_dec->ID->Name);
+        auto name = (id->dec->dir_dec->ID->Name);
         std::cerr << " name is: " << name << std::endl;
         if (global.find(name) !=  global.end())
         {
@@ -147,7 +147,7 @@ public:
         if (indentation == 0)
         {
             // if we are in the global scope, we add it to the set
-            global.insert(*(id->dec->dir_dec->ID->Name));
+            global.insert((id->dec->dir_dec->ID->Name));
             std::cerr << "added to global" << std::endl;
         }
         std::cout << "=";
@@ -180,7 +180,7 @@ public:
         std::cerr<< "parameter declaration" << std::endl;
         if (pd->dec != NULL)
         {
-            std::cout << *(pd->dec->dir_dec->ID->Name);
+            std::cout << (pd->dec->dir_dec->ID->Name);
         }
     }
 
@@ -258,7 +258,7 @@ public:
     void visit(IdentifierNode * in)
     {
         std::cerr << "identifier" << std::endl;
-        std::cout << *(in->Name);
+        std::cout << (in->Name);
     }
 
 
@@ -316,7 +316,7 @@ public:
         std::cerr << "direct declarator" << std::endl;
         if (dd->ID != NULL)
         {
-            std::cout << *(dd->ID->Name);
+            std::cout << (dd->ID->Name);
         }
         else{
             if (dd->dir_dec != NULL)

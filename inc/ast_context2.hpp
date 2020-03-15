@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include <stack>
+#include <iostream>
 
 struct typeSpecifiers;
 struct ParameterTable;
@@ -104,7 +105,7 @@ struct NamedRecord : public Record{
 struct VariableDeclaration : public NamedRecord{
     bool isFunctionDefinition(){ return false; }
     //sets all others to null explicitly
-    void AddPrimary(genericConstituentType* _generic){ throw "uh oh?"; }
+    void AddPrimary(genericConstituentType* _generic){ std::cout << "lol"; }
     void AddPrimary(pointerType* _primaryPt);
     void AddPrimary(arrayType* _primaryArr);
     void AddPrimary(functionType* _primaryFunc);
@@ -124,7 +125,7 @@ struct FunctionDefinitionRec : public NamedRecord{
     bool isFunctionDefinition(){ return true; }
     functionType* funcInfo;
     Table* body;
-    void AddPrimary(genericConstituentType* _generic){ throw "uh oh?3"; }
+    void AddPrimary(genericConstituentType* _generic){ std::cout << "hmm";}
     // void AddPrimary(pointerType* _primaryPt);
     // void AddPrimary(arrayType* _primaryArr);
     void AddPrimary(functionType* _Func);
@@ -159,21 +160,23 @@ public:
     void EndDeclaration();//done
     void NewScope();//done
     void PopScope();//done
-
+    void NewDeclParts();
+    void PopDeclParts();
     NamedRecord* GetIDRecord(const std::string& _ID);
-
+    void DefocusFunc() { FuncDefIsFocus = false; }
+    void FocusFunc() { FuncDefIsFocus = true; }
 private:
     NamedRecord* SearchUp(const std::string& _ID, Table* scope);
     // std::stack<funcArgs*> funcargsStack;
     std::stack<std::vector<genericConstituentType*> > declPartsStack;
-    genericConstituentType* AccumulateDeclParts();
+    void AccumulateDeclParts();
     std::stack<VariableDeclaration*> declarationStack;
     std::stack<std::vector<std::string> >decspecStack;
     Table* trans_unit;
     Table* ActiveScopePtr;
     FunctionDefinitionRec* ActiveFuncDefPtr;
+    bool FuncDefIsFocus;
     NamedRecord* ActiveRecordPtr;
-    // funcArgs* ActiveFuncArgs;
 };
 
 #endif

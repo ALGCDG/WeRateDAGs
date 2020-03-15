@@ -279,6 +279,7 @@
     void ASTProcVis::visit(declarator* _declr){
         std::cerr << "visiting dir dec" << std::endl;
         _declr->dir_dec->accept(this);
+        std::cerr << "visited declarator" << std::endl;
         if(_declr->dir_dec!=NULL) _declr->dir_dec->accept(this);
     }
     void ASTProcVis::visit(direct_declarator* _dirdec){
@@ -288,16 +289,21 @@
             std::cerr << "added id to curr rec" << std::endl;
         }
         else if(_dirdec->dec != NULL){
+            std::cerr << "visiting dir dec: declarator" << std::endl;
             _dirdec->dec->accept(this);
         }
         else if(_dirdec->dir_dec != NULL){
+            std::cerr << "visiting dir dec: dir dec" << std::endl;//whats going on
             _dirdec->dir_dec->accept(this);
             if(_dirdec->const_expr != NULL){
+            std::cerr << "visiting dir dec: const expr" << std::endl;
                 int size = EvalConstantExpression(_dirdec->const_expr);
                 TableInstance->AddArrayToCurrRecord(size);
             }
             else if(_dirdec->para_list!=NULL){
+            std::cerr << "visiting dir dec: para list" << std::endl;
                 TableInstance->AddFuncToCurrRecord();
+                std::cerr << "visiting parameter list" << std::endl;
                 _dirdec->para_list->accept(this);
                 TableInstance->EndFuncParams();
             }
@@ -414,9 +420,13 @@
         _funcdef->decl->accept(this);
         std::cerr << "visited declarator" << std::endl;
         TableInstance->AppendCachedDecSpecs();
+        std::cerr << "appended dec specs" << std::endl;
         TableInstance->clearDecSpecs();
+        std::cerr << "cleared dec specs" << std::endl;
         TableInstance->EndFuncDfDeclaration();
+        std::cerr << "end func def dec" << std::endl << std::endl;
         TableInstance->AddFuncRecordBody();
+        std::cerr << "starting func body" << std::endl;
         _funcdef->Body->accept(this);
         TableInstance->EndFuncDef();
         // TableInstance->PopScope();

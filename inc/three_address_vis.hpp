@@ -38,10 +38,10 @@ class three_address_Visitor : public Visitor
         if (return_register.empty())
         {
             //function definition
-            std::cout << *(in->Name);
+            std::cout << (in->Name);
             if (global)
             {
-                global_labels.push(*(in->Name));
+                global_labels.push((in->Name));
             }
         }
         else
@@ -49,7 +49,7 @@ class three_address_Visitor : public Visitor
             // expression terminal
             auto return_reg = return_register.top();
             return_register.pop();
-            std::cout << "addu " << return_reg << " $zero " << *(in->Name) << std::endl;
+            std::cout << "addu " << return_reg << " $zero " << (in->Name) << std::endl;
         }
     }
     void visit(Constant *) {}

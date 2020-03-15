@@ -139,6 +139,34 @@ void pointerType::AddNextType(arrayType* arr){
 void typeSpecifiers::AddNextType(std::string spec){
     specs.push_back(spec);
 }
+
+void VariableDeclaration::AddPrimary(pointerType* _primaryPt){
+    primaryPt = _primaryPt;
+    primaryArr = NULL;
+    primaryFunc = NULL;
+    primaryTypespec = NULL;
+}
+void VariableDeclaration::AddPrimary(arrayType* _primaryArr){
+    primaryPt = NULL;
+    primaryArr = _primaryArr;
+    primaryFunc = NULL;
+    primaryTypespec = NULL;
+}
+void VariableDeclaration::AddPrimary(functionType* _primaryFunc){
+    primaryPt = NULL;
+    primaryArr = NULL;
+    primaryFunc = _primaryFunc;
+    primaryTypespec = NULL;
+}
+void VariableDeclaration::AddPrimary(typeSpecifiers* _primaryTypespec){
+    primaryPt = NULL;
+    primaryArr = NULL;
+    primaryFunc = NULL;
+    primaryTypespec = _primaryTypespec;
+}
+void FunctionDefinitionRec::AddPrimary(functionType* _Func){
+    funcInfo = _Func;
+}
 //---------------------
 
 
@@ -152,6 +180,13 @@ SymbolTable::SymbolTable(){
     ActiveFuncDefPtr = NULL;
 }
 
+void SymbolTable::NewDeclParts(){
+    declPartsStack.push(std::vector<genericConstituentType*>());
+}
+void SymbolTable::PopDeclParts(){
+    declPartsStack.pop();
+}
+
 void SymbolTable::NewScope(){
     Table* newScope = new Table(ActiveScopePtr);
     ActiveScopePtr->subRecords.push_back(newScope);
@@ -163,6 +198,7 @@ void SymbolTable::PopScope(){
 }
 
 void SymbolTable::StartNewDeclaration(){
+    NewDeclParts();
     VariableDeclaration* dec = new VariableDeclaration();
     ActiveRecordPtr = dec;
     declarationStack.push(dec);
@@ -181,10 +217,12 @@ void SymbolTable::PushDecSpec(std::string _specid){
 }
 
 void SymbolTable::EndDeclaration(){
-    declarationStack.top()->AddPrimary(AccumulateDeclParts());
-    ActiveScopePtr->subRecords.push_back(declarationStack.top());
+    //declarationStack.top()->AddPrimary(AccumulateDeclParts());
+    //ActiveScopePtr->subRecords.push_back(declarationStack.top());
+    AccumulateDeclParts();
     declarationStack.pop();
     ActiveRecordPtr = declarationStack.top();
+    PopDeclParts();
 }
 
 void SymbolTable::AddArrayToCurrRecord(int size){
@@ -192,7 +230,16 @@ void SymbolTable::AddArrayToCurrRecord(int size){
 }
 
 void SymbolTable::AddIDtoCurrRecord(std::string _id){
-    ActiveRecordPtr->SetName(_id);
+    std::cerr << "adding " << _id << " as id" << std::endl;
+    if(FuncDefIsFocus){
+        std::cerr << "adding func name" << std::endl;
+        ActiveFuncDefPtr->SetName(_id);
+    }
+    else{
+        std::cerr << "adding var name" << std::endl;
+        ActiveRecordPtr->SetName(_id);
+    }
+    std::cerr << " added id "<<std::endl;
 }
 
 void SymbolTable::AddUnnamedtoCurrRecord(){
@@ -221,7 +268,9 @@ void SymbolTable::AddPtrToCurrRecord(){
 //!MUST BE FOLLOWED BY END PARAMS()
 void SymbolTable::AddFuncToCurrRecord(){
     functionType* newFunc = new functionType;
+    std::cerr << "debug 1" << std::endl;
     declPartsStack.top().push_back(newFunc);
+    std::cerr << "debug 2" << std::endl;
     ParameterTable* params = new ParameterTable(ActiveScopePtr);
     newFunc->arguments = params;
     ActiveScopePtr = params;
@@ -238,8 +287,10 @@ void SymbolTable::EndFuncParams(){
 }
 
 void SymbolTable::StartNewFuncDef(){
+    NewDeclParts();
     FunctionDefinitionRec* def = new FunctionDefinitionRec;
     ActiveFuncDefPtr = def;
+    FocusFunc();
     //no nested function definitions in c90 so this is ok
     //no need to push to a stack
 }
@@ -253,8 +304,15 @@ void SymbolTable::AddFuncRecordBody(){
 }
 
 void SymbolTable::EndFuncDfDeclaration(){
-    ActiveFuncDefPtr->AddPrimary(AccumulateDeclParts());
-
+    // std::cerr << "accumulating parts" << std::endl;
+    // genericConstituentType* parts = AccumulateDeclParts();
+    // std::cerr << "accumulated" << std::endl;
+    // ActiveFuncDefPtr->AddPrimary(parts);
+    // std::cerr << "name" << ActiveFuncDefPtr->id << std::endl;
+    AccumulateDeclParts();
+    std::cerr << "added primaries" << std::endl;
+    PopDeclParts();
+    DefocusFunc();
 }
 
 void SymbolTable::EndFuncDef(){
@@ -264,21 +322,39 @@ void SymbolTable::EndFuncDef(){
     ActiveFuncDefPtr = NULL;
 }
 //-----------------------------------
-genericConstituentType* SymbolTable::AccumulateDeclParts(){
-    if (declPartsStack.top().size() == 1){
-        return declPartsStack.top()[0];
+void SymbolTable::AccumulateDeclParts(){
+    // if (declPartsStack.top().size() == 1){
+    //     return declPartsStack.top()[0];
+    // }
+    // else{
+        // genericConstituentType* tmp = NULL;//workaround for accumulate
+        std::vector<genericConstituentType*> decls = declPartsStack.top();
+        std::cerr << "created decls vec of size " << decls.size() << std::endl;
+        // genericConstituentType* top = std::accumulate(decls.rbegin(),decls.rend(), tmp,
+        //     [](genericConstituentType* left, genericConstituentType* right){
+        //         std::cout << "accumulating" << std::endl;
+        //         left->AddNextType(right);
+        //         return left;
+        //     }
+        // );
+        genericConstituentType* acc = NULL;
+        for(auto i = decls.rbegin(); i < decls.rend(); i++){
+            (*i)->AddNextType(acc);
+            acc = *i;
+            std::cerr << "accumulating" << std::endl;
+        }
+    
+    // }
+    if(FuncDefIsFocus){
+        std::cerr << "adding func prims" << std::endl;
+        ActiveFuncDefPtr->AddPrimary(decls[0]);
     }
     else{
-        genericConstituentType* tmp = NULL;//workaround for accumulate
-        std::vector<genericConstituentType*> decls = declPartsStack.top();
-        genericConstituentType* top = std::accumulate(decls.begin(),decls.end(), tmp,
-            [](genericConstituentType* left, genericConstituentType* right){
-                left->AddNextType(right);
-                return left;
-            }
-        );
-        return top;
+        std::cerr << "adding variable decs prims" << std::endl;
+        declarationStack.top()->AddPrimary(decls[0]);
     }
+    std::cerr << "added primaries" << std::endl;
+
 }
 
 NamedRecord* SymbolTable::GetIDRecord(const std::string& _ID){
