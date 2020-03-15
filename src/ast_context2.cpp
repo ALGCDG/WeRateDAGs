@@ -230,16 +230,16 @@ void SymbolTable::AddArrayToCurrRecord(int size){
 }
 
 void SymbolTable::AddIDtoCurrRecord(std::string _id){
-    std::cerr << "adding " << _id << " as id" << std::endl;
+    
     if(FuncDefIsFocus){
-        std::cerr << "adding func name" << std::endl;
+        
         ActiveFuncDefPtr->SetName(_id);
     }
     else{
-        std::cerr << "adding var name" << std::endl;
+        
         ActiveRecordPtr->SetName(_id);
     }
-    std::cerr << " added id "<<std::endl;
+    
 }
 
 void SymbolTable::AddUnnamedtoCurrRecord(){
@@ -268,9 +268,9 @@ void SymbolTable::AddPtrToCurrRecord(){
 //!MUST BE FOLLOWED BY END PARAMS()
 void SymbolTable::AddFuncToCurrRecord(){
     functionType* newFunc = new functionType;
-    std::cerr << "debug 1" << std::endl;
+    
     declPartsStack.top().push_back(newFunc);
-    std::cerr << "debug 2" << std::endl;
+    
     ParameterTable* params = new ParameterTable(ActiveScopePtr);
     newFunc->arguments = params;
     ActiveScopePtr = params;
@@ -298,20 +298,23 @@ void SymbolTable::StartNewFuncDef(){
 void SymbolTable::AddFuncRecordBody(){
     if(ActiveFuncDefPtr==NULL){ throw "uh oh, 2"; }
     else{
+        
         ActiveFuncDefPtr->body = new Table(ActiveFuncDefPtr->funcInfo->arguments);
+        
         ActiveScopePtr = ActiveFuncDefPtr->body;
     }
 }
 
 void SymbolTable::EndFuncDfDeclaration(){
-    // std::cerr << "accumulating parts" << std::endl;
+    // 
     // genericConstituentType* parts = AccumulateDeclParts();
-    // std::cerr << "accumulated" << std::endl;
+    // 
     // ActiveFuncDefPtr->AddPrimary(parts);
-    // std::cerr << "name" << ActiveFuncDefPtr->id << std::endl;
+    // 
     AccumulateDeclParts();
-    std::cerr << "added primaries" << std::endl;
+    std::cerr << "accumulated" << std::endl;
     PopDeclParts();
+    std::cerr << "popped parts" << std::endl;
     DefocusFunc();
 }
 
@@ -329,7 +332,7 @@ void SymbolTable::AccumulateDeclParts(){
     // else{
         // genericConstituentType* tmp = NULL;//workaround for accumulate
         std::vector<genericConstituentType*> decls = declPartsStack.top();
-        std::cerr << "created decls vec of size " << decls.size() << std::endl;
+        
         // genericConstituentType* top = std::accumulate(decls.rbegin(),decls.rend(), tmp,
         //     [](genericConstituentType* left, genericConstituentType* right){
         //         std::cout << "accumulating" << std::endl;
@@ -341,19 +344,19 @@ void SymbolTable::AccumulateDeclParts(){
         for(auto i = decls.rbegin(); i < decls.rend(); i++){
             (*i)->AddNextType(acc);
             acc = *i;
-            std::cerr << "accumulating" << std::endl;
+            
         }
     
     // }
     if(FuncDefIsFocus){
-        std::cerr << "adding func prims" << std::endl;
+        
         ActiveFuncDefPtr->AddPrimary(decls[0]);
     }
     else{
-        std::cerr << "adding variable decs prims" << std::endl;
+        
         declarationStack.top()->AddPrimary(decls[0]);
     }
-    std::cerr << "added primaries" << std::endl;
+    
 
 }
 
