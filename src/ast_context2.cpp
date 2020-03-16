@@ -151,7 +151,7 @@ void typeSpecifiers::AddNextType(std::string spec){
 }
 
 void functionType::BeAppended(genericConstituentType* other){ other->AddNextType(this); }
-void functionType::BeAppended(VariableDeclaration* vardec){ vardec->AddPrimary(this); }
+void functionType::BeAppended(VariableDeclaration* vardec){ std::cerr << "ADDING";vardec->AddPrimary(this); std::cerr << "ADD";}
 void functionType::BeAppended(FunctionDefinitionRec* funcdec){ funcdec->AddPrimary(this); }
 
 void arrayType::BeAppended(genericConstituentType* other){ other->AddNextType(this); }

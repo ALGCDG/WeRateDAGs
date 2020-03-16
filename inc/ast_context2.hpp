@@ -24,7 +24,6 @@ struct genericConstituentType{
     virtual void BeAppended(genericConstituentType* other) = 0;
     virtual void BeAppended(VariableDeclaration* vardec) = 0;
     virtual void BeAppended(FunctionDefinitionRec* funcdec) = 0;
-    virtual void AddNextType(genericConstituentType* nexttype){}
     virtual void AddNextType(typeSpecifiers* specs){}
     virtual void AddNextType(functionType* func){}
     virtual void AddNextType(arrayType* arr){}

@@ -242,8 +242,6 @@
     void ASTProcVis::visit(type_specifier* _typespec){
         std::cerr << "visiting type spec" << std::endl;
         TableInstance->PushDecSpec((_typespec->type));
-        
-
     }
     void ASTProcVis::visit(specifier_list* _speclist){
         std::cerr << "visiting specifier list" << std::endl;
@@ -295,8 +293,7 @@
     void ASTProcVis::visit(direct_declarator* _dirdec){
         std::cerr << "visiting direct dec" << std::endl;
         if(_dirdec->ID != NULL){
-            TableInstance->AddIDtoCurrRecord(_dirdec->ID->Name);
-            
+            TableInstance->AddIDtoCurrRecord(_dirdec->ID->Name);  
         }
         else if(_dirdec->dec != NULL){
             _dirdec->dec->accept(this);
@@ -331,14 +328,19 @@
         if(_pardec->dec!=NULL){
             _pardec->dec->accept(this);
         }
+        //TODO is unnamed seperate to abstract?
         else if(_pardec->abs_dec!=NULL){
             TableInstance->AddUnnamedtoCurrRecord();
             _pardec->abs_dec->accept(this);
         }
         else{
+            //todo ie here
             TableInstance->AddUnnamedtoCurrRecord();
         }
         TableInstance->AppendCachedDecSpecs();
+
+        //!added this, not sure
+        TableInstance->clearDecSpecs();
     }
     //Statements
     void ASTProcVis::visit(EmptyStatement* _emptmnt){}//do nothing
@@ -421,8 +423,7 @@
         }
     }
     void ASTProcVis::visit(FunctionDefinition* _funcdef){
-                std::cerr << "visiting func def" << std::endl;
-
+        std::cerr << "visiting func def" << std::endl;
         TableInstance->StartNewFuncDef();
         TableInstance->awaitDecSpecs();
         _funcdef->specs->accept(this);
