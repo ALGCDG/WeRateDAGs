@@ -30,3 +30,5 @@ clean :
 	rm -f *.out
 	rm -f out
 	rm -f src/*.output
+	rm -f inc/*.hpp.gch
+	rm -f src/*.swo
