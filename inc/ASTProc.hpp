@@ -106,6 +106,7 @@ public:
     void visit(ExternalDeclaration* _extdec);
     void visit(IdentifierNode* _idnode);
     void visit(TypedefNode* _typedef);
+    void visit(DeclarationList* decllis);
 private:
     SymbolTable* TableInstance;
     std::stack<IdentifierNode*> IDstack;

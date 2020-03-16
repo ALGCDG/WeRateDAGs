@@ -31,7 +31,7 @@ int main(int argc, char** argv)
 		SymbolTable* Table = new SymbolTable();
 		ASTProcVis* astproc = new ASTProcVis(Table);
 		astproc->ProcessAST(ast);
-		// Table->PrettyPrint();
+		Table->PrettyPrint();
 
 		// creating visitor
 		std::cerr << "creating visitor" << std::endl;
