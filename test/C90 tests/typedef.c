@@ -1,9 +1,6 @@
-
-int a(){
+int f(){
   return 2;
 }
 int main(){
-typedef int a;
-  a b;
+  int a;
 }
-

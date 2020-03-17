@@ -2,6 +2,7 @@
 #include <numeric> //accumulate
 #include <iostream>
 #include <algorithm>//copy_if
+#include <regex>
 
 //For pretty printing-----------
 namespace prPr{
@@ -166,6 +167,8 @@ void typeSpecifiers::BeAppended(genericConstituentType* other){ other->AddNextTy
 void typeSpecifiers::BeAppended(VariableDeclaration* vardec){ vardec->AddPrimary(this); }
 void typeSpecifiers::BeAppended(FunctionDefinitionRec* funcdec){ funcdec->AddPrimary(this); }
 
+
+
 //--------------------
 void VariableDeclaration::AddPrimary(pointerType* _primaryPt){
     primaryPt = _primaryPt;
@@ -193,6 +196,19 @@ void VariableDeclaration::AddPrimary(typeSpecifiers* _primaryTypespec){
 }
 void FunctionDefinitionRec::AddPrimary(functionType* _Func){
     funcInfo = _Func;
+}
+
+genericConstituentType* VariableDeclaration::GetPrimary(){
+    if(primaryPt!=NULL) return primaryPt;
+    else if(primaryArr!=NULL) return primaryArr;
+    else if(primaryFunc!=NULL) return primaryFunc;
+    else if(primaryTypespec!=NULL) return primaryTypespec;
+    else throw("variable record has no info!");
+}
+
+genericConstituentType* FunctionDefinitionRec::GetPrimary(){
+    if(funcInfo!=NULL) return funcInfo;
+    else throw("func record has no info!");
 }
 //---------------------
 
@@ -277,7 +293,9 @@ void SymbolTable::AssertTypedef(){
 }
 
 bool SymbolTable::IsCanonicalTypespec(const std::string& spec){
-
+    static const std::string match = "void|char|short|int|long|float|double|signed|unsigned";
+    static const std::regex reg(match);
+    return std::regex_match(spec, reg);
 }
 
 void SymbolTable::AppendCachedDecSpecs(){
@@ -287,11 +305,17 @@ void SymbolTable::AppendCachedDecSpecs(){
     for(auto spec : decspecStack.top()){
         if(spec == "typedef") AssertTypedef();
         else{
-            // if(!IsCanonicalTypespec(spec)){
-            //     VariableDeclaration* dec = static_cast<VariableDeclaration*>(GetIDRecord(spec));
-                
-            // }
-            filteredspecs.push_back(spec);
+            if(!IsCanonicalTypespec(spec)){
+                std::cerr << "test" << std::endl;
+                genericConstituentType* dec = GetIDRecord(spec)->GetPrimary();
+                std::cerr << "teststop" << std::endl;
+                declPartsStack.top().push_back(dec);
+                //TODO The above currently shallow copies the linked list
+                //!Two owners to the linked list!
+            }
+            else{
+                filteredspecs.push_back(spec);
+            }
         }
     }
     // if(filteredspecs.size() != decspecStack.top().size()){ AssertTypedef(); }

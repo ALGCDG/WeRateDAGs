@@ -116,6 +116,7 @@ struct NamedRecord : public Record{
     virtual bool isFunctionDefinition(){return false; }
     void SetName(const std::string& _id){ id = _id; }
     std::string id;
+    virtual genericConstituentType* GetPrimary() = 0;
 };
 
 struct VariableDeclaration : public NamedRecord{
@@ -132,7 +133,7 @@ struct VariableDeclaration : public NamedRecord{
     arrayType* primaryArr;
     functionType* primaryFunc;
     typeSpecifiers* primaryTypespec;
-
+    genericConstituentType* GetPrimary() override;
     void PrettyPrint() override;
 };
 
@@ -150,6 +151,7 @@ struct FunctionDefinitionRec : public NamedRecord{
     // pointerType* primaryPt;
     // typeSpecifiers* primaryTypespec;
     void PrettyPrint() override;
+    genericConstituentType* GetPrimary() override;
 };
 
 class SymbolTable{
