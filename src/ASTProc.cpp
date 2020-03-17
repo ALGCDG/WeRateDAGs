@@ -361,9 +361,11 @@ void ASTProcVis::visit(StatementList* _stmntlist){
     if(_stmntlist->RestOfStatements!=NULL){_stmntlist->RestOfStatements->accept(this);}
     _stmntlist->statement->accept(this);
 }
-void ASTProcVis::visit(CompoundStatement* _compstat){  
+void ASTProcVis::visit(CompoundStatement* _compstat){
+    TableInstance->NewScope();
     if(_compstat->Decls!=NULL){ _compstat->Decls->accept(this); }
     if(_compstat->Statements!=NULL){ _compstat->Statements->accept(this); }
+    TableInstance->PopScope();
 }
 
 //scope changing

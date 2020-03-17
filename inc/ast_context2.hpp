@@ -89,18 +89,20 @@ struct typeSpecifiers : public genericConstituentType{
 
 
 
-
+struct Table;
 struct Record{
+    Record(){}
+    Record(Table* _parentTable) : parentTable(_parentTable){}
     virtual bool hasID(const std::string& _id){ return false; }
     virtual void SetName(const std::string& _id){}
     bool isTypedef = false;
     virtual void PrettyPrint(){}
+    Table* parentTable;
 };
 
 struct Table : public Record{
-    Table(Table* _parentTable) : parentTable(_parentTable){}
+    Table(Table* _parentTable) : Record(_parentTable){}
     std::vector<Record*> subRecords;
-    Table* parentTable;
     void PrettyPrint() override;
 };
 
@@ -111,15 +113,19 @@ struct ParameterTable : public Table{
 
 
 struct NamedRecord : public Record{
+    NamedRecord(){}
+    NamedRecord(Table* _parent) : Record(_parent){}
     bool hasID(const std::string& _id) override { return _id == id; }
     //use this to check on receipt of named record which type it is
     virtual bool isFunctionDefinition(){return false; }
     void SetName(const std::string& _id){ id = _id; }
     std::string id;
     virtual genericConstituentType* GetPrimary() = 0;
+
 };
 
 struct VariableDeclaration : public NamedRecord{
+    VariableDeclaration(Table* _parent) : NamedRecord(_parent){}
     bool isFunctionDefinition(){ return false; }
     //sets all others to null explicitly
     void AddPrimary(genericConstituentType* _generic){ std::cout << "lol"; }
@@ -133,12 +139,15 @@ struct VariableDeclaration : public NamedRecord{
     arrayType* primaryArr;
     functionType* primaryFunc;
     typeSpecifiers* primaryTypespec;
+    bool IsGlobal();
+    unsigned int GetDepth();
     genericConstituentType* GetPrimary() override;
     void PrettyPrint() override;
 };
 
 
 struct FunctionDefinitionRec : public NamedRecord{
+    FunctionDefinitionRec(){}
     bool isFunctionDefinition(){ return true; }
     functionType* funcInfo;
     Table* body;

@@ -36,7 +36,7 @@ void ParameterTable::PrettyPrint(){
     std::cout << prPr::genTabs() << ")" << std::endl;
 }
 void VariableDeclaration::PrettyPrint(){
-    std::cout << prPr::genTabs() << id << " is ";
+    std::cout << prPr::genTabs() << id << " of depth " << GetDepth() << " is ";
     if(primaryPt!=NULL){
         primaryPt->Show();
     }
@@ -206,6 +206,19 @@ genericConstituentType* VariableDeclaration::GetPrimary(){
     else throw("variable record has no info!");
 }
 
+unsigned int VariableDeclaration::GetDepth(){
+    Record* traverser = parentTable;
+    unsigned int depth = 0;
+    while(traverser!=NULL){
+        depth++;
+        traverser = traverser->parentTable;
+    }
+    return depth - 1;
+}
+
+bool VariableDeclaration::IsGlobal(){
+    return GetDepth() == 0;
+}
 genericConstituentType* FunctionDefinitionRec::GetPrimary(){
     if(funcInfo!=NULL) return funcInfo;
     else throw("func record has no info!");
@@ -214,7 +227,7 @@ genericConstituentType* FunctionDefinitionRec::GetPrimary(){
 
 
 SymbolTable::SymbolTable(){
-    trans_unit = new Table(ActiveScopePtr);
+    trans_unit = new Table(NULL);
     ActiveScopePtr = trans_unit;
 
     declarationStack.push(NULL);//so never empty completely
@@ -242,7 +255,7 @@ void SymbolTable::PopScope(){
 
 void SymbolTable::StartNewDeclaration(){
     NewDeclParts();
-    VariableDeclaration* dec = new VariableDeclaration();
+    VariableDeclaration* dec = new VariableDeclaration(ActiveScopePtr);
     ActiveRecordPtr = dec;
     declarationStack.push(dec);
 }
@@ -366,9 +379,10 @@ void SymbolTable::StartNewFuncDef(){
 void SymbolTable::AddFuncRecordBody(){
     if(ActiveFuncDefPtr==NULL){ throw "uh oh, 2"; }
     else{
-                ActiveFuncDefPtr->body = new Table(ActiveFuncDefPtr->funcInfo->arguments);
-        
+        ActiveFuncDefPtr->body = new Table(ActiveFuncDefPtr->funcInfo->arguments);
         ActiveScopePtr = ActiveFuncDefPtr->body;
+        FunctionBodyStart = true; //to avoid extra scopes when first entering compound statement
+        FunctionBodyFinish = true;
     }
 }
 
