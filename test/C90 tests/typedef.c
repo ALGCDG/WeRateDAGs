@@ -1,9 +1,9 @@
-int f(int in){
-  return in;
-}
 
+int a(){
+  return 2;
+}
 int main(){
-  int b;
-  int* c;
+typedef int a;
+  a b;
 }
 

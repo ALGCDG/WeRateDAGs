@@ -180,8 +180,10 @@ public:
     void NewDeclParts();
     void PopDeclParts();
     NamedRecord* GetIDRecord(const std::string& _ID);
+    NamedRecord* GetActiveRecord();
     void DefocusFunc() { FuncDefIsFocus = false; }
     void FocusFunc() { FuncDefIsFocus = true; }
+    bool IsCanonicalTypespec(const std::string& spec);
 private:
     NamedRecord* SearchUp(const std::string& _ID, Table* scope);
     // std::stack<funcArgs*> funcargsStack;

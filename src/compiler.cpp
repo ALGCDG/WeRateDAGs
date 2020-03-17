@@ -8,7 +8,7 @@
 #include <iostream>
 int main(int argc, char** argv)
 {
-	try{
+	
 		// creating ast
 		TranslationUnit *ast=parseAST();
 		std::cerr << "finished parsing, start compiling" << std::endl;
@@ -30,9 +30,10 @@ int main(int argc, char** argv)
 		//processing ast
 		SymbolTable* Table = new SymbolTable();
 		ASTProcVis* astproc = new ASTProcVis(Table);
-		astproc->ProcessAST(ast);
-		Table->PrettyPrint();
-
+		try{
+			astproc->ProcessAST(ast);
+			Table->PrettyPrint();
+		}catch(const char* e){ std::cout << e; }
 		// creating visitor
 		std::cerr << "creating visitor" << std::endl;
 		// translate_flag=true; //TESTING translator
@@ -44,5 +45,5 @@ int main(int argc, char** argv)
 		ast->accept(language_processor);
 		delete language_processor;
 		return 0;
-	}catch(std::exception e){ std::cout << e.what(); }
+	
 }

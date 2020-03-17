@@ -79,7 +79,7 @@ decTypeInfo ASTProcVis::descendDeclarator(direct_declarator* _this_dir_dec)
     else if(_this_dir_dec->dir_dec != NULL){
         decTypeInfo below = descendDeclarator(_this_dir_dec->dir_dec);
         if(_this_dir_dec->const_expr != NULL){
-            int size = ASTProcVis::EvalConstantExpression(_this_dir_dec->const_expr);
+            unsigned int size = ASTProcVis::EvalConstantExpression(_this_dir_dec->const_expr);
             ContextData::arrayPart* this_array = new ContextData::arrayPart(size, NULL);
             below.second->AddChild(this_array); //add array to linked list
             below.second = this_array; //make bottom of list this array

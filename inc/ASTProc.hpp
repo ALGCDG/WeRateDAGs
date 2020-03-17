@@ -107,10 +107,13 @@ public:
     void visit(IdentifierNode* _idnode);
     void visit(TypedefNode* _typedef);
     void visit(DeclarationList* decllis);
+    unsigned int EvalConstantExpression(ConstantExpression* _const_expr);
+    unsigned int EvalConstantExpression(Expression* expr);
+    unsigned int EvalConstantExpression(constant_int* _const);
+    unsigned int EvalConstantExpression(unspecified_array_length* _unspec);
 private:
     SymbolTable* TableInstance;
     std::stack<IdentifierNode*> IDstack;
-    int EvalConstantExpression(ConstantExpression* _const_expr){ return 2; }//TODO
 };
 
 #endif

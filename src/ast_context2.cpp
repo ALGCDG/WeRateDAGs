@@ -1,6 +1,7 @@
 #include "ast_context2.hpp"
 #include <numeric> //accumulate
 #include <iostream>
+#include <algorithm>//copy_if
 
 //For pretty printing-----------
 namespace prPr{
@@ -275,10 +276,26 @@ void SymbolTable::AssertTypedef(){
     ActiveRecordPtr->isTypedef=true;
 }
 
+bool SymbolTable::IsCanonicalTypespec(const std::string& spec){
+
+}
+
 void SymbolTable::AppendCachedDecSpecs(){
     typeSpecifiers* specs = new typeSpecifiers;
     //deep copy
-    specs->specs = std::vector<std::string>(decspecStack.top());
+    std::vector<std::string> filteredspecs;
+    for(auto spec : decspecStack.top()){
+        if(spec == "typedef") AssertTypedef();
+        else{
+            // if(!IsCanonicalTypespec(spec)){
+            //     VariableDeclaration* dec = static_cast<VariableDeclaration*>(GetIDRecord(spec));
+                
+            // }
+            filteredspecs.push_back(spec);
+        }
+    }
+    // if(filteredspecs.size() != decspecStack.top().size()){ AssertTypedef(); }
+    specs->specs = filteredspecs;
     declPartsStack.top().push_back(specs);
 }
 
@@ -350,6 +367,15 @@ void SymbolTable::EndFuncDef(){
     ActiveScopePtr = ActiveScopePtr->parentTable->parentTable;
     ActiveScopePtr->subRecords.push_back(ActiveFuncDefPtr);
     ActiveFuncDefPtr = NULL;
+}
+
+NamedRecord* SymbolTable::GetActiveRecord(){
+    if(FuncDefIsFocus){
+        return ActiveFuncDefPtr;
+    }
+    else{
+        return ActiveRecordPtr;
+    }
 }
 //-----------------------------------
 void SymbolTable::AccumulateDeclParts(){
