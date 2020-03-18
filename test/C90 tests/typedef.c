@@ -1,11 +1,10 @@
-int f(int a){
+int f(int* test){
   return 2;
 }
-int f(int a);
-
-int main()
-{
-  return f(2);
+int main(){
+  int a = 2;
+  {
+     int b = a;
+  }
 }
-
-/*gcc -std=c90 -pedantic -Werror typedef.c*/
+int c;

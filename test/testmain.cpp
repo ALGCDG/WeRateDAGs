@@ -5,13 +5,10 @@ int main()
 {
     while(1)
     {
-        TokenType t = (TokenType)yylex();
-        if(t==None)
-        {
-            break;
-        }
-        //std::cout << *yylval.text << std::endl;
-        //delete yylval.text;
+        int a = 2;
+        do{
+            int i = a--; 
+        }while(i>)
     }
     return 0;
 }

@@ -1,0 +1,50 @@
+function definition
+startnewfuncdef()
+	NewDeclparts()
+		new vector of generic constituent types (declpartsstack)
+	active func def ptr = new functiondefinitionrec
+	focusfun()
+		funcdefisfocus = true
+awaitdecspecs()
+	push new vector of strings
+visit dec specs
+	visit typespecs
+		pushdecspec()
+visit declarator
+	visit direct declarator
+		visit direct declarator
+			addidtocurrrecord()
+                set active func ptr name
+				defocusfunc()
+		addfunctocurrrecord()
+			add new functiontype to declspartstack
+			add arguments table to function type
+			switch scope to arguments table
+		visit parameter list
+			visit other params
+			startparamdeclaration()
+				startnewdeclaration()
+					newdeclparts()
+					set new variable declaration as active record
+					push declaration to declaration stack
+			visit param dec
+				awaitDecspecs()
+				visit dec specs
+				visit declarator
+				append cached dec specs
+				cleardecspecs()
+			endparamdeclaration()
+				enddeclaration()
+					accumulatedeclparts()
+					add top of declaration stack to active scope
+					pop top of declaration stack
+					make top of declaration stack new active record
+					pop decl parts
+		endfuncparams()
+			active scope is parent's active scope
+append cached dec specs()
+clear dec specs()
+endfuncdfdeclaration()
+addfuncrecordbody()
+visit func body
+endfuncdef()
