@@ -143,7 +143,7 @@ EXPRESSIONS
 */
 
 primary_EXPR: Ident { std::cerr << "parsed id"<<std::endl;$$ = $1; }
-                  | Constant { $$ = $1;std::cout << "primary expr pass through constant" << std::endl; }
+                  | Constant { $$ = $1; }
                   | String { std::cerr << "STRING" << std::endl; }
                   | Punctuator_par_open EXPR Punctuator_par_close { $$ = $2; }
 
@@ -156,7 +156,7 @@ Constant: Constant_int { $$ = new constant_int($1); }
 		| Constant_long_double { $$ = new Constant(); }  
 
 
-postfix_EXPR: primary_EXPR { $$ = $1; std::cout << "postfix expr pass through" << std::endl;} /*Pass through*/
+postfix_EXPR: primary_EXPR { $$ = $1; } /*Pass through*/
                   | postfix_EXPR Punctuator_squ_open EXPR Punctuator_squ_close { $$ = new ArraySubscript($1, $3); }
                   | postfix_EXPR Punctuator_par_open  Punctuator_par_close  { $$ = new FuncCall($1); }
                   | postfix_EXPR Punctuator_par_open argument_EXPR_list Punctuator_par_close  { $$ = new FuncCall($1, $3); }
@@ -169,7 +169,7 @@ postfix_EXPR: primary_EXPR { $$ = $1; std::cout << "postfix expr pass through" <
 argument_EXPR_list: assignment_EXPR { $$ = new ArgExprList($1); }
                   | argument_EXPR_list Operator_comma assignment_EXPR { ($1)->AppendArgExpression($3); }
 
-unary_EXPR: postfix_EXPR { $$=$1;std::cout << "unary expr pass through" << std::endl; }
+unary_EXPR: postfix_EXPR { $$=$1; }
 		  | Operator_addadd unary_EXPR { $$ = new PreInc($2); }
 		  | Operator_subsub unary_EXPR { $$ = new PreDec($2); }
       | unary_operator cast_EXPR { $$ = PrefixExpr::DecodeUnaryOp($1,$2); }
@@ -183,51 +183,51 @@ unary_operator: Operator_bit_and { $$ = new std::string("&");}
               | Operator_bit_not { $$ = new std::string("~");}
               | Operator_not { $$ = new std::string("!");}
 
-cast_EXPR: unary_EXPR { $$ = $1;std::cout << "cast expr pass through" << std::endl; }
+cast_EXPR: unary_EXPR { $$ = $1; }
                | Punctuator_par_open type_name Punctuator_par_close cast_EXPR { $$ = new CastExpr($2, $4); }
 
-multiplicative_EXPR: cast_EXPR { $$ = $1; std::cout << "multiplicative expr pass through" << std::endl;}
+multiplicative_EXPR: cast_EXPR { $$ = $1; }
                          | multiplicative_EXPR Operator_mul cast_EXPR { $$ = new Multiply($1, $3); }
                          | multiplicative_EXPR Operator_div cast_EXPR { $$ = new Divide($1, $3); }  
 						             | multiplicative_EXPR Operator_mod cast_EXPR { $$ = new Modulo($1, $3); }
 
 
-additive_EXPR: multiplicative_EXPR { $$ = $1;std::cout << "additive expr pass through" << std::endl;}
+additive_EXPR: multiplicative_EXPR { $$ = $1;}
                    | additive_EXPR Operator_add multiplicative_EXPR { $$ = new Add($1, $3); }
                    | additive_EXPR Operator_sub multiplicative_EXPR { $$ = new Sub($1, $3); }
 
-shift_EXPR: additive_EXPR { $$ = $1; std::cout << "shift expr pass through" << std::endl;}
+shift_EXPR: additive_EXPR { $$ = $1; }
           | shift_EXPR Operator_sl additive_EXPR { $$ = new ShiftLeft($1, $3); }
           | shift_EXPR Operator_sr additive_EXPR { $$ = new ShiftRight($1, $3); }
 
-relational_EXPR: shift_EXPR { $$ = $1; std::cout << "relational expr pass through" << std::endl;}
+relational_EXPR: shift_EXPR { $$ = $1; }
                | relational_EXPR Operator_less shift_EXPR { $$ = new LessThan($1, $3); }
                | relational_EXPR Operator_greater shift_EXPR { $$ = new GreaterThan($1, $3); }
                | relational_EXPR Operator_less_equal shift_EXPR { $$ = new LessThanOrEqual($1, $3); }
                | relational_EXPR Operator_greater_equal shift_EXPR { $$ = new GreaterThanOrEqual($1, $3); }
 
-equality_EXPR: relational_EXPR { $$ = $1; std::cout << "equality expr pass through" << std::endl;}
+equality_EXPR: relational_EXPR { $$ = $1; }
              | equality_EXPR Operator_equal relational_EXPR { $$ = new EqualTo($1, $3); }
              | equality_EXPR Operator_not_equal relational_EXPR { $$ = new NotEqualTo($1, $3); }
 
 
 
-BIT_AND_EXPR: equality_EXPR { $$ = $1; std::cout << "bit and expr pass through" << std::endl;}
+BIT_AND_EXPR: equality_EXPR { $$ = $1; }
         | BIT_AND_EXPR Operator_bit_and equality_EXPR { $$ = new BitwiseAND($1, $3); }
 
-BIT_XBIT_OR_EXPR: BIT_AND_EXPR { $$ = $1;std::cout << "xbit or expr pass through" << std::endl; }
+BIT_XBIT_OR_EXPR: BIT_AND_EXPR { $$ = $1; }
         | BIT_XBIT_OR_EXPR Operator_bit_xor BIT_AND_EXPR{ $$ = new BitwiseXOR($1, $3); }
 
-BIT_OR_EXPR: BIT_XBIT_OR_EXPR { $$ = $1; std::cout << "bit or expr pass through" << std::endl;}
+BIT_OR_EXPR: BIT_XBIT_OR_EXPR { $$ = $1; }
        | BIT_OR_EXPR Operator_bit_or BIT_XBIT_OR_EXPR{ $$ = new BitwiseOR($1, $3); }
 
-LOGIC_AND_EXPR: BIT_OR_EXPR { $$ = $1; std::cout << "logic and expr pass through" << std::endl;}
+LOGIC_AND_EXPR: BIT_OR_EXPR { $$ = $1; }
               | LOGIC_AND_EXPR Operator_and BIT_OR_EXPR{ $$ = new LogicalAND($1, $3); }
 
-LOGIC_OR_EXPR: LOGIC_AND_EXPR { $$ = $1;std::cout << "logic or expr pass through" << std::endl; }
+LOGIC_OR_EXPR: LOGIC_AND_EXPR { $$ = $1; }
              | LOGIC_OR_EXPR Operator_or LOGIC_AND_EXPR{ $$ = new LogicalOR($1, $3); }
 
-conditional_EXPR: LOGIC_OR_EXPR { $$ = $1; std::cout << "conditional expr pass through" << std::endl;}
+conditional_EXPR: LOGIC_OR_EXPR { $$ = $1; }
                 | LOGIC_OR_EXPR Operator_trinary_question EXPR Operator_trinary_choice conditional_EXPR { $$ = new TernaryOpExpression($1, $3, $5); }
 
 assignment_EXPR: conditional_EXPR { $$ = $1; }
