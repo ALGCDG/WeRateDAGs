@@ -102,6 +102,21 @@ class three_address_Visitor : public Visitor
                 std::cout << "move " << return_reg << ", " << *(in->Name) << std::endl;
             }
         }
+        else
+        {
+            std::cout << "sw $v0, $fp" << std::endl; // still need to add frame offset TODO 
+            // if (variable_map.find(*(in->Name)) == variable_map.end())
+            // {
+            //     variable_map[*(in->Name)] = make_pair(offset, saved_registers.top());
+            //     std::cout << saved_registers.top();
+            //     saved_registers.pop();
+            //     offset += 4; //
+            // }
+            // else
+            // {
+
+            // }
+        }
     }
     void visit(Constant *) {}
     void visit(constant_int * ci)
