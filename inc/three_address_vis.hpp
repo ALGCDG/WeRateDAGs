@@ -6,8 +6,10 @@
 #include <iostream>
 #include <typeinfo>
 #include <stack>
+#include <queue>
+#include <deque>
 #include <utility>
-
+#include <unordered_map>
 #include <string>
 // #include "visitors.hpp"
 #include "ast_allnodes.hpp"
@@ -15,7 +17,13 @@
 class three_address_Visitor : public Visitor
 {
     public:
-    three_address_Visitor(): counter(0), return_register(), continue_to(), break_to(), cases(), global(true), global_labels() {}
+    three_address_Visitor(): counter(0), return_register(), continue_to(), break_to(), cases(), global(true), global_labels(), intermediate_values(), temporary_registers(), saved_registers(), variable_map(), writing(false)
+    {
+        for (int i = 9; i >= 0; i--)
+            temporary_registers.push("$t"+std::to_string(i));
+        for (int i = 7; i >= 0; i--)
+            saved_registers.push("$s"+std::to_string(i));
+    }
     int counter;
     std::stack<std::string> return_register; // a stack which tracks which of the two return registers to use
     std::stack<std::string> continue_to; // stores where a continue should jump to
@@ -25,6 +33,31 @@ class three_address_Visitor : public Visitor
     std::stack<std::string> global_labels;
     std::stack<std::pair<std::string,Expression*>> cases; // a stack sructure used when generating switch case code
     std::string default_label; // used as a seperate place to store a default label for switch cases
+    std::stack<std::string> intermediate_values; // a stack for counting the intermediate values of a function
+    std::stack<std::string> temporary_registers;
+    std::stack<std::string> saved_registers;
+    bool writing;
+    int offset;
+    std::unordered_map<std::string,std::pair<int,std::string>> variable_map; // a map of variable name to stack offset and what register it might be stored in
+    std::string get_temp_register(const std::string &inter)
+    {
+        // if (intermediate_values.size() < 9)
+        // {
+        //     auto reg = "$t" + std::to_string(intermediate_values.size());
+        //     intermediate_values.push(inter);
+        //     return reg;
+        // }
+        if (!temporary_registers.empty())
+        {
+            auto r = temporary_registers.top();
+            temporary_registers.pop();
+            return r;
+        }
+        else
+        {
+            std::cout << "ERROR too many intermediate values" << std::endl;
+        }
+    }
     std::string gen_name(const std::string &prefix)
     {
         return prefix + std::to_string(counter++);
@@ -35,21 +68,54 @@ class three_address_Visitor : public Visitor
     }
     void visit(IdentifierNode * in)
     {
-        if (return_register.empty())
+        if (!writing)
         {
-            //function definition
-            std::cout << (in->Name);
-            if (global)
+            if (return_register.empty())
             {
-                global_labels.push((in->Name));
+                //function definition
+                std::cout << *(in->Name);
+                if (global)
+                {
+                    global_labels.push(*(in->Name));
+                }
+            }
+            else
+            {
+                // std::cout << *(in->Name);
+                // expression terminal
+                // auto return_reg = return_register.top();
+                // return_register.pop();
+                // if (variable_map[*(in->Name)].second == "spill")
+                // {
+                //     std::cout << "lw " << saved_registers.top() << ", " << variable_map[*(in->Name)].first << "($fp)" << std::endl;
+                //     std::cout << "move " << return_reg << ", " << saved_registers.top() << std::endl;
+                //     variable_map[*(in->Name)].second = saved_registers.top();
+                //     saved_registers.pop();
+
+                // }
+                // else
+                // {
+                //     std::cout << "move " << return_reg << ", " << variable_map[*(in->Name)].second << std::endl;
+                // }
+                auto return_reg = return_register.top();
+                return_register.pop();
+                std::cout << "move " << return_reg << ", " << *(in->Name) << std::endl;
             }
         }
         else
         {
-            // expression terminal
-            auto return_reg = return_register.top();
-            return_register.pop();
-            std::cout << "addu " << return_reg << " $zero " << (in->Name) << std::endl;
+            std::cout << "sw $v0, $fp" << std::endl; // still need to add frame offset TODO 
+            // if (variable_map.find(*(in->Name)) == variable_map.end())
+            // {
+            //     variable_map[*(in->Name)] = make_pair(offset, saved_registers.top());
+            //     std::cout << saved_registers.top();
+            //     saved_registers.pop();
+            //     offset += 4; //
+            // }
+            // else
+            // {
+
+            // }
         }
     }
     void visit(Constant *) {}
@@ -63,11 +129,12 @@ class three_address_Visitor : public Visitor
         {
             auto return_reg = return_register.top();
             return_register.pop();
-            std::cout << "li " << return_reg << ' ' << ci->value << std::endl;
+            std::cout << "li " << return_reg << ", " << ci->value << std::endl;
         }
     }
     void visit(ArraySubscript * as)
     {
+        // reading from array
         // get return register
         auto return_reg = return_register.top();
         // get subscript expression
@@ -173,125 +240,156 @@ class three_address_Visitor : public Visitor
     void visit(SizeofExpr *) {}
     void visit(SizeofType *) {}
     void visit(CastExpr *) {}
-    void descend(BinaryOpExpression * bop)
+    std::pair<std::string, std::string> descend(BinaryOpExpression * bop)
     {
-        return_register.push("$v0");
+        auto ret_A = get_temp_register(gen_name("ret_A_"));
+        auto ret_B = get_temp_register(gen_name("ret_B_"));
+        return_register.push(ret_A);
         bop->LHS->accept(this);
-        return_register.push("$v1");
+        return_register.push(ret_B);
         bop->RHS->accept(this);
+        return make_pair(ret_A, ret_B);
     }
     void visit(Multiply *m)
     {
-        descend(m);
+        auto intermediates = descend(m);
         auto return_reg = return_register.top();
         return_register.pop();
-        std::cout << "multu $v0 $v1" << std::endl;
+        std::cout << "multu " << intermediates.first << ", " << intermediates.second << std::endl;
         std::cout << "mflo " << return_reg << std::endl;
+        temporary_registers.push(intermediates.first);
+        temporary_registers.push(intermediates.second);
     }
     void visit(Divide *d)
     {
-        descend(d);
+        auto intermediates = descend(d);
         auto return_reg = return_register.top();
         return_register.pop();
-        std::cout << "divu " << return_reg << " $v0 $v1" << std::endl;
+        std::cout << "divu " << return_reg << ", " << intermediates.first << ", " << intermediates.second << std::endl;
         std::cout << "mfhi " << return_reg << std::endl;
+        temporary_registers.push(intermediates.first);
+        temporary_registers.push(intermediates.second);
     }
     void visit(Modulo * m)
     {
-        descend(m);
+        auto intermediates = descend(m);
         auto return_reg = return_register.top();
         return_register.pop();
-        std::cout << "divu " << return_reg << " $v0 $v1" << std::endl;
+        std::cout << "divu " << return_reg << ", " << intermediates.first << ", " << intermediates.second << std::endl;
         std::cout << "mflo " << return_reg << std::endl;
+        temporary_registers.push(intermediates.first);
+        temporary_registers.push(intermediates.second);
     }
     void visit(Add * a)
     {
-        descend(a);
+        auto intermediates = descend(a);
         auto return_reg = return_register.top();
         return_register.pop();
-        std::cout << "addu " << return_reg << " $v0 $v1" << std::endl;
+        std::cout << "addu " << return_reg << ", " << intermediates.first << ", " << intermediates.second << std::endl;
+        temporary_registers.push(intermediates.first);
+        temporary_registers.push(intermediates.second);
     }
     void visit(Sub * s)
     {
-        descend(s);
+        auto intermediates = descend(s);
         auto return_reg = return_register.top();
         return_register.pop();
-        std::cout << "subu " << return_reg << " $v0 $v1" << std::endl;
+        std::cout << "subu " << return_reg << ", " << intermediates.first << ", " << intermediates.second << std::endl;
+        temporary_registers.push(intermediates.first);
+        temporary_registers.push(intermediates.second);
     }
     void visit(ShiftLeft * sl)
     {
-        descend(sl);
+        auto intermediates = descend(sl);
         auto return_reg = return_register.top();
         return_register.pop();
-        std::cout << "sllv " << return_reg << " $v0 $v1" << std::endl;
+        std::cout << "sllv " << return_reg << ", " << intermediates.first << ", " << intermediates.second << std::endl;
+        temporary_registers.push(intermediates.first);
+        temporary_registers.push(intermediates.second);
     }
     void visit(ShiftRight * sr)
     {
-        descend(sr);
+        auto intermediates = descend(sr);
         auto return_reg = return_register.top();
         return_register.pop();
-        std::cout << "srlv " << return_reg << " $v0 $v1" << std::endl;
+        std::cout << "srlv " << return_reg << ", " << intermediates.first << ", " << intermediates.second << std::endl;
+        temporary_registers.push(intermediates.first);
+        temporary_registers.push(intermediates.second);
     }
     void visit(LessThan * lt)
     {
-        descend(lt);
+        auto intermediates = descend(lt);
         auto return_reg = return_register.top();
         return_register.pop();
-        std::cout << "slt " << return_reg << " $v0 $v1" << std::endl;
+        std::cout << "slt " << return_reg << ", " << intermediates.first << ", " << intermediates.second << std::endl;
+        temporary_registers.push(intermediates.first);
+        temporary_registers.push(intermediates.second);
     }
     void visit(GreaterThan * gt)
     {
-        descend(gt);
+        auto intermediates = descend(gt);
         std::cout << "sub $v0 $zero $v0" << std::endl;
         std::cout << "sub $v1 $zero $v1" << std::endl;
-        std::cout << "slt " << return_register.top() << " $v0 $v1" << std::endl;
+        std::cout << "slt " << return_register.top() << ", " << intermediates.first << ", " << intermediates.second << std::endl;
         return_register.pop();
+        temporary_registers.push(intermediates.first);
+        temporary_registers.push(intermediates.second);
     }
     void visit(LessThanOrEqual *) {}
     void visit(GreaterThanOrEqual *) {}
     void visit(EqualTo * et)
     {
-        descend(et);
-        std::cout << "xor $v0 $v0 $v1" << std::endl;
-        std::cout << "li $v1 0xffffffff" << std::endl;
-        std::cout << "xor $v0 $v0 $v1" << std::endl;
-        std::cout << "li $v1 0xfffffffe" << std::endl;
-        std::cout << "sltu " << return_register.top() << " $v0 $v1" << std::endl;
+        auto intermediates = descend(et);
+        std::cout << "xor $v0 " << intermediates.first << ", " << intermediates.second << std::endl;
+        std::cout << "li $v1, 0xffffffff" << std::endl;
+        std::cout << "xor $v0, $v0, $v1" << std::endl;
+        std::cout << "li $v1, 0xfffffffe" << std::endl;
+        std::cout << "sltu " << return_register.top() << ", $v0, $v1" << std::endl;
         return_register.pop();
+        temporary_registers.push(intermediates.first);
+        temporary_registers.push(intermediates.second);
     }
     void visit(NotEqualTo * net)
     {
-        descend(net);
-        std::cout << "xor " << return_register.top() << " $v0 $v1" << std::endl;
+        auto intermediates = descend(net);
+        std::cout << "xor " << return_register.top() << ", " << intermediates.first << ", " << intermediates.second << std::endl;
         return_register.pop();
+        temporary_registers.push(intermediates.first);
+        temporary_registers.push(intermediates.second);
     }
     void visit(LogicalAND * la)
     {
-        // descend(la);
-        // std::cout << "and " << return_register.top() << " $v0 $v1" << std::endl;
+        // auto intermediates = descend(la);
+        // std::cout << "and " << return_register.top() << ", " << intermediates.first << ", " << intermediates.second << std::endl;
         // return_register.pop();
     }
     void visit(LogicalOR *) {}
     void visit(BitwiseAND * ba)
     {
-        descend(ba);
+        auto intermediates = descend(ba);
         auto return_reg = return_register.top();
         return_register.pop();
-        std::cout << "and " << return_reg << " $v0 $v1" << std::endl;
+        std::cout << "and " << return_reg << ", " << intermediates.first << ", " << intermediates.second << std::endl;
+        temporary_registers.push(intermediates.first);
+        temporary_registers.push(intermediates.second);
     }
     void visit(BitwiseOR * bo)
     {
-        descend(bo);
+        auto intermediates = descend(bo);
         auto return_reg = return_register.top();
         return_register.pop();
-        std::cout << "or " << return_reg << " $v0 $v1" << std::endl;
+        std::cout << "or " << return_reg << " " << intermediates.first << ", " << intermediates.second << std::endl;
+        temporary_registers.push(intermediates.first);
+        temporary_registers.push(intermediates.second);
     }
     void visit(BitwiseXOR * bx)
     {
-        descend(bx);
+        auto intermediates = descend(bx);
         auto return_reg = return_register.top();
         return_register.pop();
-        std::cout << "xor " << return_reg << " $v0 $v1" << std::endl;
+        std::cout << "xor " << return_reg << " " << intermediates.first << ", " << intermediates.second << std::endl;
+        temporary_registers.push(intermediates.first);
+        temporary_registers.push(intermediates.second);
     }
     void visit(TernaryOpExpression * toe)
     {
@@ -309,7 +407,7 @@ class three_address_Visitor : public Visitor
         return_register.push(return_register.top());
         toe->IfTrue->accept(this);
         // branch to end
-        std::cout << "beq $zero $zero " << end << std::endl;
+        std::cout << "b " << end << std::endl;
         // do false expression
         std::cout << f << ':' << std::endl;
         return_register.push(return_register.top());
@@ -322,89 +420,110 @@ class three_address_Visitor : public Visitor
     {
         return_register.push("$v0");
         ae->RHS->accept(this);
-        std::cout << "addu ";
+        std::cout << "move ";
         ae->LHS->accept(this);
-        std::cout << " $v0 $zero" << std::endl;
+        std::cout << " $v0" << std::endl;
     }
-    void descend(GenericAssignExpr * gae)
+    std::pair<std::string,std::string> descend(GenericAssignExpr *gae)
     {
-        return_register.push("$v0");
+        auto ret_A = get_temp_register(gen_name("ret_A_"));
+        auto ret_B = get_temp_register(gen_name("ret_B_"));
+        return_register.push(ret_A);
         gae->LHS->accept(this);
-        return_register.push("$v1");
+        return_register.push(ret_B);
         gae->RHS->accept(this);
+        return make_pair(ret_A, ret_B);
     }
     void visit(MulAssignment * ma)
     {
-        descend(ma);
-        std::cout << "mult $v0, $v1" << std::endl;
+        auto intermediates = descend(ma);
+        std::cout << "mult, " << intermediates.first << ", " << intermediates.second << std::endl;
         std::cout << "mflo ";
         ma->LHS->accept(this);
         std::cout << std::endl; 
+        temporary_registers.push(intermediates.first);
+        temporary_registers.push(intermediates.second);
     }
     void visit(DivAssignment * da)
     {
-        descend(da);
-        std::cout << "div $v0, $v1" << std::endl;
+        auto intermediates = descend(da);
+        std::cout << "div, " << intermediates.first << ", " << intermediates.second << std::endl;
         std::cout << "mfhi ";
         da->LHS->accept(this);
         std::cout << std::endl; 
+        temporary_registers.push(intermediates.first);
+        temporary_registers.push(intermediates.second);
     }
     void visit(ModAssignment * ma)
     {
-        descend(ma);
-        std::cout << "div $v0, $v1" << std::endl;
+        auto intermediates = descend(ma);
+        std::cout << "div, " << intermediates.first << ", " << intermediates.second << std::endl;
         std::cout << "mflo ";
         ma->LHS->accept(this);
         std::cout << std::endl; 
     }
     void visit(AddAssignment * aa)
     {
-        descend(aa);
+        auto intermediates = descend(aa);
         std::cout << "addu ";
         aa->LHS->accept(this);
-        std::cout << " $v0, $v1" << std::endl;
+        std::cout << ", " << intermediates.first << ", " << intermediates.second << std::endl;
+        temporary_registers.push(intermediates.first);
+        temporary_registers.push(intermediates.second);
     }
     void visit(SubAssignment * sa)
     {
-        descend(sa);
+        auto intermediates = descend(sa);
         std::cout << "subu ";
         sa->LHS->accept(this);
-        std::cout << " $v0, $v1" << std::endl;
+        std::cout << ", " << intermediates.first << ", " << intermediates.second << std::endl;
+        temporary_registers.push(intermediates.first);
+        temporary_registers.push(intermediates.second);
     }
     void visit(ShiftLeftAssignment * sla)
     {
-        descend(sla);
+        auto intermediates = descend(sla);
         std::cout << "sllv ";
         sla->LHS->accept(this);
-        std::cout << " $v0, $v1" << std::endl;
+        std::cout << ", " << intermediates.first << ", " << intermediates.second << std::endl;
+        temporary_registers.push(intermediates.first);
+        temporary_registers.push(intermediates.second);
     }
     void visit(ShiftRightAssignment * sra)
     {
-        descend(sra);
+        auto intermediates = descend(sra);
         std::cout << "srlv ";
         sra->LHS->accept(this);
-        std::cout << " $v0, $v1" << std::endl;
+        std::cout << ", " << intermediates.first << ", " << intermediates.second << std::endl;
+        temporary_registers.push(intermediates.first);
+        temporary_registers.push(intermediates.second);
     }
     void visit(BitwiseANDAssignment * baa)
     {
-        descend(baa);
+        auto intermediates = descend(baa);
         std::cout << "and ";
         baa->LHS->accept(this);
-        std::cout << " $v0, $v1" << std::endl;
+        std::cout << ", " << intermediates.first << ", " << intermediates.second << std::endl;
+        temporary_registers.push(intermediates.first);
+        temporary_registers.push(intermediates.second);
     }
     void visit(BitwiseXORAssignment * bxa)
     {
-        descend(bxa);
+        auto intermediates = descend(bxa);
         std::cout << "xor ";
         bxa->LHS->accept(this);
-        std::cout << " $v0, $v1" << std::endl;
+        std::cout << ", " << intermediates.first << ", " << intermediates.second << std::endl;
+        temporary_registers.push(intermediates.first);
+        temporary_registers.push(intermediates.second);
     }
     void visit(BitwiseORAssignment * boa)
     {
-        descend(boa);
+        auto intermediates = descend(boa);
         std::cout << "or ";
         boa->LHS->accept(this);
-        std::cout << " $v0, $v1" << std::endl;
+        std::cout << ", " << intermediates.first << ", " << intermediates.second << std::endl;
+        temporary_registers.push(intermediates.first);
+        temporary_registers.push(intermediates.second);
     }
     void visit(ConstantExpression *) {}
     void visit(CommaSepExpression *) {}
@@ -434,7 +553,6 @@ class three_address_Visitor : public Visitor
             id->dec->accept(this);
             std::cout << ": ";
             id->init->accept(this);
-
         }
         else
         {
@@ -444,9 +562,10 @@ class three_address_Visitor : public Visitor
                 {
                     return_register.push("$v0");
                     id->init->ass_expr->accept(this);
-                    std::cout << "addu ";
+                    while (!intermediate_values.empty()) intermediate_values.pop();
+                    std::cout << "move ";
                     id->dec->accept(this);
-                    std::cout << " $v0 $zero" << std::endl;
+                    std::cout << ", $v0" << std::endl;
                 }
             }
         }
@@ -522,11 +641,11 @@ class three_address_Visitor : public Visitor
     void visit(EmptyStatement *) {}
     void visit(Continue *)
     {
-        std::cout << "beq $zero $zero " << continue_to.top() << std::endl;
+        std::cout << "b " << continue_to.top() << std::endl;
     }
     void visit(Break *)
     {
-        std::cout << "beq $zero $zero " << break_to.top() << std::endl;
+        std::cout << "b " << break_to.top() << std::endl;
     }
     void visit(Return * r)
     {
@@ -558,7 +677,7 @@ class three_address_Visitor : public Visitor
         continue_to.pop();
         break_to.pop();
         // branch to beginning
-        std::cout << "beq " << "$zero" << ' ' << "$zero" << ' ' << beginning << std::endl;
+        std::cout << "b "<< beginning << std::endl;
         //end
         std::cout << end << ':' << std::endl;
         // std::cout << "const " << destReg << " 0" << std::endl; // we need to return 0
@@ -583,7 +702,7 @@ class three_address_Visitor : public Visitor
         continue_to.pop();
         break_to.pop();
         // branch to beginning
-        std::cout << "beq " << "$zero" << ' ' << "$zero" << ' ' << beginning << std::endl;
+        std::cout << "b " << beginning << std::endl;
         //end
         std::cout << end << ':' << std::endl;
         // std::cout << "const " << destReg << " 0" << std::endl; // we need to return 0
@@ -607,6 +726,7 @@ class three_address_Visitor : public Visitor
         // doing control statement
         if (f->Control != NULL)
         {
+            return_register.push("$v0");
             f->Control->accept(this);
         }
         // jump to end if control fails
@@ -656,7 +776,7 @@ class three_address_Visitor : public Visitor
         // do true
         std::cout << true_case_label << ':' << std::endl;
         ie->IfTrue->accept(this);
-        std::cout << "beq " << ' ' << "$zero" << ' ' << "$zero" << ' ' << end_label << std::endl;
+        std::cout << "b " << end_label << std::endl;
         // do false
         std::cout << false_case_label << ':' << std::endl;
         ie->IfFalse->accept(this);
@@ -666,6 +786,7 @@ class three_address_Visitor : public Visitor
     void visit(ExpressionStatement * es)
     {
         es->Expr->accept(this);
+        while (!intermediate_values.empty()) intermediate_values.pop();
     }
     void visit(StatementList * sl)
     {
@@ -705,28 +826,28 @@ class three_address_Visitor : public Visitor
         // adding beginning and end as pair to boundry stacks
         break_to.push(end);
         // jumping to decision
-        std::cout << "beq $zero $zero " << decision << std::endl;
+        std::cout << "b " << decision << std::endl;
         // making case
         s->Body->accept(this);
         break_to.pop();
-        std::cout << "beq $zero $zero " << end << std::endl;
+        std::cout << "b " << end << std::endl;
         //evaluate switch expression
         std::cout << decision << ':' << std::endl;
-        return_register.push("$t9"); // stores evaluation in t9 to avoid conflict with expression temps
+        return_register.push("$v0"); // stores evaluation in t9 to avoid conflict with expression temps
         s->ControlExpression->accept(this);
         // checking and branching to each case
         while (!cases.empty())
         {
             // std::cerr << "loop" << std::endl;
             auto c = cases.top();
-            return_register.push("$v0");
+            return_register.push("$v1");
             // std::cerr << "push" << std::endl;
             c.second->accept(this);
-            std::cout << "beq $t9 $v0 " << c.first << std::endl;
+            std::cout << "beq $v0 $v1 " << c.first << std::endl;
             cases.pop();
         }
         // or going to default
-        std::cout << "beq $zero $zero " << default_label << std::endl;
+        std::cout << "b " << default_label << std::endl;
         std::cout << end << ':' << std::endl;
     }
     void visit(CaseOrDefault * cod)
