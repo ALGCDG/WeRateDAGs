@@ -381,8 +381,6 @@ void SymbolTable::AddFuncRecordBody(){
     else{
         ActiveFuncDefPtr->body = new Table(ActiveFuncDefPtr->funcInfo->arguments);
         ActiveScopePtr = ActiveFuncDefPtr->body;
-        FunctionBodyStart = true; //to avoid extra scopes when first entering compound statement
-        FunctionBodyFinish = true;
     }
 }
 
