@@ -6,8 +6,10 @@
 #include <iostream>
 #include <typeinfo>
 #include <stack>
+#include <queue>
+#include <deque>
 #include <utility>
-
+#include <unordered_map>
 #include <string>
 // #include "visitors.hpp"
 #include "ast_allnodes.hpp"
@@ -15,7 +17,13 @@
 class three_address_Visitor : public Visitor
 {
     public:
-    three_address_Visitor(): counter(0), return_register(), continue_to(), break_to(), cases(), global(true), global_labels(), intermediate_values() {}
+    three_address_Visitor(): counter(0), return_register(), continue_to(), break_to(), cases(), global(true), global_labels(), intermediate_values(), temporary_registers(), saved_registers(), variable_map(), writing(false)
+    {
+        for (int i = 9; i >= 0; i--)
+            temporary_registers.push("$t"+std::to_string(i));
+        for (int i = 7; i >= 0; i--)
+            saved_registers.push("$s"+std::to_string(i));
+    }
     int counter;
     std::stack<std::string> return_register; // a stack which tracks which of the two return registers to use
     std::stack<std::string> continue_to; // stores where a continue should jump to
@@ -26,17 +34,28 @@ class three_address_Visitor : public Visitor
     std::stack<std::pair<std::string,Expression*>> cases; // a stack sructure used when generating switch case code
     std::string default_label; // used as a seperate place to store a default label for switch cases
     std::stack<std::string> intermediate_values; // a stack for counting the intermediate values of a function
+    std::stack<std::string> temporary_registers;
+    std::stack<std::string> saved_registers;
+    bool writing;
+    int offset;
+    std::unordered_map<std::string,std::pair<int,std::string>> variable_map; // a map of variable name to stack offset and what register it might be stored in
     std::string get_temp_register(const std::string &inter)
     {
-        if (intermediate_values.size() < 8)
+        // if (intermediate_values.size() < 9)
+        // {
+        //     auto reg = "$t" + std::to_string(intermediate_values.size());
+        //     intermediate_values.push(inter);
+        //     return reg;
+        // }
+        if (!temporary_registers.empty())
         {
-            auto reg = "$t" + std::to_string(intermediate_values.size());
-            intermediate_values.push(inter);
-            return reg;
+            auto r = temporary_registers.top();
+            temporary_registers.pop();
+            return r;
         }
         else
         {
-            return inter;
+            std::cout << "ERROR too many intermediate values" << std::endl;
         }
     }
     std::string gen_name(const std::string &prefix)
@@ -49,21 +68,39 @@ class three_address_Visitor : public Visitor
     }
     void visit(IdentifierNode * in)
     {
-        if (return_register.empty())
+        if (!writing)
         {
-            //function definition
-            std::cout << *(in->Name);
-            if (global)
+            if (return_register.empty())
             {
-                global_labels.push(*(in->Name));
+                //function definition
+                std::cout << *(in->Name);
+                if (global)
+                {
+                    global_labels.push(*(in->Name));
+                }
             }
-        }
-        else
-        {
-            // expression terminal
-            auto return_reg = return_register.top();
-            return_register.pop();
-            std::cout << "move " << return_reg << ", " << *(in->Name) << std::endl;
+            else
+            {
+                // std::cout << *(in->Name);
+                // expression terminal
+                // auto return_reg = return_register.top();
+                // return_register.pop();
+                // if (variable_map[*(in->Name)].second == "spill")
+                // {
+                //     std::cout << "lw " << saved_registers.top() << ", " << variable_map[*(in->Name)].first << "($fp)" << std::endl;
+                //     std::cout << "move " << return_reg << ", " << saved_registers.top() << std::endl;
+                //     variable_map[*(in->Name)].second = saved_registers.top();
+                //     saved_registers.pop();
+
+                // }
+                // else
+                // {
+                //     std::cout << "move " << return_reg << ", " << variable_map[*(in->Name)].second << std::endl;
+                // }
+                auto return_reg = return_register.top();
+                return_register.pop();
+                std::cout << "move " << return_reg << ", " << *(in->Name) << std::endl;
+            }
         }
     }
     void visit(Constant *) {}
@@ -77,7 +114,7 @@ class three_address_Visitor : public Visitor
         {
             auto return_reg = return_register.top();
             return_register.pop();
-            std::cout << "li " << return_reg << ' ' << ci->value << std::endl;
+            std::cout << "li " << return_reg << ", " << ci->value << std::endl;
         }
     }
     void visit(ArraySubscript * as)
@@ -205,6 +242,8 @@ class three_address_Visitor : public Visitor
         return_register.pop();
         std::cout << "multu " << intermediates.first << ", " << intermediates.second << std::endl;
         std::cout << "mflo " << return_reg << std::endl;
+        temporary_registers.push(intermediates.first);
+        temporary_registers.push(intermediates.second);
     }
     void visit(Divide *d)
     {
@@ -213,6 +252,8 @@ class three_address_Visitor : public Visitor
         return_register.pop();
         std::cout << "divu " << return_reg << ", " << intermediates.first << ", " << intermediates.second << std::endl;
         std::cout << "mfhi " << return_reg << std::endl;
+        temporary_registers.push(intermediates.first);
+        temporary_registers.push(intermediates.second);
     }
     void visit(Modulo * m)
     {
@@ -221,6 +262,8 @@ class three_address_Visitor : public Visitor
         return_register.pop();
         std::cout << "divu " << return_reg << ", " << intermediates.first << ", " << intermediates.second << std::endl;
         std::cout << "mflo " << return_reg << std::endl;
+        temporary_registers.push(intermediates.first);
+        temporary_registers.push(intermediates.second);
     }
     void visit(Add * a)
     {
@@ -228,6 +271,8 @@ class three_address_Visitor : public Visitor
         auto return_reg = return_register.top();
         return_register.pop();
         std::cout << "addu " << return_reg << ", " << intermediates.first << ", " << intermediates.second << std::endl;
+        temporary_registers.push(intermediates.first);
+        temporary_registers.push(intermediates.second);
     }
     void visit(Sub * s)
     {
@@ -235,6 +280,8 @@ class three_address_Visitor : public Visitor
         auto return_reg = return_register.top();
         return_register.pop();
         std::cout << "subu " << return_reg << ", " << intermediates.first << ", " << intermediates.second << std::endl;
+        temporary_registers.push(intermediates.first);
+        temporary_registers.push(intermediates.second);
     }
     void visit(ShiftLeft * sl)
     {
@@ -242,6 +289,8 @@ class three_address_Visitor : public Visitor
         auto return_reg = return_register.top();
         return_register.pop();
         std::cout << "sllv " << return_reg << ", " << intermediates.first << ", " << intermediates.second << std::endl;
+        temporary_registers.push(intermediates.first);
+        temporary_registers.push(intermediates.second);
     }
     void visit(ShiftRight * sr)
     {
@@ -249,6 +298,8 @@ class three_address_Visitor : public Visitor
         auto return_reg = return_register.top();
         return_register.pop();
         std::cout << "srlv " << return_reg << ", " << intermediates.first << ", " << intermediates.second << std::endl;
+        temporary_registers.push(intermediates.first);
+        temporary_registers.push(intermediates.second);
     }
     void visit(LessThan * lt)
     {
@@ -256,6 +307,8 @@ class three_address_Visitor : public Visitor
         auto return_reg = return_register.top();
         return_register.pop();
         std::cout << "slt " << return_reg << ", " << intermediates.first << ", " << intermediates.second << std::endl;
+        temporary_registers.push(intermediates.first);
+        temporary_registers.push(intermediates.second);
     }
     void visit(GreaterThan * gt)
     {
@@ -264,6 +317,8 @@ class three_address_Visitor : public Visitor
         std::cout << "sub $v1 $zero $v1" << std::endl;
         std::cout << "slt " << return_register.top() << ", " << intermediates.first << ", " << intermediates.second << std::endl;
         return_register.pop();
+        temporary_registers.push(intermediates.first);
+        temporary_registers.push(intermediates.second);
     }
     void visit(LessThanOrEqual *) {}
     void visit(GreaterThanOrEqual *) {}
@@ -271,17 +326,21 @@ class three_address_Visitor : public Visitor
     {
         auto intermediates = descend(et);
         std::cout << "xor $v0 " << intermediates.first << ", " << intermediates.second << std::endl;
-        std::cout << "li $v1 0xffffffff" << std::endl;
-        std::cout << "xor $v0 $v0 $v1" << std::endl;
-        std::cout << "li $v1 0xfffffffe" << std::endl;
-        std::cout << "sltu " << return_register.top() << " $v0 $v1" << std::endl;
+        std::cout << "li $v1, 0xffffffff" << std::endl;
+        std::cout << "xor $v0, $v0, $v1" << std::endl;
+        std::cout << "li $v1, 0xfffffffe" << std::endl;
+        std::cout << "sltu " << return_register.top() << ", $v0, $v1" << std::endl;
         return_register.pop();
+        temporary_registers.push(intermediates.first);
+        temporary_registers.push(intermediates.second);
     }
     void visit(NotEqualTo * net)
     {
         auto intermediates = descend(net);
         std::cout << "xor " << return_register.top() << ", " << intermediates.first << ", " << intermediates.second << std::endl;
         return_register.pop();
+        temporary_registers.push(intermediates.first);
+        temporary_registers.push(intermediates.second);
     }
     void visit(LogicalAND * la)
     {
@@ -296,6 +355,8 @@ class three_address_Visitor : public Visitor
         auto return_reg = return_register.top();
         return_register.pop();
         std::cout << "and " << return_reg << ", " << intermediates.first << ", " << intermediates.second << std::endl;
+        temporary_registers.push(intermediates.first);
+        temporary_registers.push(intermediates.second);
     }
     void visit(BitwiseOR * bo)
     {
@@ -303,6 +364,8 @@ class three_address_Visitor : public Visitor
         auto return_reg = return_register.top();
         return_register.pop();
         std::cout << "or " << return_reg << " " << intermediates.first << ", " << intermediates.second << std::endl;
+        temporary_registers.push(intermediates.first);
+        temporary_registers.push(intermediates.second);
     }
     void visit(BitwiseXOR * bx)
     {
@@ -310,6 +373,8 @@ class three_address_Visitor : public Visitor
         auto return_reg = return_register.top();
         return_register.pop();
         std::cout << "xor " << return_reg << " " << intermediates.first << ", " << intermediates.second << std::endl;
+        temporary_registers.push(intermediates.first);
+        temporary_registers.push(intermediates.second);
     }
     void visit(TernaryOpExpression * toe)
     {
@@ -361,6 +426,8 @@ class three_address_Visitor : public Visitor
         std::cout << "mflo ";
         ma->LHS->accept(this);
         std::cout << std::endl; 
+        temporary_registers.push(intermediates.first);
+        temporary_registers.push(intermediates.second);
     }
     void visit(DivAssignment * da)
     {
@@ -369,6 +436,8 @@ class three_address_Visitor : public Visitor
         std::cout << "mfhi ";
         da->LHS->accept(this);
         std::cout << std::endl; 
+        temporary_registers.push(intermediates.first);
+        temporary_registers.push(intermediates.second);
     }
     void visit(ModAssignment * ma)
     {
@@ -384,6 +453,8 @@ class three_address_Visitor : public Visitor
         std::cout << "addu ";
         aa->LHS->accept(this);
         std::cout << ", " << intermediates.first << ", " << intermediates.second << std::endl;
+        temporary_registers.push(intermediates.first);
+        temporary_registers.push(intermediates.second);
     }
     void visit(SubAssignment * sa)
     {
@@ -391,6 +462,8 @@ class three_address_Visitor : public Visitor
         std::cout << "subu ";
         sa->LHS->accept(this);
         std::cout << ", " << intermediates.first << ", " << intermediates.second << std::endl;
+        temporary_registers.push(intermediates.first);
+        temporary_registers.push(intermediates.second);
     }
     void visit(ShiftLeftAssignment * sla)
     {
@@ -398,6 +471,8 @@ class three_address_Visitor : public Visitor
         std::cout << "sllv ";
         sla->LHS->accept(this);
         std::cout << ", " << intermediates.first << ", " << intermediates.second << std::endl;
+        temporary_registers.push(intermediates.first);
+        temporary_registers.push(intermediates.second);
     }
     void visit(ShiftRightAssignment * sra)
     {
@@ -405,6 +480,8 @@ class three_address_Visitor : public Visitor
         std::cout << "srlv ";
         sra->LHS->accept(this);
         std::cout << ", " << intermediates.first << ", " << intermediates.second << std::endl;
+        temporary_registers.push(intermediates.first);
+        temporary_registers.push(intermediates.second);
     }
     void visit(BitwiseANDAssignment * baa)
     {
@@ -412,6 +489,8 @@ class three_address_Visitor : public Visitor
         std::cout << "and ";
         baa->LHS->accept(this);
         std::cout << ", " << intermediates.first << ", " << intermediates.second << std::endl;
+        temporary_registers.push(intermediates.first);
+        temporary_registers.push(intermediates.second);
     }
     void visit(BitwiseXORAssignment * bxa)
     {
@@ -419,6 +498,8 @@ class three_address_Visitor : public Visitor
         std::cout << "xor ";
         bxa->LHS->accept(this);
         std::cout << ", " << intermediates.first << ", " << intermediates.second << std::endl;
+        temporary_registers.push(intermediates.first);
+        temporary_registers.push(intermediates.second);
     }
     void visit(BitwiseORAssignment * boa)
     {
@@ -426,6 +507,8 @@ class three_address_Visitor : public Visitor
         std::cout << "or ";
         boa->LHS->accept(this);
         std::cout << ", " << intermediates.first << ", " << intermediates.second << std::endl;
+        temporary_registers.push(intermediates.first);
+        temporary_registers.push(intermediates.second);
     }
     void visit(ConstantExpression *) {}
     void visit(CommaSepExpression *) {}
@@ -735,17 +818,17 @@ class three_address_Visitor : public Visitor
         std::cout << "b " << end << std::endl;
         //evaluate switch expression
         std::cout << decision << ':' << std::endl;
-        return_register.push("$t9"); // stores evaluation in t9 to avoid conflict with expression temps
+        return_register.push("$v0"); // stores evaluation in t9 to avoid conflict with expression temps
         s->ControlExpression->accept(this);
         // checking and branching to each case
         while (!cases.empty())
         {
             // std::cerr << "loop" << std::endl;
             auto c = cases.top();
-            return_register.push("$v0");
+            return_register.push("$v1");
             // std::cerr << "push" << std::endl;
             c.second->accept(this);
-            std::cout << "beq $t9 $v0 " << c.first << std::endl;
+            std::cout << "beq $v0 $v1 " << c.first << std::endl;
             cases.pop();
         }
         // or going to default
