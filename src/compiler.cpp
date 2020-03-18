@@ -32,7 +32,7 @@ int main(int argc, char** argv)
 		ASTProcVis* astproc = new ASTProcVis(Table);
 		try{
 			astproc->ProcessAST(ast);
-			// Table->PrettyPrint();
+			Table->PrettyPrint();
 		}catch(const char* e){ std::cout << e; }
 		// creating visitor
 		std::cerr << "creating visitor" << std::endl;

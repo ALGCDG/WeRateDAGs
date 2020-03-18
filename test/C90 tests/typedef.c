@@ -1,10 +1,11 @@
-int f(int* test){
+int f(int a){
+  int b;
+  {
+    int b;
+  }
   return 2;
 }
+
 int main(){
-  int a = 2;
-  {
-     int b = a;
-  }
+  return f(2);
 }
-int c;

@@ -167,7 +167,42 @@ void typeSpecifiers::BeAppended(genericConstituentType* other){ other->AddNextTy
 void typeSpecifiers::BeAppended(VariableDeclaration* vardec){ vardec->AddPrimary(this); }
 void typeSpecifiers::BeAppended(FunctionDefinitionRec* funcdec){ funcdec->AddPrimary(this); }
 
+std::vector<Record*>& functionType::ArgVec(){
+    return arguments->subRecords;
+}
 
+unsigned int pointerType::ByteSize(){
+    return 4;
+}
+
+unsigned int typeSpecifiers::ByteSize(){
+    unsigned int size_count = 0;
+    //float
+    //char
+    //signed
+    //double
+    //int
+    for(auto spec : specs){
+        if(spec == "int" | spec == "float") size_count += 4;
+        else if(spec == "char") size_count += 1;
+        else if(spec == "double") size_count += 8;
+    }
+    return size_count;
+}
+
+unsigned int arrayType::ByteSize(){
+    if(nextArray!=NULL) return size*nextArray->ByteSize();
+    else if(pointerElementType!=NULL) return size*pointerElementType->ByteSize();
+    else if(basetypeElementType!=NULL) return size*basetypeElementType->ByteSize();
+}
+
+unsigned int functionType::ByteSize(){
+    unsigned int size_count = 0;
+    for(auto arg : ArgVec()){
+        size_count += arg->DeclarationSize();
+    }
+    return size_count;
+}
 
 //--------------------
 void VariableDeclaration::AddPrimary(pointerType* _primaryPt){
@@ -223,6 +258,17 @@ genericConstituentType* FunctionDefinitionRec::GetPrimary(){
     if(funcInfo!=NULL) return funcInfo;
     else throw("func record has no info!");
 }
+
+std::vector<Record*>::iterator FunctionDefinitionRec::ArgsBegin(){
+    return funcInfo->ArgVec().begin();
+}
+std::vector<Record*>::iterator FunctionDefinitionRec::ArgsEnd(){
+    return funcInfo->ArgVec().end();
+}
+unsigned int FunctionDefinitionRec::NumArgs(){
+    return funcInfo->ArgVec().size();
+}
+
 //---------------------
 
 

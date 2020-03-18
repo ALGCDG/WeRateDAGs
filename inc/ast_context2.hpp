@@ -29,6 +29,7 @@ struct genericConstituentType{
     virtual void AddNextType(arrayType* arr){}
     virtual void AddNextType(pointerType* point){}
     virtual void Show(){}
+    virtual unsigned int ByteSize() = 0;
 };
 struct functionType : public genericConstituentType{
     void BeAppended(genericConstituentType* other);
@@ -40,6 +41,8 @@ struct functionType : public genericConstituentType{
     pointerType* pointerReturnType;
     ParameterTable* arguments;
     void Show();
+    std::vector<Record*>& ArgVec();
+    unsigned int ByteSize() override;
 };
 
 struct arrayType : public genericConstituentType{
@@ -56,6 +59,7 @@ struct arrayType : public genericConstituentType{
     pointerType* pointerElementType;
     typeSpecifiers* basetypeElementType;
     void Show();
+    unsigned int ByteSize() override;
 };
 
 struct pointerType : public genericConstituentType{
@@ -71,6 +75,7 @@ struct pointerType : public genericConstituentType{
     typeSpecifiers* ptToBasetype;
     functionType* ptToFunc;
     void Show();
+    unsigned int ByteSize() override;
 };
 
 struct typeSpecifiers : public genericConstituentType{
@@ -80,6 +85,7 @@ struct typeSpecifiers : public genericConstituentType{
     std::vector<std::string> specs;
     void AddNextType(std::string spec);
     void Show();
+    unsigned int ByteSize() override;
 };
 
 // struct funcArgs{
@@ -95,8 +101,9 @@ struct Record{
     Record(Table* _parentTable) : parentTable(_parentTable){}
     virtual bool hasID(const std::string& _id){ return false; }
     virtual void SetName(const std::string& _id){}
-    bool isTypedef = false;
     virtual void PrettyPrint(){}
+    virtual unsigned int DeclarationSize(){}
+    bool isTypedef = false;
     Table* parentTable;
 };
 
@@ -111,6 +118,10 @@ struct ParameterTable : public Table{
     void PrettyPrint() override;
 };
 
+unsigned int UniqueCtr(){
+    static unsigned int a = 0;
+    return a++;
+}
 
 struct NamedRecord : public Record{
     NamedRecord(){}
@@ -121,7 +132,6 @@ struct NamedRecord : public Record{
     void SetName(const std::string& _id){ id = _id; }
     std::string id;
     virtual genericConstituentType* GetPrimary() = 0;
-
 };
 
 struct VariableDeclaration : public NamedRecord{
@@ -143,6 +153,8 @@ struct VariableDeclaration : public NamedRecord{
     unsigned int GetDepth();
     genericConstituentType* GetPrimary() override;
     void PrettyPrint() override;
+    std::string UniqueID(){ return id + std::to_string(UniqueCtr()); }
+    unsigned int DeclarationSize(){ GetPrimary()->ByteSize(); }
 };
 
 
@@ -161,6 +173,9 @@ struct FunctionDefinitionRec : public NamedRecord{
     // typeSpecifiers* primaryTypespec;
     void PrettyPrint() override;
     genericConstituentType* GetPrimary() override;
+    std::vector<Record*>::iterator ArgsBegin();
+    std::vector<Record*>::iterator ArgsEnd();
+    unsigned int NumArgs();
 };
 
 class SymbolTable{
