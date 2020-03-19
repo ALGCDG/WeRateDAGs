@@ -37,8 +37,9 @@ class three_address_Visitor : public Visitor
     std::stack<std::string> temporary_registers;
     std::stack<std::string> saved_registers;
     bool writing;
-    int offset;
-    std::unordered_map<std::string,std::pair<int,std::string>> variable_map; // a map of variable name to stack offset and what register it might be stored in
+    int local_words, arg_words;
+    std::string function_end;
+    std::unordered_map<std::string,int> variable_map; // a map of variable name to stack offset and what register it might be stored in
     std::string get_temp_register(const std::string &inter)
     {
         // if (intermediate_values.size() < 9)
@@ -99,23 +100,23 @@ class three_address_Visitor : public Visitor
                 // }
                 auto return_reg = return_register.top();
                 return_register.pop();
-                std::cout << "move " << return_reg << ", " << (in->Name) << std::endl;
+                // std::cout << "move " << return_reg << ", " << (in->Name) << std::endl;
+                std::cout << "lw " << return_reg << ", " << -variable_map[in->Name] << "($s7) " << std::endl; // still need to add frame offset TODO
             }
         }
         else
         {
-            std::cout << "sw $v0, $fp" << std::endl; // still need to add frame offset TODO 
-            // if (variable_map.find(*(in->Name)) == variable_map.end())
-            // {
-            //     variable_map[*(in->Name)] = make_pair(offset, saved_registers.top());
-            //     std::cout << saved_registers.top();
-            //     saved_registers.pop();
-            //     offset += 4; //
-            // }
-            // else
-            // {
-
-            // }
+            if (variable_map.find(in->Name) == variable_map.end())
+            {
+                local_words++;
+                auto offset = 8 + local_words * 4;
+                std::cout << "sw $v0, " << -offset << "($s7)" << std::endl; // still need to add frame offset TODO
+                variable_map[in->Name] = offset;
+            }
+            else
+            {
+                std::cout << "sw $v0, " << -variable_map[in->Name] << "($s7)" << std::endl; // still need to add frame offset TODO
+            }
         }
     }
     void visit(Constant *) {}
@@ -420,9 +421,11 @@ class three_address_Visitor : public Visitor
     {
         return_register.push("$v0");
         ae->RHS->accept(this);
-        std::cout << "move ";
+        // std::cout << "move ";
+        writing = true;
         ae->LHS->accept(this);
-        std::cout << " $v0" << std::endl;
+        writing = false;
+        // std::cout << " $v0" << std::endl;
     }
     std::pair<std::string,std::string> descend(GenericAssignExpr *gae)
     {
@@ -437,20 +440,22 @@ class three_address_Visitor : public Visitor
     void visit(MulAssignment * ma)
     {
         auto intermediates = descend(ma);
-        std::cout << "mult, " << intermediates.first << ", " << intermediates.second << std::endl;
-        std::cout << "mflo ";
+        std::cout << "mult " << intermediates.first << ", " << intermediates.second << std::endl;
+        std::cout << "mflo $v0" << std::endl;
+        writing = true;
         ma->LHS->accept(this);
-        std::cout << std::endl; 
+        writing = false;
         temporary_registers.push(intermediates.first);
         temporary_registers.push(intermediates.second);
     }
     void visit(DivAssignment * da)
     {
         auto intermediates = descend(da);
-        std::cout << "div, " << intermediates.first << ", " << intermediates.second << std::endl;
-        std::cout << "mfhi ";
+        std::cout << "div " << intermediates.first << ", " << intermediates.second << std::endl;
+        std::cout << "mfhi $v0" << std::endl;
+        writing = true;
         da->LHS->accept(this);
-        std::cout << std::endl; 
+        writing = false;
         temporary_registers.push(intermediates.first);
         temporary_registers.push(intermediates.second);
     }
@@ -458,70 +463,80 @@ class three_address_Visitor : public Visitor
     {
         auto intermediates = descend(ma);
         std::cout << "div, " << intermediates.first << ", " << intermediates.second << std::endl;
-        std::cout << "mflo ";
+        std::cout << "mflo $v0" << std::endl;
+        writing = true;
         ma->LHS->accept(this);
-        std::cout << std::endl; 
+        writing = false;
+        temporary_registers.push(intermediates.first);
+        temporary_registers.push(intermediates.second);
     }
     void visit(AddAssignment * aa)
     {
         auto intermediates = descend(aa);
-        std::cout << "addu ";
+        std::cout << "addu $v0, " << intermediates.first << ", " << intermediates.second << std::endl;
+        writing = true;
         aa->LHS->accept(this);
-        std::cout << ", " << intermediates.first << ", " << intermediates.second << std::endl;
+        writing = false;  
         temporary_registers.push(intermediates.first);
         temporary_registers.push(intermediates.second);
     }
     void visit(SubAssignment * sa)
     {
         auto intermediates = descend(sa);
-        std::cout << "subu ";
+        std::cout << "subu $v0, " << intermediates.first << ", " << intermediates.second << std::endl;
+        writing = true;
         sa->LHS->accept(this);
-        std::cout << ", " << intermediates.first << ", " << intermediates.second << std::endl;
+        writing = false;
         temporary_registers.push(intermediates.first);
         temporary_registers.push(intermediates.second);
     }
     void visit(ShiftLeftAssignment * sla)
     {
         auto intermediates = descend(sla);
-        std::cout << "sllv ";
+        std::cout << "sllv $v0, " << intermediates.first << ", " << intermediates.second << std::endl;
+        writing = true;
         sla->LHS->accept(this);
-        std::cout << ", " << intermediates.first << ", " << intermediates.second << std::endl;
+        writing = false;
         temporary_registers.push(intermediates.first);
         temporary_registers.push(intermediates.second);
     }
     void visit(ShiftRightAssignment * sra)
     {
         auto intermediates = descend(sra);
-        std::cout << "srlv ";
+        std::cout << "srlv $v0, " << intermediates.first << ", " << intermediates.second << std::endl;
+        writing = true;
         sra->LHS->accept(this);
-        std::cout << ", " << intermediates.first << ", " << intermediates.second << std::endl;
+        writing = false;  
         temporary_registers.push(intermediates.first);
         temporary_registers.push(intermediates.second);
     }
     void visit(BitwiseANDAssignment * baa)
     {
         auto intermediates = descend(baa);
-        std::cout << "and ";
+        std::cout << "and $v0, " << intermediates.first << ", " << intermediates.second << std::endl;
+        writing = true;
         baa->LHS->accept(this);
-        std::cout << ", " << intermediates.first << ", " << intermediates.second << std::endl;
+        writing = false;
         temporary_registers.push(intermediates.first);
         temporary_registers.push(intermediates.second);
     }
     void visit(BitwiseXORAssignment * bxa)
     {
         auto intermediates = descend(bxa);
-        std::cout << "xor ";
+        std::cout << "xor $v0, " << intermediates.first << ", " << intermediates.second << std::endl;
+        writing = true;
         bxa->LHS->accept(this);
-        std::cout << ", " << intermediates.first << ", " << intermediates.second << std::endl;
+        writing = false;
         temporary_registers.push(intermediates.first);
         temporary_registers.push(intermediates.second);
     }
     void visit(BitwiseORAssignment * boa)
     {
         auto intermediates = descend(boa);
-        std::cout << "or ";
+        std::cout << "or $v0, " << intermediates.first << ", " << intermediates.second << std::endl;
+        writing = true;
         boa->LHS->accept(this);
-        std::cout << ", " << intermediates.first << ", " << intermediates.second << std::endl;
+        writing = false;
         temporary_registers.push(intermediates.first);
         temporary_registers.push(intermediates.second);
     }
@@ -563,9 +578,11 @@ class three_address_Visitor : public Visitor
                     return_register.push("$v0");
                     id->init->ass_expr->accept(this);
                     while (!intermediate_values.empty()) intermediate_values.pop();
-                    std::cout << "move ";
+                    // std::cout << "move ";
+                    writing = true;
                     id->dec->accept(this);
-                    std::cout << ", $v0" << std::endl;
+                    writing = false;
+                    // std::cout << ", $v0" << std::endl;
                 }
             }
         }
@@ -633,9 +650,19 @@ class three_address_Visitor : public Visitor
     {
         d->dir_dec->accept(this);
     }
-    void visit(parameter_list *) {}
+    void visit(parameter_list * pl)
+    {
+        if (pl->para_list != NULL)
+        {
+            pl->para_list->accept(this);
+        }
+        pl->para_dec->accept(this);
+    }
     void visit(empty_parameter_list *) {}
-    void visit(parameter_declaration *) {}
+    void visit(parameter_declaration * pd)
+    {
+        
+    }
 
     //Statements
     void visit(EmptyStatement *) {}
@@ -654,8 +681,7 @@ class three_address_Visitor : public Visitor
             return_register.push("$v0");
             r->ReturnExpression->accept(this);
         }
-        std::cout << "jr $ra" << std::endl;
-        std::cout << "nop" << std::endl;
+        std::cout << "b " << function_end << std::endl;
     }
     void visit(While * w) 
     {
@@ -885,14 +911,67 @@ class three_address_Visitor : public Visitor
         // create function label and parameters
         fd->decl->accept(this);
         std::cout << ':' << std::endl;
-        // std::cout << "addiu $sp $sp -8" << std::endl; // moving the stack pointer down by two
-        // std::cout << "sw $fp 4($sp)" << std::endl; //storing the previous stack pointer in the second/first word of the new stack
-        // std::cout << "move $fp $sp" << std::endl; 
+        // generating stack handler label
+        auto stack_handler = gen_name("stack_handle");
+        // jumping to stack handler
+        std::cout << "b " << stack_handler << std::endl;
+        // processing body
+        auto body = gen_name("body");
+        std::cout << body << ':' << std::endl;
         // return value using return regesters
+        // creatinge end label
+        auto end = gen_name("end");
+        function_end = end;
+        // intialise word counters
+        local_words = 0; arg_words = 0; variable_map = std::unordered_map<std::string, int>();
         global = false;
         fd->Body->accept(this);
         global = true;
         // if no return statement is used must still jump back
+        std::cout << "b " << end << std::endl;
+        // SETUP STACK
+        std::cout << stack_handler << ':' << std::endl;
+        // degrement stack for the correct size
+        // going to be 8 or greater
+        auto stacksize = 8 + local_words * 4 + 8*4;
+        std::cout << "addiu $sp, $sp, " << -stacksize << std::endl;
+        // store return address
+        std::cout << "sw $ra, " << stacksize << "($sp)" << std::endl;
+        // store previous stack pointer
+        std::cout << "sw $fp, " << stacksize - 4 << "($sp)" << std::endl;
+        // IN OUR FUNCTIONS, $s7 is reserved for the previous stack pointer (for ease of access to local variables)
+        // but as we have to save previous s values, we temporary store it in t0
+        std::cout << "move $t0, $fp" << std::endl;
+        // move fp to sp
+        std::cout << "move $fp, $sp" << std::endl;
+        // // store first four parameters IF they are provided
+        // for (int i = 0; i < 4; i++)
+        // {
+        //     std::cout << "sw $a" << i << ", " << (i+1)*4 << "($sp)" << std::endl;
+        // }
+        // make space for local variables
+        // make space for saved registers (always going to be)
+        for (int i = 0; i < 8; i++)
+        {
+            std::cout << "sw $s" << i << ", " << (i+1)*4 << "($sp)" << std::endl;
+        }
+        std::cout << "move $s7, $t0" << std::endl;
+        // build arguments for function calls in body, find maximum number of words used as arguments for functioncalls
+        // go to body
+        std::cout << "b " << body << std::endl;
+        // wind down stack
+        std::cout << end << ':' << std::endl;
+        // restore saved registers
+        for (int i = 0; i < 8; i++)
+        {
+            std::cout << "lw $s" << i << ", " << (i + 1) * 4 << "($sp)" << std::endl;
+        }
+        // restore return address
+        std::cout << "lw $ra, " << stacksize << "($sp)" << std::endl;
+        // restore stack pointer
+        std::cout << "lw $fp, " << stacksize -4 << "($sp)" << std::endl;
+        std::cout << "move $sp, $fp" << std::endl;
+        // jump to original
         std::cout << "jr $ra" << std::endl;
         std::cout << "nop" << std::endl;
     }
