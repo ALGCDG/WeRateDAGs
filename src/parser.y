@@ -54,6 +54,10 @@
     GenericExternalDeclaration * t_external_declaration;
     FunctionDefinition * t_function_definition;
 
+    struct_specifier* struct_spec;
+    struct_declaration* struct_dection;
+    struct_declaration_list* struct_dection_list;
+    struct_declarator_list* struct_dec_list;
 };
 
 %token Constant_int Constant_char Constant_double Constant_float Constant_long_double
@@ -63,7 +67,10 @@
 %token Keyword Keyword_void Keyword_char Keyword_short Keyword_int Keyword_long Keyword_float Keyword_double Keyword_signed Keyword_unsigned Keyword_case Keyword_default Keyword_if Keyword_else Keyword_switch Keyword_while Keyword_do Keyword_for Keyword_continue Keyword_break Keyword_return Keyword_enum Keyword_struct Keyword_typedef
 %token Punctuator Punctuator_eol Punctuator_par_open Punctuator_par_close Punctuator_squ_open Punctuator_squ_close Punctuator_cur_open Punctuator_cur_close
 
-
+%type <struct_spec> struct_specifier
+%type <struct_dection> struct_declaration
+%type <struct_dection_list> struct_declaration_list
+%type <struct_dec_list> struct_declarator_list
 
 %type <ivalue> Constant_int
 %type <cvalue> Constant_char
@@ -282,32 +289,34 @@ type_specifier: Keyword_void { $$ = new type_specifier("void"); }
               | Keyword_double { $$ = new type_specifier("double"); }
               | Keyword_signed { $$ = new type_specifier("signed"); }
               | Keyword_unsigned{ $$ = new type_specifier("unsigned"); }
-/*              | struct_specifier { std::cerr << "struct" << std::endl; }
-              | enum_specifier { std::cerr << "enum" << std::endl; }
-              | typedef_name { std::cerr << "typedef type" << std::endl; }
+/*              | enum_specifier { std::cerr << "enum" << std::endl; }
+              | typedef_name { std::cerr << "typedef type" << std::endl; }*/
+              | struct_specifier{ $$ = $1}; }
 
-struct_specifier: Keyword_struct Ident Punctuator_cur_open struct_declaration_list Punctuator_cur_close { std::cerr << "struct x {...}" << std::endl; }
-				| Keyword_struct Punctuator_cur_open struct_declaration_list Punctuator_cur_close { std::cerr << "struct {...}" << std::endl; }
-				| Keyword_struct Ident { std::cerr << "struct x" << std::endl; }
+struct_specifier: Keyword_struct Ident Punctuator_cur_open struct_declaration_list Punctuator_cur_close { 
+                  $$ = new struct_specifier($2, $4); }
+				| Keyword_struct Punctuator_cur_open struct_declaration_list Punctuator_cur_close { 
+                  $$ = new struct_specifier($3); }
+				| Keyword_struct Ident { $$ = new struct_specifier($2); }
 
+struct_declaration_list: struct_declaration { $$ = new struct_declaration_list($1); }
+					   | struct_declaration_list struct_declaration { $1->AppendDeclaration($2); }
 
+struct_declaration: specifier_list struct_declarator_list { $$ = new struct_declaration($1, $2); }
 
-struct_declaration_list: struct_declaration
-					   | struct_declaration_list struct_declaration
+specifier_list: type_specifier  { $$ = new specifier_list($1); } /*TODO!*/
+						| type_specifier specifier_list { $$ = new specifier_list($1, $2); }
 
-struct_declaration: specifier_list struct_declarator_list
-*/
-specifier_list: type_specifier  { std::cerr << "tysp" << std::endl; } /*TODO!*/
-						| type_specifier specifier_list { std::cerr << "tysp spli" << std::endl; }
-/*
-struct_declarator_list: struct_declarator
-					  | struct_declarator_list Operator_comma struct_declarator
+struct_declarator_list:declarator { $$ = new struct_declarator_list($1); }
+					  | struct_declarator_list Operator_comma declarator { $1->AppendDeclarator($3); }
 
+/*This includes bitfields which are not required -> struct declarator === declarator
 struct_declarator: declarator
                  | declarator Operator_trinary_choice struct_declarator
                  | Operator_trinary_choice struct_declarator
+*/
 
-
+/*
 enum_specifier: Keyword_enum Ident
 			  | Keyword_enum Ident Punctuator_cur_open enum_list Punctuator_cur_close
 			  | Keyword_enum Punctuator_cur_open enum_list Punctuator_cur_close

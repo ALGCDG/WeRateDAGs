@@ -126,6 +126,11 @@ class FunctionDefinition;
 class ExternalDeclaration;
 class TypedefNode;
 
+class struct_specifier;
+class struct_declaration_list;
+class struct_declaration;
+class struct_declarator_list;
+
 class Visitor
 {
 public:
@@ -231,6 +236,11 @@ public:
     virtual void visit(ExternalDeclaration *) {}
     virtual void visit(TypedefNode*){}
     //Declarations
+
+    virtual void visit(struct_specifier*){}
+    virtual void visit(struct_declaration_list*){}
+    virtual void visit(struct_declaration*){}
+    virtual void visit(struct_declarator_list*){}
 };
 
 class Node{
@@ -934,6 +944,39 @@ public:
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
 };
 
+class struct_declarator_list : public Node{
+public:
+    struct_declarator_list(declarator* _decl){ decls = {_decl}; }
+    std::vector<declarator*> decls;
+    void AppendDeclarator(declarator* decl){ decls.push_back(decl); }
+    void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
+};
+
+class struct_declaration : public Node{
+public:
+    struct_declaration(specifier_list* _specs, struct_declarator_list* _decls) : specs(_specs), decls(_decs){}
+    specifier_list* specs;
+    struct_declarator_list* decls;
+    void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
+};
+
+class struct_declaration_list : public Node{
+public:
+    struct_declaration_list(struct_declaration* dec){decs = {dec};}
+    std::vector<struct_declaration*> decs;
+    void AppendDeclaration(struct_declaration* dec){ decs.push_back(dec); }
+    void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
+};
+
+class struct_specifier : public type_specifier{
+public:
+    struct_specifier(IdentifierNode* _ident = NULL, struct_declaration_list* _list = NULL) : type_specifier("struct"), tag(_ident), list(_list){}
+    IdentifierNode* tag;
+    struct_declaration_list* list;
+    void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
+};
+
+
 
 class pointer : public Node
 {
@@ -1147,5 +1190,8 @@ public:
     declaration* decl;
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
 };
+
+
+
 
 #endif
