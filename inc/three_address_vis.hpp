@@ -135,27 +135,31 @@ class three_address_Visitor : public Visitor
     }
     void visit(ArraySubscript * as)
     {
-        // reading from array
-        // get return register
-        auto return_reg = return_register.top();
-        // get subscript expression
-        return_register.push("$v0");
-        as->Subscript->accept(this);
-        // if array is global
-            // get array address
-            std::cout << "la $v1 ";
-            as->LHS->accept(this);
-            std::cout << std::endl;
-            // add subscript and 
-            std::cout << "addu $v0 $v0 $v1";
-            // load relevant word
-            std::cout << "lw " << return_reg << " $v0" << std::endl;
-        // if array is local
-        // ???
-        return_register.pop();
+        if (!writing)
+        {
+            // reading from array
+            // get return register
+            auto return_reg = return_register.top();
+            // get subscript expression
+            return_register.push("$v0");
+            as->Subscript->accept(this);
+            // if array is global
+                // get array address
+                std::cout << "la $v1 ";
+                as->LHS->accept(this);
+                std::cout << std::endl;
+                // add subscript and 
+                std::cout << "addu $v0 $v0 $v1";
+                // load relevant word
+                std::cout << "lw " << return_reg << " $v0" << std::endl;
+            // if array is local
+            // ???
+            return_register.pop();
+        }
     }
     void visit(FuncCall * fc)
     {
+        // REMEMBER, PUSH TO STACK ENOUGH SPACE FOR ALL WORDS USED BY FUNCTION ARGUMENT
         // insert arguments
         fc->Args->accept(this);
         // jump and link
@@ -192,6 +196,7 @@ class three_address_Visitor : public Visitor
                 // move other args into stack
             }
             words++;
+            arg_words++;
         }
     }
     void visit(UnaryAddressOperator *) {}
