@@ -14,6 +14,38 @@
 // #include "visitors.hpp"
 #include "ast_allnodes.hpp"
 
+class vm
+{
+    /*
+    A class for tracking the position of variables on the stack
+    */
+    private:
+    std::unordered_map<std::string, int> m;
+    public:
+    vm(){}
+    void update(int offset)
+    {
+        for(auto & p : m)
+        {
+            p.second += offset;
+        }
+    }
+    int lookup(std::string s)
+    {
+        return m[s];
+    }
+    void register_variable(std::string s, int x)
+    {
+        m[s] = x;
+    }
+    bool contains(std::string s)
+    {
+        return m.find(s) != m.end() && !m.empty();
+    }
+};
+
+
+
 class three_address_Visitor : public Visitor
 {
     public:
@@ -38,8 +70,9 @@ class three_address_Visitor : public Visitor
     std::stack<std::string> saved_registers;
     bool writing;
     int local_words, arg_words;
+    int stacksize;
     std::string function_end;
-    std::unordered_map<std::string,int> variable_map; // a map of variable name to stack offset and what register it might be stored in
+    vm variable_map; // a map of variable name to stack offset and what register it might be stored in
     std::string get_temp_register(const std::string &inter)
     {
         // if (intermediate_values.size() < 9)
@@ -101,21 +134,26 @@ class three_address_Visitor : public Visitor
                 auto return_reg = return_register.top();
                 return_register.pop();
                 // std::cout << "move " << return_reg << ", " << (in->Name) << std::endl;
-                std::cout << "lw " << return_reg << ", " << -variable_map[in->Name] << "($s7) " << std::endl; // still need to add frame offset TODO
+                std::cout << "# reading variable " << in->Name << std::endl;
+                std::cout << "lw " << return_reg << ", " << variable_map.lookup(in->Name) << "($fp) " << std::endl; // still need to add frame offset TODO
             }
         }
         else
         {
-            if (variable_map.find(in->Name) == variable_map.end())
+            if (!variable_map.contains(in->Name))
             {
-                local_words++;
-                auto offset = 8 + local_words * 4;
-                std::cout << "sw $v0, " << -offset << "($s7)" << std::endl; // still need to add frame offset TODO
-                variable_map[in->Name] = offset;
+                stacksize+=4;
+                variable_map.update(4);
+                std::cout << "# allocating space for " << in->Name << std::endl;
+                std::cout << "addiu $sp, $sp, -4" << std::endl;
+                std::cout << "move $fp, $sp" << std::endl;
+                std::cout << "sw $v0, 4($fp)" << std::endl; // still need to add frame offset TODO
+                variable_map.register_variable(in->Name, 4);
             }
             else
             {
-                std::cout << "sw $v0, " << -variable_map[in->Name] << "($s7)" << std::endl; // still need to add frame offset TODO
+                std::cout << "# writing to variable " << in->Name << std::endl;
+                std::cout << "sw $v0, " << variable_map.lookup(in->Name) << "($fp)" << std::endl; // still need to add frame offset TODO
             }
         }
     }
@@ -183,21 +221,24 @@ class three_address_Visitor : public Visitor
     }
     void visit(ArgExprList * ael)
     {
-        int words = 0;
-        for (std::vector<Expression *>::iterator it = ael->Args.begin(); it != ael->Args.end(); it++)
+        int no_args = ael->Args.size();
+        std::cout << "addiu $sp, $sp, " << -no_args*4 << std::endl;
+        std::cout << "move $fp, $sp " << std::endl;
+        for (int i = ael->Args.size() - 1 ; i >= 0; i--)
         {
-            if (words < 4)
+            // evaluating arguments
+            return_register.push("$v0");
+            ael->Args[i]->accept(this);
+            if (i < 4)
             {
                 // move first 4 args into relevant registers
-                std::cout << "move $a" << words << " " << std::endl;
+                std::cout << "move $a" << i << ", $v0" << std::endl;
             }
-            else
-            {
-                // move other args into stack
-            }
-            words++;
-            arg_words++;
+            // store all arguments on stack
+            std::cout << "sw $v0, " << i*4 << "($fp)" << std::endl;
         }
+        std::cout << "addiu $sp, $sp, " << no_args*4 << std::endl;
+        std::cout << "move $fp, $sp " << std::endl;
     }
     void visit(UnaryAddressOperator *) {}
     void visit(UnaryDerefOperator *) {}
@@ -346,7 +387,7 @@ class three_address_Visitor : public Visitor
     void visit(EqualTo * et)
     {
         auto intermediates = descend(et);
-        std::cout << "xor $v0 " << intermediates.first << ", " << intermediates.second << std::endl;
+        std::cout << "xor $v0, " << intermediates.first << ", " << intermediates.second << std::endl;
         std::cout << "li $v1, 0xffffffff" << std::endl;
         std::cout << "xor $v0, $v0, $v1" << std::endl;
         std::cout << "li $v1, 0xfffffffe" << std::endl;
@@ -917,59 +958,45 @@ class three_address_Visitor : public Visitor
         fd->decl->accept(this);
         std::cout << ':' << std::endl;
         // generating stack handler label
-        auto stack_handler = gen_name("stack_handle");
+        auto stack_handler = gen_name("PUSH");
         // jumping to stack handler
-        std::cout << "b " << stack_handler << std::endl;
-        // processing body
-        auto body = gen_name("body");
-        std::cout << body << ':' << std::endl;
-        // return value using return regesters
         // creatinge end label
-        auto end = gen_name("end");
+        auto end = gen_name("POP");
         function_end = end;
-        // intialise word counters
-        local_words = 0; arg_words = 0; variable_map = std::unordered_map<std::string, int>();
-        global = false;
-        fd->Body->accept(this);
-        global = true;
-        // if no return statement is used must still jump back
-        std::cout << "b " << end << std::endl;
         // SETUP STACK
         std::cout << stack_handler << ':' << std::endl;
-        // degrement stack for the correct size
-        // going to be 8 or greater
-        auto stacksize = 8 + local_words * 4 + 8*4;
+        // // store first four parameters IF they are provided
+        // for (int i = 0; i < 4; i++)
+        // {
+        //     std::cout << "sw $a" << i << ", " << (i+1)*4 + stacksize << "($sp)" << std::endl;
+        // }
+        // make space for local variables
+        stacksize = 8 + 8*4; // by default we assign space for return address, old stack pointer, and saved registers
         std::cout << "addiu $sp, $sp, " << -stacksize << std::endl;
         // store return address
         std::cout << "sw $ra, " << stacksize << "($sp)" << std::endl;
         // store previous stack pointer
         std::cout << "sw $fp, " << stacksize - 4 << "($sp)" << std::endl;
-        // IN OUR FUNCTIONS, $s7 is reserved for the previous stack pointer (for ease of access to local variables)
-        // but as we have to save previous s values, we temporary store it in t0
-        std::cout << "move $t0, $fp" << std::endl;
         // move fp to sp
-        std::cout << "move $fp, $sp" << std::endl;
-        // // store first four parameters IF they are provided
-        // for (int i = 0; i < 4; i++)
-        // {
-        //     std::cout << "sw $a" << i << ", " << (i+1)*4 << "($sp)" << std::endl;
-        // }
-        // make space for local variables
         // make space for saved registers (always going to be)
         for (int i = 0; i < 8; i++)
         {
             std::cout << "sw $s" << i << ", " << (i+1)*4 << "($sp)" << std::endl;
         }
-        std::cout << "move $s7, $t0" << std::endl;
-        // build arguments for function calls in body, find maximum number of words used as arguments for functioncalls
-        // go to body
-        std::cout << "b " << body << std::endl;
-        // wind down stack
+        std::cout << "move $fp, $sp" << std::endl;
+        // processing body
+        auto body = gen_name("body");
+        std::cout << body << ':' << std::endl;
+        variable_map = vm();
+        global = false;
+        fd->Body->accept(this);
+        global = true;
+        // FREE STACK
         std::cout << end << ':' << std::endl;
         // restore saved registers
         for (int i = 0; i < 8; i++)
         {
-            std::cout << "lw $s" << i << ", " << (i + 1) * 4 << "($sp)" << std::endl;
+            std::cout << "lw $s" << i << ", " << stacksize - (9-i) * 4 << "($sp)" << std::endl;
         }
         // restore return address
         std::cout << "lw $ra, " << stacksize << "($sp)" << std::endl;
@@ -986,5 +1013,7 @@ class three_address_Visitor : public Visitor
         ed->decl->accept(this);
     }
 };
+
+
 
 #endif
