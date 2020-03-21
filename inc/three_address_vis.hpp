@@ -701,11 +701,11 @@ class three_address_Visitor : public Visitor
     }
     void visit(parameter_list * pl)
     {
+        pl->para_dec->accept(this);
         if (pl->para_list != NULL)
         {
             pl->para_list->accept(this);
         }
-        pl->para_dec->accept(this);
     }
     void visit(empty_parameter_list *) {}
     void visit(parameter_declaration * pd)
