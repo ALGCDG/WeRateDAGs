@@ -536,6 +536,36 @@ NamedRecord* SymbolTable::GetActiveRecord(){
         return ActiveRecordPtr;
     }
 }
+
+void SymbolTable::StartNewStructDeclaration(){
+    //new struct record
+    StructTypeDeclarationRec* rec = new StructTypeDeclarationRec;
+    //add to struct stack
+    structDecStack.push(rec);
+    //set it to be the active record
+    ActiveRecordPtr = rec;
+    //add the type part that describes it
+    rec->structDef = new structType;
+    //add the table that holds the member decs
+    rec->structDef->members = new Table(ActiveScopePtr);
+    //switch scope to this table
+    ActiveScopePtr = rec->structDef->members;
+}
+void SymbolTable::EndStructDeclaration(){
+    ActiveScopePtr = ActiveScopePtr->parentTable;
+    ActiveScopePtr->subRecords.push_back(structDecStack.top());
+    structDecStack.pop();
+    if(structDecStack.size() > 0) ActiveRecordPtr = structDecStack.top();
+    else ActiveRecordPtr = declarationStack.top();
+
+}
+void SymbolTable::AddStructRecToCurrRecord(const std::string& tag){
+    NamedRecord* structResult = GetIDRecord("struct " + tag);
+    //declPartsStack.top().push_back(structResult->GetPrimary());
+    //TODO:
+    // change decspec stack to have a vector of a container struct
+    // that can contain either a string, struct spec or enum spec
+}
 //-----------------------------------
 void SymbolTable::AccumulateDeclParts(){
     // if (declPartsStack.top().size() == 1){

@@ -105,6 +105,7 @@ struct structType : public genericConstituentType{
     void BeAppended(VariableDeclaration* vardec);
     void BeAppended(StructTypeDeclarationRec* structDec);
     void BeAppended(TypedefTypeDeclarationRec* typedefDec);
+    unsigned int ByteSize() override;
 };
 
 
@@ -247,8 +248,13 @@ public:
     void EndDeclaration();//done
     void NewScope();//done
     void PopScope();//done
-    void NewDeclParts();
-    void PopDeclParts();
+    void NewDeclParts();//done
+    void PopDeclParts();//done
+
+    void StartNewStructDeclaration();
+    void EndStructDeclaration();
+    void AddStructRecToCurrRecord(const std::string& tag);    
+
     NamedRecord* GetIDRecord(const std::string& _ID);
     NamedRecord* GetActiveRecord();
     void DefocusFunc() { FuncDefIsFocus = false; }

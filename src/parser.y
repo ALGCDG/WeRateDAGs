@@ -162,7 +162,6 @@ Constant: Constant_int { $$ = new constant_int($1); }
 		| Constant_float { $$ = new Constant(); }  
 		| Constant_long_double { $$ = new Constant(); }  
 
-
 postfix_EXPR: primary_EXPR { $$ = $1; } /*Pass through*/
                   | postfix_EXPR Punctuator_squ_open EXPR Punctuator_squ_close { $$ = new ArraySubscript($1, $3); }
                   | postfix_EXPR Punctuator_par_open  Punctuator_par_close  { $$ = new FuncCall($1); }
