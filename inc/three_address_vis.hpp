@@ -49,7 +49,7 @@ class vm
 class three_address_Visitor : public Visitor
 {
     public:
-    three_address_Visitor(): counter(0), return_register(), continue_to(), break_to(), cases(), global(true), global_labels(), intermediate_values(), temporary_registers(), saved_registers(), variable_map(), writing(false)
+    three_address_Visitor(): counter(0), return_register(), continue_to(), break_to(), cases(), global(true), global_labels(), intermediate_values(), temporary_registers(), saved_registers(), variable_map(), writing(false), parameter_flag(false)
     {
         for (int i = 9; i >= 0; i--)
             temporary_registers.push("$t"+std::to_string(i));
@@ -69,8 +69,10 @@ class three_address_Visitor : public Visitor
     std::stack<std::string> temporary_registers;
     std::stack<std::string> saved_registers;
     bool writing;
+    bool parameter_flag;
     int local_words, arg_words;
     int stacksize;
+    int parameter_size;
     std::string function_end;
     vm variable_map; // a map of variable name to stack offset and what register it might be stored in
     std::string get_temp_register(const std::string &inter)
@@ -102,7 +104,12 @@ class three_address_Visitor : public Visitor
     }
     void visit(IdentifierNode * in)
     {
-        if (!writing)
+        if (parameter_flag)
+        {
+            variable_map.update(4);
+            variable_map.register_variable(in->Name, 4);
+        }
+        else if (!writing)
         {
             if (return_register.empty())
             {
@@ -447,7 +454,7 @@ class three_address_Visitor : public Visitor
         return_register.push("$v0");
         toe->Condition->accept(this);
         // if false go to false label
-        std::cout << "beq $v0 $zero " << f << std::endl;
+        std::cout << "beq $v0, $zero, " << f << std::endl;
         return_register.push(return_register.top());
         // doing true expression
         std::cout << gen_name("ternary_true") << ':' << std::endl;
@@ -670,7 +677,6 @@ class three_address_Visitor : public Visitor
         if (dd->ID != NULL)
         {
             dd->ID->accept(this);
-            // std::cout << *(dd->ID->Name);
         }
         else if (dd->dec!=NULL)
         {
@@ -681,13 +687,10 @@ class three_address_Visitor : public Visitor
             if (dd->dir_dec != NULL)
             {
                 dd->dir_dec->accept(this);
-                // std::cout << '(';
-                // if (dd->para_list != NULL)
-                // {
-                //     std::cerr << "going to visit parameters: " << dd->para_list << std::endl;
-                //     dd->para_list->accept(this);
-                // }
-                // std::cout << "):" << std::endl;
+                if (dd->para_list != NULL)
+                {
+                    dd->para_list->accept(this);
+                }
             }
         }
     }
@@ -707,7 +710,10 @@ class three_address_Visitor : public Visitor
     void visit(empty_parameter_list *) {}
     void visit(parameter_declaration * pd)
     {
-        
+        parameter_size++;
+        parameter_flag=true;
+        pd->dec->accept(this);
+        parameter_flag=false;
     }
 
     //Statements
@@ -741,9 +747,10 @@ class three_address_Visitor : public Visitor
         break_to.push(end);
         // evaluate condition
         auto condition = gen_name("while_condition");
+        return_register.push("$v0");
         w->ControlExpression->accept(this);
         // branch to end if condition not met
-        std::cout << "beq " << "$v0" << ' ' << "$zero" << ' ' << end << std::endl;
+        std::cout << "beq $v0, $zero, " << end << std::endl;
         // do body
         w->Body->accept(this);
         continue_to.pop();
@@ -766,9 +773,10 @@ class three_address_Visitor : public Visitor
         break_to.push(end);
         // evaluate condition
         auto condition = gen_name("while_condition");
+        return_register.push("$v0");
         dw->ControlExpression->accept(this);
         // branch to end if condition not met
-        std::cout << "beq " << "$v0" << ' ' << "$zero" << ' ' << end << std::endl;
+        std::cout << "beq $v0, $zero, " << end << std::endl;
         // do body
         dw->Body->accept(this);
         continue_to.pop();
@@ -802,7 +810,7 @@ class three_address_Visitor : public Visitor
             f->Control->accept(this);
         }
         // jump to end if control fails
-        std::cout << "beq $v0 $zero " << end << std::endl;
+        std::cout << "beq $v0, $zero, " << end << std::endl;
         // executing body
         f->Body->accept(this);
         // do iteration statement
@@ -811,7 +819,7 @@ class three_address_Visitor : public Visitor
             f->Next->accept(this);
         }
         // jump to beginning
-        std::cout << "beq $v0 $zero " << beginning << std::endl;
+        std::cout << "beq $v0, $zero, " << beginning << std::endl;
         // writing end
         std::cout << end << ':' << std::endl;
         // clearing continue and break
@@ -824,10 +832,11 @@ class three_address_Visitor : public Visitor
         auto true_case_label = gen_name("if_true");
         auto end_label = gen_name("if_end");
         // evaluating expression
+        return_register.push("$v0");
         i->ControlExpression->accept(this);
         // result of controlexpression should be stored in $v0
         // branch to end if false
-        std::cout << "beq " << " $v0" << ' ' << " $zero" << ' ' << end_label << std::endl;
+        std::cout << "beq $v0, $zero, " << end_label << std::endl;
         // do true
         std::cout << true_case_label << ':' << std::endl;
         i->IfTrue->accept(this);
@@ -841,10 +850,11 @@ class three_address_Visitor : public Visitor
         auto false_case_label = gen_name("if_false");
         auto end_label = gen_name("if_end");
         // evaluating expression
+        return_register.push("$v0");
         ie->ControlExpression->accept(this);
         // result of controlexpression should be stored in $v0
         // branch between true or false case
-        std::cout << "beq " << " $v0" << ' ' << " $zero" << ' ' << false_case_label << std::endl;
+        std::cout << "beq $v0, $zero, " << false_case_label << std::endl;
         // do true
         std::cout << true_case_label << ':' << std::endl;
         ie->IfTrue->accept(this);
@@ -915,7 +925,7 @@ class three_address_Visitor : public Visitor
             return_register.push("$v1");
             // std::cerr << "push" << std::endl;
             c.second->accept(this);
-            std::cout << "beq $v0 $v1 " << c.first << std::endl;
+            std::cout << "beq $v0, $v1, " << c.first << std::endl;
             cases.pop();
         }
         // or going to default
@@ -955,6 +965,8 @@ class three_address_Visitor : public Visitor
     void visit(FunctionDefinition * fd)
     {
         // create function label and parameters
+        parameter_size = 0; // also count number of words used by argument
+        variable_map = vm();
         fd->decl->accept(this);
         std::cout << ':' << std::endl;
         // generating stack handler label
@@ -965,13 +977,17 @@ class three_address_Visitor : public Visitor
         function_end = end;
         // SETUP STACK
         std::cout << stack_handler << ':' << std::endl;
-        // // store first four parameters IF they are provided
-        // for (int i = 0; i < 4; i++)
-        // {
-        //     std::cout << "sw $a" << i << ", " << (i+1)*4 + stacksize << "($sp)" << std::endl;
-        // }
+        // store first four parameters IF they are provided
+        for (int i = 0; i < parameter_size; i++)
+        {
+            if  (i < 4)
+            {
+                std::cout << "sw $a" << i << ", " << (i+1)*4 + stacksize << "($sp)" << std::endl;
+            }
+        }
         // make space for local variables
         stacksize = 8 + 8*4; // by default we assign space for return address, old stack pointer, and saved registers
+        variable_map.update(stacksize);
         std::cout << "addiu $sp, $sp, " << -stacksize << std::endl;
         // store return address
         std::cout << "sw $ra, " << stacksize << "($sp)" << std::endl;
@@ -987,7 +1003,6 @@ class three_address_Visitor : public Visitor
         // processing body
         auto body = gen_name("body");
         std::cout << body << ':' << std::endl;
-        variable_map = vm();
         global = false;
         fd->Body->accept(this);
         global = true;
