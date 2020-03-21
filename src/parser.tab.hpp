@@ -192,8 +192,12 @@ union YYSTYPE
     GenericExternalDeclaration * t_external_declaration;
     FunctionDefinition * t_function_definition;
 
+    struct_specifier* struct_spec;
+    struct_declaration* struct_dection;
+    struct_declaration_list* struct_dection_list;
+    struct_declarator_list* struct_dec_list;
 
-#line 197 "src/parser.tab.hpp" /* yacc.c:1909  */
+#line 201 "src/parser.tab.hpp" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;

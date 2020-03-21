@@ -8,11 +8,15 @@
 
 struct typeSpecifiers;
 struct ParameterTable;
+struct Table;
 struct arrayType;
 struct pointerType;
 struct functionType;
 struct VariableDeclaration;
 struct FunctionDefinitionRec;
+struct StructTypeDeclarationRec;
+struct TypedefTypeDeclarationRec;
+struct structType;
 namespace prPr{
     extern int tabs;
     void Tabsplus();
@@ -23,14 +27,16 @@ namespace prPr{
 struct genericConstituentType{
     virtual void BeAppended(genericConstituentType* other) = 0;
     virtual void BeAppended(VariableDeclaration* vardec) = 0;
-    virtual void BeAppended(FunctionDefinitionRec* funcdec) = 0;
+    virtual void BeAppended(FunctionDefinitionRec* funcdec){}
     virtual void AddNextType(typeSpecifiers* specs){}
     virtual void AddNextType(functionType* func){}
     virtual void AddNextType(arrayType* arr){}
     virtual void AddNextType(pointerType* point){}
+    virtual void AddNextType(structType* str){}
     virtual void Show(){}
     virtual unsigned int ByteSize() = 0;
 };
+struct Record;
 struct functionType : public genericConstituentType{
     void BeAppended(genericConstituentType* other);
     void BeAppended(VariableDeclaration* vardec);
@@ -39,6 +45,7 @@ struct functionType : public genericConstituentType{
     void AddNextType(pointerType* point) override;
     typeSpecifiers* basetypeReturnType;
     pointerType* pointerReturnType;
+    
     ParameterTable* arguments;
     void Show();
     std::vector<Record*>& ArgVec();
@@ -54,26 +61,30 @@ struct arrayType : public genericConstituentType{
     void AddNextType(arrayType* arr) override;
     void AddNextType(pointerType* pnt) override;
     void AddNextType(typeSpecifiers* typ) override;
+    void AddNextType(structType* str) override;
 
     arrayType* nextArray;
     pointerType* pointerElementType;
     typeSpecifiers* basetypeElementType;
+    structType* structElementType;//TODO fix append to make this null when appropriate
     void Show();
     unsigned int ByteSize() override;
 };
 
 struct pointerType : public genericConstituentType{
-    void BeAppended(genericConstituentType* other);
-    void BeAppended(VariableDeclaration* vardec);
-    void BeAppended(FunctionDefinitionRec* funcdec);
+    void BeAppended(genericConstituentType* other) override;
+    void BeAppended(VariableDeclaration* vardec) override;
+    void BeAppended(FunctionDefinitionRec* funcdec) override;
     void AddNextType(arrayType* arr) override;
     void AddNextType(pointerType* pnt) override;
     void AddNextType(typeSpecifiers* typ) override;
     void AddNextType(functionType* func) override;
+    void AddNextType(structType* str) override;
     pointerType* ptToPointer;
     arrayType* ptToArray;
     typeSpecifiers* ptToBasetype;
     functionType* ptToFunc;
+    structType* ptToStruct;
     void Show();
     unsigned int ByteSize() override;
 };
@@ -87,6 +98,15 @@ struct typeSpecifiers : public genericConstituentType{
     void Show();
     unsigned int ByteSize() override;
 };
+
+struct structType : public genericConstituentType{
+    Table* members;
+    void BeAppended(genericConstituentType* other);
+    void BeAppended(VariableDeclaration* vardec);
+    void BeAppended(StructTypeDeclarationRec* structDec);
+    void BeAppended(TypedefTypeDeclarationRec* typedefDec);
+};
+
 
 // struct funcArgs{
 //     //abstract represented with empty string
@@ -118,49 +138,47 @@ struct ParameterTable : public Table{
     void PrettyPrint() override;
 };
 
-unsigned int UniqueCtr(){
-    static unsigned int a = 0;
-    return a++;
-}
+unsigned int UniqueCtr();
 
 struct NamedRecord : public Record{
     NamedRecord(){}
     NamedRecord(Table* _parent) : Record(_parent){}
     bool hasID(const std::string& _id) override { return _id == id; }
     //use this to check on receipt of named record which type it is
-    virtual bool isFunctionDefinition(){return false; }
-    void SetName(const std::string& _id){ id = _id; }
+    // virtual bool isFunctionDefinition(){ return false; }
+    virtual void SetName(const std::string& _id){ id = _id; unique_id = _id + std::to_string(UniqueCtr()); }
     std::string id;
+    std::string unique_id;
     virtual genericConstituentType* GetPrimary() = 0;
 };
 
 struct VariableDeclaration : public NamedRecord{
-    VariableDeclaration(Table* _parent) : NamedRecord(_parent){}
-    bool isFunctionDefinition(){ return false; }
+    VariableDeclaration(Table* _parent) : NamedRecord(_parent){ }
+    // bool isFunctionDefinition(){ return false; }
     //sets all others to null explicitly
     void AddPrimary(genericConstituentType* _generic){ std::cout << "lol"; }
     void AddPrimary(pointerType* _primaryPt);
     void AddPrimary(arrayType* _primaryArr);
     void AddPrimary(functionType* _primaryFunc);
     void AddPrimary(typeSpecifiers* _primaryTypespec);
-    
+    void AddPrimary(structType* _primarystruct);
     //can be only one of the below
     pointerType* primaryPt;
     arrayType* primaryArr;
     functionType* primaryFunc;
     typeSpecifiers* primaryTypespec;
+    structType* primaryStruct;
     bool IsGlobal();
     unsigned int GetDepth();
     genericConstituentType* GetPrimary() override;
     void PrettyPrint() override;
-    std::string UniqueID(){ return id + std::to_string(UniqueCtr()); }
     unsigned int DeclarationSize(){ GetPrimary()->ByteSize(); }
 };
 
 
 struct FunctionDefinitionRec : public NamedRecord{
     FunctionDefinitionRec(){}
-    bool isFunctionDefinition(){ return true; }
+    // bool isFunctionDefinition(){ return true; }
     functionType* funcInfo;
     Table* body;
     void AddPrimary(genericConstituentType* _generic){ std::cout << "hmm";}
@@ -177,6 +195,32 @@ struct FunctionDefinitionRec : public NamedRecord{
     std::vector<Record*>::iterator ArgsEnd();
     unsigned int NumArgs();
 };
+
+
+struct TypeDeclarationRec : public NamedRecord{
+    TypeDeclarationRec(){}
+    TypeDeclarationRec(Table* parent) : NamedRecord(parent){}
+};
+struct StructTypeDeclarationRec : public TypeDeclarationRec{
+    StructTypeDeclarationRec(Table* parent) : TypeDeclarationRec(parent){}
+    structType* structDef;
+    void AddPrimary(structType* _strdef){ structDef = _strdef; }
+};
+struct TypedefTypeDeclarationRec : public TypeDeclarationRec{
+    TypedefTypeDeclarationRec(Table* parent) : TypeDeclarationRec(parent){}
+    //type parts pointers here
+    pointerType* PtrDef;
+    arrayType* ArrDef;
+    functionType* FuncDef;
+    structType* StructDef;
+    typeSpecifiers* BasetypeDef;
+    void AddPrimary(pointerType* PtrDef);
+    void AddPrimary(arrayType* ArrDef);
+    void AddPrimary(functionType* FuncDef);
+    void AddPrimary(structType* StructDef);
+    void AddPrimary(typeSpecifiers* BasetypeDef);
+};
+
 
 class SymbolTable{
 public:
@@ -216,6 +260,7 @@ private:
     std::stack<std::vector<genericConstituentType*> > declPartsStack;
     void AccumulateDeclParts();
     std::stack<VariableDeclaration*> declarationStack;
+    std::stack<StructTypeDeclarationRec*> structDecStack;
     std::stack<std::vector<std::string> >decspecStack;
     Table* trans_unit;
     Table* ActiveScopePtr;

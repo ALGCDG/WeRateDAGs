@@ -291,12 +291,12 @@ type_specifier: Keyword_void { $$ = new type_specifier("void"); }
               | Keyword_unsigned{ $$ = new type_specifier("unsigned"); }
 /*              | enum_specifier { std::cerr << "enum" << std::endl; }
               | typedef_name { std::cerr << "typedef type" << std::endl; }*/
-              | struct_specifier{ $$ = $1}; }
+              | struct_specifier{ $$ = $1; }
 
-struct_specifier: Keyword_struct Ident Punctuator_cur_open struct_declaration_list Punctuator_cur_close { 
-                  $$ = new struct_specifier($2, $4); }
-				| Keyword_struct Punctuator_cur_open struct_declaration_list Punctuator_cur_close { 
-                  $$ = new struct_specifier($3); }
+struct_specifier: Keyword_struct Ident Punctuator_cur_open struct_declaration_list Punctuator_cur_close 
+        { $$ = new struct_specifier($2, $4); }
+				| Keyword_struct Punctuator_cur_open struct_declaration_list Punctuator_cur_close 
+        { $$ = new struct_specifier(NULL, $3); }
 				| Keyword_struct Ident { $$ = new struct_specifier($2); }
 
 struct_declaration_list: struct_declaration { $$ = new struct_declaration_list($1); }

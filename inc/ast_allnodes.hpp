@@ -237,10 +237,10 @@ public:
     virtual void visit(TypedefNode*){}
     //Declarations
 
-    virtual void visit(struct_specifier*){}
-    virtual void visit(struct_declaration_list*){}
-    virtual void visit(struct_declaration*){}
-    virtual void visit(struct_declarator_list*){}
+    virtual void visit(struct_specifier* _strspec){}
+    virtual void visit(struct_declaration_list* _strdectionlist){}
+    virtual void visit(struct_declaration* _strdection){}
+    virtual void visit(struct_declarator_list* _strdeclist){}
 };
 
 class Node{
@@ -954,7 +954,7 @@ public:
 
 class struct_declaration : public Node{
 public:
-    struct_declaration(specifier_list* _specs, struct_declarator_list* _decls) : specs(_specs), decls(_decs){}
+    struct_declaration(specifier_list* _specs, struct_declarator_list* _decls) : specs(_specs), decls(_decls){}
     specifier_list* specs;
     struct_declarator_list* decls;
     void accept(Visitor * AVisitor) override { AVisitor->visit(this); }

@@ -199,7 +199,6 @@ void ASTProcVis::visit(CommaSepExpression* _comsep){
 
 //Declarations
 void ASTProcVis::visit(declaration* _dectn){
-    
     TableInstance->awaitDecSpecs();//new vector on top
     _dectn->specifier->accept(this);
     // TableInstance->stopAwaitDecSpecs();
@@ -207,14 +206,11 @@ void ASTProcVis::visit(declaration* _dectn){
     TableInstance->clearDecSpecs();
 }
 void ASTProcVis::visit(declaration_specifiers* _decspec){
-    
     //TODO if not a canonical type, link in the record somehow
     if(_decspec->type_spec!=NULL){
-        
         _decspec->type_spec->accept(this);
     }
     else if(_decspec->storage_class_specifier!=NULL){
-        
         _decspec->storage_class_specifier->accept(this);
     }
     if(_decspec->specifier!=NULL){
@@ -235,16 +231,13 @@ void ASTProcVis::visit(init_declarator_list* _indeclis){
     TableInstance->EndDeclaration();//combines dec specs right to left
 }
 void ASTProcVis::visit(init_declarator* _indec){
-    
     if(_indec->init!=NULL) _indec->init->accept(this);
     _indec->dec->accept(this);
 }
 void ASTProcVis::visit(type_specifier* _typespec){
-    
     TableInstance->PushDecSpec((_typespec->type));
 }
 void ASTProcVis::visit(specifier_list* _speclist){
-    
     _speclist->type_spec->accept(this);
     if(_speclist->spec_list!=NULL){ _speclist->spec_list->accept(this); }
 }
@@ -461,6 +454,46 @@ void ASTProcVis::visit(DeclarationList* decllis){
     decllis->this_decl->accept(this);
 }
 
+void ASTProcVis::visit(struct_specifier* _strspec){
+    // struct identifier { struct-declaration-list }
+    //      add new record defining the struct with name "struct <identifier>", append struct body definition to record
+    // struct { struct-declaration-list }
+    //      add new record defining the struct with name "", append struct body definition to record
+    // struct identifier 
+    //      search for record with name "struct <identifier>", add its primary to the list
+
+    std::string name = "struct";
+    if(_strspec->tag!=NULL){ name += " " + _strspec->tag->Name; } //"struct <tag>"
+    if(_strspec->list!=NULL){
+        TableInstance->StartNewStructDeclaration();
+        TableInstance->AddIDtoCurrRecord(name);
+        _strspec->list->accept(this);
+        TableInstance->EndStructDeclaration();
+    }
+    TableInstance->AddStructRecToCurrRecord(name);
+    /*Adds most recent struct dec records information to the current record*/
+}
+void ASTProcVis::visit(struct_declaration_list* _strdectionlist){
+    for(auto declaration : _strdectionlist->decs){
+        declaration->accept(this);
+    }
+}
+void ASTProcVis::visit(struct_declaration* _strdection){
+    TableInstance->awaitDecSpecs();
+    _strdection->specs->accept(this);
+    _strdection->decls->accept(this);
+    TableInstance->clearDecSpecs();
+}
+void ASTProcVis::visit(struct_declarator_list* _strdeclist){
+    for(auto dec : _strdeclist->decls){
+        TableInstance->StartNewDeclaration();
+        dec->accept(this);
+        TableInstance->AppendCachedDecSpecs();
+        TableInstance->EndDeclaration();
+    }
+}
+
+
 unsigned int ASTProcVis::EvalConstantExpression(ConstantExpression* _const_expr){
     return _const_expr->constEval();
 }
@@ -485,4 +518,3 @@ unsigned int ASTProcVis::EvalConstantExpression(Expression* expr){
 
 //     //!Size 0 -> unspecified
 // }
-
