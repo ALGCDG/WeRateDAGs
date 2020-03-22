@@ -11,6 +11,7 @@
 #include <utility>
 #include <unordered_map>
 #include <string>
+#include <algorithm>
 // #include "visitors.hpp"
 #include "ast_allnodes.hpp"
 
@@ -19,7 +20,7 @@ class vm
     /*
     A class for tracking the position of variables on the stack
     */
-    private:
+    public:
     std::unordered_map<std::string, int> m;
     public:
     vm(){}
@@ -41,6 +42,10 @@ class vm
     bool contains(std::string s)
     {
         return m.find(s) != m.end() && !m.empty();
+    }
+    void clear()
+    {
+        m.clear();
     }
 };
 
@@ -142,6 +147,7 @@ class three_address_Visitor : public Visitor
                 // std::cout << "move " << return_reg << ", " << (in->Name) << std::endl;
                 std::cout << "# reading variable " << in->Name << std::endl;
                 std::cout << "lw " << return_reg << ", " << variable_map.lookup(in->Name) << "($fp) " << std::endl; // still need to add frame offset TODO
+                std::cout << "nop" << std::endl;
             }
         }
         else
@@ -196,6 +202,7 @@ class three_address_Visitor : public Visitor
                 std::cout << "addu $v0 $v0 $v1";
                 // load relevant word
                 std::cout << "lw " << return_reg << " $v0" << std::endl;
+                std::cout << "nop" << std::endl;
             // if array is local
             // ???
             return_register.pop();
@@ -208,6 +215,7 @@ class three_address_Visitor : public Visitor
         if (fc->Args != NULL)
         {
             no_args = fc->Args->Args.size();
+            no_args = std::max(no_args,4);
             std::cout << "# making room on the stack for arguments" << std::endl;
             std::cout << "addiu $sp, $sp, " << -no_args*4 << std::endl;
             std::cout << "move $fp, $sp " << std::endl;
@@ -254,8 +262,9 @@ class three_address_Visitor : public Visitor
             auto r = (i < 4) ? "$a" + std::to_string(i) : "$v0";
             return_register.push(r);
             ael->Args[i]->accept(this);
-            // store all arguments on stack
+            // // store all arguments on stack
             std::cout << "sw " << r << ", " << (i+1)*4 << "($fp)" << std::endl;
+            std::cout << "nop" << std::endl;
         }
     }
     void visit(UnaryAddressOperator *) {}
@@ -393,23 +402,41 @@ class three_address_Visitor : public Visitor
     void visit(GreaterThan * gt)
     {
         auto intermediates = descend(gt);
-        std::cout << "sub $v0 $zero $v0" << std::endl;
-        std::cout << "sub $v1 $zero $v1" << std::endl;
-        std::cout << "slt " << return_register.top() << ", " << intermediates.first << ", " << intermediates.second << std::endl;
+        // std::cout << "sub $v0 $zero $v0" << std::endl;
+        // std::cout << "sub $v1 $zero $v1" << std::endl;
+        // std::cout << "slt " << return_register.top() << ", " << intermediates.first << ", " << intermediates.second << std::endl;
+        std::cout << "sgt " << return_register.top() << ", " << intermediates.first << ", " << intermediates.second << std::endl;
         return_register.pop();
         saved_registers.push(intermediates.first);
         saved_registers.push(intermediates.second);
     }
-    void visit(LessThanOrEqual *) {}
-    void visit(GreaterThanOrEqual *) {}
+    void visit(LessThanOrEqual * ltoe)
+    {
+        auto intermediates = descend(ltoe);
+        auto return_reg = return_register.top();
+        return_register.pop();
+        std::cout << "sle " << return_reg << ", " << intermediates.first << ", " << intermediates.second << std::endl;
+        saved_registers.push(intermediates.first);
+        saved_registers.push(intermediates.second);
+    }
+    void visit(GreaterThanOrEqual * gtoe)
+    {
+        auto intermediates = descend(gtoe);
+        auto return_reg = return_register.top();
+        return_register.pop();
+        std::cout << "sge " << return_reg << ", " << intermediates.first << ", " << intermediates.second << std::endl;
+        saved_registers.push(intermediates.first);
+        saved_registers.push(intermediates.second);
+    }
     void visit(EqualTo * et)
     {
         auto intermediates = descend(et);
-        std::cout << "xor $v0, " << intermediates.first << ", " << intermediates.second << std::endl;
-        std::cout << "li $v1, 0xffffffff" << std::endl;
-        std::cout << "xor $v0, $v0, $v1" << std::endl;
-        std::cout << "li $v1, 0xfffffffe" << std::endl;
-        std::cout << "sltu " << return_register.top() << ", $v0, $v1" << std::endl;
+        // std::cout << "xor $v0, " << intermediates.first << ", " << intermediates.second << std::endl;
+        // std::cout << "li $v1, 0xffffffff" << std::endl;
+        // std::cout << "xor $v0, $v0, $v1" << std::endl;
+        // std::cout << "li $v1, 0xfffffffe" << std::endl;
+        // std::cout << "sltu " << return_register.top() << ", $v0, $v1" << std::endl;
+        std::cout << "seq $v0, " << intermediates.first << ", " << intermediates.second << std::endl;
         return_register.pop();
         saved_registers.push(intermediates.first);
         saved_registers.push(intermediates.second);
@@ -417,18 +444,32 @@ class three_address_Visitor : public Visitor
     void visit(NotEqualTo * net)
     {
         auto intermediates = descend(net);
-        std::cout << "xor " << return_register.top() << ", " << intermediates.first << ", " << intermediates.second << std::endl;
+        // std::cout << "xor " << return_register.top() << ", " << intermediates.first << ", " << intermediates.second << std::endl;
+        std::cout << "sne " << return_register.top() << ", " << intermediates.first << ", " << intermediates.second << std::endl;
         return_register.pop();
         saved_registers.push(intermediates.first);
         saved_registers.push(intermediates.second);
     }
     void visit(LogicalAND * la)
     {
-        // auto intermediates = descend(la);
-        // std::cout << "and " << return_register.top() << ", " << intermediates.first << ", " << intermediates.second << std::endl;
-        // return_register.pop();
+        auto intermediates = descend(la);
+        std::cout << "sne " << intermediates.first << ", " << intermediates.first << ", $zero" << std::endl;
+        std::cout << "sne " << intermediates.second << ", " << intermediates.second << ", $zero" << std::endl;
+        std::cout << "and " << return_register.top() << ", " << intermediates.first << ", " << intermediates.second << std::endl;
+        std::cout << "sne " << return_register.top() << ", " << return_register.top() << ", $zero" << std::endl;
+        return_register.pop();
+        saved_registers.push(intermediates.first);
+        saved_registers.push(intermediates.second);
     }
-    void visit(LogicalOR *) {}
+    void visit(LogicalOR * lo)
+    {
+        auto intermediates = descend(lo);
+        std::cout << "or " << return_register.top() << ", " << intermediates.first << ", " << intermediates.second << std::endl;
+        std::cout << "sne " << return_register.top() << ", " << return_register.top() << ", $zero" << std::endl;
+        return_register.pop();
+        saved_registers.push(intermediates.first);
+        saved_registers.push(intermediates.second);
+    }
     void visit(BitwiseAND * ba)
     {
         auto intermediates = descend(ba);
@@ -466,6 +507,7 @@ class three_address_Visitor : public Visitor
         toe->Condition->accept(this);
         // if false go to false label
         std::cout << "beq $v0, $zero, " << f << std::endl;
+        std::cout << "nop" << std::endl;
         return_register.push(return_register.top());
         // doing true expression
         std::cout << gen_name("ternary_true") << ':' << std::endl;
@@ -473,6 +515,7 @@ class three_address_Visitor : public Visitor
         toe->IfTrue->accept(this);
         // branch to end
         std::cout << "b " << end << std::endl;
+        std::cout << "nop" << std::endl;
         // do false expression
         std::cout << f << ':' << std::endl;
         return_register.push(return_register.top());
@@ -732,10 +775,12 @@ class three_address_Visitor : public Visitor
     void visit(Continue *)
     {
         std::cout << "b " << continue_to.top() << std::endl;
+        std::cout << "nop" << std::endl;
     }
     void visit(Break *)
     {
         std::cout << "b " << break_to.top() << std::endl;
+        std::cout << "nop" << std::endl;
     }
     void visit(Return * r)
     {
@@ -745,6 +790,7 @@ class three_address_Visitor : public Visitor
             r->ReturnExpression->accept(this);
         }
         std::cout << "b " << function_end << std::endl;
+        std::cout << "nop" << std::endl;
     }
     void visit(While * w) 
     {
@@ -762,12 +808,14 @@ class three_address_Visitor : public Visitor
         w->ControlExpression->accept(this);
         // branch to end if condition not met
         std::cout << "beq $v0, $zero, " << end << std::endl;
+        std::cout << "nop" << std::endl;
         // do body
         w->Body->accept(this);
         continue_to.pop();
         break_to.pop();
         // branch to beginning
         std::cout << "b "<< beginning << std::endl;
+        std::cout << "nop" << std::endl;
         //end
         std::cout << end << ':' << std::endl;
         // std::cout << "const " << destReg << " 0" << std::endl; // we need to return 0
@@ -788,12 +836,14 @@ class three_address_Visitor : public Visitor
         dw->ControlExpression->accept(this);
         // branch to end if condition not met
         std::cout << "beq $v0, $zero, " << end << std::endl;
+        std::cout << "nop" << std::endl;
         // do body
         dw->Body->accept(this);
         continue_to.pop();
         break_to.pop();
         // branch to beginning
         std::cout << "b " << beginning << std::endl;
+        std::cout << "nop" << std::endl;
         //end
         std::cout << end << ':' << std::endl;
         // std::cout << "const " << destReg << " 0" << std::endl; // we need to return 0
@@ -822,6 +872,7 @@ class three_address_Visitor : public Visitor
         }
         // jump to end if control fails
         std::cout << "beq $v0, $zero, " << end << std::endl;
+        std::cout << "nop" << std::endl;
         // executing body
         f->Body->accept(this);
         // do iteration statement
@@ -831,6 +882,7 @@ class three_address_Visitor : public Visitor
         }
         // jump to beginning
         std::cout << "beq $v0, $zero, " << beginning << std::endl;
+        std::cout << "nop" << std::endl;
         // writing end
         std::cout << end << ':' << std::endl;
         // clearing continue and break
@@ -848,6 +900,7 @@ class three_address_Visitor : public Visitor
         // result of controlexpression should be stored in $v0
         // branch to end if false
         std::cout << "beq $v0, $zero, " << end_label << std::endl;
+        std::cout << "nop" << std::endl;
         // do true
         std::cout << true_case_label << ':' << std::endl;
         i->IfTrue->accept(this);
@@ -866,10 +919,12 @@ class three_address_Visitor : public Visitor
         // result of controlexpression should be stored in $v0
         // branch between true or false case
         std::cout << "beq $v0, $zero, " << false_case_label << std::endl;
+        std::cout << "nop" << std::endl;
         // do true
         std::cout << true_case_label << ':' << std::endl;
         ie->IfTrue->accept(this);
         std::cout << "b " << end_label << std::endl;
+        std::cout << "nop" << std::endl;
         // do false
         std::cout << false_case_label << ':' << std::endl;
         ie->IfFalse->accept(this);
@@ -920,10 +975,12 @@ class three_address_Visitor : public Visitor
         break_to.push(end);
         // jumping to decision
         std::cout << "b " << decision << std::endl;
+        std::cout << "nop" << std::endl;
         // making case
         s->Body->accept(this);
         break_to.pop();
         std::cout << "b " << end << std::endl;
+        std::cout << "nop" << std::endl;
         //evaluate switch expression
         std::cout << decision << ':' << std::endl;
         return_register.push("$v0"); // stores evaluation in t9 to avoid conflict with expression temps
@@ -937,10 +994,12 @@ class three_address_Visitor : public Visitor
             // std::cerr << "push" << std::endl;
             c.second->accept(this);
             std::cout << "beq $v0, $v1, " << c.first << std::endl;
+            std::cout << "nop" << std::endl;
             cases.pop();
         }
         // or going to default
         std::cout << "b " << default_label << std::endl;
+        std::cout << "nop" << std::endl;
         std::cout << end << ':' << std::endl;
     }
     void visit(CaseOrDefault * cod)
@@ -993,7 +1052,8 @@ class three_address_Visitor : public Visitor
         {
             if  (i < 4)
             {
-                std::cout << "sw $a" << i << ", " << (i+1)*4 + stacksize << "($sp)" << std::endl;
+                std::cout << "sw $a" << i << ", " << (i+1)*4 << "($sp)" << std::endl;
+                std::cout << "nop" << std::endl;
             }
         }
         // make space for local variables
@@ -1002,13 +1062,16 @@ class three_address_Visitor : public Visitor
         std::cout << "addiu $sp, $sp, " << -stacksize << std::endl;
         // store return address
         std::cout << "sw $ra, " << stacksize << "($sp)" << std::endl;
+        std::cout << "nop" << std::endl;
         // store previous stack pointer
         std::cout << "sw $fp, " << stacksize - 4 << "($sp)" << std::endl;
+        std::cout << "nop" << std::endl;
         // move fp to sp
         // make space for saved registers (always going to be)
         for (int i = 0; i < 8; i++)
         {
             std::cout << "sw $s" << i << ", " << (i+1)*4 << "($sp)" << std::endl;
+            std::cout << "nop" << std::endl;
         }
         std::cout << "move $fp, $sp" << std::endl;
         // processing body
@@ -1023,15 +1086,19 @@ class three_address_Visitor : public Visitor
         for (int i = 0; i < 8; i++)
         {
             std::cout << "lw $s" << i << ", " << stacksize - (9-i) * 4 << "($sp)" << std::endl;
+            std::cout << "nop" << std::endl;
         }
         // restore return address
         std::cout << "lw $ra, " << stacksize << "($sp)" << std::endl;
+        std::cout << "nop" << std::endl;
         // restore stack pointer
         std::cout << "lw $fp, " << stacksize -4 << "($sp)" << std::endl;
+        std::cout << "nop" << std::endl;
         std::cout << "move $sp, $fp" << std::endl;
         // jump to original
         std::cout << "jr $ra" << std::endl;
         std::cout << "nop" << std::endl;
+        std::cout << std::endl << std::endl;
     }
     void visit(ExternalDeclaration * ed)
     {
