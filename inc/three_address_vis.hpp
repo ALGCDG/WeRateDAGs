@@ -49,7 +49,7 @@ class vm
 class three_address_Visitor : public Visitor
 {
     public:
-    three_address_Visitor(): counter(0), return_register(), continue_to(), break_to(), cases(), global(true), global_labels(), intermediate_values(), temporary_registers(), saved_registers(), variable_map(), writing(false), parameter_flag(false)
+    three_address_Visitor(): counter(0), return_register(), continue_to(), break_to(), cases(), global(true), global_labels(), intermediate_values(), temporary_registers(), saved_registers(), variable_map(), writing(false), parameter_flag(false), func_call_flag(false)
     {
         for (int i = 9; i >= 0; i--)
             temporary_registers.push("$t"+std::to_string(i));
@@ -70,6 +70,7 @@ class three_address_Visitor : public Visitor
     std::stack<std::string> saved_registers;
     bool writing;
     bool parameter_flag;
+    bool func_call_flag;
     int local_words, arg_words;
     int stacksize;
     int parameter_size;
@@ -77,16 +78,10 @@ class three_address_Visitor : public Visitor
     vm variable_map; // a map of variable name to stack offset and what register it might be stored in
     std::string get_temp_register(const std::string &inter)
     {
-        // if (intermediate_values.size() < 9)
-        // {
-        //     auto reg = "$t" + std::to_string(intermediate_values.size());
-        //     intermediate_values.push(inter);
-        //     return reg;
-        // }
-        if (!temporary_registers.empty())
+        if (!saved_registers.empty())
         {
-            auto r = temporary_registers.top();
-            temporary_registers.pop();
+            auto r = saved_registers.top();
+            saved_registers.pop();
             return r;
         }
         else
@@ -108,6 +103,10 @@ class three_address_Visitor : public Visitor
         {
             variable_map.update(4);
             variable_map.register_variable(in->Name, 4);
+        }
+        else if (func_call_flag)
+        {
+            std::cout << (in->Name);
         }
         else if (!writing)
         {
@@ -204,13 +203,34 @@ class three_address_Visitor : public Visitor
     }
     void visit(FuncCall * fc)
     {
+        int no_args = 0;
         // REMEMBER, PUSH TO STACK ENOUGH SPACE FOR ALL WORDS USED BY FUNCTION ARGUMENT
-        // insert arguments
-        fc->Args->accept(this);
+        if (fc->Args != NULL)
+        {
+            no_args = fc->Args->Args.size();
+            std::cout << "# making room on the stack for arguments" << std::endl;
+            std::cout << "addiu $sp, $sp, " << -no_args*4 << std::endl;
+            std::cout << "move $fp, $sp " << std::endl;
+            variable_map.update(no_args*4);
+            // insert arguments
+            fc->Args->accept(this);
+        }
         // jump and link
         std::cout << "jal ";
+        func_call_flag = true;
         fc->LHS->accept(this);
+        func_call_flag = false;
         std::cout << std::endl;
+        std::cout << "nop" << std::endl; // moving returned value to specified register
+        std::cout << "move " << return_register.top() << ", $v0" << std::endl; // moving returned value to specified register
+        return_register.pop();
+        if (fc->Args != NULL)
+        {
+            std::cout << "# freeing function call arguments from stack" << std::endl;
+            std::cout << "addiu $sp, $sp, " << no_args*4 << std::endl;
+            std::cout << "move $fp, $sp " << std::endl;
+            variable_map.update(-no_args*4);
+        }
     }
     void visit(MemberAccess *) {}
     void visit(DerefMemberAccess *) {}
@@ -228,24 +248,15 @@ class three_address_Visitor : public Visitor
     }
     void visit(ArgExprList * ael)
     {
-        int no_args = ael->Args.size();
-        std::cout << "addiu $sp, $sp, " << -no_args*4 << std::endl;
-        std::cout << "move $fp, $sp " << std::endl;
         for (int i = ael->Args.size() - 1 ; i >= 0; i--)
         {
             // evaluating arguments
-            return_register.push("$v0");
+            auto r = (i < 4) ? "$a" + std::to_string(i) : "$v0";
+            return_register.push(r);
             ael->Args[i]->accept(this);
-            if (i < 4)
-            {
-                // move first 4 args into relevant registers
-                std::cout << "move $a" << i << ", $v0" << std::endl;
-            }
             // store all arguments on stack
-            std::cout << "sw $v0, " << i*4 << "($fp)" << std::endl;
+            std::cout << "sw " << r << ", " << (i+1)*4 << "($fp)" << std::endl;
         }
-        std::cout << "addiu $sp, $sp, " << no_args*4 << std::endl;
-        std::cout << "move $fp, $sp " << std::endl;
     }
     void visit(UnaryAddressOperator *) {}
     void visit(UnaryDerefOperator *) {}
@@ -311,8 +322,8 @@ class three_address_Visitor : public Visitor
         return_register.pop();
         std::cout << "multu " << intermediates.first << ", " << intermediates.second << std::endl;
         std::cout << "mflo " << return_reg << std::endl;
-        temporary_registers.push(intermediates.first);
-        temporary_registers.push(intermediates.second);
+        saved_registers.push(intermediates.first);
+        saved_registers.push(intermediates.second);
     }
     void visit(Divide *d)
     {
@@ -321,8 +332,8 @@ class three_address_Visitor : public Visitor
         return_register.pop();
         std::cout << "divu " << return_reg << ", " << intermediates.first << ", " << intermediates.second << std::endl;
         std::cout << "mfhi " << return_reg << std::endl;
-        temporary_registers.push(intermediates.first);
-        temporary_registers.push(intermediates.second);
+        saved_registers.push(intermediates.first);
+        saved_registers.push(intermediates.second);
     }
     void visit(Modulo * m)
     {
@@ -331,8 +342,8 @@ class three_address_Visitor : public Visitor
         return_register.pop();
         std::cout << "divu " << return_reg << ", " << intermediates.first << ", " << intermediates.second << std::endl;
         std::cout << "mflo " << return_reg << std::endl;
-        temporary_registers.push(intermediates.first);
-        temporary_registers.push(intermediates.second);
+        saved_registers.push(intermediates.first);
+        saved_registers.push(intermediates.second);
     }
     void visit(Add * a)
     {
@@ -340,8 +351,8 @@ class three_address_Visitor : public Visitor
         auto return_reg = return_register.top();
         return_register.pop();
         std::cout << "addu " << return_reg << ", " << intermediates.first << ", " << intermediates.second << std::endl;
-        temporary_registers.push(intermediates.first);
-        temporary_registers.push(intermediates.second);
+        saved_registers.push(intermediates.first);
+        saved_registers.push(intermediates.second);
     }
     void visit(Sub * s)
     {
@@ -349,8 +360,8 @@ class three_address_Visitor : public Visitor
         auto return_reg = return_register.top();
         return_register.pop();
         std::cout << "subu " << return_reg << ", " << intermediates.first << ", " << intermediates.second << std::endl;
-        temporary_registers.push(intermediates.first);
-        temporary_registers.push(intermediates.second);
+        saved_registers.push(intermediates.first);
+        saved_registers.push(intermediates.second);
     }
     void visit(ShiftLeft * sl)
     {
@@ -358,8 +369,8 @@ class three_address_Visitor : public Visitor
         auto return_reg = return_register.top();
         return_register.pop();
         std::cout << "sllv " << return_reg << ", " << intermediates.first << ", " << intermediates.second << std::endl;
-        temporary_registers.push(intermediates.first);
-        temporary_registers.push(intermediates.second);
+        saved_registers.push(intermediates.first);
+        saved_registers.push(intermediates.second);
     }
     void visit(ShiftRight * sr)
     {
@@ -367,8 +378,8 @@ class three_address_Visitor : public Visitor
         auto return_reg = return_register.top();
         return_register.pop();
         std::cout << "srlv " << return_reg << ", " << intermediates.first << ", " << intermediates.second << std::endl;
-        temporary_registers.push(intermediates.first);
-        temporary_registers.push(intermediates.second);
+        saved_registers.push(intermediates.first);
+        saved_registers.push(intermediates.second);
     }
     void visit(LessThan * lt)
     {
@@ -376,8 +387,8 @@ class three_address_Visitor : public Visitor
         auto return_reg = return_register.top();
         return_register.pop();
         std::cout << "slt " << return_reg << ", " << intermediates.first << ", " << intermediates.second << std::endl;
-        temporary_registers.push(intermediates.first);
-        temporary_registers.push(intermediates.second);
+        saved_registers.push(intermediates.first);
+        saved_registers.push(intermediates.second);
     }
     void visit(GreaterThan * gt)
     {
@@ -386,8 +397,8 @@ class three_address_Visitor : public Visitor
         std::cout << "sub $v1 $zero $v1" << std::endl;
         std::cout << "slt " << return_register.top() << ", " << intermediates.first << ", " << intermediates.second << std::endl;
         return_register.pop();
-        temporary_registers.push(intermediates.first);
-        temporary_registers.push(intermediates.second);
+        saved_registers.push(intermediates.first);
+        saved_registers.push(intermediates.second);
     }
     void visit(LessThanOrEqual *) {}
     void visit(GreaterThanOrEqual *) {}
@@ -400,16 +411,16 @@ class three_address_Visitor : public Visitor
         std::cout << "li $v1, 0xfffffffe" << std::endl;
         std::cout << "sltu " << return_register.top() << ", $v0, $v1" << std::endl;
         return_register.pop();
-        temporary_registers.push(intermediates.first);
-        temporary_registers.push(intermediates.second);
+        saved_registers.push(intermediates.first);
+        saved_registers.push(intermediates.second);
     }
     void visit(NotEqualTo * net)
     {
         auto intermediates = descend(net);
         std::cout << "xor " << return_register.top() << ", " << intermediates.first << ", " << intermediates.second << std::endl;
         return_register.pop();
-        temporary_registers.push(intermediates.first);
-        temporary_registers.push(intermediates.second);
+        saved_registers.push(intermediates.first);
+        saved_registers.push(intermediates.second);
     }
     void visit(LogicalAND * la)
     {
@@ -424,8 +435,8 @@ class three_address_Visitor : public Visitor
         auto return_reg = return_register.top();
         return_register.pop();
         std::cout << "and " << return_reg << ", " << intermediates.first << ", " << intermediates.second << std::endl;
-        temporary_registers.push(intermediates.first);
-        temporary_registers.push(intermediates.second);
+        saved_registers.push(intermediates.first);
+        saved_registers.push(intermediates.second);
     }
     void visit(BitwiseOR * bo)
     {
@@ -433,17 +444,17 @@ class three_address_Visitor : public Visitor
         auto return_reg = return_register.top();
         return_register.pop();
         std::cout << "or " << return_reg << " " << intermediates.first << ", " << intermediates.second << std::endl;
-        temporary_registers.push(intermediates.first);
-        temporary_registers.push(intermediates.second);
+        saved_registers.push(intermediates.first);
+        saved_registers.push(intermediates.second);
     }
     void visit(BitwiseXOR * bx)
     {
         auto intermediates = descend(bx);
         auto return_reg = return_register.top();
         return_register.pop();
-        std::cout << "xor " << return_reg << " " << intermediates.first << ", " << intermediates.second << std::endl;
-        temporary_registers.push(intermediates.first);
-        temporary_registers.push(intermediates.second);
+        std::cout << "xor " << return_reg << ", " << intermediates.first << ", " << intermediates.second << std::endl;
+        saved_registers.push(intermediates.first);
+        saved_registers.push(intermediates.second);
     }
     void visit(TernaryOpExpression * toe)
     {
@@ -498,8 +509,8 @@ class three_address_Visitor : public Visitor
         writing = true;
         ma->LHS->accept(this);
         writing = false;
-        temporary_registers.push(intermediates.first);
-        temporary_registers.push(intermediates.second);
+        saved_registers.push(intermediates.first);
+        saved_registers.push(intermediates.second);
     }
     void visit(DivAssignment * da)
     {
@@ -509,8 +520,8 @@ class three_address_Visitor : public Visitor
         writing = true;
         da->LHS->accept(this);
         writing = false;
-        temporary_registers.push(intermediates.first);
-        temporary_registers.push(intermediates.second);
+        saved_registers.push(intermediates.first);
+        saved_registers.push(intermediates.second);
     }
     void visit(ModAssignment * ma)
     {
@@ -520,8 +531,8 @@ class three_address_Visitor : public Visitor
         writing = true;
         ma->LHS->accept(this);
         writing = false;
-        temporary_registers.push(intermediates.first);
-        temporary_registers.push(intermediates.second);
+        saved_registers.push(intermediates.first);
+        saved_registers.push(intermediates.second);
     }
     void visit(AddAssignment * aa)
     {
@@ -530,8 +541,8 @@ class three_address_Visitor : public Visitor
         writing = true;
         aa->LHS->accept(this);
         writing = false;  
-        temporary_registers.push(intermediates.first);
-        temporary_registers.push(intermediates.second);
+        saved_registers.push(intermediates.first);
+        saved_registers.push(intermediates.second);
     }
     void visit(SubAssignment * sa)
     {
@@ -540,8 +551,8 @@ class three_address_Visitor : public Visitor
         writing = true;
         sa->LHS->accept(this);
         writing = false;
-        temporary_registers.push(intermediates.first);
-        temporary_registers.push(intermediates.second);
+        saved_registers.push(intermediates.first);
+        saved_registers.push(intermediates.second);
     }
     void visit(ShiftLeftAssignment * sla)
     {
@@ -550,8 +561,8 @@ class three_address_Visitor : public Visitor
         writing = true;
         sla->LHS->accept(this);
         writing = false;
-        temporary_registers.push(intermediates.first);
-        temporary_registers.push(intermediates.second);
+        saved_registers.push(intermediates.first);
+        saved_registers.push(intermediates.second);
     }
     void visit(ShiftRightAssignment * sra)
     {
@@ -560,8 +571,8 @@ class three_address_Visitor : public Visitor
         writing = true;
         sra->LHS->accept(this);
         writing = false;  
-        temporary_registers.push(intermediates.first);
-        temporary_registers.push(intermediates.second);
+        saved_registers.push(intermediates.first);
+        saved_registers.push(intermediates.second);
     }
     void visit(BitwiseANDAssignment * baa)
     {
@@ -570,8 +581,8 @@ class three_address_Visitor : public Visitor
         writing = true;
         baa->LHS->accept(this);
         writing = false;
-        temporary_registers.push(intermediates.first);
-        temporary_registers.push(intermediates.second);
+        saved_registers.push(intermediates.first);
+        saved_registers.push(intermediates.second);
     }
     void visit(BitwiseXORAssignment * bxa)
     {
@@ -580,8 +591,8 @@ class three_address_Visitor : public Visitor
         writing = true;
         bxa->LHS->accept(this);
         writing = false;
-        temporary_registers.push(intermediates.first);
-        temporary_registers.push(intermediates.second);
+        saved_registers.push(intermediates.first);
+        saved_registers.push(intermediates.second);
     }
     void visit(BitwiseORAssignment * boa)
     {
@@ -590,8 +601,8 @@ class three_address_Visitor : public Visitor
         writing = true;
         boa->LHS->accept(this);
         writing = false;
-        temporary_registers.push(intermediates.first);
-        temporary_registers.push(intermediates.second);
+        saved_registers.push(intermediates.first);
+        saved_registers.push(intermediates.second);
     }
     void visit(ConstantExpression *) {}
     void visit(CommaSepExpression *) {}
