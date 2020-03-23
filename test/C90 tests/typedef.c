@@ -1,11 +1,7 @@
-int f(int a){
-  int b;
-  {
+struct a{
     int b;
-  }
-  return 2;
-}
+};
 
 int main(){
-  return f(2);
 }
+

@@ -36,6 +36,7 @@
     init_declarator_list  * t_init_declarator_list;
     init_declarator       * t_init_declarator;
     type_specifier        * t_type_specifier;
+
     specifier_list        * t_specifier_list;
     declarator            * t_declarator;
     direct_declarator     * t_direct_declarator;
@@ -58,6 +59,9 @@
     struct_declaration* struct_dection;
     struct_declaration_list* struct_dection_list;
     struct_declarator_list* struct_dec_list;
+
+    Enumerator* t_enumerator;
+    EnumeratorList* t_enumlist;
 };
 
 %token Constant_int Constant_char Constant_double Constant_float Constant_long_double
@@ -67,7 +71,7 @@
 %token Keyword Keyword_void Keyword_char Keyword_short Keyword_int Keyword_long Keyword_float Keyword_double Keyword_signed Keyword_unsigned Keyword_case Keyword_default Keyword_if Keyword_else Keyword_switch Keyword_while Keyword_do Keyword_for Keyword_continue Keyword_break Keyword_return Keyword_enum Keyword_struct Keyword_typedef
 %token Punctuator Punctuator_eol Punctuator_par_open Punctuator_par_close Punctuator_squ_open Punctuator_squ_close Punctuator_cur_open Punctuator_cur_close
 
-%type <struct_spec> struct_specifier
+%type <t_type_specifier> struct_specifier
 %type <struct_dection> struct_declaration
 %type <struct_dection_list> struct_declaration_list
 %type <struct_dec_list> struct_declarator_list
@@ -138,7 +142,9 @@
 %type <t_external_declaration> external_declaration
 %type <t_function_definition> function_definition
 
-
+%type <t_type_specifier> enum_specifier
+%type <t_enumerator> enumerator
+%type <t_enumlist> enum_list
 
 %start ROOT
 
@@ -288,8 +294,8 @@ type_specifier: Keyword_void { $$ = new type_specifier("void"); }
               | Keyword_double { $$ = new type_specifier("double"); }
               | Keyword_signed { $$ = new type_specifier("signed"); }
               | Keyword_unsigned{ $$ = new type_specifier("unsigned"); }
-/*              | enum_specifier { std::cerr << "enum" << std::endl; }
-              | typedef_name { std::cerr << "typedef type" << std::endl; }*/
+              | enum_specifier { $$ = $1; }
+/*              | typedef_name { std::cerr << "typedef type" << std::endl; }*/
               | struct_specifier{ $$ = $1; }
 
 struct_specifier: Keyword_struct Ident Punctuator_cur_open struct_declaration_list Punctuator_cur_close 
@@ -301,12 +307,12 @@ struct_specifier: Keyword_struct Ident Punctuator_cur_open struct_declaration_li
 struct_declaration_list: struct_declaration { $$ = new struct_declaration_list($1); }
 					   | struct_declaration_list struct_declaration { $1->AppendDeclaration($2); }
 
-struct_declaration: specifier_list struct_declarator_list { $$ = new struct_declaration($1, $2); }
+struct_declaration: specifier_list struct_declarator_list Punctuator_eol { $$ = new struct_declaration($1, $2); }
 
 specifier_list: type_specifier  { $$ = new specifier_list($1); } /*TODO!*/
 						| type_specifier specifier_list { $$ = new specifier_list($1, $2); }
 
-struct_declarator_list:declarator { $$ = new struct_declarator_list($1); }
+struct_declarator_list: declarator { $$ = new struct_declarator_list($1); }
 					  | struct_declarator_list Operator_comma declarator { $1->AppendDeclarator($3); }
 
 /*This includes bitfields which are not required -> struct declarator === declarator
@@ -315,19 +321,19 @@ struct_declarator: declarator
                  | Operator_trinary_choice struct_declarator
 */
 
-/*
-enum_specifier: Keyword_enum Ident
-			  | Keyword_enum Ident Punctuator_cur_open enum_list Punctuator_cur_close
-			  | Keyword_enum Punctuator_cur_open enum_list Punctuator_cur_close
 
-enum_list: enumerator
-		 | enum_list Operator_comma enumerator
+enum_specifier: Keyword_enum Ident { $$ = new EnumSpecifier($1); }
+			  | Keyword_enum Ident Punctuator_cur_open enum_list Punctuator_cur_close { $$ = new EnumSpecifier($2, $4); }
+			  | Keyword_enum Punctuator_cur_open enum_list Punctuator_cur_close { $$ = new EnumSpecifier($3); }
 
-enumerator: ENUM_CONST
-		  | ENUM_CONST Operator_assign constant_EXPR
+enum_list: enumerator { $$ = new EnumeratorList($1); }
+		 | enum_list Operator_comma enumerator { (*$1)->AppendEnumerator($3);}
 
-ENUM_CONST: Ident
-*/
+enumerator: ENUM_CONST { $$ = new Enumerator($1); }
+		  | ENUM_CONST Operator_assign constant_EXPR { $$ = new Enumerator($1, $3); }
+
+ENUM_CONST: Ident { $$ = $1; }
+
 declarator: direct_declarator { $$ = new declarator($1); }
 		  | pointer direct_declarator { $$ = new declarator($2, $1); }
 

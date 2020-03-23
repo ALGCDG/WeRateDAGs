@@ -41,7 +41,7 @@ void ParameterTable::PrettyPrint(){
     std::cout << prPr::genTabs() << ")" << std::endl;
 }
 void VariableDeclaration::PrettyPrint(){
-    std::cout << prPr::genTabs() << id << " of depth " << GetDepth() << " is ";
+    std::cout << prPr::genTabs() << id << /*" of depth " << GetDepth() <<*/ " is ";
     if(primaryPt!=NULL){
         primaryPt->Show();
     }
@@ -53,6 +53,9 @@ void VariableDeclaration::PrettyPrint(){
     }
     else if(primaryTypespec!=NULL){
         primaryTypespec->Show();
+    }
+    else if(primaryStruct!=NULL){
+        primaryStruct->Show();
     }
     else{
         std::cout << "error -> no type";
@@ -66,7 +69,13 @@ void FunctionDefinitionRec::PrettyPrint(){
     prPr::Tabsplus();
     body->PrettyPrint();
     prPr::Tabsminus();
-    std::cout << prPr::genTabs() << "}" << std::endl << std::endl;;
+    std::cout << prPr::genTabs() << "}" << std::endl << std::endl;
+}
+void StructTypeDeclarationRec::PrettyPrint(){
+    // std::cout << prPr::genTabs() << id << " is struct type definition with namespace:" << std::endl;
+    // prPr::Tabsplus();
+    // structDef->members->PrettyPrint();
+    // prPr::Tabsminus();
 }
 void functionType::Show(){
     std::cout << "function " << std::endl;
@@ -88,12 +97,19 @@ void pointerType::Show(){
     else if(ptToArray!=NULL){ ptToArray->Show(); }
     else if(ptToBasetype!=NULL){ ptToBasetype->Show(); }
     else if(ptToFunc!=NULL){ ptToFunc->Show(); }
+    else if(ptToStruct!=NULL){ ptToStruct->Show(); }
     else{ std::cout << "error, pointer to nothing"; }
 }
 void typeSpecifiers::Show(){
     for(auto i : specs){
         std::cout << i << " ";
     }
+}
+void structType::Show(){
+    std::cout << "struct with members" << std::endl;
+    prPr::Tabsplus();
+    members->PrettyPrint();
+    prPr::Tabsminus();
 }
 
 //For adding types to chain
@@ -191,6 +207,7 @@ void typeSpecifiers::BeAppended(VariableDeclaration* vardec){ vardec->AddPrimary
 void typeSpecifiers::BeAppended(FunctionDefinitionRec* funcdec){ funcdec->AddPrimary(this); }
 
 void structType::BeAppended(genericConstituentType* other){other->AddNextType(this);}
+void structType::BeAppended(pointerType* ptr){ptr->AddNextType(this);}
 void structType::BeAppended(VariableDeclaration* vardec){ vardec->AddPrimary(this); }
 void structType::BeAppended(StructTypeDeclarationRec* structDec){ structDec->AddPrimary(this);}
 void structType::BeAppended(TypedefTypeDeclarationRec* typedefDec){ typedefDec->AddPrimary(this); }
@@ -231,6 +248,13 @@ unsigned int functionType::ByteSize(){
         size_count += arg->DeclarationSize();
     }
     return size_count;
+}
+
+unsigned int structType::ByteSize(){
+    unsigned int sum = 0;
+    for(auto rec : members->subRecords){
+        sum += rec->DeclarationSize();
+    }
 }
 
 //--------------------
@@ -346,6 +370,10 @@ unsigned int FunctionDefinitionRec::NumArgs(){
     return funcInfo->ArgVec().size();
 }
 
+genericConstituentType* StructTypeDeclarationRec::GetPrimary(){
+    return structDef;
+}
+
 //---------------------
 
 
@@ -397,8 +425,9 @@ void SymbolTable::PushDecSpec(std::string _specid){
 
 void SymbolTable::EndDeclaration(){
     //declarationStack.top()->AddPrimary(AccumulateDeclParts());
+    std::cerr << "accumulating" << std::endl;
     AccumulateDeclParts();
-    
+    std::cerr << "accumulated" << std::endl;
     ActiveScopePtr->subRecords.push_back(declarationStack.top());
     
     declarationStack.pop();
@@ -435,6 +464,7 @@ bool SymbolTable::IsCanonicalTypespec(const std::string& spec){
 }
 
 void SymbolTable::AppendCachedDecSpecs(){
+    std::cerr << "appendeding cached specs" << std::endl;
     typeSpecifiers* specs = new typeSpecifiers;
     //deep copy
     std::vector<std::string> filteredspecs;
@@ -442,6 +472,7 @@ void SymbolTable::AppendCachedDecSpecs(){
         if(spec == "typedef") AssertTypedef();
         else{
             if(!IsCanonicalTypespec(spec)){
+                //this should work for structs too?
                 std::cerr << "test" << std::endl;
                 genericConstituentType* dec = GetIDRecord(spec)->GetPrimary();
                 std::cerr << "teststop" << std::endl;
@@ -539,7 +570,7 @@ NamedRecord* SymbolTable::GetActiveRecord(){
 
 void SymbolTable::StartNewStructDeclaration(){
     //new struct record
-    StructTypeDeclarationRec* rec = new StructTypeDeclarationRec;
+    StructTypeDeclarationRec* rec = new StructTypeDeclarationRec(ActiveScopePtr);
     //add to struct stack
     structDecStack.push(rec);
     //set it to be the active record
@@ -552,6 +583,7 @@ void SymbolTable::StartNewStructDeclaration(){
     ActiveScopePtr = rec->structDef->members;
 }
 void SymbolTable::EndStructDeclaration(){
+    std::cerr << "ending struct declaration" << std::endl;
     ActiveScopePtr = ActiveScopePtr->parentTable;
     ActiveScopePtr->subRecords.push_back(structDecStack.top());
     structDecStack.pop();
@@ -559,13 +591,12 @@ void SymbolTable::EndStructDeclaration(){
     else ActiveRecordPtr = declarationStack.top();
 
 }
-void SymbolTable::AddStructRecToCurrRecord(const std::string& tag){
-    NamedRecord* structResult = GetIDRecord("struct " + tag);
-    //declPartsStack.top().push_back(structResult->GetPrimary());
-    //TODO:
-    // change decspec stack to have a vector of a container struct
-    // that can contain either a string, struct spec or enum spec
-}
+// void SymbolTable::AddStructRecToCurrRecord(const std::string& tag){
+//     NamedRecord* structResult = GetIDRecord("struct " + tag);
+//     //declPartsStack.top().push_back(structResult->GetPrimary());
+//     // change decspec stack to have a vector of a container struct
+//     // that can contain either a string, struct spec or enum spec
+// }
 //-----------------------------------
 void SymbolTable::AccumulateDeclParts(){
     // if (declPartsStack.top().size() == 1){

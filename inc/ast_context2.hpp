@@ -102,10 +102,12 @@ struct typeSpecifiers : public genericConstituentType{
 struct structType : public genericConstituentType{
     Table* members;
     void BeAppended(genericConstituentType* other);
+    void BeAppended(pointerType* ptr);
     void BeAppended(VariableDeclaration* vardec);
     void BeAppended(StructTypeDeclarationRec* structDec);
     void BeAppended(TypedefTypeDeclarationRec* typedefDec);
     unsigned int ByteSize() override;
+    void Show();
 };
 
 
@@ -123,7 +125,7 @@ struct Record{
     virtual bool hasID(const std::string& _id){ return false; }
     virtual void SetName(const std::string& _id){}
     virtual void PrettyPrint(){}
-    virtual unsigned int DeclarationSize(){}
+    virtual unsigned int DeclarationSize(){ return 0; }
     bool isTypedef = false;
     Table* parentTable;
 };
@@ -206,6 +208,8 @@ struct StructTypeDeclarationRec : public TypeDeclarationRec{
     StructTypeDeclarationRec(Table* parent) : TypeDeclarationRec(parent){}
     structType* structDef;
     void AddPrimary(structType* _strdef){ structDef = _strdef; }
+    genericConstituentType* GetPrimary();
+    void PrettyPrint() override;
 };
 struct TypedefTypeDeclarationRec : public TypeDeclarationRec{
     TypedefTypeDeclarationRec(Table* parent) : TypeDeclarationRec(parent){}
@@ -221,7 +225,11 @@ struct TypedefTypeDeclarationRec : public TypeDeclarationRec{
     void AddPrimary(structType* StructDef);
     void AddPrimary(typeSpecifiers* BasetypeDef);
 };
-
+struct EnumTypeDeclarationRec : public TypeDeclarationRec{
+    EnumTypeDeclarationRec(Table* parent) : TypeDeclarationRec(parent){}
+    enumType* enumDef;
+    
+};
 
 class SymbolTable{
 public:
@@ -253,7 +261,7 @@ public:
 
     void StartNewStructDeclaration();
     void EndStructDeclaration();
-    void AddStructRecToCurrRecord(const std::string& tag);    
+    // void AddStructRecToCurrRecord(const std::string& tag);    
 
     NamedRecord* GetIDRecord(const std::string& _ID);
     NamedRecord* GetActiveRecord();
@@ -273,6 +281,7 @@ private:
     FunctionDefinitionRec* ActiveFuncDefPtr;
     bool FuncDefIsFocus;
     NamedRecord* ActiveRecordPtr;
+
 };
 
 #endif

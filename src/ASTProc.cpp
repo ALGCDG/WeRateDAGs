@@ -201,9 +201,12 @@ void ASTProcVis::visit(CommaSepExpression* _comsep){
 void ASTProcVis::visit(declaration* _dectn){
     TableInstance->awaitDecSpecs();//new vector on top
     _dectn->specifier->accept(this);
+    std::cerr << "visited declaration specifier" << std::endl;
     // TableInstance->stopAwaitDecSpecs();
-    _dectn->list->accept(this);
+    if(_dectn->list!=NULL)
+        _dectn->list->accept(this);
     TableInstance->clearDecSpecs();
+    std::cerr << "visited declaration" << std::endl;
 }
 void ASTProcVis::visit(declaration_specifiers* _decspec){
     //TODO if not a canonical type, link in the record somehow
@@ -442,6 +445,7 @@ void ASTProcVis::visit(ExternalDeclaration* _extdec){
 
     //hop straight down to the declaration
     _extdec->decl->accept(this);
+    std::cerr << "visited declaration" << std::endl;
 }
 
 void ASTProcVis::visit(IdentifierNode* _idnode){
@@ -455,6 +459,7 @@ void ASTProcVis::visit(DeclarationList* decllis){
 }
 
 void ASTProcVis::visit(struct_specifier* _strspec){
+    std::cerr << "visiting struct specifier" << std::endl;
     // struct identifier { struct-declaration-list }
     //      add new record defining the struct with name "struct <identifier>", append struct body definition to record
     // struct { struct-declaration-list }
@@ -470,8 +475,8 @@ void ASTProcVis::visit(struct_specifier* _strspec){
         _strspec->list->accept(this);
         TableInstance->EndStructDeclaration();
     }
-    TableInstance->AddStructRecToCurrRecord(name);
-    /*Adds most recent struct dec records information to the current record*/
+    TableInstance->PushDecSpec(name);
+    std::cerr << "visited struct specifier" << std::endl;
 }
 void ASTProcVis::visit(struct_declaration_list* _strdectionlist){
     for(auto declaration : _strdectionlist->decs){
@@ -493,6 +498,33 @@ void ASTProcVis::visit(struct_declarator_list* _strdeclist){
     }
 }
 
+void ASTProcVis::visit(EnumSpecifier* _enum){
+    std::string name = "enum";
+    if(_enum->tag!=NULL){ name += " " + _enum->tag->Name; }
+    if(_enum->options!=NULL){
+        TableInstance->StartNewEnumDeclaration();
+        TableInstance->AddIDtoCurrRecord(name);
+        _enum->options->accept(this);
+        TableInstance->EndEnumDeclaration();
+    }
+    TableInstance->PushDecSpec(name);
+}
+
+void ASTProcVis::visit(EnumeratorList* _enumlist){
+    for(auto enumerator : _enumlist->List){
+        enumerator->accept(this);
+    }
+}
+
+void ASTProcVis::visit(Enumerator* _enumer){
+    if(_enumer->OptionalValue!=NULL){
+        int value = EvalConstantExpression(_enumer->OptionalValue);
+        TableInstance->AddEnumerator(_enumer->ConstID->Name, value);
+    }
+    else{
+        TableInstance->AddEnumerator(_enumer->ConstID->Name);
+    }
+}
 
 unsigned int ASTProcVis::EvalConstantExpression(ConstantExpression* _const_expr){
     return _const_expr->constEval();

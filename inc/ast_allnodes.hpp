@@ -130,6 +130,10 @@ class struct_specifier;
 class struct_declaration_list;
 class struct_declaration;
 class struct_declarator_list;
+class Enumerator;
+class EnumeratorList;
+class EnumSpecifier;
+
 
 class Visitor
 {
@@ -241,11 +245,15 @@ public:
     virtual void visit(struct_declaration_list* _strdectionlist){}
     virtual void visit(struct_declaration* _strdection){}
     virtual void visit(struct_declarator_list* _strdeclist){}
+
+    virtual void visit(Enumerator* _enum){}
+    virtual void visit(EnumeratorList* _enumlist){}
+    virtual void visit(EnumSpecifier* _enumspec){}
 };
 
 class Node{
 public:
-    virtual void accept(Visitor *AVisitor) { AVisitor->visit(this); }
+    virtual void accept(Visitor *AVisitor) = 0;
 };
 
 /*
@@ -976,7 +984,27 @@ public:
     void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
 };
 
-
+class Enumerator : public Node{
+public:
+    Enumerator(IdentifierNode* _id) : ConstID(_id){}
+    Enumerator(IdentifierNode* _id, ConstantExpression* _expr)
+        : ConstID(_id), OptionalValue(_expr){}
+    IdentifierNode* ConstID;
+    ConstantExpression* OptionalValue;
+};
+class EnumeratorList : public Node{
+public:
+    EnumeratorList(Enumerator* _first){ List = {_first}; }
+    std::vector<Enumerator*> List;
+    void AppendEnumerator(Enumerator* en){ List.push_back(en); }
+};
+class EnumSpecifier : public type_specifier{
+public:
+    EnumSpecifier(EnumeratorList* _list):type_specifier("enum"),tag(NULL),options(_list){}
+    EnumSpecifier(IdentifierNode* _id = NULL, EnumeratorList* _list = NULL):type_specifier("enum"),tag(_id), options(_list){}
+    IdentifierNode* tag;
+    EnumeratorList* options;
+};
 
 class pointer : public Node
 {

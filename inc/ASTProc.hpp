@@ -113,10 +113,15 @@ public:
     void visit(struct_declaration* _strdection);
     void visit(struct_declarator_list* _strdeclist);
 
+    void visit(Enumerator* _enum);
+    void visit(EnumeratorList* _enumlist);
+    void visit(EnumSpecifier* _enumspec);
+
     unsigned int EvalConstantExpression(ConstantExpression* _const_expr);
     unsigned int EvalConstantExpression(Expression* expr);
     unsigned int EvalConstantExpression(constant_int* _const);
     unsigned int EvalConstantExpression(unspecified_array_length* _unspec);
+
 private:
     SymbolTable* TableInstance;
     std::stack<IdentifierNode*> IDstack;
