@@ -3,7 +3,7 @@
 
 //void visit(Node*); //If nothing defined for this type of node
 void ASTProcVis::visit(ArraySubscript* _subcr){
-    std::cout << "visit " << "arraysubsr" << std::endl;
+    // std::cout << "visit " << "arraysubsr" << std::endl;
     _subcr->Subscript->accept(this);
     _subcr->LHS->accept(this);
 }

@@ -262,7 +262,7 @@ assignment: Operator_assign { $$ = new std::string("=");}
 EXPR: assignment_EXPR { $$ = $1; }
     | EXPR Operator_comma assignment_EXPR { $$ = new CommaSepExpression($1, $3); }
 
-constant_EXPR: conditional_EXPR { $$ = new ConstantExpression($1); std::cout << "new const expr" << std::endl;}
+constant_EXPR: conditional_EXPR { $$ = new ConstantExpression($1); }
 
 /*
 DECLARATIONS

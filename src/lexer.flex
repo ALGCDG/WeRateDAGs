@@ -44,6 +44,8 @@ Operator [+\-*/%&|^><=!~?:.,#\[\]\(\)\{\}]
 "char"      { return Keyword_char; }
 
 
+[/][/].*  {/*A single line comment*/ fprintf(stderr, "its a single line comment\n"); }
+[/][*][^*/]*[*][/] {/*A multy line comment*/ fprintf(stderr, "its a multi line comment\n"); }
 
 "+" { return Operator_add; }
 "-" { return Operator_sub; }
