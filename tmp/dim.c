@@ -1,7 +1,7 @@
 
 int a[2][2] = {{1,2},{3,4}};
 
-int main()
+int f()
 {
-	return 0;
+	return a[1][1];
 }

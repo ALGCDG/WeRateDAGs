@@ -10,6 +10,7 @@
 #include <deque>
 #include <utility>
 #include <unordered_map>
+#include <unordered_set>
 #include <string>
 #include <algorithm>
 // #include "visitors.hpp"
@@ -54,7 +55,7 @@ class vm
 class three_address_Visitor : public Visitor
 {
     public:
-    three_address_Visitor(): counter(0), return_register(), continue_to(), break_to(), cases(), global(true), global_labels(), intermediate_values(), temporary_registers(), saved_registers(), variable_map(), writing(false), parameter_flag(false), func_call_flag(false)
+    three_address_Visitor(): counter(0), return_register(), continue_to(), break_to(), cases(), global(true), global_labels(), intermediate_values(), temporary_registers(), saved_registers(), variable_map(), writing(false), parameter_flag(false), func_call_flag(false), array_flag(false)
     {
         for (int i = 9; i >= 0; i--)
             temporary_registers.push("$t"+std::to_string(i));
@@ -67,7 +68,7 @@ class three_address_Visitor : public Visitor
     std::stack<std::string> break_to; // stores where a break should jump to 
     // std::stack<std::string> temporary_words; 
     bool global; // a flag for tracking if declaration is global or is in a scope.
-    std::stack<std::string> global_labels;
+    std::unordered_set<std::string> global_labels;
     std::stack<std::pair<std::string,Expression*>> cases; // a stack sructure used when generating switch case code
     std::string default_label; // used as a seperate place to store a default label for switch cases
     std::stack<std::string> intermediate_values; // a stack for counting the intermediate values of a function
@@ -76,6 +77,7 @@ class three_address_Visitor : public Visitor
     bool writing;
     bool parameter_flag;
     bool func_call_flag;
+    bool array_flag;
     int local_words, arg_words;
     int stacksize;
     int parameter_size;
@@ -109,6 +111,7 @@ class three_address_Visitor : public Visitor
             variable_map.update(4);
             variable_map.register_variable(in->Name, 4);
         }
+        // else if (array_flag) if (global_labels.find(in->Name) != global_labels.end()) global = true;
         else if (func_call_flag)
         {
             std::cout << (in->Name);
@@ -121,7 +124,7 @@ class three_address_Visitor : public Visitor
                 std::cout << (in->Name);
                 if (global)
                 {
-                    global_labels.push(in->Name);
+                    global_labels.insert(in->Name);
                 }
             }
             else
@@ -185,27 +188,37 @@ class three_address_Visitor : public Visitor
     }
     void visit(ArraySubscript * as)
     {
-        if (!writing)
+        // get subscript expression
+        return_register.push("$v0");
+        as->Subscript->accept(this);
+        // assume it is int, multiply by 4
+        std::cout << "sll $v0, $v0, 2" << std::endl;
+        if (global)
         {
-            // reading from array
-            // get return register
-            auto return_reg = return_register.top();
-            // get subscript expression
-            return_register.push("$v0");
-            as->Subscript->accept(this);
             // if array is global
-                // get array address
-                std::cout << "la $v1 ";
-                as->LHS->accept(this);
-                std::cout << std::endl;
-                // add subscript and 
-                std::cout << "addu $v0 $v0 $v1";
+            // get array address
+            std::cout << "la $v1 ";
+            as->LHS->accept(this);
+            std::cout << std::endl;
+            // add subscript and 
+            std::cout << "addu $v0 $v0 $v1";
+            if (!writing)
+            {
+                // reading from array
+                // get return register
+                auto return_reg = return_register.top();
                 // load relevant word
                 std::cout << "lw " << return_reg << " $v0" << std::endl;
                 std::cout << "nop" << std::endl;
-            // if array is local
-            // ???
-            return_register.pop();
+                return_register.pop();
+            }
+            // else
+            // {
+            //     std::cout << "lw " << return_reg << " $v0" << std::endl;
+            //     std::cout << "nop" << std::endl;
+
+            // }
+            global = false;
         }
     }
     void visit(FuncCall * fc)
@@ -711,7 +724,7 @@ class three_address_Visitor : public Visitor
                 i->init_list->accept(this);
 
             }
-        }
+        } 
     }
     void visit(initializer_list * il)
     {
@@ -744,6 +757,18 @@ class three_address_Visitor : public Visitor
                 if (dd->para_list != NULL)
                 {
                     dd->para_list->accept(this);
+                }
+                else if (dd->const_expr != NULL)
+                {
+                    if (!global)
+                    {
+                        // // assume const expression is a number (not a variable or expression)
+                        // auto no_elements = dd->const_expr->ConstantSubtree->constEval();
+                        // //assuming type is int
+                        // std::cout << "addiu $sp, $sp, " << -no_elements*4 << std::endl;
+                        // std::cout << "move $fp, $sp" << std::endl;
+                        // variable_map.update(no_elements*4);
+                    }
                 }
             }
         }
@@ -1026,11 +1051,12 @@ class three_address_Visitor : public Visitor
         {
             (*it)->accept(this);
         }
-        while (!global_labels.empty())
-        {
-            std::cout << ".global " << global_labels.top() << std::endl;
-            global_labels.pop();
-        }
+        // while (!global_labels.empty())
+        // {
+        //     std::cout << ".global " << global_labels.top() << std::endl;
+        //     global_labels.pop();
+        // }
+        for (const std::string & s : global_labels) std::cout << ".global " << s << std::endl;
     }
     void visit(FunctionDefinition * fd)
     {

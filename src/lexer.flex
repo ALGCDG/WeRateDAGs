@@ -40,6 +40,9 @@ Operator [+\-*/%&|^><=!~?:.,#\[\]\(\)\{\}]
             return Keyword_int;
 }
 
+[/][/].*  {/*A single line comment*/ fprintf(stderr, "its a single line comment\n"); }
+[/][*][^*/]*[*][/] {/*A multy line comment*/ fprintf(stderr, "its a multi line comment\n"); }
+
 "+" { return Operator_add; }
 "-" { return Operator_sub; }
 "++" { return Operator_addadd; }
