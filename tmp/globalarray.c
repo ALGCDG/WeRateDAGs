@@ -1,6 +1,6 @@
-int a[] = {1, 2, 3, 4, 5};
-
-int main()
+int a[1];
+int f()
 {
-	return 0;
+	a[0] = 1;
+	return a[0];
 }

@@ -13,15 +13,9 @@ int main(int argc, char** argv)
 		TranslationUnit *ast=parseAST();
 		std::cerr << "finished parsing, start compiling" << std::endl;
 		// checking if we are translating
-		auto output_filename = "a.out";
 		auto translate_flag = false;
 		for (int i = 0; i < argc; i++)
 		{
-			if (std::string(argv[i]) == "-o")
-			{
-				i++;
-				output_filename = argv[i];
-			}
 			if (std::string(argv[i]) == "--translate")
 			{
 				translate_flag = true;
@@ -32,7 +26,7 @@ int main(int argc, char** argv)
 		ASTProcVis* astproc = new ASTProcVis(Table);
 		try{
 			astproc->ProcessAST(ast);
-			Table->PrettyPrint();
+			// Table->PrettyPrint();
 		}catch(const char* e){ std::cout << e; }
 		// creating visitor
 		std::cerr << "creating visitor" << std::endl;

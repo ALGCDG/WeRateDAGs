@@ -5,7 +5,7 @@ mips-linux-gnu-gcc -mfp32 -c tmp.s -o tmp.o
 mips-linux-gnu-gcc -mfp32 -static tmp/main.c tmp.o
 rm tmp.s
 rm tmp.o
-qemu-mips a.out
+qemu-mips -d in_asm a.out
 ret=$?
 rm a.out
 printf "simulation returns: "
