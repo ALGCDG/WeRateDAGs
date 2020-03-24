@@ -126,6 +126,15 @@ class FunctionDefinition;
 class ExternalDeclaration;
 class TypedefNode;
 
+class struct_specifier;
+class struct_declaration_list;
+class struct_declaration;
+class struct_declarator_list;
+class Enumerator;
+class EnumeratorList;
+class EnumSpecifier;
+
+
 class Visitor
 {
 public:
@@ -231,11 +240,20 @@ public:
     virtual void visit(ExternalDeclaration *) {}
     virtual void visit(TypedefNode*){}
     //Declarations
+
+    virtual void visit(struct_specifier* _strspec){}
+    virtual void visit(struct_declaration_list* _strdectionlist){}
+    virtual void visit(struct_declaration* _strdection){}
+    virtual void visit(struct_declarator_list* _strdeclist){}
+
+    virtual void visit(Enumerator* _enum){}
+    virtual void visit(EnumeratorList* _enumlist){}
+    virtual void visit(EnumSpecifier* _enumspec){}
 };
 
 class Node{
 public:
-    virtual void accept(Visitor *AVisitor) { AVisitor->visit(this); }
+    virtual void accept(Visitor *AVisitor) = 0;
 };
 
 /*
@@ -277,7 +295,7 @@ class constant_int : public Constant {
     public:
     int value;
     unsigned int constEval(){ return value; }
-    constant_int(int v): value(v) {std::cerr << "creating int: " << v << std::endl;}
+    constant_int(int v): value(v) {}
 
 public:
     void accept(Visitor *AVisitor) override { AVisitor->visit(this); }
@@ -669,7 +687,7 @@ class ConstantExpression : public Expression{
 public:
     ConstantExpression(){}
     ConstantExpression(Expression* Expr): ConstantSubtree(Expr){}
-    unsigned int constEval() override {}
+    unsigned int constEval() override { return ConstantSubtree->constEval(); }
     Expression* ConstantSubtree;
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
 };
@@ -934,6 +952,62 @@ public:
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
 };
 
+class struct_declarator_list : public Node{
+public:
+    struct_declarator_list(declarator* _decl){ decls = {_decl}; }
+    std::vector<declarator*> decls;
+    void AppendDeclarator(declarator* decl){ decls.push_back(decl); }
+    void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
+};
+
+class struct_declaration : public Node{
+public:
+    struct_declaration(specifier_list* _specs, struct_declarator_list* _decls) : specs(_specs), decls(_decls){}
+    specifier_list* specs;
+    struct_declarator_list* decls;
+    void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
+};
+
+class struct_declaration_list : public Node{
+public:
+    struct_declaration_list(struct_declaration* dec){decs = {dec};}
+    std::vector<struct_declaration*> decs;
+    void AppendDeclaration(struct_declaration* dec){ decs.push_back(dec); }
+    void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
+};
+
+class struct_specifier : public type_specifier{
+public:
+    struct_specifier(IdentifierNode* _ident = NULL, struct_declaration_list* _list = NULL) : type_specifier("struct"), tag(_ident), list(_list){}
+    IdentifierNode* tag;
+    struct_declaration_list* list;
+    void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
+};
+
+class Enumerator : public Node{
+public:
+    Enumerator(IdentifierNode* _id) : ConstID(_id){}
+    Enumerator(IdentifierNode* _id, ConstantExpression* _expr)
+        : ConstID(_id), OptionalValue(_expr){}
+    IdentifierNode* ConstID;
+    ConstantExpression* OptionalValue;
+    void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
+};
+class EnumeratorList : public Node{
+public:
+    EnumeratorList(Enumerator* _first){ List = {_first}; }
+    std::vector<Enumerator*> List;
+    void AppendEnumerator(Enumerator* en){ List.push_back(en); }
+    void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
+};
+class EnumSpecifier : public type_specifier{
+public:
+    EnumSpecifier(EnumeratorList* _list):type_specifier("enum"),tag(NULL),options(_list){}
+    EnumSpecifier(IdentifierNode* _id = NULL, EnumeratorList* _list = NULL):type_specifier("enum"),tag(_id), options(_list){}
+    IdentifierNode* tag;
+    EnumeratorList* options;
+    void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
+};
 
 class pointer : public Node
 {
@@ -1147,5 +1221,8 @@ public:
     declaration* decl;
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
 };
+
+
+
 
 #endif

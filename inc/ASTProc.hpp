@@ -8,7 +8,7 @@
 class ASTProcVis : public Visitor{
 public:
     ASTProcVis(SymbolTable* _table) : TableInstance(_table){
-            //make sure to construct visitor with instance of table
+        //make sure to construct visitor with instance of table
         assert(_table);
     }
     void ProcessAST(TranslationUnit* root){ root->accept(this); }
@@ -107,10 +107,21 @@ public:
     void visit(IdentifierNode* _idnode);
     void visit(TypedefNode* _typedef);
     void visit(DeclarationList* decllis);
+
+    void visit(struct_specifier* _strspec);
+    void visit(struct_declaration_list* _strdectionlist);
+    void visit(struct_declaration* _strdection);
+    void visit(struct_declarator_list* _strdeclist);
+
+    void visit(Enumerator* _enum);
+    void visit(EnumeratorList* _enumlist);
+    void visit(EnumSpecifier* _enumspec);
+
     unsigned int EvalConstantExpression(ConstantExpression* _const_expr);
     unsigned int EvalConstantExpression(Expression* expr);
     unsigned int EvalConstantExpression(constant_int* _const);
     unsigned int EvalConstantExpression(unspecified_array_length* _unspec);
+
 private:
     SymbolTable* TableInstance;
     std::stack<IdentifierNode*> IDstack;

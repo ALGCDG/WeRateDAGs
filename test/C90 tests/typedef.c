@@ -1,10 +1,7 @@
-int f(int* test){
-  return 2;
-}
+struct test{
+    enum a{INT=2,FLOAT} testenum;
+}b;
+
 int main(){
-  int a = 2;
-  {
-     int b = a;
-  }
+    enum a lmao;
 }
-int c;

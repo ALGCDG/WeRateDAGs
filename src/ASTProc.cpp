@@ -14,11 +14,12 @@ void ASTProcVis::visit(FuncCall* _funccall){
 }
 void ASTProcVis::visit(MemberAccess* _memberaccess){
     std::cout << "visit " << "MemberAccess" << std::endl;
-    _memberaccess->ID->accept(this);
+    //cant link easily to their meaning, don't know their namespace
+    //_memberaccess->ID->accept(this);
     _memberaccess->LHS->accept(this);
 }
 void ASTProcVis::visit(DerefMemberAccess* _derefmemberacc){
-    _derefmemberacc->ID->accept(this);
+    //_derefmemberacc->ID->accept(this);
     _derefmemberacc->LHS->accept(this);
 }
 void ASTProcVis::visit(ArgExprList* _argexprlist){
@@ -199,22 +200,21 @@ void ASTProcVis::visit(CommaSepExpression* _comsep){
 
 //Declarations
 void ASTProcVis::visit(declaration* _dectn){
-    
     TableInstance->awaitDecSpecs();//new vector on top
     _dectn->specifier->accept(this);
+    std::cerr << "visited declaration specifier" << std::endl;
     // TableInstance->stopAwaitDecSpecs();
-    _dectn->list->accept(this);
+    if(_dectn->list!=NULL)
+        _dectn->list->accept(this);
     TableInstance->clearDecSpecs();
+    std::cerr << "visited declaration" << std::endl;
 }
 void ASTProcVis::visit(declaration_specifiers* _decspec){
-    
     //TODO if not a canonical type, link in the record somehow
     if(_decspec->type_spec!=NULL){
-        
         _decspec->type_spec->accept(this);
     }
     else if(_decspec->storage_class_specifier!=NULL){
-        
         _decspec->storage_class_specifier->accept(this);
     }
     if(_decspec->specifier!=NULL){
@@ -235,16 +235,13 @@ void ASTProcVis::visit(init_declarator_list* _indeclis){
     TableInstance->EndDeclaration();//combines dec specs right to left
 }
 void ASTProcVis::visit(init_declarator* _indec){
-    
     if(_indec->init!=NULL) _indec->init->accept(this);
     _indec->dec->accept(this);
 }
 void ASTProcVis::visit(type_specifier* _typespec){
-    
     TableInstance->PushDecSpec((_typespec->type));
 }
 void ASTProcVis::visit(specifier_list* _speclist){
-    
     _speclist->type_spec->accept(this);
     if(_speclist->spec_list!=NULL){ _speclist->spec_list->accept(this); }
 }
@@ -389,7 +386,6 @@ void ASTProcVis::visit(For* _for){
     TableInstance->NewScope();
     _for->Body->accept(this);
     TableInstance->PopScope();
-
 }
 void ASTProcVis::visit(If* _if){
     _if->ControlExpression->accept(this);
@@ -449,6 +445,7 @@ void ASTProcVis::visit(ExternalDeclaration* _extdec){
 
     //hop straight down to the declaration
     _extdec->decl->accept(this);
+    std::cerr << "visited declaration" << std::endl;
 }
 
 void ASTProcVis::visit(IdentifierNode* _idnode){
@@ -459,6 +456,75 @@ void ASTProcVis::visit(IdentifierNode* _idnode){
 void ASTProcVis::visit(DeclarationList* decllis){
     if(decllis->left_list!=NULL){ decllis->left_list->accept(this);}
     decllis->this_decl->accept(this);
+}
+
+void ASTProcVis::visit(struct_specifier* _strspec){
+    std::string name = "struct";
+    if(_strspec->tag!=NULL){ name += " " + _strspec->tag->Name; } //"struct <tag>"
+    if(_strspec->list!=NULL){
+        TableInstance->StartNewStructDeclaration();
+        TableInstance->AddIDtoCurrRecord(name);
+        _strspec->list->accept(this);
+        TableInstance->EndStructDeclaration();
+    }
+    TableInstance->PushDecSpec(name);
+    std::cerr << "visited struct specifier" << std::endl;
+}
+void ASTProcVis::visit(struct_declaration_list* _strdectionlist){
+    for(auto declaration : _strdectionlist->decs){
+        declaration->accept(this);
+    }
+}
+void ASTProcVis::visit(struct_declaration* _strdection){
+    TableInstance->awaitDecSpecs();
+    _strdection->specs->accept(this);
+    _strdection->decls->accept(this);
+    TableInstance->clearDecSpecs();
+}
+void ASTProcVis::visit(struct_declarator_list* _strdeclist){
+    for(auto dec : _strdeclist->decls){
+        TableInstance->StartNewDeclaration();
+        dec->accept(this);
+        TableInstance->AppendCachedDecSpecs();
+        TableInstance->EndDeclaration();
+    }
+}
+
+void ASTProcVis::visit(EnumSpecifier* _enum){
+    std::cerr << "visiting enum spec" << std::endl;
+    std::string name = "enum";
+    if(_enum->tag!=NULL){ name += " " + _enum->tag->Name; }
+    if(_enum->options!=NULL){
+        TableInstance->StartNewEnumDeclaration(name);
+        std::cerr << "started enum dec" << std::endl;
+        // TableInstance->AddIDtoCurrRecord(name);
+        // std::cerr << "add id: enum spec" << std::endl;
+        _enum->options->accept(this);
+        std::cerr << "visited options" << std::endl;
+        TableInstance->EndEnumDeclaration();
+    }
+    TableInstance->PushDecSpec(name);
+    std::cerr << "pushed " << name << std::endl;
+}
+
+void ASTProcVis::visit(EnumeratorList* _enumlist){
+    for(auto enumerator : _enumlist->List){
+        enumerator->accept(this);
+    }
+}
+
+void ASTProcVis::visit(Enumerator* _enumer){
+    std::cerr << "visiting enumerator" << std::endl;
+    if(_enumer->OptionalValue!=NULL){
+        std::cerr << "enumerator: value given" << std::endl;
+        int value = EvalConstantExpression(_enumer->OptionalValue);
+        std::cerr << "visited enumerator, calculated value as " << value << std::endl;
+        TableInstance->AddEnumerator(_enumer->ConstID->Name, value);
+    }
+    else{
+        std::cerr << "enumerator: no value given" << std::endl;
+        TableInstance->AddEnumerator(_enumer->ConstID->Name);
+    }
 }
 
 unsigned int ASTProcVis::EvalConstantExpression(ConstantExpression* _const_expr){
@@ -485,4 +551,3 @@ unsigned int ASTProcVis::EvalConstantExpression(Expression* expr){
 
 //     //!Size 0 -> unspecified
 // }
-

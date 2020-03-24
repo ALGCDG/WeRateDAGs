@@ -36,9 +36,13 @@ Operator [+\-*/%&|^><=!~?:.,#\[\]\(\)\{\}]
             builtin functions: sizeof
             luckily not flexible
             */
-            fprintf(stderr, "its a keyword/n");
             return Keyword_int;
 }
+
+"double"    { return Keyword_double; }
+"float"     { return Keyword_float; }
+"char"      { return Keyword_char; }
+
 
 [/][/].*  {/*A single line comment*/ fprintf(stderr, "its a single line comment\n"); }
 [/][*][^*/]*[*][/] {/*A multy line comment*/ fprintf(stderr, "its a multi line comment\n"); }
@@ -213,8 +217,8 @@ Operator [+\-*/%&|^><=!~?:.,#\[\]\(\)\{\}]
 ")" { return Punctuator_par_close; }
 "[" { return Punctuator_squ_open; }
 "]" { return Punctuator_squ_close; }
-"{" { return Punctuator_cur_open; }
-"}" { return Punctuator_cur_close; }
+"{" { fprintf(stderr, "{\n"); return Punctuator_cur_open; }
+"}" { fprintf(stderr, "}\n");return Punctuator_cur_close; }
 
 .   {
 		fprintf(stderr, "catch all: %s\n", yytext);
