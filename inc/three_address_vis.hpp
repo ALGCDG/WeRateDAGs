@@ -22,11 +22,13 @@ class vm
     A class for tracking the position of variables on the stack
     */
     public:
+    int stack_size;
     std::unordered_map<std::string, int> m;
     public:
-    vm(){}
+    vm():stack_size(0){}
     void update(int offset)
     {
+        stack_size+=offset;
         for(auto & p : m)
         {
             p.second += offset;
@@ -48,6 +50,10 @@ class vm
     {
         m.clear();
     }
+    int get_stack_size()
+    {
+        return stack_size;
+    }
 };
 
 
@@ -55,7 +61,7 @@ class vm
 class three_address_Visitor : public Visitor
 {
     public:
-    three_address_Visitor(): counter(0), return_register(), continue_to(), break_to(), cases(), global(true), global_labels(), intermediate_values(), temporary_registers(), saved_registers(), variable_map(), writing(false), parameter_flag(false), func_call_flag(false), array_flag(false)
+    three_address_Visitor(): counter(0), return_register(), continue_to(), break_to(), cases(), global(true), global_labels(), intermediate_values(), temporary_registers(), saved_registers(), variable_map(), writing(false), parameter_flag(false), func_call_flag(false), array_flag(false), initlist_count(0)
     {
         for (int i = 9; i >= 0; i--)
             temporary_registers.push("$t"+std::to_string(i));
@@ -83,6 +89,8 @@ class three_address_Visitor : public Visitor
     int parameter_size;
     std::string function_end;
     vm variable_map; // a map of variable name to stack offset and what register it might be stored in
+    std::string array_name;
+    int initlist_count;
     std::string get_temp_register(const std::string &inter)
     {
         if (!saved_registers.empty())
@@ -106,18 +114,21 @@ class three_address_Visitor : public Visitor
     }
     void visit(IdentifierNode * in)
     {
+        if (array_flag) array_name = in->Name;
         if (parameter_flag)
         {
+            std::cerr << "parameter flag" << std::endl;
             variable_map.update(4);
             variable_map.register_variable(in->Name, 4);
         }
-        // else if (array_flag) if (global_labels.find(in->Name) != global_labels.end()) global = true;
         else if (func_call_flag)
         {
+            std::cerr << "func call flag" << std::endl;
             std::cout << (in->Name);
         }
         else if (!writing)
         {
+            std::cerr << "reading" << std::endl;
             if (return_register.empty())
             {
                 //function definition
@@ -163,12 +174,14 @@ class three_address_Visitor : public Visitor
                 std::cout << "addiu $sp, $sp, -4" << std::endl;
                 std::cout << "move $fp, $sp" << std::endl;
                 std::cout << "sw $v0, 4($fp)" << std::endl; // still need to add frame offset TODO
+                std::cout << "nop" << std::endl;
                 variable_map.register_variable(in->Name, 4);
             }
             else
             {
                 std::cout << "# writing to variable " << in->Name << std::endl;
                 std::cout << "sw $v0, " << variable_map.lookup(in->Name) << "($fp)" << std::endl; // still need to add frame offset TODO
+                std::cout << "nop" << std::endl;
             }
         }
     }
@@ -188,27 +201,31 @@ class three_address_Visitor : public Visitor
     }
     void visit(ArraySubscript * as)
     {
+        std::cerr << "subscript!!!" << std::endl;
         // get subscript expression
-        return_register.push("$v0");
+        return_register.push("$t0");
         as->Subscript->accept(this);
         // assume it is int, multiply by 4
-        std::cout << "sll $v0, $v0, 2" << std::endl;
+        std::cout << "sll $t0, $t0, 2" << std::endl;
+        // getting array name, stored in array_name string
+        // array_flag = true;
+        // as->LHS->accept(this);
+        // array_flag = false;
         if (global)
         {
+            std::cout << "# accessing global array " << array_name << std::endl;
             // if array is global
             // get array address
-            std::cout << "la $v1 ";
-            as->LHS->accept(this);
-            std::cout << std::endl;
+            std::cout << "la $t1, " << array_name << std::endl;
             // add subscript and 
-            std::cout << "addu $v0 $v0 $v1";
+            std::cout << "addu $t0 $t0 $t1";
             if (!writing)
             {
                 // reading from array
                 // get return register
                 auto return_reg = return_register.top();
                 // load relevant word
-                std::cout << "lw " << return_reg << " $v0" << std::endl;
+                std::cout << "lw " << return_reg << " $t0" << std::endl;
                 std::cout << "nop" << std::endl;
                 return_register.pop();
             }
@@ -219,6 +236,35 @@ class three_address_Visitor : public Visitor
 
             // }
             global = false;
+        }
+        else
+        {
+            std::cout << "# accessing local array " << array_name << std::endl;
+            // getting array offset
+            auto tmp_write = writing;
+            writing = false;
+            return_register.push("$t1");
+            as->LHS->accept(this);
+            writing = tmp_write;
+            // add subscript and frame pointer
+            std::cout << "addu $t0, $t0, $t1" << std::endl;
+            if (!writing)
+            {
+                // reading from array
+                // get return register
+                auto return_reg = return_register.top();
+                // load relevant word
+                std::cout << "lw " << return_reg << ", 0($t0)" << std::endl;
+                std::cout << "nop" << std::endl;
+                return_register.pop();
+            }
+            else
+            {
+                std::cout << "sw $v0, 0($t0)" << std::endl;
+                std::cout << "nop" << std::endl;
+                
+            }
+            
         }
     }
     void visit(FuncCall * fc)
@@ -667,19 +713,27 @@ class three_address_Visitor : public Visitor
 
     void visit(declaration * dec)
     {
+        dec->specifier->accept(this);
         if (dec->list != NULL)
         {
+            writing = true;
             dec->list->accept(this);
+            writing = false;
         }
     }
-    void visit(declaration_specifiers *) {}
+    void visit(declaration_specifiers * ds)
+    {
+        if (ds->type_spec != NULL) ds->type_spec->accept(this);
+        else if (ds->storage_class_specifier != NULL) ds->storage_class_specifier->accept(this);
+        if (ds->specifier != NULL) ds->specifier->accept(this);
+    }
     void visit(init_declarator_list * il)
     {
-        il->init_dec->accept(this);
         if (il->init_dec_list != NULL)
         {
             il->init_dec_list->accept(this);
         }
+        il->init_dec->accept(this);
     }
     void visit(init_declarator *id)
     {
@@ -691,6 +745,8 @@ class three_address_Visitor : public Visitor
         }
         else
         {
+            writing = true;
+            id->dec->accept(this);
             if (id->init!=NULL)
             {
                 if (id->init->ass_expr!=NULL)
@@ -705,6 +761,7 @@ class three_address_Visitor : public Visitor
                     // std::cout << ", $v0" << std::endl;
                 }
             }
+            writing = false;
         }
     }
     void visit(initializer * i)
@@ -724,7 +781,22 @@ class three_address_Visitor : public Visitor
                 i->init_list->accept(this);
 
             }
-        } 
+        }
+        // else 
+        // {
+      
+        //     if (i->ass_expr != NULL)
+        //     {
+        //         return_register.push("$v0");
+        //         i->ass_expr->accept(this);
+        //         std::cout << "sw $v0, " << initlist_count*4 << std::endl;
+        //         std::cout << "nop" << std::endl;
+        //     }
+        //     else if (i->init_list != NULL)
+        //     {
+        //         i->init_list->accept(this);
+        //     }      
+        // }
     }
     void visit(initializer_list * il)
     {
@@ -741,6 +813,7 @@ class three_address_Visitor : public Visitor
     void visit(base_declarator *) {}
     void visit(direct_declarator * dd)
     {
+        std::cerr << "DD" << std::endl;
         if (dd->ID != NULL)
         {
             dd->ID->accept(this);
@@ -753,6 +826,7 @@ class three_address_Visitor : public Visitor
         {
             if (dd->dir_dec != NULL)
             {
+                if (dd->const_expr != NULL) array_flag = true;
                 dd->dir_dec->accept(this);
                 if (dd->para_list != NULL)
                 {
@@ -760,15 +834,38 @@ class three_address_Visitor : public Visitor
                 }
                 else if (dd->const_expr != NULL)
                 {
-                    if (!global)
-                    {
-                        // // assume const expression is a number (not a variable or expression)
-                        // auto no_elements = dd->const_expr->ConstantSubtree->constEval();
-                        // //assuming type is int
-                        // std::cout << "addiu $sp, $sp, " << -no_elements*4 << std::endl;
-                        // std::cout << "move $fp, $sp" << std::endl;
-                        // variable_map.update(no_elements*4);
-                    }
+                    // if (!global)
+                    // {
+                        // assume const expression is a number (not a variable or expression)
+                        int no_elements = dd->const_expr->ConstantSubtree->constEval();
+                        if (no_elements == 0)
+                        {
+                            // array size has not been specified
+                            // TODO DO SOMETHING
+                        }
+                        else
+                        {
+                            //assuming type is int
+                            std::cout << "# allocating " << no_elements*4 << " bytes for array " << array_name << " on function stack" << std::endl;
+                            std::cerr << -no_elements*4 << std::endl;
+                            std::cout << "addiu $sp, $sp, " << -no_elements*4 << std::endl;
+                            std::cout << "move $fp, $sp" << std::endl;
+                            for (int i = no_elements-1; i >= 0 ; i--)
+                            {
+                                variable_map.update(4);
+                                variable_map.register_variable(array_name+'['+std::to_string(i)+']', 4);
+                                // std::cout << "sw $zero, 4($fp)" << std::endl;
+                                // std::cout << "nop" << std::endl;
+                            }
+                        }
+                        // std::cout << "# creating " << array_name << " as a pointer to the base of the array" << std::endl;
+                        // std::cout << "addiu $v0, $sp, 4" << std::endl;
+                        // std::cout << "sw $v0, 0($sp)" << std::endl;
+                        std::cout << "addiu $v0, $fp, " << variable_map.lookup(array_name+"[0]") << std::endl;
+                        std::cout << "sw $v0, " << variable_map.lookup(array_name) << "($fp)" << std::endl;
+                        std::cout << "nop" << std::endl;
+                        array_flag = false;
+                    // }
                 }
             }
         }
@@ -1107,6 +1204,7 @@ class three_address_Visitor : public Visitor
         fd->Body->accept(this);
         global = true;
         // FREE STACK
+        stacksize = variable_map.get_stack_size();
         std::cout << end << ':' << std::endl;
         // restore saved registers
         for (int i = 0; i < 8; i++)
