@@ -36,6 +36,7 @@
     init_declarator_list  * t_init_declarator_list;
     init_declarator       * t_init_declarator;
     type_specifier        * t_type_specifier;
+
     specifier_list        * t_specifier_list;
     declarator            * t_declarator;
     direct_declarator     * t_direct_declarator;
@@ -54,6 +55,13 @@
     GenericExternalDeclaration * t_external_declaration;
     FunctionDefinition * t_function_definition;
 
+    struct_specifier* struct_spec;
+    struct_declaration* struct_dection;
+    struct_declaration_list* struct_dection_list;
+    struct_declarator_list* struct_dec_list;
+
+    Enumerator* t_enumerator;
+    EnumeratorList* t_enumlist;
 };
 
 %token Constant_int Constant_char Constant_double Constant_float Constant_long_double
@@ -63,7 +71,10 @@
 %token Keyword Keyword_void Keyword_char Keyword_short Keyword_int Keyword_long Keyword_float Keyword_double Keyword_signed Keyword_unsigned Keyword_case Keyword_default Keyword_if Keyword_else Keyword_switch Keyword_while Keyword_do Keyword_for Keyword_continue Keyword_break Keyword_return Keyword_enum Keyword_struct Keyword_typedef
 %token Punctuator Punctuator_eol Punctuator_par_open Punctuator_par_close Punctuator_squ_open Punctuator_squ_close Punctuator_cur_open Punctuator_cur_close
 
-
+%type <t_type_specifier> struct_specifier
+%type <struct_dection> struct_declaration
+%type <struct_dection_list> struct_declaration_list
+%type <struct_dec_list> struct_declarator_list
 
 %type <ivalue> Constant_int
 %type <cvalue> Constant_char
@@ -131,7 +142,10 @@
 %type <t_external_declaration> external_declaration
 %type <t_function_definition> function_definition
 
-
+%type <t_type_specifier> enum_specifier
+%type <t_enumerator> enumerator
+%type <t_enumlist> enum_list
+%type <identnode> ENUM_CONST
 
 %start ROOT
 
@@ -142,7 +156,7 @@
 EXPRESSIONS
 */
 
-primary_EXPR: Ident { std::cerr << "parsed id"<<std::endl;$$ = $1; }
+primary_EXPR: Ident { $$ = $1; }
                   | Constant { $$ = $1; }
                   | String { std::cerr << "STRING" << std::endl; }
                   | Punctuator_par_open EXPR Punctuator_par_close { $$ = $2; }
@@ -154,7 +168,6 @@ Constant: Constant_int { $$ = new constant_int($1); }
 		| Constant_double { $$ = new Constant(); }  
 		| Constant_float { $$ = new Constant(); }  
 		| Constant_long_double { $$ = new Constant(); }  
-
 
 postfix_EXPR: primary_EXPR { $$ = $1; } /*Pass through*/
                   | postfix_EXPR Punctuator_squ_open EXPR Punctuator_squ_close { $$ = new ArraySubscript($1, $3); }
@@ -282,44 +295,46 @@ type_specifier: Keyword_void { $$ = new type_specifier("void"); }
               | Keyword_double { $$ = new type_specifier("double"); }
               | Keyword_signed { $$ = new type_specifier("signed"); }
               | Keyword_unsigned{ $$ = new type_specifier("unsigned"); }
-/*              | struct_specifier { std::cerr << "struct" << std::endl; }
-              | enum_specifier { std::cerr << "enum" << std::endl; }
-              | typedef_name { std::cerr << "typedef type" << std::endl; }
+              | enum_specifier { $$ = $1; }
+/*              | typedef_name { std::cerr << "typedef type" << std::endl; }*/
+              | struct_specifier{ $$ = $1; }
 
-struct_specifier: Keyword_struct Ident Punctuator_cur_open struct_declaration_list Punctuator_cur_close { std::cerr << "struct x {...}" << std::endl; }
-				| Keyword_struct Punctuator_cur_open struct_declaration_list Punctuator_cur_close { std::cerr << "struct {...}" << std::endl; }
-				| Keyword_struct Ident { std::cerr << "struct x" << std::endl; }
+struct_specifier: Keyword_struct Ident Punctuator_cur_open struct_declaration_list Punctuator_cur_close 
+        { $$ = new struct_specifier($2, $4); }
+				| Keyword_struct Punctuator_cur_open struct_declaration_list Punctuator_cur_close 
+        { $$ = new struct_specifier(NULL, $3); }
+				| Keyword_struct Ident { $$ = new struct_specifier($2); }
 
+struct_declaration_list: struct_declaration { $$ = new struct_declaration_list($1); }
+					   | struct_declaration_list struct_declaration { $1->AppendDeclaration($2); }
 
+struct_declaration: specifier_list struct_declarator_list Punctuator_eol { $$ = new struct_declaration($1, $2); }
 
-struct_declaration_list: struct_declaration
-					   | struct_declaration_list struct_declaration
+specifier_list: type_specifier  { $$ = new specifier_list($1); } /*TODO!*/
+						| type_specifier specifier_list { $$ = new specifier_list($1, $2); }
 
-struct_declaration: specifier_list struct_declarator_list
-*/
-specifier_list: type_specifier  { std::cerr << "tysp" << std::endl; } /*TODO!*/
-						| type_specifier specifier_list { std::cerr << "tysp spli" << std::endl; }
-/*
-struct_declarator_list: struct_declarator
-					  | struct_declarator_list Operator_comma struct_declarator
+struct_declarator_list: declarator { $$ = new struct_declarator_list($1); }
+					  | struct_declarator_list Operator_comma declarator { $1->AppendDeclarator($3); }
 
+/*This includes bitfields which are not required -> struct declarator === declarator
 struct_declarator: declarator
                  | declarator Operator_trinary_choice struct_declarator
                  | Operator_trinary_choice struct_declarator
-
-
-enum_specifier: Keyword_enum Ident
-			  | Keyword_enum Ident Punctuator_cur_open enum_list Punctuator_cur_close
-			  | Keyword_enum Punctuator_cur_open enum_list Punctuator_cur_close
-
-enum_list: enumerator
-		 | enum_list Operator_comma enumerator
-
-enumerator: ENUM_CONST
-		  | ENUM_CONST Operator_assign constant_EXPR
-
-ENUM_CONST: Ident
 */
+
+
+enum_specifier: Keyword_enum Ident { $$ = new EnumSpecifier($2); }
+			  | Keyword_enum Ident Punctuator_cur_open enum_list Punctuator_cur_close { $$ = new EnumSpecifier($2, $4); }
+			  | Keyword_enum Punctuator_cur_open enum_list Punctuator_cur_close { $$ = new EnumSpecifier($3); }
+
+enum_list: enumerator { $$ = new EnumeratorList($1); }
+		 | enum_list Operator_comma enumerator { ($1)->AppendEnumerator($3);}
+
+enumerator: ENUM_CONST { $$ = new Enumerator($1);}
+		  | ENUM_CONST Operator_assign constant_EXPR { $$ = new Enumerator($1, $3);}
+
+ENUM_CONST: Ident { $$ = $1; }
+
 declarator: direct_declarator { $$ = new declarator($1); }
 		  | pointer direct_declarator { $$ = new declarator($2, $1); }
 
@@ -406,7 +421,7 @@ compound_statement: Punctuator_cur_open declaration_list statement_list Punctuat
 declaration_list: declaration {$$ = new DeclarationList($1); }
                 | declaration_list declaration { $$ = new DeclarationList($1, $2); }
 
-statement_list: statement { std::cerr << "parsing single statement" << std::endl;$$ = new StatementList($1); }
+statement_list: statement { $$ = new StatementList($1); }
               | statement_list statement { $$ = new StatementList($1, $2); }
 
 EXPR_statement: EXPR Punctuator_eol { $$ = new ExpressionStatement($1); }
@@ -454,7 +469,7 @@ function_definition: declarator compound_statement { $$ = new FunctionDefinition
                    /*| declaration_specifiers declaration declaration_list compound_statement -> only for K&R*/
 
 
-ROOT: translation_unit { std::cerr << "Its a valid program" << std::endl; g_root = $1; }
+ROOT: translation_unit {g_root = $1; }
 
 %%
 

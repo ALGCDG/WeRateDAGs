@@ -4,6 +4,11 @@
 #include <algorithm>//copy_if
 #include <regex>
 
+unsigned int UniqueCtr(){
+    static unsigned int a = 0;
+    return a++;
+}
+
 //For pretty printing-----------
 namespace prPr{
     int tabs = 0;
@@ -36,7 +41,7 @@ void ParameterTable::PrettyPrint(){
     std::cout << prPr::genTabs() << ")" << std::endl;
 }
 void VariableDeclaration::PrettyPrint(){
-    std::cout << prPr::genTabs() << id << " of depth " << GetDepth() << " is ";
+    std::cout << prPr::genTabs() << id << /*" of depth " << GetDepth() <<*/ " is ";
     if(primaryPt!=NULL){
         primaryPt->Show();
     }
@@ -48,6 +53,12 @@ void VariableDeclaration::PrettyPrint(){
     }
     else if(primaryTypespec!=NULL){
         primaryTypespec->Show();
+    }
+    else if(primaryStruct!=NULL){
+        primaryStruct->Show();
+    }
+    else if(primaryEnum!=NULL){
+        primaryEnum->Show();
     }
     else{
         std::cout << "error -> no type";
@@ -61,8 +72,22 @@ void FunctionDefinitionRec::PrettyPrint(){
     prPr::Tabsplus();
     body->PrettyPrint();
     prPr::Tabsminus();
-    std::cout << prPr::genTabs() << "}" << std::endl << std::endl;;
+    std::cout << prPr::genTabs() << "}" << std::endl << std::endl;
 }
+void StructTypeDeclarationRec::PrettyPrint(){
+    // std::cout << prPr::genTabs() << id << " is struct type definition with namespace:" << std::endl;
+    // prPr::Tabsplus();
+    // structDef->members->PrettyPrint();
+    // prPr::Tabsminus();
+}
+// void EnumTypeDeclarationRec::PrettyPrint(){
+//     std::cout << "With name " << id << ", ";
+//     enumDef->Show();
+// }
+// void EnumConstDeclarationRec::PrettyPrint(){
+//     data->Show();
+// }
+
 void functionType::Show(){
     std::cout << "function " << std::endl;
     arguments->PrettyPrint();
@@ -83,6 +108,7 @@ void pointerType::Show(){
     else if(ptToArray!=NULL){ ptToArray->Show(); }
     else if(ptToBasetype!=NULL){ ptToBasetype->Show(); }
     else if(ptToFunc!=NULL){ ptToFunc->Show(); }
+    else if(ptToStruct!=NULL){ ptToStruct->Show(); }
     else{ std::cout << "error, pointer to nothing"; }
 }
 void typeSpecifiers::Show(){
@@ -90,64 +116,102 @@ void typeSpecifiers::Show(){
         std::cout << i << " ";
     }
 }
+void structType::Show(){
+    std::cout << "struct with members" << std::endl;
+    prPr::Tabsplus();
+    members->PrettyPrint();
+    prPr::Tabsminus();
+}
+void enumType::Show(){
+    std::cout << "enum with options";
+    for (auto option : options){
+        option->Show();
+        std::cout << " ";
+    }
+    std::cout << std::endl;
+}
+void enumConstType::Show(){
+    std::cout << "(" << name << "," << value << ")";
+}
+
 
 //For adding types to chain
 
 void functionType::AddNextType(typeSpecifiers* specs){
-    
     basetypeReturnType = specs;
     pointerReturnType = NULL;
 }void functionType::AddNextType(pointerType* point){
-    
     basetypeReturnType = NULL;
     pointerReturnType = point;
 }
 
 void arrayType::AddNextType(arrayType* arr){
-    
     nextArray = arr;
     pointerElementType = NULL;
     basetypeElementType = NULL;
+    structElementType = NULL;
 }void arrayType::AddNextType(pointerType* pnt){
-    
     nextArray = NULL;
     pointerElementType = pnt;
     basetypeElementType = NULL;
+    structElementType = NULL;
 }void arrayType::AddNextType(typeSpecifiers* typ){
-    
     nextArray = NULL;
     pointerElementType = NULL;
     basetypeElementType = typ;
+    structElementType = NULL;
+}void arrayType::AddNextType(structType* str){
+    nextArray = NULL;
+    pointerElementType = NULL;
+    basetypeElementType = NULL;
+    structElementType = str;
 }
 
 void pointerType::AddNextType(arrayType* arr){
-    
     ptToPointer = NULL;
     ptToArray = arr;
     ptToBasetype = NULL;
     ptToFunc = NULL;
+    ptToStruct = NULL;
+    ptToEnum = NULL;
 }void pointerType::AddNextType(pointerType* pnt){
-    
     ptToPointer = pnt;
     ptToArray = NULL;
     ptToBasetype = NULL;
     ptToFunc = NULL;
+    ptToStruct = NULL;
+    ptToEnum = NULL;
 }void pointerType::AddNextType(typeSpecifiers* typ){
-    
     ptToPointer = NULL;
     ptToArray = NULL;
     ptToBasetype = typ;
     ptToFunc = NULL;
+    ptToStruct = NULL;
+    ptToEnum = NULL;
 }void pointerType::AddNextType(functionType* func){
-    
     ptToPointer = NULL;
     ptToArray = NULL;
     ptToBasetype = NULL;
     ptToFunc = func;
+    ptToStruct = NULL;
+    ptToEnum = NULL;
+}void pointerType::AddNextType(structType* str){
+    ptToPointer = NULL;
+    ptToArray = NULL;
+    ptToBasetype = NULL;
+    ptToFunc = NULL;
+    ptToStruct = str;
+    ptToEnum = NULL;
+}void pointerType::AddNextType(enumType* en){
+    ptToPointer = NULL;
+    ptToArray = NULL;
+    ptToBasetype = NULL;
+    ptToFunc = NULL;
+    ptToStruct = NULL;
+    ptToEnum = en;
 }
 
 void typeSpecifiers::AddNextType(std::string spec){
-    
     specs.push_back(spec);
 }
 
@@ -167,33 +231,167 @@ void typeSpecifiers::BeAppended(genericConstituentType* other){ other->AddNextTy
 void typeSpecifiers::BeAppended(VariableDeclaration* vardec){ vardec->AddPrimary(this); }
 void typeSpecifiers::BeAppended(FunctionDefinitionRec* funcdec){ funcdec->AddPrimary(this); }
 
+void structType::BeAppended(genericConstituentType* other){other->AddNextType(this);}
+void structType::BeAppended(pointerType* ptr){ptr->AddNextType(this);}
+void structType::BeAppended(VariableDeclaration* vardec){ vardec->AddPrimary(this); }
+void structType::BeAppended(StructTypeDeclarationRec* structDec){ structDec->AddPrimary(this);}
+void structType::BeAppended(TypedefTypeDeclarationRec* typedefDec){ typedefDec->AddPrimary(this); }
 
+void enumType::BeAppended(genericConstituentType* other){other->AddNextType(this);}
+void enumType::BeAppended(pointerType* ptr){ ptr->AddNextType(this);}
+void enumType::BeAppended(VariableDeclaration* vardec){vardec->AddPrimary(this);}
+void enumType::BeAppended(TypedefTypeDeclarationRec* typedefDec){typedefDec->AddPrimary(this);}
 
+std::vector<Record*>& functionType::ArgVec(){
+    return arguments->subRecords;
+}
+
+unsigned int pointerType::ByteSize(){
+    return 4;
+}
+
+unsigned int typeSpecifiers::ByteSize(){
+    unsigned int size_count = 0;
+    //float
+    //char
+    //signed
+    //double
+    //int
+    for(auto spec : specs){
+        if(spec == "int" | spec == "float") size_count += 4;
+        else if(spec == "char") size_count += 1;
+        else if(spec == "double") size_count += 8;
+    }
+    return size_count;
+}
+
+unsigned int arrayType::ByteSize(){
+    if(nextArray!=NULL) return size*nextArray->ByteSize();
+    else if(pointerElementType!=NULL) return size*pointerElementType->ByteSize();
+    else if(basetypeElementType!=NULL) return size*basetypeElementType->ByteSize();
+    else if(structElementType!=NULL) return size*structElementType->ByteSize();
+}
+
+unsigned int functionType::ByteSize(){
+    unsigned int size_count = 0;
+    for(auto arg : ArgVec()){
+        size_count += arg->DeclarationSize();
+    }
+    return size_count;
+}
+
+unsigned int structType::ByteSize(){
+    unsigned int sum = 0;
+    for(auto rec : members->subRecords){
+        sum += rec->DeclarationSize();
+    }
+}
+
+unsigned int enumType::ByteSize(){
+    return 4;
+}
+unsigned int enumConstType::ByteSize(){
+    return 4;
+}
 //--------------------
 void VariableDeclaration::AddPrimary(pointerType* _primaryPt){
     primaryPt = _primaryPt;
     primaryArr = NULL;
     primaryFunc = NULL;
     primaryTypespec = NULL;
+    primaryStruct = NULL;
+    primaryEnum = NULL;
 }
 void VariableDeclaration::AddPrimary(arrayType* _primaryArr){
     primaryPt = NULL;
     primaryArr = _primaryArr;
     primaryFunc = NULL;
     primaryTypespec = NULL;
+    primaryStruct = NULL;
+    primaryEnum = NULL;
 }
 void VariableDeclaration::AddPrimary(functionType* _primaryFunc){
     primaryPt = NULL;
     primaryArr = NULL;
     primaryFunc = _primaryFunc;
     primaryTypespec = NULL;
+    primaryStruct = NULL;
+    primaryEnum = NULL;
 }
 void VariableDeclaration::AddPrimary(typeSpecifiers* _primaryTypespec){
     primaryPt = NULL;
     primaryArr = NULL;
     primaryFunc = NULL;
     primaryTypespec = _primaryTypespec;
+    primaryStruct = NULL;
+    primaryEnum = NULL;
 }
+void VariableDeclaration::AddPrimary(structType* _primarystruct){
+    primaryPt = NULL;
+    primaryArr = NULL;
+    primaryFunc = NULL;
+    primaryTypespec = NULL;
+    primaryStruct = _primarystruct;
+    primaryEnum = NULL;
+}
+void VariableDeclaration::AddPrimary(enumType* _primaryenum){
+    primaryPt = NULL;
+    primaryArr = NULL;
+    primaryFunc = NULL;
+    primaryTypespec = NULL;
+    primaryStruct = NULL;
+    primaryEnum = _primaryenum;
+}
+
+void TypedefTypeDeclarationRec::AddPrimary(pointerType* _PtrDef){
+    pointerType* PtrDef = _PtrDef;
+    arrayType* ArrDef = NULL;
+    functionType* FuncDef = NULL;
+    structType* StructDef = NULL;
+    typeSpecifiers* BasetypeDef = NULL;
+    enumDef = NULL;
+}
+void TypedefTypeDeclarationRec::AddPrimary(arrayType* _ArrDef){
+    pointerType* PtrDef = NULL;
+    arrayType* ArrDef = _ArrDef;
+    functionType* FuncDef = NULL;
+    structType* StructDef = NULL;
+    typeSpecifiers* BasetypeDef = NULL;
+    enumDef = NULL;
+}
+void TypedefTypeDeclarationRec::AddPrimary(functionType* _FuncDef){
+    pointerType* PtrDef = NULL;
+    arrayType* ArrDef = NULL;
+    functionType* FuncDef = _FuncDef;
+    structType* StructDef = NULL;
+    typeSpecifiers* BasetypeDef = NULL;
+    enumDef = NULL;
+}
+void TypedefTypeDeclarationRec::AddPrimary(structType* _StructDef){
+    pointerType* PtrDef = NULL;
+    arrayType* ArrDef = NULL;
+    functionType* FuncDef = NULL;
+    structType* StructDef = _StructDef;
+    typeSpecifiers* BasetypeDef = NULL;
+    enumDef = NULL;
+}
+void TypedefTypeDeclarationRec::AddPrimary(typeSpecifiers* _BasetypeDef){
+    pointerType* PtrDef = NULL;
+    arrayType* ArrDef = NULL;
+    functionType* FuncDef = NULL;
+    structType* StructDef = NULL;
+    typeSpecifiers* BasetypeDef = _BasetypeDef;
+    enumDef = NULL;
+}
+void TypedefTypeDeclarationRec::AddPrimary(enumType* enType){
+    pointerType* PtrDef = NULL;
+    arrayType* ArrDef = NULL;
+    functionType* FuncDef = NULL;
+    structType* StructDef = NULL;
+    typeSpecifiers* BasetypeDef = NULL;;
+    enumDef = enType;
+}
+
 void FunctionDefinitionRec::AddPrimary(functionType* _Func){
     funcInfo = _Func;
 }
@@ -223,6 +421,30 @@ genericConstituentType* FunctionDefinitionRec::GetPrimary(){
     if(funcInfo!=NULL) return funcInfo;
     else throw("func record has no info!");
 }
+
+std::vector<Record*>::iterator FunctionDefinitionRec::ArgsBegin(){
+    return funcInfo->ArgVec().begin();
+}
+std::vector<Record*>::iterator FunctionDefinitionRec::ArgsEnd(){
+    return funcInfo->ArgVec().end();
+}
+unsigned int FunctionDefinitionRec::NumArgs(){
+    return funcInfo->ArgVec().size();
+}
+
+genericConstituentType* StructTypeDeclarationRec::GetPrimary(){
+    return structDef;
+}
+
+genericConstituentType* EnumTypeDeclarationRec::GetPrimary(){
+    return enumDef;
+}
+
+genericConstituentType* EnumConstDeclarationRec::GetPrimary(){
+    return data;
+}
+
+
 //---------------------
 
 
@@ -275,7 +497,6 @@ void SymbolTable::PushDecSpec(std::string _specid){
 void SymbolTable::EndDeclaration(){
     //declarationStack.top()->AddPrimary(AccumulateDeclParts());
     AccumulateDeclParts();
-    
     ActiveScopePtr->subRecords.push_back(declarationStack.top());
     
     declarationStack.pop();
@@ -319,9 +540,8 @@ void SymbolTable::AppendCachedDecSpecs(){
         if(spec == "typedef") AssertTypedef();
         else{
             if(!IsCanonicalTypespec(spec)){
-                std::cerr << "test" << std::endl;
+                //this should work for structs too?
                 genericConstituentType* dec = GetIDRecord(spec)->GetPrimary();
-                std::cerr << "teststop" << std::endl;
                 declPartsStack.top().push_back(dec);
                 //TODO The above currently shallow copies the linked list
                 //!Two owners to the linked list!
@@ -413,6 +633,65 @@ NamedRecord* SymbolTable::GetActiveRecord(){
         return ActiveRecordPtr;
     }
 }
+
+void SymbolTable::StartNewStructDeclaration(){
+    //new struct record
+    StructTypeDeclarationRec* rec = new StructTypeDeclarationRec(ActiveScopePtr);
+    //add to struct stack
+    structDecStack.push(rec);
+    //set it to be the active record
+    ActiveRecordPtr = rec;
+    //add the type part that describes it
+    rec->structDef = new structType;
+    //add the table that holds the member decs
+    rec->structDef->members = new nsTable(ActiveScopePtr);
+    //switch scope to this table
+    ActiveScopePtr = rec->structDef->members;
+}
+void SymbolTable::EndStructDeclaration(){
+    ActiveScopePtr = ActiveScopePtr->parentTable;
+    ActiveScopePtr->GetScope()->subRecords.push_back(structDecStack.top());
+    structDecStack.pop();
+    if(structDecStack.size() > 0) ActiveRecordPtr = structDecStack.top();
+    else ActiveRecordPtr = declarationStack.top();
+
+}
+
+void SymbolTable::StartNewEnumDeclaration(const std::string& name){
+    EnumTypeDeclarationRec* rec = new EnumTypeDeclarationRec(ActiveScopePtr);
+    ActiveEnumPtr = rec;
+    rec->SetName(name);
+    ActiveScopePtr->GetScope()->subRecords.push_back(rec);
+}
+
+void SymbolTable::AddEnumerator(const std::string& name, int value){
+    EnumConstDeclarationRec* constrec = new EnumConstDeclarationRec(ActiveScopePtr->GetScope(),ActiveEnumPtr,value);
+    constrec->SetName(name);
+    ActiveEnumPtr->enumDef->options.push_back(constrec->data);
+    ActiveScopePtr->GetScope()->subRecords.push_back(constrec);
+}
+
+void SymbolTable::AddEnumerator(const std::string& name){
+    int last_val;
+    if(ActiveEnumPtr->enumDef->options.size()!=0)
+    {
+        last_val = ActiveEnumPtr->enumDef->options.back()->value;
+    }
+    else{
+        last_val = -1;
+    }
+    AddEnumerator(name,last_val+1);
+}
+
+void SymbolTable::EndEnumDeclaration(){
+    ActiveEnumPtr = NULL;
+}
+// void SymbolTable::AddStructRecToCurrRecord(const std::string& tag){
+//     NamedRecord* structResult = GetIDRecord("struct " + tag);
+//     //declPartsStack.top().push_back(structResult->GetPrimary());
+//     // change decspec stack to have a vector of a container struct
+//     // that can contain either a string, struct spec or enum spec
+// }
 //-----------------------------------
 void SymbolTable::AccumulateDeclParts(){
     // if (declPartsStack.top().size() == 1){
@@ -441,7 +720,6 @@ void SymbolTable::AccumulateDeclParts(){
     
     // }
     if(FuncDefIsFocus){
-        
         decls[0]->BeAppended(ActiveFuncDefPtr);
     }
     else{

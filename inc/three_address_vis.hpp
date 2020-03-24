@@ -1065,6 +1065,7 @@ class three_address_Visitor : public Visitor
         variable_map = vm();
         fd->decl->accept(this);
         std::cout << ':' << std::endl;
+
         // generating stack handler label
         auto stack_handler = gen_name("PUSH");
         // jumping to stack handler
@@ -1103,6 +1104,7 @@ class three_address_Visitor : public Visitor
         // processing body
         auto body = gen_name("body");
         std::cout << body << ':' << std::endl;
+
         global = false;
         fd->Body->accept(this);
         global = true;
