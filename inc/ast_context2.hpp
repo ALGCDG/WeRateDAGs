@@ -17,6 +17,7 @@ struct FunctionDefinitionRec;
 struct StructTypeDeclarationRec;
 struct TypedefTypeDeclarationRec;
 struct structType;
+struct enumType;
 namespace prPr{
     extern int tabs;
     void Tabsplus();
@@ -25,14 +26,15 @@ namespace prPr{
 }
 
 struct genericConstituentType{
-    virtual void BeAppended(genericConstituentType* other) = 0;
-    virtual void BeAppended(VariableDeclaration* vardec) = 0;
+    virtual void BeAppended(genericConstituentType* other){}
+    virtual void BeAppended(VariableDeclaration* vardec){}
     virtual void BeAppended(FunctionDefinitionRec* funcdec){}
     virtual void AddNextType(typeSpecifiers* specs){}
     virtual void AddNextType(functionType* func){}
     virtual void AddNextType(arrayType* arr){}
     virtual void AddNextType(pointerType* point){}
     virtual void AddNextType(structType* str){}
+    virtual void AddNextType(enumType* en){}
     virtual void Show(){}
     virtual unsigned int ByteSize() = 0;
 };
@@ -80,11 +82,13 @@ struct pointerType : public genericConstituentType{
     void AddNextType(typeSpecifiers* typ) override;
     void AddNextType(functionType* func) override;
     void AddNextType(structType* str) override;
+    void AddNextType(enumType* en) override;
     pointerType* ptToPointer;
     arrayType* ptToArray;
     typeSpecifiers* ptToBasetype;
     functionType* ptToFunc;
     structType* ptToStruct;
+    enumType* ptToEnum;
     void Show();
     unsigned int ByteSize() override;
 };
@@ -99,8 +103,9 @@ struct typeSpecifiers : public genericConstituentType{
     unsigned int ByteSize() override;
 };
 
+struct nsTable;
 struct structType : public genericConstituentType{
-    Table* members;
+    nsTable* members;
     void BeAppended(genericConstituentType* other);
     void BeAppended(pointerType* ptr);
     void BeAppended(VariableDeclaration* vardec);
@@ -110,6 +115,23 @@ struct structType : public genericConstituentType{
     void Show();
 };
 
+struct enumConstType : public genericConstituentType{
+    enumConstType(int val):value(val){}
+    int value;
+    std::string name;
+    unsigned int ByteSize() override;
+    void Show();
+};
+struct enumType : public genericConstituentType{
+    enumType(){}
+    std::vector<enumConstType*> options;
+    void BeAppended(genericConstituentType* other);
+    void BeAppended(pointerType* ptr);
+    void BeAppended(VariableDeclaration* vardec);
+    void BeAppended(TypedefTypeDeclarationRec* typedefDec);
+    unsigned int ByteSize();
+    void Show();
+};
 
 // struct funcArgs{
 //     //abstract represented with empty string
@@ -134,6 +156,16 @@ struct Table : public Record{
     Table(Table* _parentTable) : Record(_parentTable){}
     std::vector<Record*> subRecords;
     void PrettyPrint() override;
+    virtual Table* GetScope(){ return this;}
+};
+
+//mainly for structs?
+struct nsTable : public Table{
+    nsTable(Table* _parent) : Table(_parent){}
+    //void PrettyPrint() override;
+    //struct namespaces don't introduce new scopes 
+    // whenever a new type is introduced insif 
+    Table* GetScope() override { return parentTable; }
 };
 
 struct ParameterTable : public Table{
@@ -165,12 +197,14 @@ struct VariableDeclaration : public NamedRecord{
     void AddPrimary(functionType* _primaryFunc);
     void AddPrimary(typeSpecifiers* _primaryTypespec);
     void AddPrimary(structType* _primarystruct);
+    void AddPrimary(enumType* _primaryenum);
     //can be only one of the below
     pointerType* primaryPt;
     arrayType* primaryArr;
     functionType* primaryFunc;
     typeSpecifiers* primaryTypespec;
     structType* primaryStruct;
+    enumType* primaryEnum;
     bool IsGlobal();
     unsigned int GetDepth();
     genericConstituentType* GetPrimary() override;
@@ -208,8 +242,28 @@ struct StructTypeDeclarationRec : public TypeDeclarationRec{
     StructTypeDeclarationRec(Table* parent) : TypeDeclarationRec(parent){}
     structType* structDef;
     void AddPrimary(structType* _strdef){ structDef = _strdef; }
-    genericConstituentType* GetPrimary();
+    genericConstituentType* GetPrimary() override;
     void PrettyPrint() override;
+};
+struct EnumTypeDeclarationRec : public TypeDeclarationRec{
+    EnumTypeDeclarationRec(Table* parent) : TypeDeclarationRec(parent){
+        enumDef = new enumType;
+    }
+    enumType* enumDef;
+    genericConstituentType* GetPrimary() override;
+    // void PrettyPrint() override;
+};
+struct EnumConstDeclarationRec : public NamedRecord{
+    EnumConstDeclarationRec(Table* parent, EnumTypeDeclarationRec* _parentenum, int value) : NamedRecord(parent), parentEnum(_parentenum){
+        data = new enumConstType(value);
+    }
+    void SetParentEnum(EnumTypeDeclarationRec* rec){ parentEnum = rec; }
+    bool hasID(const std::string& _id) override { return data->name == _id; }
+    void SetName(const std::string& name) override {data->name = name; NamedRecord::SetName(name); }
+    EnumTypeDeclarationRec* parentEnum;
+    enumConstType* data;
+    genericConstituentType* GetPrimary() override;
+    //void PrettyPrint() override;
 };
 struct TypedefTypeDeclarationRec : public TypeDeclarationRec{
     TypedefTypeDeclarationRec(Table* parent) : TypeDeclarationRec(parent){}
@@ -219,16 +273,13 @@ struct TypedefTypeDeclarationRec : public TypeDeclarationRec{
     functionType* FuncDef;
     structType* StructDef;
     typeSpecifiers* BasetypeDef;
+    enumType* enumDef;
     void AddPrimary(pointerType* PtrDef);
     void AddPrimary(arrayType* ArrDef);
     void AddPrimary(functionType* FuncDef);
     void AddPrimary(structType* StructDef);
     void AddPrimary(typeSpecifiers* BasetypeDef);
-};
-struct EnumTypeDeclarationRec : public TypeDeclarationRec{
-    EnumTypeDeclarationRec(Table* parent) : TypeDeclarationRec(parent){}
-    enumType* enumDef;
-    
+    void AddPrimary(enumType* enType);
 };
 
 class SymbolTable{
@@ -259,9 +310,15 @@ public:
     void NewDeclParts();//done
     void PopDeclParts();//done
 
-    void StartNewStructDeclaration();
-    void EndStructDeclaration();
+    void StartNewStructDeclaration();//done
+    void EndStructDeclaration();//done
     // void AddStructRecToCurrRecord(const std::string& tag);    
+
+    void AddEnumerator(const std::string& name, int value);
+    void AddEnumerator(const std::string& name);
+    void StartNewEnumDeclaration(const std::string& name);
+    void EndEnumDeclaration();
+    
 
     NamedRecord* GetIDRecord(const std::string& _ID);
     NamedRecord* GetActiveRecord();
@@ -281,7 +338,7 @@ private:
     FunctionDefinitionRec* ActiveFuncDefPtr;
     bool FuncDefIsFocus;
     NamedRecord* ActiveRecordPtr;
-
+    EnumTypeDeclarationRec* ActiveEnumPtr;
 };
 
 #endif
