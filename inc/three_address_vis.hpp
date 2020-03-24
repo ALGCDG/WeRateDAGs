@@ -114,6 +114,7 @@ class three_address_Visitor : public Visitor
     }
     void visit(IdentifierNode * in)
     {
+        std::cerr << "ID" << std::endl;
         if (array_flag) array_name = in->Name;
         if (parameter_flag)
         {
@@ -166,22 +167,25 @@ class three_address_Visitor : public Visitor
         }
         else
         {
-            if (!variable_map.contains(in->Name))
+            if (!global)
             {
-                stacksize+=4;
-                variable_map.update(4);
-                std::cout << "# allocating space for " << in->Name << std::endl;
-                std::cout << "addiu $sp, $sp, -4" << std::endl;
-                std::cout << "move $fp, $sp" << std::endl;
-                std::cout << "sw $v0, 4($fp)" << std::endl; // still need to add frame offset TODO
-                std::cout << "nop" << std::endl;
-                variable_map.register_variable(in->Name, 4);
-            }
-            else
-            {
-                std::cout << "# writing to variable " << in->Name << std::endl;
-                std::cout << "sw $v0, " << variable_map.lookup(in->Name) << "($fp)" << std::endl; // still need to add frame offset TODO
-                std::cout << "nop" << std::endl;
+                if (!variable_map.contains(in->Name))
+                {
+                    stacksize+=4;
+                    variable_map.update(4);
+                    std::cout << "# allocating space for " << in->Name << std::endl;
+                    std::cout << "addiu $sp, $sp, -4" << std::endl;
+                    std::cout << "move $fp, $sp" << std::endl;
+                    std::cout << "sw $v0, 4($fp)" << std::endl; // still need to add frame offset TODO
+                    std::cout << "nop" << std::endl;
+                    variable_map.register_variable(in->Name, 4);
+                }
+                else
+                {
+                    std::cout << "# writing to variable " << in->Name << std::endl;
+                    std::cout << "sw $v0, " << variable_map.lookup(in->Name) << "($fp)" << std::endl; // still need to add frame offset TODO
+                    std::cout << "nop" << std::endl;
+                }
             }
         }
     }
@@ -737,11 +741,12 @@ class three_address_Visitor : public Visitor
     }
     void visit(init_declarator *id)
     {
+        std::cerr << "init D" << std::endl;
         if (global)
         {
             id->dec->accept(this);
-            std::cout << ": ";
-            id->init->accept(this);
+            // std::cout << ": ";
+            if (id->init != NULL) id->init->accept(this);
         }
         else
         {
@@ -766,6 +771,7 @@ class three_address_Visitor : public Visitor
     }
     void visit(initializer * i)
     {
+        std::cerr << "init" << std::endl;
         if(global)
         {
 
@@ -834,10 +840,10 @@ class three_address_Visitor : public Visitor
                 }
                 else if (dd->const_expr != NULL)
                 {
-                    // if (!global)
-                    // {
-                        // assume const expression is a number (not a variable or expression)
-                        int no_elements = dd->const_expr->ConstantSubtree->constEval();
+                    // assume const expression is a number (not a variable or expression)
+                    int no_elements = dd->const_expr->ConstantSubtree->constEval();
+                    if (!global)
+                    {
                         if (no_elements == 0)
                         {
                             // array size has not been specified
@@ -864,8 +870,13 @@ class three_address_Visitor : public Visitor
                         std::cout << "addiu $v0, $fp, " << variable_map.lookup(array_name+"[0]") << std::endl;
                         std::cout << "sw $v0, " << variable_map.lookup(array_name) << "($fp)" << std::endl;
                         std::cout << "nop" << std::endl;
-                        array_flag = false;
-                    // }
+                    }
+                    else
+                    {
+                        std::cout << array_name << ':' << " .space " <<  no_elements*4 << std::endl;
+                    }
+                    
+                    array_flag = false;
                 }
             }
         }
@@ -873,6 +884,7 @@ class three_address_Visitor : public Visitor
     void visit(abstract_declarator *) {}
     void visit(declarator * d)
     {
+        std::cerr << "D" << std::endl;
         d->dir_dec->accept(this);
     }
     void visit(parameter_list * pl)
@@ -1230,6 +1242,7 @@ class three_address_Visitor : public Visitor
     {
         std::cerr << "ex dec" << std::endl;
         ed->decl->accept(this);
+        std::cout << std::endl << std::endl;
     }
 };
 
