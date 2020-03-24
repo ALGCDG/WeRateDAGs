@@ -145,6 +145,7 @@
 %type <t_type_specifier> enum_specifier
 %type <t_enumerator> enumerator
 %type <t_enumlist> enum_list
+%type <identnode> ENUM_CONST
 
 %start ROOT
 
@@ -155,7 +156,7 @@
 EXPRESSIONS
 */
 
-primary_EXPR: Ident { std::cerr << "parsed id"<<std::endl;$$ = $1; }
+primary_EXPR: Ident { $$ = $1; }
                   | Constant { $$ = $1; }
                   | String { std::cerr << "STRING" << std::endl; }
                   | Punctuator_par_open EXPR Punctuator_par_close { $$ = $2; }
@@ -322,15 +323,15 @@ struct_declarator: declarator
 */
 
 
-enum_specifier: Keyword_enum Ident { $$ = new EnumSpecifier($1); }
+enum_specifier: Keyword_enum Ident { $$ = new EnumSpecifier($2); }
 			  | Keyword_enum Ident Punctuator_cur_open enum_list Punctuator_cur_close { $$ = new EnumSpecifier($2, $4); }
 			  | Keyword_enum Punctuator_cur_open enum_list Punctuator_cur_close { $$ = new EnumSpecifier($3); }
 
 enum_list: enumerator { $$ = new EnumeratorList($1); }
-		 | enum_list Operator_comma enumerator { (*$1)->AppendEnumerator($3);}
+		 | enum_list Operator_comma enumerator { ($1)->AppendEnumerator($3);}
 
-enumerator: ENUM_CONST { $$ = new Enumerator($1); }
-		  | ENUM_CONST Operator_assign constant_EXPR { $$ = new Enumerator($1, $3); }
+enumerator: ENUM_CONST { $$ = new Enumerator($1);}
+		  | ENUM_CONST Operator_assign constant_EXPR { $$ = new Enumerator($1, $3);}
 
 ENUM_CONST: Ident { $$ = $1; }
 
@@ -420,7 +421,7 @@ compound_statement: Punctuator_cur_open declaration_list statement_list Punctuat
 declaration_list: declaration {$$ = new DeclarationList($1); }
                 | declaration_list declaration { $$ = new DeclarationList($1, $2); }
 
-statement_list: statement { std::cerr << "parsing single statement" << std::endl;$$ = new StatementList($1); }
+statement_list: statement { $$ = new StatementList($1); }
               | statement_list statement { $$ = new StatementList($1, $2); }
 
 EXPR_statement: EXPR Punctuator_eol { $$ = new ExpressionStatement($1); }
@@ -468,7 +469,7 @@ function_definition: declarator compound_statement { $$ = new FunctionDefinition
                    /*| declaration_specifiers declaration declaration_list compound_statement -> only for K&R*/
 
 
-ROOT: translation_unit { std::cerr << "Its a valid program" << std::endl; g_root = $1; }
+ROOT: translation_unit {g_root = $1; }
 
 %%
 

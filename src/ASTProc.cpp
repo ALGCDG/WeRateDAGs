@@ -14,11 +14,12 @@ void ASTProcVis::visit(FuncCall* _funccall){
 }
 void ASTProcVis::visit(MemberAccess* _memberaccess){
     std::cout << "visit " << "MemberAccess" << std::endl;
-    _memberaccess->ID->accept(this);
+    //cant link easily to their meaning, don't know their namespace
+    //_memberaccess->ID->accept(this);
     _memberaccess->LHS->accept(this);
 }
 void ASTProcVis::visit(DerefMemberAccess* _derefmemberacc){
-    _derefmemberacc->ID->accept(this);
+    //_derefmemberacc->ID->accept(this);
     _derefmemberacc->LHS->accept(this);
 }
 void ASTProcVis::visit(ArgExprList* _argexprlist){
@@ -385,7 +386,6 @@ void ASTProcVis::visit(For* _for){
     TableInstance->NewScope();
     _for->Body->accept(this);
     TableInstance->PopScope();
-
 }
 void ASTProcVis::visit(If* _if){
     _if->ControlExpression->accept(this);
@@ -459,14 +459,6 @@ void ASTProcVis::visit(DeclarationList* decllis){
 }
 
 void ASTProcVis::visit(struct_specifier* _strspec){
-    std::cerr << "visiting struct specifier" << std::endl;
-    // struct identifier { struct-declaration-list }
-    //      add new record defining the struct with name "struct <identifier>", append struct body definition to record
-    // struct { struct-declaration-list }
-    //      add new record defining the struct with name "", append struct body definition to record
-    // struct identifier 
-    //      search for record with name "struct <identifier>", add its primary to the list
-
     std::string name = "struct";
     if(_strspec->tag!=NULL){ name += " " + _strspec->tag->Name; } //"struct <tag>"
     if(_strspec->list!=NULL){
@@ -499,15 +491,20 @@ void ASTProcVis::visit(struct_declarator_list* _strdeclist){
 }
 
 void ASTProcVis::visit(EnumSpecifier* _enum){
+    std::cerr << "visiting enum spec" << std::endl;
     std::string name = "enum";
     if(_enum->tag!=NULL){ name += " " + _enum->tag->Name; }
     if(_enum->options!=NULL){
-        TableInstance->StartNewEnumDeclaration();
-        TableInstance->AddIDtoCurrRecord(name);
+        TableInstance->StartNewEnumDeclaration(name);
+        std::cerr << "started enum dec" << std::endl;
+        // TableInstance->AddIDtoCurrRecord(name);
+        // std::cerr << "add id: enum spec" << std::endl;
         _enum->options->accept(this);
+        std::cerr << "visited options" << std::endl;
         TableInstance->EndEnumDeclaration();
     }
     TableInstance->PushDecSpec(name);
+    std::cerr << "pushed " << name << std::endl;
 }
 
 void ASTProcVis::visit(EnumeratorList* _enumlist){
@@ -517,11 +514,15 @@ void ASTProcVis::visit(EnumeratorList* _enumlist){
 }
 
 void ASTProcVis::visit(Enumerator* _enumer){
+    std::cerr << "visiting enumerator" << std::endl;
     if(_enumer->OptionalValue!=NULL){
+        std::cerr << "enumerator: value given" << std::endl;
         int value = EvalConstantExpression(_enumer->OptionalValue);
+        std::cerr << "visited enumerator, calculated value as " << value << std::endl;
         TableInstance->AddEnumerator(_enumer->ConstID->Name, value);
     }
     else{
+        std::cerr << "enumerator: no value given" << std::endl;
         TableInstance->AddEnumerator(_enumer->ConstID->Name);
     }
 }

@@ -295,7 +295,7 @@ class constant_int : public Constant {
     public:
     int value;
     unsigned int constEval(){ return value; }
-    constant_int(int v): value(v) {std::cerr << "creating int: " << v << std::endl;}
+    constant_int(int v): value(v) {}
 
 public:
     void accept(Visitor *AVisitor) override { AVisitor->visit(this); }
@@ -687,7 +687,7 @@ class ConstantExpression : public Expression{
 public:
     ConstantExpression(){}
     ConstantExpression(Expression* Expr): ConstantSubtree(Expr){}
-    unsigned int constEval() override {}
+    unsigned int constEval() override { return ConstantSubtree->constEval(); }
     Expression* ConstantSubtree;
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
 };
@@ -991,12 +991,14 @@ public:
         : ConstID(_id), OptionalValue(_expr){}
     IdentifierNode* ConstID;
     ConstantExpression* OptionalValue;
+    void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
 };
 class EnumeratorList : public Node{
 public:
     EnumeratorList(Enumerator* _first){ List = {_first}; }
     std::vector<Enumerator*> List;
     void AppendEnumerator(Enumerator* en){ List.push_back(en); }
+    void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
 };
 class EnumSpecifier : public type_specifier{
 public:
@@ -1004,6 +1006,7 @@ public:
     EnumSpecifier(IdentifierNode* _id = NULL, EnumeratorList* _list = NULL):type_specifier("enum"),tag(_id), options(_list){}
     IdentifierNode* tag;
     EnumeratorList* options;
+    void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
 };
 
 class pointer : public Node
