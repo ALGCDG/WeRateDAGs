@@ -1,7 +1,0 @@
-declpart stack      | functiontype(with args)
-decspec stack       | <decspecs for func>
-declaration stack   | new variable declaration
-active scope pointer| functiontypeargs
-active func def ptr | new funcdefrec(with id)
-active record ptr   | variabledec(with id)(with decspecs)
-funcisfocus         | false
