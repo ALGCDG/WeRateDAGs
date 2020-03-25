@@ -26,10 +26,10 @@ class vm
     std::unordered_map<std::string, int> m;
     public:
     vm():stack_size(0){}
-    void update(int offset)
+    void update(int offset, bool in_stack = true)
     {
         std::cerr << "UPDATE" << std::endl;
-        stack_size+=offset;
+        if (in_stack) stack_size+=offset;
         for(auto & p : m)
         {
             p.second += offset;
@@ -116,12 +116,12 @@ class three_address_Visitor : public Visitor
     void visit(IdentifierNode * in)
     {
         std::cerr << "ID" << std::endl;
-        if (array_flag) array_name = in->Name;
+        if (array_flag) array_name = in->ContextRecord->unique_id;
         if (parameter_flag)
         {
             std::cerr << "parameter flag" << std::endl;
-            variable_map.update(4);
-            variable_map.register_variable(in->Name, 4);
+            variable_map.update(4, false);
+            variable_map.register_variable(in->ContextRecord->unique_id, 4);
         }
         else if (func_call_flag)
         {
@@ -161,8 +161,8 @@ class three_address_Visitor : public Visitor
                 auto return_reg = return_register.top();
                 return_register.pop();
                 // std::cout << "move " << return_reg << ", " << (in->Name) << std::endl;
-                std::cout << "# reading variable " << in->Name << std::endl;
-                std::cout << "lw " << return_reg << ", " << variable_map.lookup(in->Name) << "($fp) " << std::endl; // still need to add frame offset TODO
+                std::cout << "# reading variable " << in->ContextRecord->unique_id << std::endl;
+                std::cout << "lw " << return_reg << ", " << variable_map.lookup(in->ContextRecord->unique_id) << "($fp) " << std::endl; // still need to add frame offset TODO
                 std::cout << "nop" << std::endl;
             }
         }
@@ -170,21 +170,21 @@ class three_address_Visitor : public Visitor
         {
             if (!global)
             {
-                if (!variable_map.contains(in->Name))
+                if (!variable_map.contains(in->ContextRecord->unique_id))
                 {
                     stacksize+=4;
                     variable_map.update(4);
-                    std::cout << "# allocating space for " << in->Name << std::endl;
+                    std::cout << "# allocating space for " << in->ContextRecord->unique_id << std::endl;
                     std::cout << "addiu $sp, $sp, -4" << std::endl;
                     std::cout << "move $fp, $sp" << std::endl;
                     std::cout << "sw $v0, 4($fp)" << std::endl; // still need to add frame offset TODO
                     std::cout << "nop" << std::endl;
-                    variable_map.register_variable(in->Name, 4);
+                    variable_map.register_variable(in->ContextRecord->unique_id, 4);
                 }
                 else
                 {
-                    std::cout << "# writing to variable " << in->Name << std::endl;
-                    std::cout << "sw $v0, " << variable_map.lookup(in->Name) << "($fp)" << std::endl; // still need to add frame offset TODO
+                    std::cout << "# writing to variable " << in->ContextRecord->unique_id << std::endl;
+                    std::cout << "sw $v0, " << variable_map.lookup(in->ContextRecord->unique_id) << "($fp)" << std::endl; // still need to add frame offset TODO
                     std::cout << "nop" << std::endl;
                 }
             }
@@ -357,7 +357,14 @@ class three_address_Visitor : public Visitor
         ubno->RHS->accept(this);
         std::cout << "xori " << return_reg << return_reg << " 1" << std::endl;
     }
-    void visit(UnaryLogicalNotOperator *) {}
+    void visit(UnaryLogicalNotOperator * ulno)
+    {
+        auto return_reg = return_register.top();
+        return_register.pop();
+        return_register.push(return_reg);
+        ulno->RHS->accept(this);
+        std::cout << "sne " << return_reg << return_reg << " $zero" << std::endl;
+    }
     void visit(PreInc * pi)
     {
         auto return_reg = return_register.top();
@@ -404,7 +411,7 @@ class three_address_Visitor : public Visitor
         auto return_reg = return_register.top();
         return_register.pop();
         std::cout << "divu " << return_reg << ", " << intermediates.first << ", " << intermediates.second << std::endl;
-        std::cout << "mfhi " << return_reg << std::endl;
+        std::cout << "mflo " << return_reg << std::endl;
         saved_registers.push(intermediates.first);
         saved_registers.push(intermediates.second);
     }
@@ -414,7 +421,7 @@ class three_address_Visitor : public Visitor
         auto return_reg = return_register.top();
         return_register.pop();
         std::cout << "divu " << return_reg << ", " << intermediates.first << ", " << intermediates.second << std::endl;
-        std::cout << "mflo " << return_reg << std::endl;
+        std::cout << "mfhi " << return_reg << std::endl;
         saved_registers.push(intermediates.first);
         saved_registers.push(intermediates.second);
     }
@@ -548,7 +555,7 @@ class three_address_Visitor : public Visitor
         auto intermediates = descend(bo);
         auto return_reg = return_register.top();
         return_register.pop();
-        std::cout << "or " << return_reg << " " << intermediates.first << ", " << intermediates.second << std::endl;
+        std::cout << "or " << return_reg << ", " << intermediates.first << ", " << intermediates.second << std::endl;
         saved_registers.push(intermediates.first);
         saved_registers.push(intermediates.second);
     }
