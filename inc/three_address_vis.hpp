@@ -28,6 +28,7 @@ class vm
     vm():stack_size(0){}
     void update(int offset)
     {
+        std::cerr << "UPDATE" << std::endl;
         stack_size+=offset;
         for(auto & p : m)
         {
@@ -774,7 +775,6 @@ class three_address_Visitor : public Visitor
         std::cerr << "init" << std::endl;
         if(global)
         {
-
             if (i->ass_expr != NULL)
             {
                 std::cout << ".word ";
@@ -785,24 +785,22 @@ class three_address_Visitor : public Visitor
             {
                 std::cout << std::endl;
                 i->init_list->accept(this);
-
             }
         }
-        // else 
-        // {
-      
-        //     if (i->ass_expr != NULL)
-        //     {
-        //         return_register.push("$v0");
-        //         i->ass_expr->accept(this);
-        //         std::cout << "sw $v0, " << initlist_count*4 << std::endl;
-        //         std::cout << "nop" << std::endl;
-        //     }
-        //     else if (i->init_list != NULL)
-        //     {
-        //         i->init_list->accept(this);
-        //     }      
-        // }
+        else
+        {
+            if (i->ass_expr != NULL)
+            {
+                return_register.push("$v0");
+                i->ass_expr->accept(this);
+                std::cout << "sw $v0, " << std::endl;
+                std::cout << "nop" << std::endl;
+            }
+            else if (i->init_list != NULL)
+            {
+                i->init_list->accept(this);
+            }
+        }
     }
     void visit(initializer_list * il)
     {
