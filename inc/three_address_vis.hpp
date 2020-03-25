@@ -168,10 +168,13 @@ class three_address_Visitor : public Visitor
         }
         else
         {
+            std::cerr << "writing: " << in->Name << std::endl;
+            std::cerr << (in->ContextRecord == NULL) << std::endl;
             if (!global)
             {
                 if (!variable_map.contains(in->ContextRecord->unique_id))
                 {
+                    std::cerr << "new" << std::endl;
                     stacksize+=4;
                     variable_map.update(4);
                     std::cout << "# allocating space for " << in->ContextRecord->unique_id << std::endl;
@@ -183,6 +186,7 @@ class three_address_Visitor : public Visitor
                 }
                 else
                 {
+                    std::cerr << "old" << std::endl;
                     std::cout << "# writing to variable " << in->ContextRecord->unique_id << std::endl;
                     std::cout << "sw $v0, " << variable_map.lookup(in->ContextRecord->unique_id) << "($fp)" << std::endl; // still need to add frame offset TODO
                     std::cout << "nop" << std::endl;
@@ -308,15 +312,25 @@ class three_address_Visitor : public Visitor
     void visit(DerefMemberAccess *) {}
     void visit(PostInc * pi)
     {
-        // // expression of postinc must be a variable
-        // std::cout << "move $v0" << *(pi->LHS->Name) << std::endl;
-        // std::cout << "addui " << *(pi->LHS->Name) << " $v0 1"<< std::endl;
+        std::cerr << "PI" << std::endl;
+        return_register.push(return_register.top());
+        pi->LHS->accept(this);
+        std::cout << "addiu $v0, " << return_register.top() << ", 1" << std::endl;
+        return_register.pop();
+        writing = true;
+        pi->LHS->accept(this);
+        writing = false;
     }
     void visit(PostDec * pd)
     {
-        // // expression of postinc must be a variable
-        // std::cout << "move $v0" << *(pd->LHS->Name) << std::endl;
-        // std::cout << "addui " << *(pd->LHS->Name) << " $v0 -1"<< std::endl;
+        std::cerr << "PD" << std::endl;
+        return_register.push(return_register.top());
+        pd->LHS->accept(this);
+        std::cout << "addiu $v0, " << return_register.top() << ", -1" << std::endl;
+        return_register.pop();
+        writing = true;
+        pd->LHS->accept(this);
+        writing = false;
     }
     void visit(ArgExprList * ael)
     {
