@@ -1,6 +1,6 @@
 int a = 5;
-
-int main()
+int b;
+int f()
 {
 	return 0;
 }
