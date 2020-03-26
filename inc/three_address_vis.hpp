@@ -92,6 +92,8 @@ class three_address_Visitor : public Visitor
     vm variable_map; // a map of variable name to stack offset and what register it might be stored in
     std::string array_name;
     int initlist_count;
+    std::unordered_map<std::string, int> enum_symbol_map;
+    int enum_counter;
     std::string get_temp_register(const std::string &inter)
     {
         if (!saved_registers.empty())
@@ -160,10 +162,17 @@ class three_address_Visitor : public Visitor
                 // }
                 auto return_reg = return_register.top();
                 return_register.pop();
-                // std::cout << "move " << return_reg << ", " << (in->Name) << std::endl;
-                std::cout << "# reading variable " << in->ContextRecord->unique_id << std::endl;
-                std::cout << "lw " << return_reg << ", " << variable_map.lookup(in->ContextRecord->unique_id) << "($fp) " << std::endl; // still need to add frame offset TODO
-                std::cout << "nop" << std::endl;
+                if (enum_symbol_map.find(in->Name) == enum_symbol_map.end())
+                {
+                    // std::cout << "move " << return_reg << ", " << (in->Name) << std::endl;
+                    std::cout << "# reading variable " << in->ContextRecord->unique_id << std::endl;
+                    std::cout << "lw " << return_reg << ", " << variable_map.lookup(in->ContextRecord->unique_id) << "($fp) " << std::endl; // still need to add frame offset TODO
+                    std::cout << "nop" << std::endl;
+                }
+                else
+                {
+                    std::cout << "li " << return_reg << ", " << enum_symbol_map[in->Name] << std::endl;
+                }
             }
         }
         else
@@ -921,6 +930,28 @@ class three_address_Visitor : public Visitor
         parameter_flag=true;
         pd->dec->accept(this);
         parameter_flag=false;
+    }
+    void visit(Enumerator* _enum)
+    {
+        if (_enum->OptionalValue != NULL)
+        {
+            auto val = _enum->OptionalValue->constEval();
+            enum_symbol_map[_enum->ConstID->Name] = val;
+            enum_counter = ++val;
+        }
+        else
+        {
+            enum_symbol_map[_enum->ConstID->Name] = enum_counter++;
+        }
+    }
+    void visit(EnumeratorList* _enumlist)
+    {
+        enum_counter=0;
+        for (const auto &e : _enumlist->List) e->accept(this);
+    }
+    void visit(EnumSpecifier* _enumspec)
+    {
+        if (_enumspec->options!=NULL) _enumspec->options->accept(this);
     }
 
     //Statements
