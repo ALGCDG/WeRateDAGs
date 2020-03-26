@@ -76,7 +76,7 @@ class three_address_Visitor : public Visitor
     // std::stack<std::string> temporary_words; 
     bool global; // a flag for tracking if declaration is global or is in a scope.
     std::unordered_set<std::string> global_labels;
-    std::stack<std::pair<std::string,Expression*>> cases; // a stack sructure used when generating switch case code
+    std::stack<std::pair<std::string,int>> cases; // a stack sructure used when generating switch case code
     std::string default_label; // used as a seperate place to store a default label for switch cases
     std::stack<std::string> intermediate_values; // a stack for counting the intermediate values of a function
     std::stack<std::string> temporary_registers;
@@ -1155,6 +1155,8 @@ class three_address_Visitor : public Visitor
         // creating loop exit
         auto end = gen_name("switch_end");
         auto decision = gen_name("switch_decision");
+        // default label
+        default_label = "";
         // adding beginning and end as pair to boundry stacks
         break_to.push(end);
         // jumping to decision
@@ -1174,16 +1176,17 @@ class three_address_Visitor : public Visitor
         {
             // std::cerr << "loop" << std::endl;
             auto c = cases.top();
-            return_register.push("$v1");
-            // std::cerr << "push" << std::endl;
-            c.second->accept(this);
+            std::cout << "li $v1, " << c.second << std::endl;
             std::cout << "beq $v0, $v1, " << c.first << std::endl;
             std::cout << "nop" << std::endl;
             cases.pop();
         }
         // or going to default
-        std::cout << "b " << default_label << std::endl;
-        std::cout << "nop" << std::endl;
+        if (default_label != "")
+        {
+            std::cout << "b " << default_label << std::endl;
+            std::cout << "nop" << std::endl;
+        }
         std::cout << end << ':' << std::endl;
     }
     void visit(CaseOrDefault * cod)
@@ -1191,7 +1194,7 @@ class three_address_Visitor : public Visitor
         if (cod->Eval != NULL)
         {
             auto case_label = gen_name("case");
-            cases.push(make_pair(case_label, cod->Eval));
+            cases.push(make_pair(case_label, cod->Eval->constEval()));
             std::cout << case_label << ':' << std::endl;
         }
         else
