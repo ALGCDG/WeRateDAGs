@@ -4,6 +4,19 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <experimental/optional> 
+
+enum class en_typeData{ 
+    INT,
+    FLOAT,
+    DOUBLE,
+    CHAR,
+    STRUCT,
+    POINTER,
+    ENUM
+};
+
+
 // #include "ast_basenode.hpp"
 
 // //FORWARD DECLARE VISITOR
@@ -263,7 +276,6 @@ EXPRESSIONS
 class Expression : public Node{
 public:
     virtual unsigned int constEval(){}
-    //Type* EvalsToType;
     //TODO types!
     void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
 };

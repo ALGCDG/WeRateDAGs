@@ -185,13 +185,14 @@ struct NamedRecord : public Record{
     std::string id;
     std::string unique_id;
     virtual genericConstituentType* GetPrimary() = 0;
+    virtual unsigned int GetSize() = 0; //TODO
 };
 
 struct VariableDeclaration : public NamedRecord{
     VariableDeclaration(Table* _parent) : NamedRecord(_parent){ }
     // bool isFunctionDefinition(){ return false; }
     //sets all others to null explicitly
-    void AddPrimary(genericConstituentType* _generic){ std::cout << "lol"; }
+    void AddPrimary(genericConstituentType* _generic){}
     void AddPrimary(pointerType* _primaryPt);
     void AddPrimary(arrayType* _primaryArr);
     void AddPrimary(functionType* _primaryFunc);

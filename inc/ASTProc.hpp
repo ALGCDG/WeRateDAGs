@@ -28,6 +28,7 @@ public:
     void visit(AssignmentExpression* _assignexpr);
 
     void visit(Constant* _constant);
+    void visit(constant_int* _constantint);
     void visit(UnaryPlusOperator* _unaryplus);
     void visit(UnaryNegOperator* _unaryneg);
     void visit(UnaryBitwiseNotOperator* _unaryBitNot);
@@ -116,6 +117,9 @@ public:
     void visit(Enumerator* _enum);
     void visit(EnumeratorList* _enumlist);
     void visit(EnumSpecifier* _enumspec);
+
+    void visit(initializer * _init);
+    void visit(initializer_list * _init_list);
 
     unsigned int EvalConstantExpression(ConstantExpression* _const_expr);
     unsigned int EvalConstantExpression(Expression* expr);
