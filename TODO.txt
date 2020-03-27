@@ -16,6 +16,7 @@
 ./compiler_tests/strings/puts.c
 ./compiler_tests/strings/search.c
 ./compiler_tests/struct/sizeof.c
+./compiler_tests/struct/struct_inst.c
 ./compiler_tests/struct/struct_member_get.c
 ./compiler_tests/struct/struct_member_set.c
 ./compiler_tests/struct/struct_two_members.c
