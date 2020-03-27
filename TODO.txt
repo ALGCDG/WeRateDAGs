@@ -1,6 +1,3 @@
-./compiler_tests/array/index_expression.c
-./compiler_tests/array/index_variable.c
-./compiler_tests/control_flow/for_multiple.c
 ./compiler_tests/float/add_double.c
 ./compiler_tests/float/add.c
 ./compiler_tests/float/add_mul.c

@@ -960,7 +960,7 @@ class three_address_Visitor : public Visitor
             f->Next->accept(this);
         }
         // jump to beginning
-        std::cout << "beq $v0, $zero, " << beginning << std::endl;
+        std::cout << "b " << beginning << std::endl;
         std::cout << "nop" << std::endl;
         // writing end
         std::cout << end << ':' << std::endl;
