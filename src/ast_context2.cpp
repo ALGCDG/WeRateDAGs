@@ -401,6 +401,7 @@ genericConstituentType* VariableDeclaration::GetPrimary(){
     else if(primaryArr!=NULL) return primaryArr;
     else if(primaryFunc!=NULL) return primaryFunc;
     else if(primaryTypespec!=NULL) return primaryTypespec;
+    else if(primaryStruct!=NULL) return primaryStruct;
     else throw("variable record has no info!");
 }
 
