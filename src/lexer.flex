@@ -27,7 +27,16 @@ Binary [01]
 
 Operator [+\-*/%&|^><=!~?:.,#\[\]\(\)\{\}]
 
+
+
+SourceCharSet [a-zA-Z0-9_\{\}\[\]#\(\)<>%:;.?*+-/^&|~!=,\\"'\n]
+sChar [a-zA-Z0-9_\{\}\[\]#\(\)<>%:;.?*+-/^&|~!=,']
+simpEscSeq \"\\.\"
+escSeq {simpEscSeq} | {octEscSeq} | {hexEscSeq}
 %%
+
+{simpEscSeq} { std::cerr << "escape seq:\n" << *yytext << "\nend esc seq\n";}
+
 "int"   {
             /*
             Keywords
