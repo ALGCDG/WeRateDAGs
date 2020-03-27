@@ -650,9 +650,9 @@ class three_address_Visitor : public Visitor
         dec->specifier->accept(this);
         if (dec->list != NULL)
         {
-            writing = true;
+            // writing = true;
             dec->list->accept(this);
-            writing = false;
+            // writing = false;
         }
     }
     void visit(declaration_specifiers * ds)
@@ -674,8 +674,10 @@ class three_address_Visitor : public Visitor
         std::cerr << "init D" << std::endl;
         if (global)
         {
+            writing = true;
             id->dec->accept(this);
             if (id->init != NULL) id->init->accept(this);
+            writing = false;
         }
         else
         {

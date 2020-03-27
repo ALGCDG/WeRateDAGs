@@ -5,7 +5,6 @@
 ./compiler_tests/float/mul_double.c
 ./compiler_tests/float/mul.c
 ./compiler_tests/float/pow.c
-./compiler_tests/local_var/expression_initialiser.c
 ./compiler_tests/misc/switch2.c
 ./compiler_tests/misc/typedef1.c
 ./compiler_tests/misc/typedef2.c
