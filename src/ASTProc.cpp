@@ -23,7 +23,6 @@ void ASTProcVis::visit(DerefMemberAccess* _derefmemberacc){
     _derefmemberacc->LHS->accept(this);
 }
 void ASTProcVis::visit(ArgExprList* _argexprlist){
-    
     for(auto i : _argexprlist->Args){
         i->accept(this);
     }
@@ -39,6 +38,7 @@ void ASTProcVis::visit(UnaryAddressOperator* _addrOp){
 }
 void ASTProcVis::visit(UnaryDerefOperator* derefOp){
     derefOp->RHS->accept(this);
+    //todo
 }
 void ASTProcVis::visit(PostInc* _postinc){
     _postinc->LHS->accept(this);
@@ -49,13 +49,17 @@ void ASTProcVis::visit(PostDec* _postdec){
 void ASTProcVis::visit(CastExpr* _castexpr){
     _castexpr->typ->accept(this);
     _castexpr->RHS->accept(this);
+    //todo
 }
 void ASTProcVis::visit(AssignmentExpression* _assignexpr){
     _assignexpr->RHS->accept(this);
     _assignexpr->LHS->accept(this);
+    //todo
 }
 
 void ASTProcVis::visit(Constant* _constant){}
+void ASTProcVis::visit(constant_int* _constantint){
+}
 void ASTProcVis::visit(UnaryPlusOperator* _unaryplus){
     _unaryplus->RHS->accept(this);
 }
@@ -64,15 +68,19 @@ void ASTProcVis::visit(UnaryNegOperator* _unaryneg){
 }
 void ASTProcVis::visit(UnaryBitwiseNotOperator* _unaryBitNot){
     _unaryBitNot->RHS->accept(this);
+    //todo
 }
 void ASTProcVis::visit(UnaryLogicalNotOperator* _unaryLogNot){
     _unaryLogNot->RHS->accept(this);
+    //todo
 }
 void ASTProcVis::visit(PreInc* _preinc){
     _preinc->RHS->accept(this);
+
 }
 void ASTProcVis::visit(PreDec* _predec){
     _predec->RHS->accept(this);
+
 }
 void ASTProcVis::visit(Multiply* _mul){
     _mul->RHS->accept(this);
@@ -456,6 +464,16 @@ void ASTProcVis::visit(IdentifierNode* _idnode){
 void ASTProcVis::visit(DeclarationList* decllis){
     if(decllis->left_list!=NULL){ decllis->left_list->accept(this);}
     decllis->this_decl->accept(this);
+}
+
+void ASTProcVis::visit(initializer * _init){
+    if(_init->ass_expr!=NULL){ _init->ass_expr->accept(this); }
+    else if(_init->init_list!=NULL){ _init->init_list->accept(this); }
+    else { throw("uh oh"); }
+}
+void ASTProcVis::visit(initializer_list * _init_list){
+    if(_init_list->init_list!=NULL){_init_list->init_list->accept(this);}
+    _init_list->init->accept(this);
 }
 
 void ASTProcVis::visit(struct_specifier* _strspec){

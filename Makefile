@@ -1,5 +1,5 @@
   
-CPPFLAGS += -std=c++11 -W -Wall -g -Wno-unused-parameter
+CPPFLAGS += -std=c++17 -W -Wall -g -Wno-unused-parameter
 CPPFLAGS += -I inc
 
 all : bin/compiler src/wrapper.sh
@@ -17,6 +17,11 @@ src/lexer.yy.cpp : src/lexer.flex Include/parser.tab.hpp
 
 # src/ASTProc.o : src/ASTProc.cpp src/ast_context2.o src/ast_allnodes.o
 # 	g++ $(CPPFLAGS) -o src/ASTProc.o $^
+src/ast_context2.o : src/ast_context2.cpp
+	g++ $(CPPFLAGS) -o src/ast_context2.o $^
+
+src/ast_allnodes.o : src/ast_allnodes.cpp
+	g++ $(CPPFLAGS) -o src/ast_allnodes.o $^
 
 bin/compiler : src/parser.tab.o src/lexer.yy.o src/compiler.o src/ast_allnodes.o src/ASTProc.o src/ast_context2.o
 	mkdir -p bin
