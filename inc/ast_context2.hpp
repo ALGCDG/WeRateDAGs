@@ -185,7 +185,7 @@ struct NamedRecord : public Record{
     std::string id;
     std::string unique_id;
     virtual genericConstituentType* GetPrimary() = 0;
-    virtual unsigned int GetSize() = 0; //TODO
+    // virtual unsigned int GetSize() = 0; //TODO
 };
 
 struct VariableDeclaration : public NamedRecord{
