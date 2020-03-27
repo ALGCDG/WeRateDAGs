@@ -126,7 +126,7 @@ class three_address_Visitor : public Visitor
         {
             std::cerr << "parameter flag" << std::endl;
             variable_map.update(4, false);
-            variable_map.register_variable(in->ContextRecord->unique_id, 4);
+            variable_map.register_variable(in->ContextRecord->unique_id, 0);
         }
         else if (func_flag)
         {
@@ -317,7 +317,7 @@ class three_address_Visitor : public Visitor
             ael->Args[i]->accept(this);
             move(r, "$v0");
             // // store all arguments on stack
-            std::cout << "sw " << r << ", " << (i+1)*4 << "($fp)" << std::endl;
+            std::cout << "sw " << r << ", " << (i)*4 << "($fp)" << std::endl;
             std::cout << "nop" << std::endl;
         }
     }
@@ -675,13 +675,11 @@ class three_address_Visitor : public Visitor
         if (global)
         {
             id->dec->accept(this);
-            // std::cout << ": ";
             if (id->init != NULL) id->init->accept(this);
         }
         else
         {
-            writing = true;
-            id->dec->accept(this);
+
             if (id->init!=NULL)
             {
                 if (id->init->ass_expr!=NULL)
@@ -692,7 +690,12 @@ class three_address_Visitor : public Visitor
                     writing = false;
                 }
             }
-            writing = false;
+            else 
+            {
+                writing = true;
+                id->dec->accept(this);
+                writing = false;
+            }
         }
     }
     void visit(initializer * i)
@@ -1132,7 +1135,7 @@ class three_address_Visitor : public Visitor
         {
             if  (i < 4)
             {
-                std::cout << "sw $a" << i << ", " << (i+1)*4 << "($sp)" << std::endl;
+                std::cout << "sw $a" << i << ", " << (i)*4 << "($sp)" << std::endl;
                 std::cout << "nop" << std::endl;
             }
         }
@@ -1141,16 +1144,16 @@ class three_address_Visitor : public Visitor
         variable_map.update(stacksize);
         std::cout << "addiu $sp, $sp, " << -stacksize << std::endl;
         // store return address
-        std::cout << "sw $ra, " << stacksize << "($sp)" << std::endl;
+        std::cout << "sw $ra, " << stacksize - 4 << "($sp)" << std::endl;
         std::cout << "nop" << std::endl;
         // store previous stack pointer
-        std::cout << "sw $fp, " << stacksize - 4 << "($sp)" << std::endl;
+        std::cout << "sw $fp, " << stacksize - 8 << "($sp)" << std::endl;
         std::cout << "nop" << std::endl;
         // move fp to sp
         // make space for saved registers (always going to be)
         for (int i = 0; i < 8; i++)
         {
-            std::cout << "sw $s" << i << ", " << (i+1)*4 << "($sp)" << std::endl;
+            std::cout << "sw $s" << i << ", " << (i)*4 << "($sp)" << std::endl;
             std::cout << "nop" << std::endl;
         }
         std::cout << "move $fp, $sp" << std::endl;
@@ -1167,14 +1170,14 @@ class three_address_Visitor : public Visitor
         // restore saved registers
         for (int i = 0; i < 8; i++)
         {
-            std::cout << "lw $s" << i << ", " << stacksize - (9-i) * 4 << "($sp)" << std::endl;
+            std::cout << "lw $s" << i << ", " << stacksize - (10-i) * 4 << "($sp)" << std::endl;
             std::cout << "nop" << std::endl;
         }
         // restore return address
-        std::cout << "lw $ra, " << stacksize << "($sp)" << std::endl;
+        std::cout << "lw $ra, " << stacksize-4 << "($sp)" << std::endl;
         std::cout << "nop" << std::endl;
         // restore stack pointer
-        std::cout << "lw $fp, " << stacksize -4 << "($sp)" << std::endl;
+        std::cout << "lw $fp, " << stacksize -8 << "($sp)" << std::endl;
         std::cout << "nop" << std::endl;
         std::cout << "move $sp, $fp" << std::endl;
         // jump to original

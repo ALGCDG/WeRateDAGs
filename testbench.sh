@@ -48,15 +48,15 @@ for section in ./compiler_tests/* ; do
             perfect_ret=$?
             rm a.out
             if [[ $our_ret == $perfect_ret ]] ; then
-                echo "PASSED"
+                printf "PASSED "
                 let "no_passes=no_passes+1"
             else
                 echo $test_file >> $hitlist
-                echo "FAILED "
+                printf "FAILED "
             fi
-            printf "WRD compiler returns: "
+            printf "WRD: "
             printf $our_ret
-            printf " GCC compiler returns: "
+            printf " GCC: "
             echo $perfect_ret
             let "no_tests=no_tests+1"
         fi
