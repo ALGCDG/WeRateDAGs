@@ -62,7 +62,7 @@ class vm
 class three_address_Visitor : public Visitor
 {
     public:
-    three_address_Visitor(): counter(0), return_register(), continue_to(), break_to(), cases(), global(true), global_labels(), intermediate_values(), temporary_registers(), saved_registers(), variable_map(), writing(false), parameter_flag(false), func_flag(false), array_flag(false), initlist_count(0)
+    three_address_Visitor(): counter(0), return_register(), continue_to(), break_to(), cases(), global(true), global_labels(), intermediate_values(), temporary_registers(), saved_registers(), variable_map(), writing(false), parameter_flag(false), func_flag(false), array_flag(false), initlist_count(0), address_flag(false)
     {
         for (int i = 9; i >= 0; i--)
             temporary_registers.push("$t"+std::to_string(i));
@@ -92,6 +92,8 @@ class three_address_Visitor : public Visitor
     vm variable_map; // a map of variable name to stack offset and what register it might be stored in
     std::string array_name;
     int initlist_count;
+    bool address_flag;
+    std::string address_name;
     std::unordered_map<std::string, int> enum_symbol_map;
     int enum_counter;
     void pop(std::string reg, int stack_offset = 0) { std::cout << "lw " << reg << ", " << stack_offset << "($sp)" << std::endl << "nop" << std::endl;}
@@ -137,6 +139,7 @@ class three_address_Visitor : public Visitor
                 global_labels.insert(in->Name);
             }
         }
+        else if (address_flag) address_name = in->ContextRecord->unique_id;
         else if (!writing)
         {
             std::cerr << "reading" << std::endl;
@@ -321,8 +324,30 @@ class three_address_Visitor : public Visitor
             std::cout << "nop" << std::endl;
         }
     }
-    void visit(UnaryAddressOperator *) {}
-    void visit(UnaryDerefOperator *) {}
+    void visit(UnaryAddressOperator * uao)
+    {
+        address_flag = true;
+        uao->RHS->accept(this);
+        address_flag = false;
+        std::cout << "# getting address of " << address_name << std::endl;
+        std::cout << "addiu $v0, $sp, " << variable_map.lookup(address_name) << std::endl;
+    }
+    void visit(UnaryDerefOperator * udo)
+    {
+        if (!writing)
+        {
+            udo->RHS->accept(this);
+            std::cout << "lw $v0, 0($v0)" << std::endl;
+        }
+        else
+        {
+            move("$v1", "$v0");
+            writing = false;
+            udo->RHS->accept(this);
+            writing = true;
+            std::cout << "sw $v1, 0($v0)" << std::endl;
+        }
+    }
     void visit(UnaryPlusOperator * upo)
     {
         // does nothing, equivalent

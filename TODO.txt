@@ -9,7 +9,6 @@
 ./compiler_tests/misc/typedef1.c
 ./compiler_tests/misc/typedef2.c
 ./compiler_tests/pointer/arithmetic.c
-./compiler_tests/pointer/assign.c
 ./compiler_tests/programs/sqrt.c
 ./compiler_tests/strings/chliteral.c
 ./compiler_tests/strings/escaped.c
