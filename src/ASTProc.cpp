@@ -13,7 +13,7 @@ void ASTProcVis::visit(FuncCall* _funccall){
     _funccall->LHS->accept(this);
 }
 void ASTProcVis::visit(MemberAccess* _memberaccess){
-    std::cout << "visit " << "MemberAccess" << std::endl;
+    std::cerr << "visit " << "MemberAccess" << std::endl;
     //cant link easily to their meaning, don't know their namespace
     //_memberaccess->ID->accept(this);
     _memberaccess->LHS->accept(this);

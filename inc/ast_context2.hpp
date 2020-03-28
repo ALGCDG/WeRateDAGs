@@ -148,6 +148,7 @@ struct Record{
     Record(Table* _parentTable) : parentTable(_parentTable){}
     virtual bool hasID(const std::string& _id){ return false; }
     virtual std::string get_unique_id() {return std::string(""); }
+    virtual std::string get_id() {return std::string(""); }
     virtual void SetName(const std::string& _id){}
     virtual void PrettyPrint(){}
     virtual unsigned int DeclarationSize(){ return 0; }
@@ -183,6 +184,7 @@ struct NamedRecord : public Record{
     NamedRecord(Table* _parent) : Record(_parent){}
     bool hasID(const std::string& _id) override { return _id == id; }
     std::string get_unique_id() {return unique_id; }
+    std::string get_id() {return id; }
     //use this to check on receipt of named record which type it is
     // virtual bool isFunctionDefinition(){ return false; }
     virtual void SetName(const std::string& _id){ id = _id; unique_id = _id + std::to_string(UniqueCtr()); }

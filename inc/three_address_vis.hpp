@@ -63,7 +63,7 @@ class vm
 class three_address_Visitor : public Visitor
 {
     public:
-    three_address_Visitor(): counter(0), return_register(), continue_to(), break_to(), cases(), global(true), global_labels(), intermediate_values(), temporary_registers(), saved_registers(), variable_map(), writing(false), parameter_flag(false), func_flag(false), array_flag(false), initlist_count(0), address_flag(false), struct_flag(false)
+    three_address_Visitor(): counter(0), return_register(), continue_to(), break_to(), cases(), global(true), global_labels(), intermediate_values(), temporary_registers(), saved_registers(), variable_map(), writing(false), parameter_flag(false), func_flag(false), array_flag(false), initlist_count(0), address_flag(false), struct_flag(false), struct_fetch_record(false)
     {
         for (int i = 9; i >= 0; i--)
             temporary_registers.push("$t"+std::to_string(i));
@@ -98,6 +98,8 @@ class three_address_Visitor : public Visitor
     std::unordered_map<std::string, int> enum_symbol_map;
     int enum_counter;
     bool struct_flag;
+    bool struct_fetch_record;
+    std::vector<Record*> struct_record;
     void pop(std::string reg, int stack_offset = 0) { std::cout << "lw " << reg << ", " << stack_offset << "($sp)" << std::endl << "nop" << std::endl;}
     void push(std::string reg, int stack_offset = 0) { std::cout << "sw " << reg << ", " << stack_offset << "($sp)" << std::endl << "nop" << std::endl;}
     void move(std::string dest, std::string src) { std::cout << "move " << dest << ", " << src << std::endl; }
@@ -140,6 +142,7 @@ class three_address_Visitor : public Visitor
         //         }
         //     }
         // }
+        if (struct_fetch_record) struct_record = in->ContextRecord->GetPrimary()->get_table()->subRecords;
         if (parameter_flag)
         {
             std::cerr << "parameter flag" << std::endl;
@@ -201,25 +204,27 @@ class three_address_Visitor : public Visitor
         {
             std::cerr << "allocating struct space" << std::endl;
             int no_elements = 0;
-            genericConstituentType * a = in->ContextRecord->GetPrimary();
+            no_elements = in->ContextRecord->GetPrimary()->get_table()->subRecords.size();
             std::cerr << "here" << std::endl;
-            // std::string struct_name = in->ContextRecord->unique_id;
-            // if (!global)
-            // {
-            //     //assuming type is int
-            //     std::cout << "# allocating " << no_elements*4 << " bytes for structure " << struct_name << " on function stack" << std::endl;
-            //     std::cerr << -no_elements*4 << std::endl;
-            //     std::cout << "addiu $sp, $sp, " << -no_elements*4 << std::endl;
-            //     std::cout << "move $fp, $sp" << std::endl;
-            //     for (auto & r : in->ContextRecord->GetPrimary()->get_table()->subRecords)
-            //     {
-            //         variable_map.update(4);
-            //         variable_map.register_variable(struct_name+'.'+r->get_unique_id(), 4);
-            //     }
-            //     std::cout << "addiu $v0, $fp, " << variable_map.lookup(struct_name+"[0]") << std::endl;
-            //     std::cout << "sw $v0, " << variable_map.lookup(struct_name) << "($fp)" << std::endl;
-            //     std::cout << "nop" << std::endl;
-            // }
+            std::string struct_name = in->ContextRecord->unique_id;
+            if (!global)
+            {
+                //assuming type is int
+                std::cout << "# allocating " << no_elements*4 << " bytes for structure " << struct_name << " on function stack" << std::endl;
+                std::cerr << -no_elements*4 << std::endl;
+                std::cout << "addiu $sp, $sp, " << -no_elements*4 << std::endl;
+                std::cout << "move $fp, $sp" << std::endl;
+                std::string last;
+                for (auto & r : in->ContextRecord->GetPrimary()->get_table()->subRecords)
+                {
+                    variable_map.update(4);
+                    variable_map.register_variable(struct_name+'.'+r->get_unique_id(), 4);
+                    last = r->get_unique_id();
+                }
+                std::cout << "addiu $v0, $fp, " << variable_map.lookup(struct_name+"."+last) << std::endl;
+                std::cout << "sw $v0, " << variable_map.lookup(struct_name) << "($fp)" << std::endl;
+                std::cout << "nop" << std::endl;
+            }
             struct_flag = false;
         }
     }
@@ -330,6 +335,26 @@ class three_address_Visitor : public Visitor
     }
     void visit(MemberAccess * ma)
     {
+        // get pointer to structure (also requried record)
+        if (writing) move("$v1", "$v0");
+        struct_fetch_record = true;
+        auto tmp = writing;
+        writing = false;
+        ma->LHS->accept(this);
+        writing = tmp;
+        struct_fetch_record = false;
+        int offset = 0;
+        for (auto & r : struct_record) if (r->get_id()==ma->ID->Name) break; else offset+=4;
+        if (!writing)
+        {
+            std::cout << "lw $v0, " << offset << "($v0)" << std::endl;
+        }
+        else
+        {
+            std::cout << "sw $v1, " << offset << "($v0)" << std::endl;
+        }
+        std::cout << "nop" << std::endl;
+        // ma->ID->ContextRecord->GetPrimary()->get_table()->subRecords
 
     }
     void visit(DerefMemberAccess * dma)
