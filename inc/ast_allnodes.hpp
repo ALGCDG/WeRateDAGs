@@ -15,7 +15,7 @@ enum class en_typeData{
     POINTER,
     ENUM
 };
-
+std::string ConvertEscapes(const std::string& str_in);
 
 // #include "ast_basenode.hpp"
 
@@ -36,6 +36,7 @@ class Expression;
 class IdentifierNode;
 class Constant;
 class constant_int;
+class constant_char;
 class StringLiteral;
 class PostfixExpr;
 class ArgExprList;
@@ -312,14 +313,25 @@ class constant_int : public Constant {
 public:
     void accept(Visitor *AVisitor) override { AVisitor->visit(this); }
 };
+class constant_char : public Constant {
+public:
+    constant_char(const std::string& _str) : constant(ConvertEscapes(_str)){}
+    std::string constant;//can be more than one char, cast to int in such a case, implementation defined
+    void accept(Visitor * AVisitor) override { AVisitor->visit(this); }//todo, no such visitor
+};
 class StringLiteral : public Expression
 {
 public:
-    StringLiteral(std::string _str, bool L = false) : wide(L), str(_str){}
-    bool wide;
+    StringLiteral(std::string _str) {
+        std::string converted = ConvertEscapes(_str);
+        std::cerr << "constructed string lit" << converted <<  std::endl;
+        str = converted;
+    }
+    // bool wide; not needed, not tested
     std::string str;
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this);}
 };
+
 
 class TypedefNode : public Node{
 public:

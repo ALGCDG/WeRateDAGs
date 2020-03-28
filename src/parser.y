@@ -65,7 +65,7 @@
 };
 
 %token Constant_int Constant_char Constant_double Constant_float Constant_long_double
-%token String /*What is this for*/
+%token String
 %token Identifier
 %token Operator Operator_add  Operator_sub  Operator_addadd  Operator_subsub  Operator_mul  Operator_div  Operator_mod  Operator_and  Operator_or  Operator_not  Operator_assign  Operator_equal  Operator_not_equal  Operator_greater  Operator_less  Operator_greater_equal  Operator_less_equal  Operator_bit_and  Operator_bit_or  Operator_bit_not  Operator_bit_xor  Operator_sl  Operator_sr  Operator_add_assign  Operator_sub_assign  Operator_mul_assign  Operator_div_assign  Operator_mod_assign  Operator_and_assign  Operator_or_assign  Operator_xor_assign  Operator_sr_assign  Operator_sl_assign  Operator_ref  Operator_deref  Operator_access  Operator_deref_access  Operator_sizeof  Operator_trinary_question  Operator_trinary_choice  Operator_comma 
 %token Keyword Keyword_void Keyword_char Keyword_short Keyword_int Keyword_long Keyword_float Keyword_double Keyword_signed Keyword_unsigned Keyword_case Keyword_default Keyword_if Keyword_else Keyword_switch Keyword_while Keyword_do Keyword_for Keyword_continue Keyword_break Keyword_return Keyword_enum Keyword_struct Keyword_typedef
@@ -81,6 +81,7 @@
 %type <dvalue> Constant_double
 %type <fvalue> Constant_float
 %type <ldvalue> Constant_long_double
+%type <text> String
 %type <text> Identifier
 %type <text> Keyword Keyword_void Keyword_char Keyword_short Keyword_int Keyword_long Keyword_float Keyword_double Keyword_signed Keyword_unsigned Keyword_case Keyword_default Keyword_if Keyword_else Keyword_switch Keyword_while Keyword_do Keyword_for Keyword_continue Keyword_break Keyword_return Keyword_enum Keyword_struct Keyword_typedef
 
@@ -158,13 +159,13 @@ EXPRESSIONS
 
 primary_EXPR: Ident { $$ = $1; }
                   | Constant { $$ = $1; }
-                  | String { std::cerr << "STRING" << std::endl; }
+                  | String { std::cerr << "new string literal" << std::endl;$$ = new StringLiteral(*$1); }/*TODO*/
                   | Punctuator_par_open EXPR Punctuator_par_close { $$ = $2; }
 
 Ident: Identifier { $$ = new IdentifierNode(*($1)); } 
 
 Constant: Constant_int { $$ = new constant_int($1); }  
-		| Constant_char  { $$ = new Constant(); }  
+		| Constant_char  { $$ = new Constant(); } /*TODO*/ 
 		| Constant_double { $$ = new Constant(); }  
 		| Constant_float { $$ = new Constant(); }  
 		| Constant_long_double { $$ = new Constant(); }  
@@ -177,7 +178,6 @@ postfix_EXPR: primary_EXPR { $$ = $1; } /*Pass through*/
                   | postfix_EXPR Operator_deref_access Ident   { $$ = new DerefMemberAccess($1, $3); }
                   | postfix_EXPR Operator_addadd  { $$ = new PostInc($1); }
                   | postfix_EXPR Operator_subsub  { $$ = new PostDec($1); }
-
 
 argument_EXPR_list: assignment_EXPR { $$ = new ArgExprList($1); }
                   | argument_EXPR_list Operator_comma assignment_EXPR { ($1)->AppendArgExpression($3); }
@@ -492,3 +492,4 @@ main()
 	}
 }
 */
+
