@@ -4,6 +4,8 @@
 #include "ast_context2.hpp"
 #include "ast_allnodes.hpp"
 #include <cassert>
+#include <experimental/optional>
+
 
 class ASTProcVis : public Visitor{
 public:

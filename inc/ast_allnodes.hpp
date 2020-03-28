@@ -265,6 +265,74 @@ public:
     virtual void visit(EnumSpecifier* _enumspec){}
 };
 
+struct TypeInfo;
+class AbstractTypeGetter{
+public:
+    virtual TypeInfo* GetType(Expression*) = 0;
+    virtual TypeInfo* GetType(IdentifierNode*) = 0;
+    virtual TypeInfo* GetType(Constant*) = 0;
+    virtual TypeInfo* GetType(constant_int*) = 0;
+    virtual TypeInfo* GetType(constant_char*) = 0;
+    virtual TypeInfo* GetType(StringLiteral*) = 0;
+    virtual TypeInfo* GetType(TypedefNode*) = 0;
+    virtual TypeInfo* GetType(PostfixExpr*) = 0;
+    virtual TypeInfo* GetType(ArgExprList*) = 0;
+    virtual TypeInfo* GetType(ArraySubscript*) = 0;
+    virtual TypeInfo* GetType(FuncCall*) = 0;
+    virtual TypeInfo* GetType(MemberAccess*) = 0;
+    virtual TypeInfo* GetType(DerefMemberAccess*) = 0;
+    virtual TypeInfo* GetType(PostInc*) = 0;
+    virtual TypeInfo* GetType(PostDec*) = 0;
+    virtual TypeInfo* GetType(PrefixExpr*) = 0;
+    virtual TypeInfo* GetType(UnaryAddressOperator*) = 0;
+    virtual TypeInfo* GetType(UnaryDerefOperator*) = 0;
+    virtual TypeInfo* GetType(UnaryPlusOperator*) = 0;
+    virtual TypeInfo* GetType(UnaryNegOperator*) = 0;
+    virtual TypeInfo* GetType(UnaryBitwiseNotOperator*) = 0;
+    virtual TypeInfo* GetType(UnaryLogicalNotOperator*) = 0;
+    virtual TypeInfo* GetType(PreInc*) = 0;
+    virtual TypeInfo* GetType(PreDec*) = 0;
+    virtual TypeInfo* GetType(SizeofExpr*) = 0;
+    virtual TypeInfo* GetType(SizeofType*) = 0;
+    virtual TypeInfo* GetType(CastExpr*) = 0;
+    virtual TypeInfo* GetType(BinaryOpExpression*) = 0;
+    virtual TypeInfo* GetType(Multiply*) = 0;
+    virtual TypeInfo* GetType(Divide*) = 0;
+    virtual TypeInfo* GetType(Modulo*) = 0;
+    virtual TypeInfo* GetType(Add*) = 0;
+    virtual TypeInfo* GetType(Sub*) = 0;
+    virtual TypeInfo* GetType(ShiftLeft*) = 0;
+    virtual TypeInfo* GetType(ShiftRight*) = 0;
+    virtual TypeInfo* GetType(LogicalBinaryExpression*) = 0;
+    virtual TypeInfo* GetType(LessThan*) = 0;
+    virtual TypeInfo* GetType(GreaterThan*) = 0;
+    virtual TypeInfo* GetType(LessThanOrEqual*) = 0;
+    virtual TypeInfo* GetType(GreaterThanOrEqual*) = 0;
+    virtual TypeInfo* GetType(EqualTo*) = 0;
+    virtual TypeInfo* GetType(NotEqualTo*) = 0;
+    virtual TypeInfo* GetType(LogicalAND*) = 0;
+    virtual TypeInfo* GetType(LogicalOR*) = 0;
+    virtual TypeInfo* GetType(BitwiseBinaryExpression*) = 0;
+    virtual TypeInfo* GetType(BitwiseAND*) = 0;
+    virtual TypeInfo* GetType(BitwiseOR*) = 0;
+    virtual TypeInfo* GetType(BitwiseXOR*) = 0;
+    virtual TypeInfo* GetType(TernaryOpExpression*) = 0;
+    virtual TypeInfo* GetType(GenericAssignExpr*) = 0;
+    virtual TypeInfo* GetType(AssignmentExpression*) = 0;
+    virtual TypeInfo* GetType(MulAssignment*) = 0;
+    virtual TypeInfo* GetType(DivAssignment*) = 0;
+    virtual TypeInfo* GetType(ModAssignment*) = 0;
+    virtual TypeInfo* GetType(AddAssignment*) = 0;
+    virtual TypeInfo* GetType(SubAssignment*) = 0;
+    virtual TypeInfo* GetType(ShiftLeftAssignment*) = 0;
+    virtual TypeInfo* GetType(ShiftRightAssignment*) = 0;
+    virtual TypeInfo* GetType(BitwiseANDAssignment*) = 0;
+    virtual TypeInfo* GetType(BitwiseXORAssignment*) = 0;
+    virtual TypeInfo* GetType(BitwiseORAssignment*) = 0;
+    virtual TypeInfo* GetType(ConstantExpression*) = 0;
+    virtual TypeInfo* GetType(CommaSepExpression*) = 0;
+};
+
 class Node{
 public:
     virtual void accept(Visitor *AVisitor) = 0;
@@ -273,12 +341,13 @@ public:
 /*
 EXPRESSIONS
 */
-
 class Expression : public Node{
 public:
     virtual unsigned int constEval(){}
     //TODO types!
     void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
+
+    virtual TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ getter->GetType(this); }
 };
 
 //primary expr
@@ -288,6 +357,7 @@ public:
     std::string Name;
     NamedRecord* ContextRecord;
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
+    TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ getter->GetType(this); }
 };
 
 
@@ -302,34 +372,33 @@ public:
     //     long long_t;
     // };
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
+    TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ getter->GetType(this); }
 };
 
 class constant_int : public Constant {
-    public:
+public:
     int value;
     unsigned int constEval(){ return value; }
     constant_int(int v): value(v) {}
 
-public:
     void accept(Visitor *AVisitor) override { AVisitor->visit(this); }
+    TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ getter->GetType(this); }
 };
 class constant_char : public Constant {
 public:
     constant_char(const std::string& _str) : constant(ConvertEscapes(_str)){}
     std::string constant;//can be more than one char, cast to int in such a case, implementation defined
     void accept(Visitor * AVisitor) override { AVisitor->visit(this); }//todo, no such visitor
+    TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ getter->GetType(this); }
 };
 class StringLiteral : public Expression
 {
 public:
-    StringLiteral(std::string _str) {
-        std::string converted = ConvertEscapes(_str);
-        std::cerr << "constructed string lit" << converted <<  std::endl;
-        str = converted;
-    }
+    StringLiteral(std::string _str) : str(ConvertEscapes(_str)){}
     // bool wide; not needed, not tested
     std::string str;
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this);}
+    TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ getter->GetType(this); }
 };
 
 
@@ -343,6 +412,7 @@ public:
     PostfixExpr(Expression* _LHS) : LHS(_LHS){}
     Expression* LHS;
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
+    TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ getter->GetType(this); }
 };
 //---------------------------------------------------------
 
@@ -353,6 +423,7 @@ public:
     //in the grammar, expression* can be assignment expression
     std::vector<Expression*> Args;
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
+    TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ getter->GetType(this); }
 };
 
 //------------------------------------------------------
@@ -362,6 +433,7 @@ public:
 
     Expression* Subscript;
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
+    TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ getter->GetType(this); }
 };
 
 class FuncCall : public PostfixExpr{
@@ -371,6 +443,7 @@ public:
     ArgExprList* Args;
 
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
+    TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ getter->GetType(this); }
 };
 
 class MemberAccess : public PostfixExpr{
@@ -379,6 +452,7 @@ public:
 
     IdentifierNode* ID;
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
+    TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ getter->GetType(this); }
 };
 
 class DerefMemberAccess : public PostfixExpr{
@@ -387,18 +461,21 @@ public:
 
     IdentifierNode* ID;
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
+    TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ getter->GetType(this); }
 };
 
 class PostInc : public PostfixExpr{
 public:
     PostInc(Expression* _LHS) : PostfixExpr(_LHS){}
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
+    TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ getter->GetType(this); }
 };
 
 class PostDec : public PostfixExpr{
 public:
     PostDec(Expression* _LHS) : PostfixExpr(_LHS){}
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
+    TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ getter->GetType(this); }
 };
 
 
@@ -412,42 +489,49 @@ public:
 
     Expression* RHS;
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
+    TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ getter->GetType(this); }
 };
 
 class UnaryAddressOperator : public PrefixExpr{
 public:
     UnaryAddressOperator(Expression* _RHS) : PrefixExpr(_RHS){}
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
+    TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ getter->GetType(this); }
 };
 
 class UnaryDerefOperator : public PrefixExpr{
 public:
     UnaryDerefOperator(Expression* _RHS) : PrefixExpr(_RHS){}
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
+    TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ getter->GetType(this); }
 };
 
 class UnaryPlusOperator : public PrefixExpr{
 public:
     UnaryPlusOperator(Expression* _RHS) : PrefixExpr(_RHS){}
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
+    TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ getter->GetType(this); }
 };
 
 class UnaryNegOperator : public PrefixExpr{
 public:
     UnaryNegOperator(Expression* _RHS) : PrefixExpr(_RHS){}
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
+    TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ getter->GetType(this); }
 };
 
 class UnaryBitwiseNotOperator : public PrefixExpr{
 public:
     UnaryBitwiseNotOperator(Expression* _RHS) : PrefixExpr(_RHS){}
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
+    TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ getter->GetType(this); }
 };
 
 class UnaryLogicalNotOperator : public PrefixExpr{
 public:
     UnaryLogicalNotOperator(Expression* _RHS) : PrefixExpr(_RHS){}
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
+    TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ getter->GetType(this); }
 };
 
 //The rest of the prefix types:
@@ -455,18 +539,21 @@ class PreInc : public PrefixExpr{
 public:
     PreInc(Expression* _RHS) : PrefixExpr(_RHS){}
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
+    TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ getter->GetType(this); }
 };
 
 class PreDec : public PrefixExpr{
 public:
     PreDec(Expression* _RHS) : PrefixExpr(_RHS){}
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
+    TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ getter->GetType(this); }
 };
 
 class SizeofExpr : public PrefixExpr{
 public:
     SizeofExpr(Expression* _RHS) : PrefixExpr(_RHS){}
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
+    TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ getter->GetType(this); }
 };
 
 class SizeofType : public Expression{
@@ -474,6 +561,7 @@ public:
     SizeofType(type_name* _typ_nam) : typ_nam(_typ_nam){}
     type_name* typ_nam;
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
+    TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ getter->GetType(this); }
 };
 
 class CastExpr : public PrefixExpr{
@@ -482,6 +570,7 @@ public:
     type_name* typ;
 //TODO -> Needs type system
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
+    TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ getter->GetType(this); }
 };
 
 //---------------------------------------------------------
@@ -491,48 +580,56 @@ public:
     BinaryOpExpression(Expression* _LHS, Expression* _RHS) : LHS(_LHS), RHS(_RHS){}
     Expression *LHS, *RHS;  
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
+    TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ getter->GetType(this); }
 };
 
 class Multiply : public BinaryOpExpression{
 public:
     Multiply(Expression* _LHS, Expression* _RHS) : BinaryOpExpression(_LHS, _RHS){}
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
+    TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ getter->GetType(this); }
 };
 
 class Divide : public BinaryOpExpression{
 public:
     Divide(Expression* _LHS, Expression* _RHS) : BinaryOpExpression(_LHS, _RHS){}
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
+    TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ getter->GetType(this); }
 };
 
 class Modulo : public BinaryOpExpression{
 public:
     Modulo(Expression* _LHS, Expression* _RHS) : BinaryOpExpression(_LHS, _RHS){}
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
+    TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ getter->GetType(this); }
 };
 
 class Add : public BinaryOpExpression{
 public:
     Add(Expression* _LHS, Expression* _RHS) : BinaryOpExpression(_LHS, _RHS){}
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
+    TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ getter->GetType(this); }
 };
 
 class Sub : public BinaryOpExpression{
 public:
     Sub(Expression* _LHS, Expression* _RHS) : BinaryOpExpression(_LHS, _RHS){}
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
+    TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ getter->GetType(this); }
 };
 
 class ShiftLeft : public BinaryOpExpression{
 public:
     ShiftLeft(Expression* _LHS, Expression* _RHS) : BinaryOpExpression(_LHS, _RHS){}
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
+    TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ getter->GetType(this); }
 };
 
 class ShiftRight : public BinaryOpExpression{
 public:
     ShiftRight(Expression* _LHS, Expression* _RHS) : BinaryOpExpression(_LHS, _RHS){}
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
+    TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ getter->GetType(this); }
 };
 
 //------------
@@ -541,54 +638,63 @@ public:
     LogicalBinaryExpression(Expression* _LHS, Expression* _RHS) : BinaryOpExpression(_LHS, _RHS)/*, EvalsToType() TODO set to int */ {}
 //Always evaluates to int
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
+    TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ getter->GetType(this); }
 };
 
 class LessThan : public LogicalBinaryExpression{
 public:
     LessThan(Expression* _LHS, Expression* _RHS) : LogicalBinaryExpression(_LHS, _RHS){}
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
+    TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ getter->GetType(this); }
 };
 
 class GreaterThan : public LogicalBinaryExpression{
 public:
     GreaterThan(Expression* _LHS, Expression* _RHS) : LogicalBinaryExpression(_LHS, _RHS){}
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
+    TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ getter->GetType(this); }
 };
 
 class LessThanOrEqual : public LogicalBinaryExpression{
 public:
     LessThanOrEqual(Expression* _LHS, Expression* _RHS) : LogicalBinaryExpression(_LHS, _RHS){}
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
+    TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ getter->GetType(this); }
 };
 
 class GreaterThanOrEqual : public LogicalBinaryExpression{
 public:
     GreaterThanOrEqual(Expression* _LHS, Expression* _RHS) : LogicalBinaryExpression(_LHS, _RHS){}
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
+    TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ getter->GetType(this); }
 };
 
 class EqualTo : public LogicalBinaryExpression{
 public:
     EqualTo(Expression* _LHS, Expression* _RHS) : LogicalBinaryExpression(_LHS, _RHS){}
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
+    TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ getter->GetType(this); }
 };
 
 class NotEqualTo : public LogicalBinaryExpression{
 public:
     NotEqualTo(Expression* _LHS, Expression* _RHS) : LogicalBinaryExpression(_LHS, _RHS){}
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
+    TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ getter->GetType(this); }
 };
 
 class LogicalAND : public LogicalBinaryExpression{
 public:
     LogicalAND(Expression* _LHS, Expression* _RHS) : LogicalBinaryExpression(_LHS, _RHS){}
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
+    TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ getter->GetType(this); }
 };
 
 class LogicalOR : public LogicalBinaryExpression{
 public:
     LogicalOR(Expression* _LHS, Expression* _RHS) : LogicalBinaryExpression(_LHS, _RHS){}
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
+    TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ getter->GetType(this); }
 };
 
 //------------
@@ -597,24 +703,28 @@ class BitwiseBinaryExpression : public BinaryOpExpression{
 public:
     BitwiseBinaryExpression(Expression* _LHS, Expression* _RHS) : BinaryOpExpression(_LHS, _RHS){}
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
+    TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ getter->GetType(this); }
 };
 
 class BitwiseAND : public BitwiseBinaryExpression{
 public:
     BitwiseAND(Expression* _LHS, Expression* _RHS) : BitwiseBinaryExpression(_LHS, _RHS){}
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
+    TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ getter->GetType(this); }
 };
 
 class BitwiseOR : public BitwiseBinaryExpression{
 public:
     BitwiseOR(Expression* _LHS, Expression* _RHS) : BitwiseBinaryExpression(_LHS, _RHS){}
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
+    TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ getter->GetType(this); }
 };
 
 class BitwiseXOR : public BitwiseBinaryExpression{
 public:
     BitwiseXOR(Expression* _LHS, Expression* _RHS) : BitwiseBinaryExpression(_LHS, _RHS){}
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
+    TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ getter->GetType(this); }
 };
 //---------------------------------------------------------
 
@@ -623,6 +733,7 @@ public:
     TernaryOpExpression(Expression* cond, Expression* _true, Expression* _false) : Condition(cond), IfTrue(_true), IfFalse(_false){}
     Expression* Condition, *IfTrue, *IfFalse;
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
+    TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ getter->GetType(this); }
 };
 
 //---------------------------------------------------------
@@ -637,72 +748,84 @@ public:
     //possibly move this out of this class
     Expression* LHS, *RHS;
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
+    TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ getter->GetType(this); }
 };
 
 class AssignmentExpression : public GenericAssignExpr{
 public:
     AssignmentExpression(Expression* _LHS, Expression* _RHS) : GenericAssignExpr(_LHS, _RHS){}
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
+    TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ getter->GetType(this); }
 };
 
 class MulAssignment : public GenericAssignExpr{
 public:
     MulAssignment(Expression* _LHS, Expression* _RHS) : GenericAssignExpr(_LHS, _RHS){}
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
+    TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ getter->GetType(this); }
 };
 
 class DivAssignment : public GenericAssignExpr{
 public:
     DivAssignment(Expression* _LHS, Expression* _RHS) : GenericAssignExpr(_LHS, _RHS){}
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
+    TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ getter->GetType(this); }
 };
 
 class ModAssignment : public GenericAssignExpr{
 public:
     ModAssignment(Expression* _LHS, Expression* _RHS) : GenericAssignExpr(_LHS, _RHS){}
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
+    TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ getter->GetType(this); }
 };
 
 class AddAssignment : public GenericAssignExpr{
 public:
     AddAssignment(Expression* _LHS, Expression* _RHS) : GenericAssignExpr(_LHS, _RHS){}
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
+    TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ getter->GetType(this); }
 };
 
 class SubAssignment : public GenericAssignExpr{
 public:
     SubAssignment(Expression* _LHS, Expression* _RHS) : GenericAssignExpr(_LHS, _RHS){}
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
+    TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ getter->GetType(this); }
 };
 
 class ShiftLeftAssignment : public GenericAssignExpr{
 public:
     ShiftLeftAssignment(Expression* _LHS, Expression* _RHS) : GenericAssignExpr(_LHS, _RHS){}
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
+    TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ getter->GetType(this); }
 };
 
 class ShiftRightAssignment : public GenericAssignExpr{
 public:
     ShiftRightAssignment(Expression* _LHS, Expression* _RHS) : GenericAssignExpr(_LHS, _RHS){}
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
+    TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ getter->GetType(this); }
 };
 
 class BitwiseANDAssignment : public GenericAssignExpr{
 public:
     BitwiseANDAssignment(Expression* _LHS, Expression* _RHS) : GenericAssignExpr(_LHS, _RHS){}
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
+    TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ getter->GetType(this); }
 };
 
 class BitwiseXORAssignment : public GenericAssignExpr{
 public:
     BitwiseXORAssignment(Expression* _LHS, Expression* _RHS) : GenericAssignExpr(_LHS, _RHS){}
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
+    TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ getter->GetType(this); }
 };
 
 class BitwiseORAssignment : public GenericAssignExpr{
 public:
     BitwiseORAssignment(Expression* _LHS, Expression* _RHS) : GenericAssignExpr(_LHS, _RHS){}
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
+    TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ getter->GetType(this); }
 };
 
 //---------------------------------------------------------
@@ -714,6 +837,7 @@ public:
     unsigned int constEval() override { return ConstantSubtree->constEval(); }
     Expression* ConstantSubtree;
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
+    TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ getter->GetType(this); }
 };
 
 //TODO Comma seperated expression? Grammar from annex:
@@ -725,6 +849,7 @@ public:
 
     Expression* RHS, *LHS;
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
+    TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ getter->GetType(this); }
 };
 
 //---------------------------------------------------------
