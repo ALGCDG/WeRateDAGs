@@ -72,8 +72,8 @@ class three_address_Visitor : public Visitor
     }
     int counter;
     std::stack<std::string> return_register; // a stack which tracks which of the two return registers to use
-    std::stack<std::string> continue_to; // stores where a continue should jump to
-    std::stack<std::string> break_to; // stores where a break should jump to 
+    std::stack<std::pair<std::string, int>> continue_to; // stores where a continue should jump to, and the stack size it should return to
+    std::stack<std::pair<std::string, int>> break_to; // stores where a break should jump to, and the stack size it should return to
     // std::stack<std::string> temporary_words; 
     bool global; // a flag for tracking if declaration is global or is in a scope.
     std::unordered_set<std::string> global_labels;
@@ -1011,12 +1011,26 @@ class three_address_Visitor : public Visitor
     void visit(EmptyStatement *) {}
     void visit(Continue *)
     {
-        std::cout << "b " << continue_to.top() << std::endl;
+        // clearing local variables
+        if (variable_map.stack_size !=  continue_to.top().second)
+        {
+            std::cout << "addiu $sp, $sp, " << variable_map.stack_size - continue_to.top().second << std::endl;
+            move("$fp", "$sp");
+            variable_map.update(continue_to.top().second - variable_map.stack_size);
+        }
+        std::cout << "b " << continue_to.top().first << std::endl;
         std::cout << "nop" << std::endl;
     }
     void visit(Break *)
     {
-        std::cout << "b " << break_to.top() << std::endl;
+        // clearing local variables
+        if (variable_map.stack_size !=  break_to.top().second)
+        {
+            std::cout << "addiu $sp, $sp, " << variable_map.stack_size - break_to.top().second << std::endl;
+            move("$fp", "$sp");
+            variable_map.update(break_to.top().second - variable_map.stack_size);
+        }
+        std::cout << "b " << break_to.top().first << std::endl;
         std::cout << "nop" << std::endl;
     }
     void visit(Return * r)
@@ -1037,8 +1051,8 @@ class three_address_Visitor : public Visitor
         // creating loop exit
         auto end = gen_name("while_end");
         // adding beginning and end as pair to boundry stacks
-        continue_to.push(beginning);
-        break_to.push(end);
+        continue_to.push(std::make_pair(beginning, base_stack_size));
+        break_to.push(std::make_pair(end, base_stack_size));
         // evaluate condition
         auto condition = gen_name("while_condition");
         w->ControlExpression->accept(this);
@@ -1065,14 +1079,15 @@ class three_address_Visitor : public Visitor
     }
     void visit(DoWhile *dw)
     {
+        int base_stack_size = variable_map.stack_size;
         // creating entry label
         auto beginning = gen_name("while_begin");
         std::cout << beginning << ':' << std::endl;
         // creating loop exit
         auto end = gen_name("while_end");
         // adding beginning and end as pair to boundry stacks
-        continue_to.push(beginning);
-        break_to.push(end);
+        continue_to.push(std::make_pair(beginning, base_stack_size));
+        break_to.push(std::make_pair(end, base_stack_size));
         // evaluate condition
         auto condition = gen_name("while_condition");
         dw->ControlExpression->accept(this);
@@ -1083,6 +1098,13 @@ class three_address_Visitor : public Visitor
         dw->Body->accept(this);
         continue_to.pop();
         break_to.pop();
+        // clearing local variables
+        if (variable_map.stack_size !=  base_stack_size)
+        {
+            std::cout << "addiu $sp, $sp, " << variable_map.stack_size - base_stack_size << std::endl;
+            move("$fp", "$sp");
+            variable_map.update(base_stack_size - variable_map.stack_size);
+        }
         // branch to beginning
         std::cout << "b " << beginning << std::endl;
         std::cout << "nop" << std::endl;
@@ -1092,6 +1114,7 @@ class three_address_Visitor : public Visitor
     }
     void visit(For * f)
     {
+        int base_stack_size = variable_map.stack_size;
         // doing inital statement
         if (f->Init != NULL)
         {
@@ -1102,8 +1125,8 @@ class three_address_Visitor : public Visitor
         // creating loop exit
         auto end = gen_name("for_end");
         // adding beginning and end as pair to boundry stacks
-        continue_to.push(beginning);
-        break_to.push(end);
+        continue_to.push(std::make_pair(beginning, base_stack_size));
+        break_to.push(std::make_pair(end, base_stack_size));
         // writing start
         std::cout << beginning << ':' << std::endl;
         // doing control statement
@@ -1123,6 +1146,13 @@ class three_address_Visitor : public Visitor
         {
             f->Next->accept(this);
         }
+        // clearing local variables
+        if (variable_map.stack_size !=  base_stack_size)
+        {
+            std::cout << "addiu $sp, $sp, " << variable_map.stack_size - base_stack_size << std::endl;
+            move("$fp", "$sp");
+            variable_map.update(base_stack_size - variable_map.stack_size);
+        }
         // jump to beginning
         std::cout << "b " << beginning << std::endl;
         std::cout << "nop" << std::endl;
@@ -1134,6 +1164,7 @@ class three_address_Visitor : public Visitor
     }
     void visit(If * i)
     {
+        int base_stack_size = variable_map.stack_size;
         // creating labels
         auto true_case_label = gen_name("if_true");
         auto end_label = gen_name("if_end");
@@ -1146,11 +1177,19 @@ class three_address_Visitor : public Visitor
         // do true
         std::cout << true_case_label << ':' << std::endl;
         i->IfTrue->accept(this);
+        // clearing local variables
+        if (variable_map.stack_size !=  base_stack_size)
+        {
+            std::cout << "addiu $sp, $sp, " << variable_map.stack_size - base_stack_size << std::endl;
+            move("$fp", "$sp");
+            variable_map.update(base_stack_size - variable_map.stack_size);
+        }
         // end
         std::cout << end_label << ':' << std::endl;
     }
     void visit(IfElse *ie)
     {
+        int base_stack_size = variable_map.stack_size;
         // creating labels
         auto true_case_label = gen_name("if_true");
         auto false_case_label = gen_name("if_false");
@@ -1164,11 +1203,25 @@ class three_address_Visitor : public Visitor
         // do true
         std::cout << true_case_label << ':' << std::endl;
         ie->IfTrue->accept(this);
+        // clearing local variables
+        if (variable_map.stack_size !=  base_stack_size)
+        {
+            std::cout << "addiu $sp, $sp, " << variable_map.stack_size - base_stack_size << std::endl;
+            move("$fp", "$sp");
+            variable_map.update(base_stack_size - variable_map.stack_size);
+        }
         std::cout << "b " << end_label << std::endl;
         std::cout << "nop" << std::endl;
         // do false
         std::cout << false_case_label << ':' << std::endl;
         ie->IfFalse->accept(this);
+        // clearing local variables
+        if (variable_map.stack_size !=  base_stack_size)
+        {
+            std::cout << "addiu $sp, $sp, " << variable_map.stack_size - base_stack_size << std::endl;
+            move("$fp", "$sp");
+            variable_map.update(base_stack_size - variable_map.stack_size);
+        }
         // end
         std::cout << end_label << ':' << std::endl;
     }
@@ -1206,6 +1259,7 @@ class three_address_Visitor : public Visitor
     }
     void visit(Switch * s)
     {
+        int base_stack_size = variable_map.stack_size;
         // creating entry label
         auto beginning = gen_name("switch_begin");
         std::cout << beginning << ':' << std::endl;
@@ -1215,7 +1269,7 @@ class three_address_Visitor : public Visitor
         // default label
         default_label = "";
         // adding beginning and end as pair to boundry stacks
-        break_to.push(end);
+        break_to.push(std::make_pair(end, base_stack_size));
         // jumping to decision
         std::cout << "b " << decision << std::endl;
         std::cout << "nop" << std::endl;
@@ -1242,6 +1296,13 @@ class three_address_Visitor : public Visitor
         {
             std::cout << "b " << default_label << std::endl;
             std::cout << "nop" << std::endl;
+        }
+        // clearing local variables
+        if (variable_map.stack_size !=  base_stack_size)
+        {
+            std::cout << "addiu $sp, $sp, " << variable_map.stack_size - base_stack_size << std::endl;
+            move("$fp", "$sp");
+            variable_map.update(base_stack_size - variable_map.stack_size);
         }
         std::cout << end << ':' << std::endl;
     }
