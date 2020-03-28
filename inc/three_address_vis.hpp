@@ -1297,7 +1297,7 @@ class three_address_Visitor : public Visitor
             }
         }
         // make space for local variables
-        stacksize = 8 + 8*4; // by default we assign space for return address, old stack pointer, and saved registers
+        stacksize = 8 + 8*4 + 4; // by default we assign space for return address, old stack pointer, and saved registers
         variable_map.update(stacksize);
         std::cout << "addiu $sp, $sp, " << -stacksize << std::endl;
         // store return address
@@ -1310,7 +1310,7 @@ class three_address_Visitor : public Visitor
         // make space for saved registers (always going to be)
         for (int i = 0; i < 8; i++)
         {
-            std::cout << "sw $s" << i << ", " << (i)*4 << "($sp)" << std::endl;
+            std::cout << "sw $s" << i << ", " << (i+1)*4 << "($sp)" << std::endl;
             std::cout << "nop" << std::endl;
         }
         std::cout << "move $fp, $sp" << std::endl;
