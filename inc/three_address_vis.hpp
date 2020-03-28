@@ -1030,6 +1030,7 @@ class three_address_Visitor : public Visitor
     }
     void visit(While * w) 
     {
+        int base_stack_size = variable_map.stack_size;
         // creating entry label
         auto beginning = gen_name("while_begin");
         std::cout << beginning << ':' << std::endl;
@@ -1048,6 +1049,13 @@ class three_address_Visitor : public Visitor
         w->Body->accept(this);
         continue_to.pop();
         break_to.pop();
+        // clearing local variables
+        if (variable_map.stack_size !=  base_stack_size)
+        {
+            std::cout << "addiu $sp, $sp, " << variable_map.stack_size - base_stack_size << std::endl;
+            move("$fp", "$sp");
+            variable_map.update(base_stack_size - variable_map.stack_size);
+        }
         // branch to beginning
         std::cout << "b "<< beginning << std::endl;
         std::cout << "nop" << std::endl;
