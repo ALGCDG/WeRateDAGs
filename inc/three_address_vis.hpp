@@ -186,7 +186,7 @@ class three_address_Visitor : public Visitor
                 if (!variable_map.contains(in->ContextRecord->unique_id))
                 {
                     std::cerr << "new" << std::endl;
-                    stacksize+=4;
+                    // stacksize+=4;
                     variable_map.update(4);
                     std::cout << "# allocating space for " << in->ContextRecord->unique_id << std::endl;
                     std::cout << "addiu $sp, $sp, -4" << std::endl;
@@ -1039,6 +1039,9 @@ class three_address_Visitor : public Visitor
         {
             r->ReturnExpression->accept(this);
         }
+        // FREE STACK
+        std::cout << "addiu $sp, $sp, " << variable_map.get_stack_size() - stacksize << std::endl;
+        move("$fp", "$sp");
         std::cout << "b " << function_end << std::endl;
         std::cout << "nop" << std::endl;
     }
@@ -1391,7 +1394,9 @@ class three_address_Visitor : public Visitor
         fd->Body->accept(this);
         global = true;
         // FREE STACK
-        stacksize = variable_map.get_stack_size();
+        std::cout << "addiu $sp, $sp, " << variable_map.get_stack_size() - stacksize << std::endl;
+        move("$fp", "$sp");
+        // stacksize = variable_map.get_stack_size();
         std::cout << end << ':' << std::endl;
         // restore saved registers
         for (int i = 0; i < 8; i++)
