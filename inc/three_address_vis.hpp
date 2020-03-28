@@ -63,7 +63,7 @@ class vm
 class three_address_Visitor : public Visitor
 {
     public:
-    three_address_Visitor(): counter(0), return_register(), continue_to(), break_to(), cases(), global(true), global_labels(), intermediate_values(), temporary_registers(), saved_registers(), variable_map(), writing(false), parameter_flag(false), func_flag(false), array_flag(false), initlist_count(0), address_flag(false), struct_flag(false), struct_fetch_record(false)
+    three_address_Visitor(): counter(0), return_register(), continue_to(), break_to(), cases(), global(true), global_labels(), intermediate_values(), temporary_registers(), saved_registers(), variable_map(), writing(false), parameter_flag(false), func_flag(false), array_flag(false), initlist_count(0), address_flag(false), struct_flag(false), struct_fetch_record(false), sizeof_flag(false)
     {
         for (int i = 9; i >= 0; i--)
             temporary_registers.push("$t"+std::to_string(i));
@@ -100,9 +100,12 @@ class three_address_Visitor : public Visitor
     bool struct_flag;
     bool struct_fetch_record;
     std::vector<Record*> struct_record;
+    std::unordered_map<std::string, int> sizeof_variables;
+    bool sizeof_flag;
     void pop(std::string reg, int stack_offset = 0) { std::cout << "lw " << reg << ", " << stack_offset << "($sp)" << std::endl << "nop" << std::endl;}
     void push(std::string reg, int stack_offset = 0) { std::cout << "sw " << reg << ", " << stack_offset << "($sp)" << std::endl << "nop" << std::endl;}
     void move(std::string dest, std::string src) { std::cout << "move " << dest << ", " << src << std::endl; }
+    void li(int val, std::string dest = "$v0") {std::cout << "li " << dest << ", " << val << std::endl;}
     std::string get_temp_register(const std::string &inter)
     {
         if (!saved_registers.empty())
@@ -149,6 +152,7 @@ class three_address_Visitor : public Visitor
             variable_map.update(4, false);
             variable_map.register_variable(in->ContextRecord->unique_id, 0);
         }
+        else if (sizeof_flag) li(sizeof_variables[in->ContextRecord->get_unique_id()]);
         else if (func_flag)
         {
             std::cerr << "func flag" << std::endl;
@@ -225,6 +229,7 @@ class three_address_Visitor : public Visitor
                 std::cout << "sw $v0, " << variable_map.lookup(struct_name) << "($fp)" << std::endl;
                 std::cout << "nop" << std::endl;
             }
+            sizeof_variables[struct_name]=no_elements*4;
             struct_flag = false;
         }
     }
@@ -354,11 +359,29 @@ class three_address_Visitor : public Visitor
             std::cout << "sw $v1, " << offset << "($v0)" << std::endl;
         }
         std::cout << "nop" << std::endl;
-        // ma->ID->ContextRecord->GetPrimary()->get_table()->subRecords
-
     }
     void visit(DerefMemberAccess * dma)
-    {}
+    {
+        // // get pointer to structure (also requried record)
+        // if (writing) move("$v1", "$v0");
+        // struct_fetch_record = true;
+        // auto tmp = writing;
+        // writing = false;
+        // ma->LHS->accept(this);
+        // writing = tmp;
+        // struct_fetch_record = false;
+        // int offset = 0;
+        // for (auto & r : struct_record) if (r->get_id()==ma->ID->Name) break; else offset+=4;
+        // if (!writing)
+        // {
+        //     std::cout << "lw $v0, " << offset << "($v0)" << std::endl;
+        // }
+        // else
+        // {
+        //     std::cout << "sw $v1, " << offset << "($v0)" << std::endl;
+        // }
+        // std::cout << "nop" << std::endl;
+    }
     void visit(PostInc * pi)
     {
         std::cerr << "PI" << std::endl;
@@ -455,8 +478,27 @@ class three_address_Visitor : public Visitor
         pd->RHS->accept(this);
         writing = false;
     }
-    void visit(SizeofExpr *) {}
-    void visit(SizeofType *) {}
+    void visit(SizeofExpr * soe)
+    {
+        sizeof_flag = true;
+        soe->RHS->accept(this);
+        sizeof_flag = false;
+    }
+    void visit(SizeofType * sot)
+    {
+        if(sot->typ_nam != NULL){
+        if(sot->typ_nam->spec_list != NULL){
+        if(sot->typ_nam->spec_list->type_spec != NULL){
+        auto type = sot->typ_nam->spec_list->type_spec->type;
+        if (type == "void") li(1);
+        else if (type == "char") li(1);
+        else if (type == "int") li(4);
+        else if (type == "float") li(4);
+        else if (type == "double") li(8);
+        else if (type == "long") li(8);
+        else if (type == "short") li(2);
+        }}}
+    }
     void visit(CastExpr *) {}
     // std::pair<std::string, std::string> descend(BinaryOpExpression * bop)
     // {
@@ -893,6 +935,7 @@ class three_address_Visitor : public Visitor
                             std::cerr << -no_elements*4 << std::endl;
                             std::cout << "addiu $sp, $sp, " << -no_elements*4 << std::endl;
                             std::cout << "move $fp, $sp" << std::endl;
+                            sizeof_variables[array_name]=no_elements*4;
                             for (int i = no_elements-1; i >= 0 ; i--)
                             {
                                 variable_map.update(4);
