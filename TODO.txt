@@ -16,5 +16,4 @@
 ./compiler_tests/strings/puts.c
 ./compiler_tests/strings/search.c
 ./compiler_tests/types/sizeof_char_inst.c
-./compiler_tests/types/sizeof_int_inst.c
 ./compiler_tests/types/unsigned.c

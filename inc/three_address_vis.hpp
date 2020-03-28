@@ -194,6 +194,7 @@ class three_address_Visitor : public Visitor
                     std::cout << "sw $v0, 4($fp)" << std::endl; // still need to add frame offset TODO
                     std::cout << "nop" << std::endl;
                     variable_map.register_variable(in->ContextRecord->unique_id, 4);
+                    sizeof_variables[in->ContextRecord->unique_id] = 4;
                 }
                 else
                 {
