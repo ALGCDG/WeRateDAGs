@@ -161,6 +161,7 @@ public:
     virtual void visit(IdentifierNode *) {}
     virtual void visit(Constant *) {}
     virtual void visit(constant_int *) {}
+    virtual void visit(constant_char *) {}
     virtual void visit(ArraySubscript *) {}
     virtual void visit(FuncCall *) {}
     virtual void visit(MemberAccess *) {}

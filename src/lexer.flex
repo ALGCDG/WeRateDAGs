@@ -50,9 +50,12 @@ simpEscSeq \\.
 		/*
 		Char
         also returns a constant
-		*/
         yylval.cvalue = yytext[1];
         fprintf(stderr, "its a char constant: %s\n", yylval.cvalue);
+		*/
+        std::string match = std::string(yytext);
+        yylval.text = new std::string();
+        *(yylval.text) = match.substr(1, yyleng - 2);
         return Constant_char;
 }
 

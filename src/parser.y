@@ -77,7 +77,7 @@
 %type <struct_dec_list> struct_declarator_list
 
 %type <ivalue> Constant_int
-%type <cvalue> Constant_char
+%type <text> Constant_char
 %type <dvalue> Constant_double
 %type <fvalue> Constant_float
 %type <ldvalue> Constant_long_double
@@ -165,7 +165,7 @@ primary_EXPR: Ident { $$ = $1; }
 Ident: Identifier { $$ = new IdentifierNode(*($1)); } 
 
 Constant: Constant_int { $$ = new constant_int($1); }  
-		| Constant_char  { $$ = new Constant(); } /*TODO*/ 
+		| Constant_char  { $$ = new constant_char(*$1); } 
 		| Constant_double { $$ = new Constant(); }  
 		| Constant_float { $$ = new Constant(); }  
 		| Constant_long_double { $$ = new Constant(); }  

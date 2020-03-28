@@ -246,6 +246,11 @@ class three_address_Visitor : public Visitor
         std::cout << "li $v0, " << ci->value << std::endl;
         // }
     }
+    virtual void visit(constant_char * cc)
+    {
+        std::cerr << "character string " << cc->constant << std::endl;
+        std::cout << "li $v0, " << (int)cc->constant[0] << std::endl;
+    }
     void visit(ArraySubscript * as)
     {
         std::cerr << "subscript!!!" << std::endl;
