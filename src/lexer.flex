@@ -30,12 +30,31 @@ Operator [+\-*/%&|^><=!~?:.,#\[\]\(\)\{\}]
 
 
 SourceCharSet [a-zA-Z0-9_\{\}\[\]#\(\)<>%:;.?*+-/^&|~!=,\\"'\n]
-sChar [a-zA-Z0-9_\{\}\[\]#\(\)<>%:;.?*+-/^&|~!=,']
-simpEscSeq \"\\.\"
-escSeq {simpEscSeq} | {octEscSeq} | {hexEscSeq}
+sChar [a-zA-Z0-9_\{\}\[\]#\(\)<>%:;.?*+-/^&|~!=,' \t\v\f]
+cChar [a-zA-Z0-9_\{\}\[\]#\(\)<>%:;.?*+-/^&|~!=,']
+simpEscSeq \\.
 %%
 
-{simpEscSeq} { std::cerr << "escape seq:\n" << *yytext << "\nend esc seq\n";}
+\"({sChar}|{simpEscSeq})*\" {
+        /*
+        String-LITERAL
+        */
+        std::string match = std::string(yytext);
+        yylval.text = new std::string();
+        *(yylval.text) = match.substr(1, yyleng - 2);
+        fprintf(stderr, "its a string literal: %s\n", *(yylval.text)); 
+        return String;
+}
+
+\'({cChar}|{simpEscSeq})+\' {
+		/*
+		Char
+        also returns a constant
+		*/
+        yylval.cvalue = yytext[1];
+        fprintf(stderr, "its a char constant: %s\n", yylval.cvalue);
+        return Constant_char;
+}
 
 "int"   {
             /*
@@ -189,28 +208,6 @@ escSeq {simpEscSeq} | {octEscSeq} | {hexEscSeq}
                 fprintf(stderr, "its an octal constant: %s\n", yylval.ivalue);
     	        return Constant_int;
 }
-
-\'.\'	{
-		/*
-		Char
-        also returns a constant
-		*/
-        yylval.cvalue = yytext[1];
-        fprintf(stderr, "its a char constant: %s\n", yylval.cvalue);
-        return Constant_char;
-}
-
-\".[^"]*\"	{
-        /*
-        String-LITERAL
-        */
-        std::string match = std::string(yytext);
-        yylval.text = new std::string();
-        *(yylval.text) = match.substr(1, yyleng - 2);
-        fprintf(stderr, "its a string literal: %s\n", *(yylval.text)); 
-        return String;
-}
-
 
 
 ";"   {

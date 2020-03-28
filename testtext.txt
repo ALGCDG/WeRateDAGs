@@ -1,1 +1,3 @@
-"a"
+int main(){
+    char a[] = "\x4f\x4B\n";
+}
