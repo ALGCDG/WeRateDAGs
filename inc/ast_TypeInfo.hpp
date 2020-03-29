@@ -21,7 +21,6 @@ struct TypeInfo{
 private:
     void SetBaseSpecDetails(const std::string& singleSpec);
     void SetBaseSpecDetails(const std::string& specOne,const std::string& specTwo);
-    
 };
 
 class TypeGetter : public AbstractTypeGetter{    

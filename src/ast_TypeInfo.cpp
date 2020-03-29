@@ -62,7 +62,7 @@ bool TypeInfo::IntegralPromoteIsSigned(TypeInfo* A){
         return false;
     }
 }
-TypeInfo* TypeInfoUsualArithConversion(TypeInfo* A, TypeInfo* B){
+TypeInfo* TypeInfo::UsualArithConversion(TypeInfo* A, TypeInfo* B){
     if(A->Options==TypeInfo::FLOAT || B->Options==TypeInfo::FLOAT){
         TypeInfo* info = new TypeInfo;
         info->Options=TypeInfo::FLOAT;
@@ -76,9 +76,12 @@ TypeInfo* TypeInfoUsualArithConversion(TypeInfo* A, TypeInfo* B){
         return B;
     }
     else{
-        typeSpecifiers* intSpec = new typeSpecifiers;
-        intSpec->specs.push_back("int");
-        TypeInfo* info = new TypeInfo(intSpec);
+        // typeSpecifiers* intSpec = new typeSpecifiers;
+        // intSpec->specs.push_back("int");
+        // TypeInfo* info = new TypeInfo(intSpec);
+        TypeInfo* info = new TypeInfo;
+        info->Options=TypeInfo::INT;
+        info->isSigned=true;
         return info;
     }
 }
@@ -93,11 +96,13 @@ TypeInfo* TypeGetter::GetType(IdentifierNode* _IdentifierNode){
 TypeInfo* TypeGetter::GetType(Constant* _Constant){}
 TypeInfo* TypeGetter::GetType(constant_int* _constant_int){
     TypeInfo* info = new TypeInfo;
-    info->Options=TypeInfo::INT;
+    info->Options=TypeInfo::INT;    
+    return info;
 }
 TypeInfo* TypeGetter::GetType(constant_char* _constant_char){
     TypeInfo* info = new TypeInfo;
     info->Options=TypeInfo::CHAR;
+    return info;
 }
 TypeInfo* TypeGetter::GetType(StringLiteral* _StringLiteral){
     TypeInfo* info = new TypeInfo;
@@ -109,13 +114,25 @@ TypeInfo* TypeGetter::GetType(PostfixExpr* _PostfixExpr){}
 TypeInfo* TypeGetter::GetType(ArgExprList* _ArgExprList){}
 TypeInfo* TypeGetter::GetType(ArraySubscript* _ArraySubscript){
     TypeInfo* below = _ArraySubscript->LHS->acceptTypeGetter(this);
-    arrayType* arr = below->isArr;
-    TypeInfo* returnInfo;
-    if(arr->nextArray!=NULL){ returnInfo = new TypeInfo(arr->nextArray);}
-    else if(arr->pointerElementType!=NULL){ returnInfo = new TypeInfo(arr->pointerElementType);}
-    else if(arr->basetypeElementType!=NULL){ returnInfo = new TypeInfo(arr->basetypeElementType);}
-    else{ throw std::string("No non null array type part"); }
-    return returnInfo;
+    if(below->Options==TypeInfo::ARR)
+    {
+        arrayType* arr = below->isArr;
+        TypeInfo* returnInfo;
+        if(arr->nextArray!=NULL){ returnInfo = new TypeInfo(arr->nextArray);}
+        else if(arr->pointerElementType!=NULL){ returnInfo = new TypeInfo(arr->pointerElementType);}
+        else if(arr->basetypeElementType!=NULL){ returnInfo = new TypeInfo(arr->basetypeElementType);}
+        else{ throw std::string("No non null array type part"); }
+        return returnInfo;
+    }
+    else if(below->Options==TypeInfo::POINTER){
+        pointerType* ptr = below->isPt;
+        if(ptr->ptToArray!=NULL){ return new TypeInfo(ptr->ptToArray); }
+        else if(ptr->ptToBasetype!=NULL){ return new TypeInfo(ptr->ptToBasetype); }
+        else if(ptr->ptToEnum!=NULL){ return new TypeInfo(ptr->ptToEnum); }
+        else if(ptr->ptToFunc!=NULL){ return new TypeInfo(ptr->ptToFunc);}
+        else if(ptr->ptToPointer!=NULL){ return new TypeInfo(ptr->ptToPointer);}
+        else if(ptr->ptToStruct!=NULL){ return new TypeInfo(ptr->ptToStruct);}
+    }
 }
 TypeInfo* TypeGetter::GetType(FuncCall* _FuncCall){
     return _FuncCall->LHS->acceptTypeGetter(this);
@@ -138,18 +155,45 @@ TypeInfo* TypeGetter::GetType(PrefixExpr* _PrefixExpr){}
 TypeInfo* TypeGetter::GetType(UnaryAddressOperator* _UnaryAddressOperator){}//todo!
 TypeInfo* TypeGetter::GetType(UnaryDerefOperator* _UnaryDerefOperator){}//todo!
 TypeInfo* TypeGetter::GetType(UnaryPlusOperator* _UnaryPlusOperator){
-    return _UnaryPlusOperator->RHS->acceptTypeGetter(this);
+    TypeInfo* info = _UnaryPlusOperator->RHS->acceptTypeGetter(this);
+    if(info->Options==TypeInfo::FLOAT || info->Options==TypeInfo::DOUBLE){ return info; }
+    else if(info->Options==TypeInfo::INT) return info;
+    else{
+        TypeInfo* newInfo = new TypeInfo;
+        newInfo->Options=TypeInfo::INT;
+        newInfo->isSigned=info->isSigned;
+        delete info;
+        return newInfo;
+    }
 }
 TypeInfo* TypeGetter::GetType(UnaryNegOperator* _UnaryNegOperator){
-    return _UnaryNegOperator->RHS->acceptTypeGetter(this);
+    TypeInfo* info = _UnaryNegOperator->RHS->acceptTypeGetter(this);
+    if(info->Options==TypeInfo::FLOAT || info->Options==TypeInfo::DOUBLE){ return info; }
+    else if(info->Options==TypeInfo::INT) return info;
+    else{
+        TypeInfo* newInfo = new TypeInfo;
+        newInfo->Options=TypeInfo::INT;
+        newInfo->isSigned=info->isSigned;
+        delete info;
+        return newInfo;
+    }
 }
 TypeInfo* TypeGetter::GetType(UnaryBitwiseNotOperator* _UnaryBitwiseNotOperator){
-    //todo -> Integral promotions?
-    return _UnaryBitwiseNotOperator->RHS->acceptTypeGetter(this);
+    TypeInfo* info = _UnaryBitwiseNotOperator->RHS->acceptTypeGetter(this);
+    if(info->Options==TypeInfo::INT) return info;
+    else{
+        TypeInfo* newInfo = new TypeInfo;
+        newInfo->Options=TypeInfo::INT;
+        newInfo->isSigned=info->isSigned;
+        delete info;
+        return newInfo;
+    }
 }
 TypeInfo* TypeGetter::GetType(UnaryLogicalNotOperator* _UnaryLogicalNotOperator){
-    //todo -> Integral promotions?
-    return _UnaryLogicalNotOperator->RHS->acceptTypeGetter(this);
+    TypeInfo* info = new TypeInfo;
+    info->Options=TypeInfo::INT;
+    info->isSigned=true;
+    return info;
 }
 TypeInfo* TypeGetter::GetType(PreInc* _PreInc){
     return _PreInc->RHS->acceptTypeGetter(this);
@@ -158,10 +202,16 @@ TypeInfo* TypeGetter::GetType(PreDec* _PreDec){
     return _PreDec->RHS->acceptTypeGetter(this);
 }
 TypeInfo* TypeGetter::GetType(SizeofExpr* _SizeofExpr){
-    //TODO: Return int
+    TypeInfo* info = new TypeInfo;
+    info->Options=TypeInfo::INT;
+    info->isSigned=true;
+    return info;
 }
 TypeInfo* TypeGetter::GetType(SizeofType* _SizeofType){
-    //TODO: Return int
+    TypeInfo* info = new TypeInfo;
+    info->Options=TypeInfo::INT;
+    info->isSigned=true;
+    return info;
 }
 TypeInfo* TypeGetter::GetType(CastExpr* _CastExpr){
     //TODO analyse declarator!
@@ -248,10 +298,13 @@ TypeInfo* TypeGetter::GetType(ShiftRight* _ShiftRight){
     return conv;
 }
 TypeInfo* TypeGetter::GetType(LogicalBinaryExpression* _LogicalBinaryExpression){
-    typeSpecifiers* intSpec = new typeSpecifiers;
+    // typeSpecifiers* intSpec = new typeSpecifiers;
     //!This will never get deleted:(
-    intSpec->specs.push_back("int");
-    TypeInfo* info = new TypeInfo(intSpec);
+    // intSpec->specs.push_back("int");
+    // TypeInfo* info = new TypeInfo(intSpec);
+    TypeInfo* info = new TypeInfo;
+    info->Options=TypeInfo::INT;
+    info->isSigned=true;
     return info;
 }
 //all return INT
