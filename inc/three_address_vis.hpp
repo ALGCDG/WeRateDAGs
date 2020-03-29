@@ -896,8 +896,10 @@ class three_address_Visitor : public Visitor
             if (i->ass_expr != NULL)
             {
                 i->ass_expr->accept(this);
-                std::cout << "sw $v0, " << std::endl;
-                std::cout << "nop" << std::endl;
+                // std::cout << "addiu $sp, $sp, 4" << std::endl; move("$fp", "$sp");
+                // std::cout << "sw $v0, 0($sp)" << std::endl;
+                // std::cout << "nop" << std::endl;
+                // variable_map.update(4);
             }
             else if (i->init_list != NULL)
             {
