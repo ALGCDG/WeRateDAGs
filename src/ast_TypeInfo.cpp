@@ -54,14 +54,14 @@ TypeInfo::TypeInfo(genericConstituentType* gen){
     }
 }
 
-bool TypeInfo::IntegralPromoteIsSigned(TypeInfo* A){
-    if(A->isSigned == true){
-        return true;
-    }
-    else{
-        return false;
-    }
-}
+// bool TypeInfo::IntegralPromoteIsSigned(TypeInfo* A){
+//     if(A->isSigned == true){
+//         return true;
+//     }
+//     else{
+//         return false;
+//     }
+// }
 TypeInfo* TypeInfo::UsualArithConversion(TypeInfo* A, TypeInfo* B){
     if(A->Options==TypeInfo::FLOAT || B->Options==TypeInfo::FLOAT){
         TypeInfo* info = new TypeInfo;
@@ -121,6 +121,8 @@ TypeInfo* TypeGetter::GetType(ArraySubscript* _ArraySubscript){
         if(arr->nextArray!=NULL){ returnInfo = new TypeInfo(arr->nextArray);}
         else if(arr->pointerElementType!=NULL){ returnInfo = new TypeInfo(arr->pointerElementType);}
         else if(arr->basetypeElementType!=NULL){ returnInfo = new TypeInfo(arr->basetypeElementType);}
+        else if(arr->enumElementType!=NULL){ returnInfo = new TypeInfo(arr->enumElementType);}
+        else if(arr->structElementType!=NULL){ returnInfo = new TypeInfo(arr->structElementType);}
         else{ throw std::string("No non null array type part"); }
         return returnInfo;
     }
@@ -152,8 +154,45 @@ TypeInfo* TypeGetter::GetType(PostDec* _PostDec){
     return _PostDec->LHS->acceptTypeGetter(this);
 }
 TypeInfo* TypeGetter::GetType(PrefixExpr* _PrefixExpr){}
-TypeInfo* TypeGetter::GetType(UnaryAddressOperator* _UnaryAddressOperator){}//todo!
-TypeInfo* TypeGetter::GetType(UnaryDerefOperator* _UnaryDerefOperator){}//todo!
+TypeInfo* TypeGetter::GetType(UnaryAddressOperator* _UnaryAddressOperator){
+    TypeInfo* below = _UnaryAddressOperator->RHS->acceptTypeGetter(this);
+    pointerType* ptr = new pointerType;
+    if(below->Options==TypeInfo::ARR){ ptr->AddNextType(below->isArr);}
+    else if(below->Options==TypeInfo::CHAR){ ptr->AddNextType(below->isBaseType);}
+    else if(below->Options==TypeInfo::DOUBLE){ ptr->AddNextType(below->isBaseType);}
+    else if(below->Options==TypeInfo::ENUM){ ptr->AddNextType(below->isEnum);}
+    else if(below->Options==TypeInfo::FLOAT){ ptr->AddNextType(below->isBaseType);}
+    else if(below->Options==TypeInfo::INT){ ptr->AddNextType(below->isBaseType);}
+    else if(below->Options==TypeInfo::FUNC){ ptr->AddNextType(below->isFunc);}
+    else if(below->Options==TypeInfo::STRUCT){ ptr->AddNextType(below->isStruct);}
+    else{ throw std::string("unaryaddressop child has no type");}
+    TypeInfo* newInfo = new TypeInfo(ptr);
+    delete below;
+    return newInfo;
+}
+TypeInfo* TypeGetter::GetType(UnaryDerefOperator* _UnaryDerefOperator){
+    TypeInfo* below = _UnaryDerefOperator->RHS->acceptTypeGetter(this);
+    TypeInfo * newInfo;
+    if(below->Options==TypeInfo::ARR){
+        if(below->isArr->basetypeElementType!=NULL){ newInfo = new TypeInfo(below->isArr->basetypeElementType);}
+        else if(below->isArr->nextArray!=NULL){ newInfo = new TypeInfo(below->isArr->nextArray);}
+        else if(below->isArr->pointerElementType!=NULL){ newInfo = new TypeInfo(below->isArr->pointerElementType);}
+        else if(below->isArr->structElementType!=NULL){ newInfo = new TypeInfo(below->isArr->structElementType);}
+        else if(below->isArr->enumElementType!=NULL){ newInfo = new TypeInfo(below->isArr->enumElementType);}
+        else{ throw std::string("unaryderef child array has no type");}
+    }
+    else if(below->Options==TypeInfo::POINTER){
+        if(below->isPt->ptToArray){newInfo = new TypeInfo(below->isPt->ptToArray);}
+        else if(below->isPt->ptToBasetype){newInfo = new TypeInfo(below->isPt->ptToBasetype);}
+        else if(below->isPt->ptToEnum){newInfo = new TypeInfo(below->isPt->ptToEnum);}
+        else if(below->isPt->ptToFunc){newInfo = new TypeInfo(below->isPt->ptToFunc);}
+        else if(below->isPt->ptToPointer){newInfo = new TypeInfo(below->isPt->ptToPointer);}
+        else if(below->isPt->ptToStruct){newInfo = new TypeInfo(below->isPt->ptToStruct);}
+        else{ throw std::string("unaryderef child pointer has no type");}
+    }
+    return newInfo;
+
+}//todo!
 TypeInfo* TypeGetter::GetType(UnaryPlusOperator* _UnaryPlusOperator){
     TypeInfo* info = _UnaryPlusOperator->RHS->acceptTypeGetter(this);
     if(info->Options==TypeInfo::FLOAT || info->Options==TypeInfo::DOUBLE){ return info; }

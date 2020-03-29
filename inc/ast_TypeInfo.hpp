@@ -16,7 +16,7 @@ struct TypeInfo{
     typeSpecifiers* isBaseType;
     structType* isStruct;
     enumType* isEnum;
-    static bool IntegralPromoteIsSigned(TypeInfo* A);
+    // static bool IntegralPromoteIsSigned(TypeInfo* A);
     static TypeInfo* UsualArithConversion(TypeInfo* A, TypeInfo* B);
 private:
     void SetBaseSpecDetails(const std::string& singleSpec);

@@ -58,7 +58,7 @@ struct functionType : public genericConstituentType{
     ParameterTable* arguments;
     void Show();
     std::vector<Record*>& ArgVec();
-    unsigned int ByteSize() override;
+    unsigned int ByteSize() override{ return 0; }//TODO return actual size
     bool AppendToCorrectPtr(functionType*& func){func = this; return true; }
 };
 
@@ -72,7 +72,9 @@ struct arrayType : public genericConstituentType{
     void AddNextType(pointerType* pnt) override;
     void AddNextType(typeSpecifiers* typ) override;
     void AddNextType(structType* str) override;
-
+    void AddNextType(enumType* en) override;
+    //TODO array of enums
+    enumType* enumElementType;
     arrayType* nextArray;
     pointerType* pointerElementType;
     typeSpecifiers* basetypeElementType;
@@ -124,7 +126,8 @@ struct structType : public genericConstituentType{
     void BeAppended(TypedefTypeDeclarationRec* typedefDec);
     unsigned int ByteSize() override;
     void Show();
-    bool AppendToCorrectPtr(structType*& str){str = this; return true; }
+    bool AppendToCorrectPtr(structType*& str){ str = this; return true; }
+    Record* SearchForMember(const std::string& name);
 };
 
 struct enumConstType : public genericConstituentType{

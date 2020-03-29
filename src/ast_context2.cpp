@@ -150,21 +150,31 @@ void arrayType::AddNextType(arrayType* arr){
     pointerElementType = NULL;
     basetypeElementType = NULL;
     structElementType = NULL;
+    enumElementType = NULL;
 }void arrayType::AddNextType(pointerType* pnt){
     nextArray = NULL;
     pointerElementType = pnt;
     basetypeElementType = NULL;
     structElementType = NULL;
+    enumElementType = NULL;
 }void arrayType::AddNextType(typeSpecifiers* typ){
     nextArray = NULL;
     pointerElementType = NULL;
     basetypeElementType = typ;
     structElementType = NULL;
+    enumElementType = NULL;
 }void arrayType::AddNextType(structType* str){
     nextArray = NULL;
     pointerElementType = NULL;
     basetypeElementType = NULL;
     structElementType = str;
+    enumElementType = NULL;
+}void arrayType::AddNextType(enumType* en){
+    nextArray = NULL;
+    pointerElementType = NULL;
+    basetypeElementType = NULL;
+    structElementType = NULL;
+    enumElementType = en;
 }
 
 void pointerType::AddNextType(arrayType* arr){
@@ -270,6 +280,7 @@ unsigned int arrayType::ByteSize(){
     else if(pointerElementType!=NULL) return size*pointerElementType->ByteSize();
     else if(basetypeElementType!=NULL) return size*basetypeElementType->ByteSize();
     else if(structElementType!=NULL) return size*structElementType->ByteSize();
+    else if(enumElementType!=NULL) return size*enumElementType->ByteSize();
 }
 
 unsigned int functionType::ByteSize(){
@@ -293,6 +304,14 @@ unsigned int enumType::ByteSize(){
 unsigned int enumConstType::ByteSize(){
     return 4;
 }
+//--------------------
+
+Record* structType::SearchForMember(const std::string& name){
+    for(auto& rec : members->subRecords){
+        if(rec->hasID(name)){ return rec; }
+    }
+}
+
 //--------------------
 void VariableDeclaration::AddPrimary(pointerType* _primaryPt){
     primaryPt = _primaryPt;
