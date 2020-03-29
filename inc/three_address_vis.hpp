@@ -110,6 +110,13 @@ class three_address_Visitor : public Visitor
     void li(int val, std::string dest = "$v0") {std::cout << "li " << dest << ", " << val << std::endl;}
     void mt_c(std::string dest, std::string src) { std::cout << "mtc1 " << src << ", " << dest << std::endl; }
     void mf_c(std::string dest, std::string src) { std::cout << "mfc1 " << dest << ", " << src << std::endl; }
+    TypeInfo* get_type_info(Expression * e)
+    {
+        TypeGetter * t = new TypeGetter();
+        TypeInfo* info = e->acceptTypeGetter(t);
+        delete t;
+        return info;
+    }
     std::string get_temp_register(const std::string &inter)
     {
         if (!saved_registers.empty())
@@ -283,9 +290,7 @@ class three_address_Visitor : public Visitor
         as->Subscript->accept(this);
         move("$t0", "$v0");
         // assume it is int, multiply by 4
-        TypeGetter * t = new TypeGetter();
-        auto info = as->acceptTypeGetter(t);
-        delete t;
+        auto info = get_type_info(as);
         std::cerr << "type info options " << info->Options << std::endl;
         switch(info->Options)
         {
@@ -441,7 +446,15 @@ class three_address_Visitor : public Visitor
         std::cerr << "PI" << std::endl;
         pi->LHS->accept(this);
         move("$v1", "$v0");
-        std::cout << "addiu $v0, $v0, 1" << std::endl;
+        auto info = get_type_info(pi->LHS);
+        switch(info->Options)
+        {
+            case(TypeInfo::POINTER):
+                std::cout << "addiu $v0, $v0, " << info->pointerDataSize.value() << std::endl;
+                break;
+            default:
+                std::cout << "addiu $v0, $v0, 1" << std::endl;
+        }
         writing = true;
         pi->LHS->accept(this);
         writing = false;
@@ -452,7 +465,15 @@ class three_address_Visitor : public Visitor
         std::cerr << "PD" << std::endl;
         pd->LHS->accept(this);
         move("$v1", "$v0");
-        std::cout << "addiu $v0, $v0, -1" << std::endl;
+        auto info = get_type_info(pd->LHS);
+        switch(info->Options)
+        {
+            case(TypeInfo::POINTER):
+                std::cout << "addiu $v0, $v0, " << -info->pointerDataSize.value() << std::endl;
+                break;
+            default:
+                std::cout << "addiu $v0, $v0, -1" << std::endl;
+        }
         writing = true;
         pd->LHS->accept(this);
         writing = false;
@@ -481,10 +502,18 @@ class three_address_Visitor : public Visitor
     }
     void visit(UnaryDerefOperator * udo)
     {
+        auto info = get_type_info(udo);
         if (!writing)
         {
             udo->RHS->accept(this);
-            std::cout << "lw $v0, 0($v0)" << std::endl;
+            switch(info->Options)
+            {
+                case(TypeInfo::CHAR):
+                    std::cout << "lb $v0, 0($v0)" << std::endl;
+                    break;
+                default:
+                    std::cout << "lw $v0, 0($v0)" << std::endl;
+            }
         }
         else
         {
@@ -492,7 +521,14 @@ class three_address_Visitor : public Visitor
             writing = false;
             udo->RHS->accept(this);
             writing = true;
-            std::cout << "sw $v1, 0($v0)" << std::endl;
+            switch(info->Options)
+            {
+                case(TypeInfo::CHAR):
+                    std::cout << "sb $v0, 0($v0)" << std::endl;
+                    break;
+                default:
+                    std::cout << "sw $v1, 0($v0)" << std::endl;
+            }
         }
     }
     void visit(UnaryPlusOperator * upo)
@@ -503,7 +539,17 @@ class three_address_Visitor : public Visitor
     void visit(UnaryNegOperator * uno)
     {
         uno->RHS->accept(this);
-        std::cout << "subu $v0, $zero, $v0" << std::endl;
+        // auto info = get_type_info(uno);
+        // switch(info->Options)
+        // {
+        //     case(TypeInfo::FLOAT):
+        //         mt_c("$f0", "$v0");
+        //         std::cout << "neg.s $f0, $f0" << std::endl;
+        //         mf_c("$v0", "$f0");
+        //         break;
+        //     default:
+                std::cout << "subu $v0, $zero, $v0" << std::endl;
+        // }
     }
     void visit(UnaryBitwiseNotOperator * ubno)
     {
@@ -519,7 +565,21 @@ class three_address_Visitor : public Visitor
     void visit(PreInc * pi)
     {
         pi->RHS->accept(this);
-        std::cout << "addiu $v0, $v0, 1" << std::endl;
+        auto info = get_type_info(pi->RHS);
+        switch(info->Options)
+        {
+        //     case(TypeInfo::FLOAT):
+        //         li(1, "$v1");
+        //         mt_c("$f2", "$v1");
+        //         mt_c("$f0", "$v0");
+        //         std::cout << "add.s $f0, $f0, $f2" << std::endl;
+        //         mf_c("$v0", "$f0");
+        //         break;
+            case(TypeInfo::POINTER):
+                std::cout << "addiu $v0, $v0, " << info->pointerDataSize.value() << std::endl;
+            default:
+                std::cout << "addiu $v0, $v0, 1" << std::endl;
+        }
         writing = true;
         pi->RHS->accept(this);
         writing = false;
@@ -527,7 +587,21 @@ class three_address_Visitor : public Visitor
     void visit(PreDec * pd)
     {
         pd->RHS->accept(this);
-        std::cout << "addiu $v0, $v0, -1" << std::endl;
+        auto info = get_type_info(pd->RHS);
+        switch(info->Options)
+        {
+        //     case(TypeInfo::FLOAT):
+        //         li(1, "$v1");
+        //         mt_c("$f2", "$v1");
+        //         mt_c("$f0", "$v0");
+        //         std::cout << "sub.s $f0, $f0, $f2" << std::endl;
+        //         mf_c("$v0", "$f0");
+        //         break;
+            case(TypeInfo::POINTER):
+                std::cout << "addiu $v0, $v0, " << info->pointerDataSize.value() << std::endl;
+            default:
+                std::cout << "addiu $v0, $v0, -1" << std::endl;
+        }
         writing = true;
         pd->RHS->accept(this);
         writing = false;
@@ -610,12 +684,58 @@ class three_address_Visitor : public Visitor
     void visit(Add * a)
     {
         descend(a);
+        auto info_right = get_type_info(a->RHS);
+        std::cerr << "RHS: " << info_right->Options << std::endl;
+        auto info_left = get_type_info(a->LHS);
+        std::cerr << "got type info" << std::endl;
+        // promoting expressions if not matched
+        if (info_right->Options != info_left->Options)
+        {
+            std::cout << "# mismatched types" << std::endl;
+            if (info_right->Options == TypeInfo::POINTER)
+            {
+                std::cout << "# promoting left hand side" << std::endl;
+                li(info_right->pointerDataSize.value(), "$t7");
+                std::cout << "multu $v0, $t7" << std::endl;
+                std::cout << "mflo $v0" << std::endl;
+            }
+            else if (info_left->Options == TypeInfo::POINTER)
+            {
+                std::cout << "# promoting right hand side" << std::endl;
+                li(info_left->pointerDataSize.value(), "$t7");
+                std::cout << "multu $v1, $t7" << std::endl;
+                std::cout << "mflo $v1" << std::endl;
+            }
+        }
         std::cout << "addu $v0, $v0, $v1" << std::endl;
         // { mt_c("$f0","$v0"); mt_c("$f2","$v1"); std::cout << "add.s $f0, $f0, $f2" << std::endl; mf_c("$v0","$f0"); }
     }
     void visit(Sub * s)
     {
         descend(s);
+        auto info_right = get_type_info(s->RHS);
+        std::cerr << "RHS: " << info_right->Options << std::endl;
+        auto info_left = get_type_info(s->LHS);
+        std::cerr << "got type info" << std::endl;
+        // promoting expressions if not matched
+        if (info_right->Options != info_left->Options)
+        {
+            std::cout << "# mismatched types" << std::endl;
+            if (info_right->Options == TypeInfo::POINTER)
+            {
+                std::cout << "# promoting left hand side" << std::endl;
+                li(info_right->pointerDataSize.value(), "$t7");
+                std::cout << "multu $v0, $t7" << std::endl;
+                std::cout << "mflo $v0" << std::endl;
+            }
+            else if (info_left->Options == TypeInfo::POINTER)
+            {
+                std::cout << "# promoting right hand side" << std::endl;
+                li(info_left->pointerDataSize.value(), "$t7");
+                std::cout << "multu $v1, $t7" << std::endl;
+                std::cout << "mflo $v1" << std::endl;
+            }
+        }
         std::cout << "subu $v0, $v0, $v1" << std::endl;
         // { mt_c("$f0","$v0"); mt_c("$f2","$v1"); std::cout << "sub.s $f0, $f0, $f2" << std::endl; mf_c("$v0","$f0"); }
     }
