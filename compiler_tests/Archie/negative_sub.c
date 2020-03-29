@@ -1,4 +1,5 @@
 int f()
 {
-	return 1--1;
+	int a = 1, b = -1;
+	return a-b;
 }

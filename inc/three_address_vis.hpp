@@ -16,6 +16,7 @@
 #include <vector>
 // #include "visitors.hpp"
 #include "ast_allnodes.hpp"
+#include "ast_TypeInfo.hpp"
 
 class vm
 {
@@ -282,7 +283,16 @@ class three_address_Visitor : public Visitor
         as->Subscript->accept(this);
         move("$t0", "$v0");
         // assume it is int, multiply by 4
-        std::cout << "sll $t0, $t0, 2" << std::endl;
+        TypeGetter * t = new TypeGetter();
+        auto info = as->acceptTypeGetter(t);
+        delete t;
+        std::cerr << "type info options " << info->Options << std::endl;
+        switch(info->Options)
+        {
+            case(TypeInfo::CHAR): break;
+            default:
+                std::cout << "sll $t0, $t0, 2" << std::endl;
+        }
         // getting array name, stored in array_name string
         // array_flag = true;
         // as->LHS->accept(this);
@@ -326,13 +336,28 @@ class three_address_Visitor : public Visitor
                 // reading from array
                 // get return register
                 // load relevant word
-                std::cout << "lw $v0, 0($t0)" << std::endl;
+                // std::cout << "lw $v0, 0($t0)" << std::endl;
+                switch(info->Options)
+                {
+                    case(TypeInfo::CHAR): 
+                        std::cout << "lb $v0, 0($t0)" << std::endl;
+                        break;
+                    default:
+                        std::cout << "lw $v0, 0($t0)" << std::endl;
+                }
                 std::cout << "nop" << std::endl;
             }
             else
             {
                 move("$v0","$t2");
-                std::cout << "sw $v0, 0($t0)" << std::endl;
+                switch(info->Options)
+                {
+                    case(TypeInfo::CHAR): 
+                        std::cout << "sb $v0, 0($t0)" << std::endl;
+                        break;
+                    default:
+                        std::cout << "sw $v0, 0($t0)" << std::endl;
+                }
                 std::cout << "nop" << std::endl;
             }
         }

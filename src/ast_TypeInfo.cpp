@@ -62,7 +62,7 @@ bool TypeInfo::IntegralPromoteIsSigned(TypeInfo* A){
         return false;
     }
 }
-TypeInfo* TypeInfoUsualArithConversion(TypeInfo* A, TypeInfo* B){
+TypeInfo* TypeInfo::UsualArithConversion(TypeInfo* A, TypeInfo* B){
     if(A->Options==TypeInfo::FLOAT || B->Options==TypeInfo::FLOAT){
         TypeInfo* info = new TypeInfo;
         info->Options=TypeInfo::FLOAT;
