@@ -58,7 +58,7 @@ struct functionType : public genericConstituentType{
     ParameterTable* arguments;
     void Show();
     std::vector<Record*>& ArgVec();
-    unsigned int ByteSize() override{ return 0; }//TODO return actual size
+    unsigned int ByteSize() override;//TODO return actual size
     bool AppendToCorrectPtr(functionType*& func){func = this; return true; }
 };
 
