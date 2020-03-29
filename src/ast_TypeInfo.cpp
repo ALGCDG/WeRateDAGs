@@ -90,6 +90,7 @@ TypeInfo* TypeInfo::UsualArithConversion(TypeInfo* A, TypeInfo* B){
 TypeInfo* TypeGetter::GetType(Expression* _Expression){}
 TypeInfo* TypeGetter::GetType(IdentifierNode* _IdentifierNode){
     std::cerr << "visting ID node" << std::endl;
+    std::cerr << (_IdentifierNode->ContextRecord == NULL) << std::endl;
     genericConstituentType* gen = _IdentifierNode->ContextRecord->GetPrimary();
     std::cerr << "got gen" << std::endl;
     TypeInfo* info = new TypeInfo(gen);

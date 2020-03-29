@@ -684,35 +684,58 @@ class three_address_Visitor : public Visitor
     void visit(Add * a)
     {
         descend(a);
-        // auto info_right = get_type_info(a->RHS);
-        // std::cerr << "RHS: " << info_right->Options << std::endl;
-        // auto info_left = get_type_info(a->LHS);
-        // std::cerr << "got type info" << std::endl;
-        // // promoting expressions if not matched
-        // if (info_right->Options != info_left->Options)
-        // {
-        //     std::cout << "# mismatched types" << std::endl;
-        //     if (info_right->Options == TypeInfo::POINTER)
-        //     {
-        //         std::cout << "# promoting left hand side" << std::endl;
-        //         li(info_right->pointerDataSize.value(), "$t7");
-        //         std::cout << "multu $v0, $t7" << std::endl;
-        //         std::cout << "mflo $v0" << std::endl;
-        //     }
-        //     else if (info_left->Options == TypeInfo::POINTER)
-        //     {
-        //         std::cout << "# promoting right hand side" << std::endl;
-        //         li(info_left->pointerDataSize.value(), "$t7");
-        //         std::cout << "multu $v1, $t7" << std::endl;
-        //         std::cout << "mflo $v1" << std::endl;
-        //     }
-        // }
+        auto info_right = get_type_info(a->RHS);
+        std::cerr << "RHS: " << info_right->Options << std::endl;
+        auto info_left = get_type_info(a->LHS);
+        std::cerr << "got type info" << std::endl;
+        // promoting expressions if not matched
+        if (info_right->Options != info_left->Options)
+        {
+            std::cout << "# mismatched types" << std::endl;
+            if (info_right->Options == TypeInfo::POINTER)
+            {
+                std::cout << "# promoting left hand side" << std::endl;
+                li(info_right->pointerDataSize.value(), "$t7");
+                std::cout << "multu $v0, $t7" << std::endl;
+                std::cout << "mflo $v0" << std::endl;
+            }
+            else if (info_left->Options == TypeInfo::POINTER)
+            {
+                std::cout << "# promoting right hand side" << std::endl;
+                li(info_left->pointerDataSize.value(), "$t7");
+                std::cout << "multu $v1, $t7" << std::endl;
+                std::cout << "mflo $v1" << std::endl;
+            }
+        }
         std::cout << "addu $v0, $v0, $v1" << std::endl;
         // { mt_c("$f0","$v0"); mt_c("$f2","$v1"); std::cout << "add.s $f0, $f0, $f2" << std::endl; mf_c("$v0","$f0"); }
     }
     void visit(Sub * s)
     {
         descend(s);
+        auto info_right = get_type_info(s->RHS);
+        std::cerr << "RHS: " << info_right->Options << std::endl;
+        auto info_left = get_type_info(s->LHS);
+        std::cerr << "got type info" << std::endl;
+        // promoting expressions if not matched
+        if (info_right->Options != info_left->Options)
+        {
+            std::cout << "# mismatched types" << std::endl;
+            if (info_right->Options == TypeInfo::POINTER)
+            {
+                std::cout << "# promoting left hand side" << std::endl;
+                li(info_right->pointerDataSize.value(), "$t7");
+                std::cout << "multu $v0, $t7" << std::endl;
+                std::cout << "mflo $v0" << std::endl;
+            }
+            else if (info_left->Options == TypeInfo::POINTER)
+            {
+                std::cout << "# promoting right hand side" << std::endl;
+                li(info_left->pointerDataSize.value(), "$t7");
+                std::cout << "multu $v1, $t7" << std::endl;
+                std::cout << "mflo $v1" << std::endl;
+            }
+        }
         std::cout << "subu $v0, $v0, $v1" << std::endl;
         // { mt_c("$f0","$v0"); mt_c("$f2","$v1"); std::cout << "sub.s $f0, $f0, $f2" << std::endl; mf_c("$v0","$f0"); }
     }
