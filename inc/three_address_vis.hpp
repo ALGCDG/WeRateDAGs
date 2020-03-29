@@ -63,7 +63,7 @@ class vm
 class three_address_Visitor : public Visitor
 {
     public:
-    three_address_Visitor(): counter(0), return_register(), continue_to(), break_to(), cases(), global(true), global_labels(), intermediate_values(), temporary_registers(), saved_registers(), variable_map(), writing(false), parameter_flag(false), func_flag(false), array_flag(false), initlist_count(0), address_flag(false), struct_flag(false), struct_fetch_record(false), sizeof_flag(false)
+    three_address_Visitor(): counter(0), return_register(), continue_to(), break_to(), cases(), global(true), global_labels(), intermediate_values(), temporary_registers(), saved_registers(), variable_map(), writing(false), parameter_flag(false), func_flag(false), array_flag(false), initlist_count(0), address_flag(false), struct_flag(false), struct_fetch_record(false), sizeof_flag(false), string_literal_flag(false)
     {
         for (int i = 9; i >= 0; i--)
             temporary_registers.push("$t"+std::to_string(i));
@@ -99,6 +99,7 @@ class three_address_Visitor : public Visitor
     int enum_counter;
     bool struct_flag;
     bool struct_fetch_record;
+    bool string_literal_flag;
     std::vector<Record*> struct_record;
     std::unordered_map<std::string, int> sizeof_variables;
     bool sizeof_flag;
@@ -250,6 +251,25 @@ class three_address_Visitor : public Visitor
     {
         std::cerr << "character string " << cc->constant << std::endl;
         std::cout << "li $v0, " << (int)cc->constant[0] << std::endl;
+    }
+    void visit(StringLiteral * sl)
+    {
+        std::cerr << "string literal: " << sl->str << std::endl;
+        int size = sl->str.length()+1;
+        size = size + size%4;
+        std::cout << "# allocating " << size << " bytes for string " << sl->str << std::endl;
+        std::cout << "addiu $sp, $sp, " << -size << std::endl;
+        move("$fp", "$sp");
+        for (int i = 0; i < sl->str.length(); i++) 
+        {
+            li((int)sl->str[i]);
+            std::cout << "sb $v0, " << i << "($sp)" << std::endl;
+        }
+        li((int)'\0');
+        std::cout << "sb $v0, " << sl->str.length() << "($sp)" << std::endl;
+        // storing pointer to string beginning in $v0
+        move("$v0", "$sp");
+
     }
     void visit(ArraySubscript * as)
     {
