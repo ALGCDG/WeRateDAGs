@@ -107,6 +107,8 @@ class three_address_Visitor : public Visitor
     void push(std::string reg, int stack_offset = 0) { std::cout << "sw " << reg << ", " << stack_offset << "($sp)" << std::endl << "nop" << std::endl;}
     void move(std::string dest, std::string src) { std::cout << "move " << dest << ", " << src << std::endl; }
     void li(int val, std::string dest = "$v0") {std::cout << "li " << dest << ", " << val << std::endl;}
+    void mt_c(std::string dest, std::string src) { std::cout << "mtc1 " << src << ", " << dest << std::endl; }
+    void mf_c(std::string dest, std::string src) { std::cout << "mfc1 " << dest << ", " << src << std::endl; }
     std::string get_temp_register(const std::string &inter)
     {
         if (!saved_registers.empty())
@@ -564,12 +566,14 @@ class three_address_Visitor : public Visitor
         descend(m);
         std::cout << "multu $v0, $v1" << std::endl;
         std::cout << "mflo $v0" << std::endl;
+        // { mt_c("$f0","$v0"); mt_c("$f2","$v1"); std::cout << "mul.s $f0, $f0, $f2" << std::endl; mf_c("$v0","$f0"); }
     }
     void visit(Divide *d)
     {
         descend(d);
         std::cout << "divu $v0, $v1" << std::endl;
         std::cout << "mflo $v0" << std::endl;
+        // { mt_c("$f0","$v0"); mt_c("$f2","$v1"); std::cout << "div.s $f0, $f0, $f2" << std::endl; mf_c("$v0","$f0"); }
     }
     void visit(Modulo * m)
     {
@@ -581,11 +585,13 @@ class three_address_Visitor : public Visitor
     {
         descend(a);
         std::cout << "addu $v0, $v0, $v1" << std::endl;
+        // { mt_c("$f0","$v0"); mt_c("$f2","$v1"); std::cout << "add.s $f0, $f0, $f2" << std::endl; mf_c("$v0","$f0"); }
     }
     void visit(Sub * s)
     {
         descend(s);
         std::cout << "subu $v0, $v0, $v1" << std::endl;
+        // { mt_c("$f0","$v0"); mt_c("$f2","$v1"); std::cout << "sub.s $f0, $f0, $f2" << std::endl; mf_c("$v0","$f0"); }
     }
     void visit(ShiftLeft * sl)
     {
@@ -603,6 +609,7 @@ class three_address_Visitor : public Visitor
         descend(lt);
         std::cout << "slt $v0, $v0, $v1" << std::endl;
         std::cerr << "VAN" << std::endl;
+        // { mt_c("$f0","$v0"); mt_c("$f2","$v1"); std::cout << "c.lt.s $f0, $f0, $f2" << std::endl; mf_c("$v0","$f0"); }
     }
     void visit(GreaterThan * gt)
     {
