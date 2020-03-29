@@ -54,6 +54,36 @@ TypeInfo::TypeInfo(genericConstituentType* gen){
     }
 }
 
+bool TypeInfo::IntegralPromoteIsSigned(TypeInfo* A){
+    if(A->isSigned == true){
+        return true;
+    }
+    else{
+        return false;
+    }
+}
+TypeInfo* TypeInfoUsualArithConversion(TypeInfo* A, TypeInfo* B){
+    if(A->Options==TypeInfo::FLOAT || B->Options==TypeInfo::FLOAT){
+        TypeInfo* info = new TypeInfo;
+        info->Options=TypeInfo::FLOAT;
+        info->isBaseType=A->isBaseType;
+        return info;
+    }
+    else if(A->Options==TypeInfo::INT && A->isSigned==false){
+        return A;
+    }
+    else if(B->Options==TypeInfo::INT && B->isSigned==false){
+        return B;
+    }
+    else{
+        typeSpecifiers* intSpec = new typeSpecifiers;
+        intSpec->specs.push_back("int");
+        TypeInfo* info = new TypeInfo(intSpec);
+        return info;
+    }
+}
+
+
 TypeInfo* TypeGetter::GetType(Expression* _Expression){}
 TypeInfo* TypeGetter::GetType(IdentifierNode* _IdentifierNode){
     genericConstituentType* gen = _IdentifierNode->ContextRecord->GetPrimary();
@@ -114,37 +144,164 @@ TypeInfo* TypeGetter::GetType(UnaryNegOperator* _UnaryNegOperator){
     return _UnaryNegOperator->RHS->acceptTypeGetter(this);
 }
 TypeInfo* TypeGetter::GetType(UnaryBitwiseNotOperator* _UnaryBitwiseNotOperator){
+    //todo -> Integral promotions?
+    return _UnaryBitwiseNotOperator->RHS->acceptTypeGetter(this);
 }
-TypeInfo* TypeGetter::GetType(UnaryLogicalNotOperator* _UnaryLogicalNotOperator){}
-TypeInfo* TypeGetter::GetType(PreInc* _PreInc){}
-TypeInfo* TypeGetter::GetType(PreDec* _PreDec){}
-TypeInfo* TypeGetter::GetType(SizeofExpr* _SizeofExpr){}
-TypeInfo* TypeGetter::GetType(SizeofType* _SizeofType){}
-TypeInfo* TypeGetter::GetType(CastExpr* _CastExpr){}
+TypeInfo* TypeGetter::GetType(UnaryLogicalNotOperator* _UnaryLogicalNotOperator){
+    //todo -> Integral promotions?
+    return _UnaryLogicalNotOperator->RHS->acceptTypeGetter(this);
+}
+TypeInfo* TypeGetter::GetType(PreInc* _PreInc){
+    return _PreInc->RHS->acceptTypeGetter(this);
+}
+TypeInfo* TypeGetter::GetType(PreDec* _PreDec){
+    return _PreDec->RHS->acceptTypeGetter(this);
+}
+TypeInfo* TypeGetter::GetType(SizeofExpr* _SizeofExpr){
+    //TODO: Return int
+}
+TypeInfo* TypeGetter::GetType(SizeofType* _SizeofType){
+    //TODO: Return int
+}
+TypeInfo* TypeGetter::GetType(CastExpr* _CastExpr){
+    //TODO analyse declarator!
+}
 TypeInfo* TypeGetter::GetType(BinaryOpExpression* _BinaryOpExpression){}
-TypeInfo* TypeGetter::GetType(Multiply* _Multiply){}
-TypeInfo* TypeGetter::GetType(Divide* _Divide){}
-TypeInfo* TypeGetter::GetType(Modulo* _Modulo){}
-TypeInfo* TypeGetter::GetType(Add* _Add){}
-TypeInfo* TypeGetter::GetType(Sub* _Sub){}
-TypeInfo* TypeGetter::GetType(ShiftLeft* _ShiftLeft){}
-TypeInfo* TypeGetter::GetType(ShiftRight* _ShiftRight){}
-TypeInfo* TypeGetter::GetType(LogicalBinaryExpression* _LogicalBinaryExpression){}
-TypeInfo* TypeGetter::GetType(LessThan* _LessThan){}
+
+TypeInfo* TypeGetter::GetType(Multiply* _Multiply){
+    TypeInfo* LHS = _Multiply->LHS->acceptTypeGetter(this);
+    TypeInfo* RHS = _Multiply->RHS->acceptTypeGetter(this);
+    TypeInfo* conv= TypeInfo::UsualArithConversion(LHS,RHS);
+    delete LHS;
+    delete RHS;
+    return conv;
+}
+TypeInfo* TypeGetter::GetType(Divide* _Divide){
+    TypeInfo* LHS = _Divide->LHS->acceptTypeGetter(this);
+    TypeInfo* RHS = _Divide->RHS->acceptTypeGetter(this);
+    TypeInfo* conv= TypeInfo::UsualArithConversion(LHS,RHS);
+    delete LHS;
+    delete RHS;
+    return conv;
+}//compare
+TypeInfo* TypeGetter::GetType(Modulo* _Modulo){
+    TypeInfo* LHS = _Modulo->LHS->acceptTypeGetter(this);
+    TypeInfo* RHS = _Modulo->RHS->acceptTypeGetter(this);
+    TypeInfo* conv= TypeInfo::UsualArithConversion(LHS,RHS);
+    delete LHS;
+    delete RHS;
+    return conv;
+}//compare
+TypeInfo* TypeGetter::GetType(Add* _Add){
+    TypeInfo* LHS = _Add->LHS->acceptTypeGetter(this);
+    TypeInfo* RHS = _Add->RHS->acceptTypeGetter(this);
+    if(LHS->Options == TypeInfo::POINTER){
+        delete RHS;
+        return LHS;
+    }
+    else if(RHS->Options == TypeInfo::POINTER){
+        delete LHS;
+        return RHS;
+    }
+    else{
+        TypeInfo* conv= TypeInfo::UsualArithConversion(LHS,RHS);
+        delete LHS;
+        delete RHS;
+        return conv;
+    }
+}//compare
+TypeInfo* TypeGetter::GetType(Sub* _Sub){
+    TypeInfo* LHS = _Sub->LHS->acceptTypeGetter(this);
+    TypeInfo* RHS = _Sub->RHS->acceptTypeGetter(this);
+    if(LHS->Options == TypeInfo::POINTER){
+        if(RHS->Options == TypeInfo::POINTER){
+            delete RHS;
+            return LHS;
+        }
+        else{
+            //left pointer, right integral
+            //TODO
+        }
+    }
+    else{
+        //both arithmetic
+        TypeInfo* conv = TypeInfo::UsualArithConversion(LHS, RHS);
+        delete LHS;
+        delete RHS;
+        return conv;
+    }
+}//
+TypeInfo* TypeGetter::GetType(ShiftLeft* _ShiftLeft){
+    TypeInfo* LHS = _ShiftLeft->LHS->acceptTypeGetter(this);
+    TypeInfo* RHS = _ShiftLeft->RHS->acceptTypeGetter(this);
+    TypeInfo* conv= TypeInfo::UsualArithConversion(LHS,RHS);
+    delete LHS;
+    delete RHS;
+    return conv;
+}
+TypeInfo* TypeGetter::GetType(ShiftRight* _ShiftRight){
+    TypeInfo* LHS = _ShiftRight->LHS->acceptTypeGetter(this);
+    TypeInfo* RHS = _ShiftRight->RHS->acceptTypeGetter(this);
+    TypeInfo* conv= TypeInfo::UsualArithConversion(LHS,RHS);
+    delete LHS;
+    delete RHS;
+    return conv;
+}
+TypeInfo* TypeGetter::GetType(LogicalBinaryExpression* _LogicalBinaryExpression){
+    typeSpecifiers* intSpec = new typeSpecifiers;
+    //!This will never get deleted:(
+    intSpec->specs.push_back("int");
+    TypeInfo* info = new TypeInfo(intSpec);
+    return info;
+}
+//all return INT
+/*TypeInfo* TypeGetter::GetType(LessThan* _LessThan){}
 TypeInfo* TypeGetter::GetType(GreaterThan* _GreaterThan){}
 TypeInfo* TypeGetter::GetType(LessThanOrEqual* _LessThanOrEqual){}
 TypeInfo* TypeGetter::GetType(GreaterThanOrEqual* _GreaterThanOrEqual){}
 TypeInfo* TypeGetter::GetType(EqualTo* _EqualTo){}
 TypeInfo* TypeGetter::GetType(NotEqualTo* _NotEqualTo){}
 TypeInfo* TypeGetter::GetType(LogicalAND* _LogicalAND){}
-TypeInfo* TypeGetter::GetType(LogicalOR* _LogicalOR){}
-TypeInfo* TypeGetter::GetType(BitwiseBinaryExpression* _BitwiseBinaryExpression){}
-TypeInfo* TypeGetter::GetType(BitwiseAND* _BitwiseAND){}
+TypeInfo* TypeGetter::GetType(LogicalOR* _LogicalOR){}*/
+
+TypeInfo* TypeGetter::GetType(BitwiseBinaryExpression* _BitwiseBinaryExpression){
+    TypeInfo* LHS = _BitwiseBinaryExpression->LHS->acceptTypeGetter(this);
+    TypeInfo* RHS = _BitwiseBinaryExpression->RHS->acceptTypeGetter(this);
+    TypeInfo* conv = TypeInfo::UsualArithConversion(LHS,RHS);
+    delete LHS;
+    delete RHS;
+    return conv;
+}
+/*TypeInfo* TypeGetter::GetType(BitwiseAND* _BitwiseAND){}
 TypeInfo* TypeGetter::GetType(BitwiseOR* _BitwiseOR){}
-TypeInfo* TypeGetter::GetType(BitwiseXOR* _BitwiseXOR){}
-TypeInfo* TypeGetter::GetType(TernaryOpExpression* _TernaryOpExpression){}
-TypeInfo* TypeGetter::GetType(GenericAssignExpr* _GenericAssignExpr){}
-TypeInfo* TypeGetter::GetType(AssignmentExpression* _AssignmentExpression){}
+TypeInfo* TypeGetter::GetType(BitwiseXOR* _BitwiseXOR){}*/
+
+TypeInfo* TypeGetter::GetType(TernaryOpExpression* _TernaryOpExpression){
+    //both arithmetic (INTEGRAL OR FLOATING)
+    //both structs
+    //both void?
+    //both pointers
+    TypeInfo* IfTrue = _TernaryOpExpression->IfTrue->acceptTypeGetter(this);
+    if(IfTrue->Options == TypeInfo::POINTER){
+        return IfTrue;
+    }
+    else if(IfTrue->Options == TypeInfo::STRUCT){
+        return IfTrue;
+    }
+    else{
+        //hopefully arithmetic type
+        TypeInfo* IfFalse = _TernaryOpExpression->IfFalse->acceptTypeGetter(this);
+        TypeInfo* conv = TypeInfo::UsualArithConversion(IfTrue,IfFalse);
+        delete IfTrue;
+        delete IfFalse;
+        return conv;
+    }
+
+}
+TypeInfo* TypeGetter::GetType(GenericAssignExpr* _GenericAssignExpr){
+    return _GenericAssignExpr->LHS->acceptTypeGetter(this);
+}
+/*TypeInfo* TypeGetter::GetType(AssignmentExpression* _AssignmentExpression){}
 TypeInfo* TypeGetter::GetType(MulAssignment* _MulAssignment){}
 TypeInfo* TypeGetter::GetType(DivAssignment* _DivAssignment){}
 TypeInfo* TypeGetter::GetType(ModAssignment* _ModAssignment){}
@@ -154,6 +311,8 @@ TypeInfo* TypeGetter::GetType(ShiftLeftAssignment* _ShiftLeftAssignment){}
 TypeInfo* TypeGetter::GetType(ShiftRightAssignment* _ShiftRightAssignment){}
 TypeInfo* TypeGetter::GetType(BitwiseANDAssignment* _BitwiseANDAssignment){}
 TypeInfo* TypeGetter::GetType(BitwiseXORAssignment* _BitwiseXORAssignment){}
-TypeInfo* TypeGetter::GetType(BitwiseORAssignment* _BitwiseORAssignment){}
-TypeInfo* TypeGetter::GetType(ConstantExpression* _ConstantExpression){}
-TypeInfo* TypeGetter::GetType(CommaSepExpression* _CommaSepExpression){}
+TypeInfo* TypeGetter::GetType(BitwiseORAssignment* _BitwiseORAssignment){}*/
+TypeInfo* TypeGetter::GetType(ConstantExpression* _ConstantExpression){
+    return _ConstantExpression->ConstantSubtree->acceptTypeGetter(this);
+}
+// TypeInfo* TypeGetter::GetType(CommaSepExpression* _CommaSepExpression){}

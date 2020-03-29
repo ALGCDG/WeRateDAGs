@@ -16,12 +16,15 @@ struct TypeInfo{
     typeSpecifiers* isBaseType;
     structType* isStruct;
     enumType* isEnum;
+    static bool IntegralPromoteIsSigned(TypeInfo* A);
+    static TypeInfo* UsualArithConversion(TypeInfo* A, TypeInfo* B);
 private:
     void SetBaseSpecDetails(const std::string& singleSpec);
     void SetBaseSpecDetails(const std::string& specOne,const std::string& specTwo);
+    
 };
 
-class TypeGetter : public AbstractTypeGetter{
+class TypeGetter : public AbstractTypeGetter{    
 public:
     TypeInfo* GetType(Expression* _Expression);
     TypeInfo* GetType(IdentifierNode* _IdentifierNode);
@@ -59,21 +62,21 @@ public:
     TypeInfo* GetType(ShiftLeft* _ShiftLeft);
     TypeInfo* GetType(ShiftRight* _ShiftRight);
     TypeInfo* GetType(LogicalBinaryExpression* _LogicalBinaryExpression);
-    TypeInfo* GetType(LessThan* _LessThan);
+    /*TypeInfo* GetType(LessThan* _LessThan);
     TypeInfo* GetType(GreaterThan* _GreaterThan);
     TypeInfo* GetType(LessThanOrEqual* _LessThanOrEqual);
     TypeInfo* GetType(GreaterThanOrEqual* _GreaterThanOrEqual);
     TypeInfo* GetType(EqualTo* _EqualTo);
     TypeInfo* GetType(NotEqualTo* _NotEqualTo);
     TypeInfo* GetType(LogicalAND* _LogicalAND);
-    TypeInfo* GetType(LogicalOR* _LogicalOR);
+    TypeInfo* GetType(LogicalOR* _LogicalOR);*/
     TypeInfo* GetType(BitwiseBinaryExpression* _BitwiseBinaryExpression);
-    TypeInfo* GetType(BitwiseAND* _BitwiseAND);
+    /*TypeInfo* GetType(BitwiseAND* _BitwiseAND);
     TypeInfo* GetType(BitwiseOR* _BitwiseOR);
-    TypeInfo* GetType(BitwiseXOR* _BitwiseXOR);
+    TypeInfo* GetType(BitwiseXOR* _BitwiseXOR);*/
     TypeInfo* GetType(TernaryOpExpression* _TernaryOpExpression);
     TypeInfo* GetType(GenericAssignExpr* _GenericAssignExpr);
-    TypeInfo* GetType(AssignmentExpression* _AssignmentExpression);
+    /*TypeInfo* GetType(AssignmentExpression* _AssignmentExpression);
     TypeInfo* GetType(MulAssignment* _MulAssignment);
     TypeInfo* GetType(DivAssignment* _DivAssignment);
     TypeInfo* GetType(ModAssignment* _ModAssignment);
@@ -83,9 +86,9 @@ public:
     TypeInfo* GetType(ShiftRightAssignment* _ShiftRightAssignment);
     TypeInfo* GetType(BitwiseANDAssignment* _BitwiseANDAssignment);
     TypeInfo* GetType(BitwiseXORAssignment* _BitwiseXORAssignment);
-    TypeInfo* GetType(BitwiseORAssignment* _BitwiseORAssignment);
+    TypeInfo* GetType(BitwiseORAssignment* _BitwiseORAssignment);*/
     TypeInfo* GetType(ConstantExpression* _ConstantExpression);
-    TypeInfo* GetType(CommaSepExpression* _CommaSepExpression);
+    // TypeInfo* GetType(CommaSepExpression* _CommaSepExpression);
 };
 
 #endif

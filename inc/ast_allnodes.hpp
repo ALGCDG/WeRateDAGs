@@ -304,21 +304,21 @@ public:
     virtual TypeInfo* GetType(ShiftLeft*) = 0;
     virtual TypeInfo* GetType(ShiftRight*) = 0;
     virtual TypeInfo* GetType(LogicalBinaryExpression*) = 0;
-    virtual TypeInfo* GetType(LessThan*) = 0;
+    /*virtual TypeInfo* GetType(LessThan*) = 0;
     virtual TypeInfo* GetType(GreaterThan*) = 0;
     virtual TypeInfo* GetType(LessThanOrEqual*) = 0;
     virtual TypeInfo* GetType(GreaterThanOrEqual*) = 0;
     virtual TypeInfo* GetType(EqualTo*) = 0;
     virtual TypeInfo* GetType(NotEqualTo*) = 0;
     virtual TypeInfo* GetType(LogicalAND*) = 0;
-    virtual TypeInfo* GetType(LogicalOR*) = 0;
+    virtual TypeInfo* GetType(LogicalOR*) = 0;*/
     virtual TypeInfo* GetType(BitwiseBinaryExpression*) = 0;
-    virtual TypeInfo* GetType(BitwiseAND*) = 0;
+    /*virtual TypeInfo* GetType(BitwiseAND*) = 0;
     virtual TypeInfo* GetType(BitwiseOR*) = 0;
-    virtual TypeInfo* GetType(BitwiseXOR*) = 0;
+    virtual TypeInfo* GetType(BitwiseXOR*) = 0;*/
     virtual TypeInfo* GetType(TernaryOpExpression*) = 0;
     virtual TypeInfo* GetType(GenericAssignExpr*) = 0;
-    virtual TypeInfo* GetType(AssignmentExpression*) = 0;
+    /*virtual TypeInfo* GetType(AssignmentExpression*) = 0;
     virtual TypeInfo* GetType(MulAssignment*) = 0;
     virtual TypeInfo* GetType(DivAssignment*) = 0;
     virtual TypeInfo* GetType(ModAssignment*) = 0;
@@ -328,9 +328,9 @@ public:
     virtual TypeInfo* GetType(ShiftRightAssignment*) = 0;
     virtual TypeInfo* GetType(BitwiseANDAssignment*) = 0;
     virtual TypeInfo* GetType(BitwiseXORAssignment*) = 0;
-    virtual TypeInfo* GetType(BitwiseORAssignment*) = 0;
+    virtual TypeInfo* GetType(BitwiseORAssignment*) = 0;*/
     virtual TypeInfo* GetType(ConstantExpression*) = 0;
-    virtual TypeInfo* GetType(CommaSepExpression*) = 0;
+    // virtual TypeInfo* GetType(CommaSepExpression*) = 0;
 };
 
 class Node{
