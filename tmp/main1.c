@@ -1,2 +1,3 @@
+#include <stdio.h>
 int f(int a);
-int main() { return f(7); }
+int main() { fprintf(stderr, "hello"); return f(7); }

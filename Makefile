@@ -23,7 +23,7 @@ src/ast_context2.o : src/ast_context2.cpp
 src/ast_allnodes.o : src/ast_allnodes.cpp
 	g++ $(CPPFLAGS) -c -o src/ast_allnodes.o $^
 
-bin/compiler : src/parser.tab.o src/lexer.yy.o src/compiler.o src/ast_allnodes.o src/ASTProc.o src/ast_context2.o
+bin/compiler : src/parser.tab.o src/lexer.yy.o src/compiler.o src/ast_allnodes.o src/ASTProc.o src/ast_context2.o src/ast_TypeInfo.o
 	mkdir -p bin
 	g++ $(CPPFLAGS) -o bin/compiler $^
 	

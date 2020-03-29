@@ -18,6 +18,7 @@ struct StructTypeDeclarationRec;
 struct TypedefTypeDeclarationRec;
 struct structType;
 struct enumType;
+struct nsTable;
 namespace prPr{
     extern int tabs;
     void Tabsplus();
@@ -26,6 +27,7 @@ namespace prPr{
 }
 
 struct genericConstituentType{
+    virtual nsTable* get_table() { return NULL; }
     virtual void BeAppended(genericConstituentType* other){}
     virtual void BeAppended(VariableDeclaration* vardec){}
     virtual void BeAppended(FunctionDefinitionRec* funcdec){}
@@ -112,9 +114,9 @@ struct typeSpecifiers : public genericConstituentType{
     bool AppendToCorrectPtr(typeSpecifiers*& spec){spec = this; return true;}
 };
 
-struct nsTable;
 struct structType : public genericConstituentType{
     nsTable* members;
+    virtual nsTable* get_table() { return members; }
     void BeAppended(genericConstituentType* other);
     void BeAppended(pointerType* ptr);
     void BeAppended(VariableDeclaration* vardec);
@@ -156,6 +158,8 @@ struct Record{
     Record(){}
     Record(Table* _parentTable) : parentTable(_parentTable){}
     virtual bool hasID(const std::string& _id){ return false; }
+    virtual std::string get_unique_id() {return std::string(""); }
+    virtual std::string get_id() {return std::string(""); }
     virtual void SetName(const std::string& _id){}
     virtual void PrettyPrint(){}
     virtual unsigned int DeclarationSize(){ return 0; }
@@ -190,6 +194,8 @@ struct NamedRecord : public Record{
     NamedRecord(){}
     NamedRecord(Table* _parent) : Record(_parent){}
     bool hasID(const std::string& _id) override { return _id == id; }
+    std::string get_unique_id() {return unique_id; }
+    std::string get_id() {return id; }
     //use this to check on receipt of named record which type it is
     // virtual bool isFunctionDefinition(){ return false; }
     virtual void SetName(const std::string& _id){ id = _id; unique_id = _id + std::to_string(UniqueCtr()); }

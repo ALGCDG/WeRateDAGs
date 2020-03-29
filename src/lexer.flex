@@ -50,9 +50,12 @@ simpEscSeq \\.
 		/*
 		Char
         also returns a constant
-		*/
         yylval.cvalue = yytext[1];
         fprintf(stderr, "its a char constant: %s\n", yylval.cvalue);
+		*/
+        std::string match = std::string(yytext);
+        yylval.text = new std::string();
+        *(yylval.text) = match.substr(1, yyleng - 2);
         return Constant_char;
 }
 
@@ -70,6 +73,7 @@ simpEscSeq \\.
 "double"    { return Keyword_double; }
 "float"     { return Keyword_float; }
 "char"      { return Keyword_char; }
+"void"      { return Keyword_void; }
 
 
 [/][/].*  {/*A single line comment*/ fprintf(stderr, "its a single line comment\n"); }
@@ -108,7 +112,7 @@ simpEscSeq \\.
 "^=" { return Operator_xor_assign; }
 ">>=" { return Operator_sr_assign; }
 "<<=" { return Operator_sl_assign; }
-"---" { return Operator_access; }
+"." { return Operator_access; }
 "->" { return Operator_deref_access; }
 "sizeof" { return Operator_sizeof; }
 "?" { return Operator_trinary_question; }
