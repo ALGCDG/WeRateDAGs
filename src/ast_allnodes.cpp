@@ -2,19 +2,6 @@
 #include <iostream>
 #include <queue>
 #include <regex>
-// #include "visitors.hpp"
-
-// ArgExprList::ArgExprList(Expression* Arg){
-//     Args.push_back(Arg);
-// }
-
-// void ArgExprList::AppendArgExpression(Expression* ArgExpr){
-//     Args.push_back(ArgExpr);
-// }
-
-// void TranslationUnit::AppendDeclaration(GenericExternalDeclaration* _decl){
-//     decls.push_back(_decl);
-// }
 
 /*static*/
 PrefixExpr* PrefixExpr::DecodeUnaryOp(std::string* yytext, Expression* _RHS){
@@ -50,15 +37,6 @@ GenericAssignExpr* GenericAssignExpr::DecodeAssignOp(Expression* LHS, std::strin
 }
 
 
-// std::string& EvalEscapesAndPop(std::string& buffer, bool force_end = false){
-    
-//     std::string out;
-//     if(std::regex_match(buffer, simpleEsc)){ 
-//         out = buffer.substr(0,2);
-//         buffer = buffer.substr(2,std::string::npos);
-//     }
-//     else if()
-// }
 unsigned char evalOctCode(std::string code){
 	unsigned char count = 0;
 	for(int i = 0; i < code.length();i++){
@@ -168,119 +146,3 @@ std::string ConvertEscapes(const std::string& str_in){
     }
         return str_out;
 }
-
-// void Node::accept(Visitor *AVisitor)
-// {
-//     AVisitor->visit(this);
-// }
-
-// void While::accept(Visitor * AVisitor) 
-// {
-//     AVisitor->visit(this);
-// }
-
-// void If::accept(Visitor * AVisitor) 
-// {
-//     AVisitor->visit(this);
-// }
-
-// void IfElse::accept(Visitor * AVisitor) 
-// {
-//     AVisitor->visit(this);
-// }
-
-// void Return::accept(Visitor * AVisitor) 
-// {
-//     AVisitor->visit(this);
-// }
-
-// void CompoundStatement::accept(Visitor * AVisitor) 
-// {
-//     AVisitor->visit(this);
-// }
-
-// void StatementList::accept(Visitor * AVisitor) 
-// {
-//     AVisitor->visit(this);
-// }
-
-// void declaration::accept(Visitor * AVisitor) 
-// {
-//     AVisitor->visit(this);
-// }
-
-// void init_declarator_list::accept(Visitor * AVisitor) 
-// {
-//     AVisitor->visit(this);
-// }
-
-// void init_declarator::accept(Visitor * AVisitor) 
-// {
-//     AVisitor->visit(this);
-// }
-
-// //Expressions
-// void Multiply::accept(Visitor * AVisitor) 
-// {
-//     AVisitor->visit(this);
-// }
-
-// void Add::accept(Visitor * AVisitor) 
-// {
-//     AVisitor->visit(this);
-// }
-
-// void Sub::accept(Visitor * AVisitor) 
-// {
-//     AVisitor->visit(this);
-// }
-
-// void LogicalAND::accept(Visitor * AVisitor) 
-// {
-//     AVisitor->visit(this);
-// }
-
-// void LogicalOR::accept(Visitor * AVisitor) 
-// {
-//     AVisitor->visit(this);
-// }
-
-// void LessThan::accept(Visitor * AVisitor) 
-// {
-//     AVisitor->visit(this);
-// }
-
-// void EqualTo::accept(Visitor * AVisitor) 
-// {
-//     AVisitor->visit(this);
-// }
-
-// void FuncCall::accept(Visitor * AVisitor) 
-// {
-//     AVisitor->visit(this);
-// }
-
-// void ArgExprList::accept(Visitor * AVisitor) 
-// {
-//     AVisitor->visit(this);
-// }
-
-// void IdentifierNode::accept(Visitor * AVisitor) 
-// {
-//     AVisitor->visit(this);
-// }
-
-// void AssignmentExpression::accept(Visitor * AVisitor) 
-// {
-//     AVisitor->visit(this);
-// }
-
-// void TranslationUnit::accept(Visitor * AVisitor) 
-// {
-//     AVisitor->visit(this);
-// }
-// void ExternalDeclaration::accept(Visitor * AVisitor) 
-// {
-//     AVisitor->visit(this);
-// }
-

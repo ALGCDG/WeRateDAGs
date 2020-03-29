@@ -39,6 +39,12 @@ struct genericConstituentType{
     virtual void AddNextType(enumType* en){}
     virtual void Show(){}
     virtual unsigned int ByteSize() = 0;
+    virtual bool AppendToCorrectPtr(typeSpecifiers*& spec){ return false; }
+    virtual bool AppendToCorrectPtr(functionType*& func){ return false; }
+    virtual bool AppendToCorrectPtr(arrayType*& arr){ return false; }
+    virtual bool AppendToCorrectPtr(pointerType*& ptr){ return false; }
+    virtual bool AppendToCorrectPtr(structType*& str){ return false; }
+    virtual bool AppendToCorrectPtr(enumType*& en){ return false; }
 };
 struct Record;
 struct functionType : public genericConstituentType{
@@ -49,11 +55,11 @@ struct functionType : public genericConstituentType{
     void AddNextType(pointerType* point) override;
     typeSpecifiers* basetypeReturnType;
     pointerType* pointerReturnType;
-    
     ParameterTable* arguments;
     void Show();
     std::vector<Record*>& ArgVec();
     unsigned int ByteSize() override;
+    bool AppendToCorrectPtr(functionType*& func){func = this; return true; }
 };
 
 struct arrayType : public genericConstituentType{
@@ -73,6 +79,7 @@ struct arrayType : public genericConstituentType{
     structType* structElementType;//TODO fix append to make this null when appropriate
     void Show();
     unsigned int ByteSize() override;
+    bool AppendToCorrectPtr(arrayType*& arr){arr = this; return true; }
 };
 
 struct pointerType : public genericConstituentType{
@@ -93,6 +100,7 @@ struct pointerType : public genericConstituentType{
     enumType* ptToEnum;
     void Show();
     unsigned int ByteSize() override;
+    bool AppendToCorrectPtr(pointerType*& ptr){ptr = this; return true;}
 };
 
 struct typeSpecifiers : public genericConstituentType{
@@ -103,6 +111,7 @@ struct typeSpecifiers : public genericConstituentType{
     void AddNextType(std::string spec);
     void Show();
     unsigned int ByteSize() override;
+    bool AppendToCorrectPtr(typeSpecifiers*& spec){spec = this; return true;}
 };
 
 struct structType : public genericConstituentType{
@@ -115,6 +124,7 @@ struct structType : public genericConstituentType{
     void BeAppended(TypedefTypeDeclarationRec* typedefDec);
     unsigned int ByteSize() override;
     void Show();
+    bool AppendToCorrectPtr(structType*& str){str = this; return true; }
 };
 
 struct enumConstType : public genericConstituentType{
@@ -133,6 +143,7 @@ struct enumType : public genericConstituentType{
     void BeAppended(TypedefTypeDeclarationRec* typedefDec);
     unsigned int ByteSize();
     void Show();
+    bool AppendToCorrectPtr(enumType*& en){en = this; return true;}
 };
 
 // struct funcArgs{
