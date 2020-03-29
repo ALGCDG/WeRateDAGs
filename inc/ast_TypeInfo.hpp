@@ -88,6 +88,7 @@ public:
     TypeInfo* GetType(BitwiseORAssignment* _BitwiseORAssignment);*/
     TypeInfo* GetType(ConstantExpression* _ConstantExpression);
     // TypeInfo* GetType(CommaSepExpression* _CommaSepExpression);
+    TypeInfo* GetType(Node* n);
 };
 
 #endif

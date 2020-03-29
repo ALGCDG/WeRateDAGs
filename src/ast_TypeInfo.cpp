@@ -89,7 +89,9 @@ TypeInfo* TypeInfo::UsualArithConversion(TypeInfo* A, TypeInfo* B){
 
 TypeInfo* TypeGetter::GetType(Expression* _Expression){}
 TypeInfo* TypeGetter::GetType(IdentifierNode* _IdentifierNode){
+    std::cerr << "visting ID node" << std::endl;
     genericConstituentType* gen = _IdentifierNode->ContextRecord->GetPrimary();
+    std::cerr << "got gen" << std::endl;
     TypeInfo* info = new TypeInfo(gen);
     return info;
 }
@@ -135,6 +137,7 @@ TypeInfo* TypeGetter::GetType(ArraySubscript* _ArraySubscript){
     }
 }
 TypeInfo* TypeGetter::GetType(FuncCall* _FuncCall){
+    std::cerr << "visiting funccall" << std::endl;
     return _FuncCall->LHS->acceptTypeGetter(this);
 }
 TypeInfo* TypeGetter::GetType(MemberAccess* _MemberAccess){
@@ -369,3 +372,8 @@ TypeInfo* TypeGetter::GetType(ConstantExpression* _ConstantExpression){
     return _ConstantExpression->ConstantSubtree->acceptTypeGetter(this);
 }
 // TypeInfo* TypeGetter::GetType(CommaSepExpression* _CommaSepExpression){}
+
+    TypeInfo* TypeGetter::GetType(Node* n)
+    {
+        std::cerr << "typeinfo accessor visiting undefined node" << std::endl;
+    }

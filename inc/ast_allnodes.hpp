@@ -270,6 +270,7 @@ public:
 struct TypeInfo;
 class AbstractTypeGetter{
 public:
+    virtual TypeInfo* GetType(Node*) = 0;
     virtual TypeInfo* GetType(Expression*) = 0;
     virtual TypeInfo* GetType(IdentifierNode*) = 0;
     virtual TypeInfo* GetType(Constant*) = 0;
