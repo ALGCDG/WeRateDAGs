@@ -258,19 +258,20 @@ class three_address_Visitor : public Visitor
     {
         std::cerr << "string literal: " << sl->str << std::endl;
         int size = sl->str.length()+1;
-        size = size + size%4;
+        size = size + (4-size%4);
         std::cout << "# allocating " << size << " bytes for string " << sl->str << std::endl;
-        std::cout << "addiu $sp, $sp, " << -size << std::endl;
+        std::cout << "addiu $sp, $sp, " << -size-4 << std::endl;
         move("$fp", "$sp");
         for (int i = 0; i < sl->str.length(); i++) 
         {
             li((int)sl->str[i]);
-            std::cout << "sb $v0, " << i << "($sp)" << std::endl;
+            std::cout << "sb $v0, " << i+4 << "($sp)" << std::endl;
         }
         li((int)'\0');
         std::cout << "sb $v0, " << sl->str.length() << "($sp)" << std::endl;
         // storing pointer to string beginning in $v0
-        move("$v0", "$sp");
+        std::cout << "addiu $v0, $sp, 4" << std::endl;
+        variable_map.update(size+4);
 
     }
     void visit(ArraySubscript * as)
@@ -571,7 +572,7 @@ class three_address_Visitor : public Visitor
     void visit(Divide *d)
     {
         descend(d);
-        std::cout << "divu $v0, $v1" << std::endl;
+        std::cout << "div $v0, $v1" << std::endl;
         std::cout << "mflo $v0" << std::endl;
         // { mt_c("$f0","$v0"); mt_c("$f2","$v1"); std::cout << "div.s $f0, $f0, $f2" << std::endl; mf_c("$v0","$f0"); }
     }

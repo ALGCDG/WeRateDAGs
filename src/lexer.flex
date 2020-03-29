@@ -73,6 +73,7 @@ simpEscSeq \\.
 "double"    { return Keyword_double; }
 "float"     { return Keyword_float; }
 "char"      { return Keyword_char; }
+"void"      { return Keyword_void; }
 
 
 [/][/].*  {/*A single line comment*/ fprintf(stderr, "its a single line comment\n"); }
