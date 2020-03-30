@@ -484,7 +484,7 @@ void ASTProcVis::visit(ExternalDeclaration* _extdec){
 }
 
 void ASTProcVis::visit(IdentifierNode* _idnode){
-    
+
     _idnode->ContextRecord = TableInstance->GetIDRecord((_idnode->Name));
 }
 

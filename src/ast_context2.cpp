@@ -631,17 +631,16 @@ void SymbolTable::EndFuncDfDeclaration(){
     // ActiveFuncDefPtr->AddPrimary(parts);
     // 
     FocusFunc();
-    
     AccumulateDeclParts();
-    
     PopDeclParts();
     DefocusFunc();
+    ActiveScopePtr->subRecords.push_back(ActiveFuncDefPtr);
 }
 
 void SymbolTable::EndFuncDef(){
     // go up through the parameter table
     ActiveScopePtr = ActiveScopePtr->parentTable->parentTable;
-    ActiveScopePtr->subRecords.push_back(ActiveFuncDefPtr);
+    // ActiveScopePtr->subRecords.push_back(ActiveFuncDefPtr);
     ActiveFuncDefPtr = NULL;
 }
 
