@@ -50,7 +50,13 @@ TypeInfo::TypeInfo(genericConstituentType* gen){
     }
     else if(gen->AppendToCorrectPtr(isPt)){
         Options = POINTER;
-        pointerDataSize = isPt->ByteSize();
+        // pointerDataSize = isPt->ByteSize();
+        if(isPt->ptToArray!=NULL){ pointerDataSize = isPt->ptToArray->ByteSize();}
+        else if(isPt->ptToBasetype!=NULL){ pointerDataSize = isPt->ptToBasetype->ByteSize();}
+        else if(isPt->ptToEnum!=NULL){ pointerDataSize = isPt->ptToEnum->ByteSize();}
+        else if(isPt->ptToFunc!=NULL){ pointerDataSize = isPt->ptToFunc->ByteSize();}
+        else if(isPt->ptToPointer!=NULL){ pointerDataSize = isPt->ptToPointer->ByteSize();}
+        else if(isPt->ptToStruct!=NULL){ pointerDataSize = isPt->ptToStruct->ByteSize();}
     }
 }
 
