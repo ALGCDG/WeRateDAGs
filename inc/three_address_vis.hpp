@@ -716,16 +716,32 @@ class three_address_Visitor : public Visitor
     void visit(Multiply *m)
     {
         descend(m);
-        std::cout << "multu $v0, $v1" << std::endl;
-        std::cout << "mflo $v0" << std::endl;
-        // { mt_c("$f0","$v0"); mt_c("$f2","$v1"); std::cout << "mul.s $f0, $f0, $f2" << std::endl; mf_c("$v0","$f0"); }
+        auto info = get_type_info(m);
+        switch (info->Options)
+        {
+            case(TypeInfo::FLOAT):
+                mt_c("$f0","$v0"); mt_c("$f2","$v1"); std::cout << "mul.s $f0, $f0, $f2" << std::endl; mf_c("$v0","$f0");
+                break;
+            default:
+                std::cout << "multu $v0, $v1" << std::endl;
+                std::cout << "mflo $v0" << std::endl;
+        }
+        delete info;
     }
     void visit(Divide *d)
     {
         descend(d);
-        std::cout << "div $v0, $v1" << std::endl;
-        std::cout << "mflo $v0" << std::endl;
-        // { mt_c("$f0","$v0"); mt_c("$f2","$v1"); std::cout << "div.s $f0, $f0, $f2" << std::endl; mf_c("$v0","$f0"); }
+        auto info = get_type_info(d);
+        switch (info->Options)
+        {
+            case(TypeInfo::FLOAT):
+                mt_c("$f0","$v0"); mt_c("$f2","$v1"); std::cout << "div.s $f0, $f0, $f2" << std::endl; mf_c("$v0","$f0");
+                break;
+            default:
+                std::cout << "div $v0, $v1" << std::endl;
+                std::cout << "mflo $v0" << std::endl;
+        }
+        delete info;
     }
     void visit(Modulo * m)
     {
