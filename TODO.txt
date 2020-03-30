@@ -7,7 +7,6 @@
 ./compiler_tests/float/pow.c
 ./compiler_tests/misc/typedef1.c
 ./compiler_tests/misc/typedef2.c
-./compiler_tests/pointer/arithmetic.c
 ./compiler_tests/strings/escaped.c
 ./compiler_tests/strings/puts.c
 ./compiler_tests/strings/search.c

@@ -267,7 +267,7 @@ class three_address_Visitor : public Visitor
         std::cerr << "string literal: " << sl->str << std::endl;
         int size = sl->str.length()+1;
         size = size + (4-size%4);
-        std::cout << "# allocating " << size << " bytes for string " << sl->str << std::endl;
+        std::cout << "# allocating " << size << " bytes for string " << sl->str << " , which is " << sl->str.length() << " characters long" << std::endl;
         std::cout << "addiu $sp, $sp, " << -size-4 << std::endl;
         move("$fp", "$sp");
         for (int i = 0; i < sl->str.length(); i++) 
@@ -660,6 +660,42 @@ class three_address_Visitor : public Visitor
         std::cout << "move $fp, $sp" << std::endl;
         // variable_map.update(-8);
         variable_map.update(-4);
+        auto info_right = get_type_info(bop->RHS);
+        auto info_left = get_type_info(bop->LHS);
+        // promoting expressions if not matched
+        if (info_right->Options != info_left->Options)
+        {
+            std::cout << "# mismatched types" << std::endl;
+            if (info_right->Options == TypeInfo::POINTER)
+            {
+                std::cout << "# promoting left hand side to pointer" << std::endl;
+                li(info_right->pointerDataSize.value(), "$t7");
+                std::cout << "multu $v0, $t7" << std::endl;
+                std::cout << "mflo $v0" << std::endl;
+            }
+            else if (info_left->Options == TypeInfo::POINTER)
+            {
+                std::cout << "# promoting right hand side to pointer" << std::endl;
+                li(info_left->pointerDataSize.value(), "$t7");
+                std::cout << "multu $v1, $t7" << std::endl;
+                std::cout << "mflo $v1" << std::endl;
+            }
+            else if (info_right->Options == TypeInfo::FLOAT)
+            {
+                std::cout << "# promoting left hand side to float" << std::endl;
+                mt_c("$f0", "$v0");
+                std::cout << "cvt.s.w $f0, $fo" << std::endl;
+                mf_c("$v0", "$f0");
+            }
+            else if (info_left->Options == TypeInfo::FLOAT)
+            {
+                std::cout << "# promoting right hand side to float" << std::endl;
+                mt_c("$f0", "$v1");
+                std::cout << "cvt.s.w $f0, $fo" << std::endl;
+                mf_c("$v1", "$f0");
+            }
+        }
+        delete info_right; delete info_left;
     }
     void visit(Multiply *m)
     {
@@ -707,8 +743,16 @@ class three_address_Visitor : public Visitor
         //         std::cout << "mflo $v1" << std::endl;
         //     }
         // }
-        std::cout << "addu $v0, $v0, $v1" << std::endl;
-        // { mt_c("$f0","$v0"); mt_c("$f2","$v1"); std::cout << "add.s $f0, $f0, $f2" << std::endl; mf_c("$v0","$f0"); }
+        auto info = get_type_info(a);
+        switch (info->Options)
+        {
+            case(TypeInfo::FLOAT):
+                mt_c("$f0","$v0"); mt_c("$f2","$v1"); std::cout << "add.s $f0, $f0, $f2" << std::endl; mf_c("$v0","$f0");
+                break;
+            default:
+                std::cout << "addu $v0, $v0, $v1" << std::endl;
+        }
+        delete info;
     }
     void visit(Sub * s)
     {
@@ -736,8 +780,16 @@ class three_address_Visitor : public Visitor
         //         std::cout << "mflo $v1" << std::endl;
         //     }
         // }
-        std::cout << "subu $v0, $v0, $v1" << std::endl;
-        // { mt_c("$f0","$v0"); mt_c("$f2","$v1"); std::cout << "sub.s $f0, $f0, $f2" << std::endl; mf_c("$v0","$f0"); }
+        auto info = get_type_info(s);
+        switch (info->Options)
+        {
+            case(TypeInfo::FLOAT):
+                mt_c("$f0","$v0"); mt_c("$f2","$v1"); std::cout << "sub.s $f0, $f0, $f2" << std::endl; mf_c("$v0","$f0");
+                break;
+            default:
+                std::cout << "subu $v0, $v0, $v1" << std::endl;
+        }
+        delete info;
     }
     void visit(ShiftLeft * sl)
     {
@@ -755,7 +807,7 @@ class three_address_Visitor : public Visitor
         descend(lt);
         std::cout << "slt $v0, $v0, $v1" << std::endl;
         std::cerr << "VAN" << std::endl;
-        // { mt_c("$f0","$v0"); mt_c("$f2","$v1"); std::cout << "c.lt.s $f0, $f0, $f2" << std::endl; mf_c("$v0","$f0"); }
+        // { mt_c("$f0","$v0"); mt_c("$f2","$v1"); std::cout << "c.lt.s $f0, $f2" << std::endl; mf_c("$v0","$f0"); }
     }
     void visit(GreaterThan * gt)
     {
