@@ -104,7 +104,7 @@ class three_address_Visitor : public Visitor
     std::vector<Record*> struct_record;
     std::unordered_map<std::string, int> sizeof_variables;
     bool sizeof_flag;
-    std::queue<std::pair<int, TypeInfo*>> parameter_types;
+    std::stack<std::pair<int, TypeInfo*>> parameter_types;
     void pop(std::string reg, int stack_offset = 0) { std::cout << "lw " << reg << ", " << stack_offset << "($sp)" << std::endl << "nop" << std::endl;}
     void push(std::string reg, int stack_offset = 0) { std::cout << "sw " << reg << ", " << stack_offset << "($sp)" << std::endl << "nop" << std::endl;}
     void move(std::string dest, std::string src) { std::cout << "move " << dest << ", " << src << std::endl; }
@@ -1628,17 +1628,24 @@ class three_address_Visitor : public Visitor
         {
             if  (i < 4)
             {
-                switch(parameter_types.front().second->Options)
+                if (i < 2)
                 {
-                    case(TypeInfo::FLOAT):
-                        std::cout << "s.s $f" << 12+i*2 << ", " << (i)*4 << "($sp)" << std::endl;
-                        break;
-                    default:
-                        std::cout << "sw $a" << i << ", " << (i)*4 << "($sp)" << std::endl;
+                    switch(parameter_types.top().second->Options)
+                    {
+                        case(TypeInfo::FLOAT):
+                            std::cout << "s.s $f" << 12+i*2 << ", " << (i)*4 << "($sp)" << std::endl;
+                            break;
+                        default:
+                            std::cout << "sw $a" << i << ", " << (i)*4 << "($sp)" << std::endl;
+                    }
+                }
+                else
+                {
+                    std::cout << "sw $a" << i << ", " << (i)*4 << "($sp)" << std::endl;
                 }
                 std::cout << "nop" << std::endl;
             }
-            delete parameter_types.front().second;
+            delete parameter_types.top().second;
             parameter_types.pop();
         }
         // make space for local variables
