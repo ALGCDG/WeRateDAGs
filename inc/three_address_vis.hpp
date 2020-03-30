@@ -64,7 +64,7 @@ class vm
 class three_address_Visitor : public Visitor
 {
     public:
-    three_address_Visitor(): counter(0), return_register(), continue_to(), break_to(), cases(), global(true), global_labels(), intermediate_values(), temporary_registers(), saved_registers(), variable_map(), writing(false), parameter_flag(false), func_flag(false), array_flag(false), initlist_count(0), address_flag(false), struct_flag(false), struct_fetch_record(false), sizeof_flag(false), string_literal_flag(false)
+    three_address_Visitor(): counter(0), return_register(), continue_to(), break_to(), cases(), global(true), global_labels(), intermediate_values(), temporary_registers(), saved_registers(), variable_map(), writing(false), parameter_flag(false), func_flag(false), array_flag(false), initlist_count(0), address_flag(false), struct_flag(false), struct_fetch_record(false), sizeof_flag(false), string_literal_flag(false), parameter_types()
     {
         for (int i = 9; i >= 0; i--)
             temporary_registers.push("$t"+std::to_string(i));
@@ -104,6 +104,7 @@ class three_address_Visitor : public Visitor
     std::vector<Record*> struct_record;
     std::unordered_map<std::string, int> sizeof_variables;
     bool sizeof_flag;
+    std::queue<std::pair<int, TypeInfo*>> parameter_types;
     void pop(std::string reg, int stack_offset = 0) { std::cout << "lw " << reg << ", " << stack_offset << "($sp)" << std::endl << "nop" << std::endl;}
     void push(std::string reg, int stack_offset = 0) { std::cout << "sw " << reg << ", " << stack_offset << "($sp)" << std::endl << "nop" << std::endl;}
     void move(std::string dest, std::string src) { std::cout << "move " << dest << ", " << src << std::endl; }
@@ -162,6 +163,8 @@ class three_address_Visitor : public Visitor
             std::cerr << "parameter flag" << std::endl;
             variable_map.update(4, false);
             variable_map.register_variable(in->ContextRecord->unique_id, 0);
+            auto info = get_type_info(in);
+            parameter_types.push(std::make_pair(parameter_size, info));
         }
         else if (sizeof_flag) li(sizeof_variables[in->ContextRecord->get_unique_id()]);
         else if (func_flag)
@@ -1609,9 +1612,18 @@ class three_address_Visitor : public Visitor
         {
             if  (i < 4)
             {
-                std::cout << "sw $a" << i << ", " << (i)*4 << "($sp)" << std::endl;
+                switch(parameter_types.front().second->Options)
+                {
+                    case(TypeInfo::FLOAT):
+                        std::cout << "s.s $f" << 12+i*2 << ", " << (i)*4 << "($sp)" << std::endl;
+                        break;
+                    default:
+                        std::cout << "sw $a" << i << ", " << (i)*4 << "($sp)" << std::endl;
+                }
                 std::cout << "nop" << std::endl;
             }
+            delete parameter_types.front().second;
+            parameter_types.pop();
         }
         // make space for local variables
         stacksize = 8 + 8*4 + 4; // by default we assign space for return address, old stack pointer, and saved registers
@@ -1643,6 +1655,8 @@ class three_address_Visitor : public Visitor
         move("$fp", "$sp");
         // stacksize = variable_map.get_stack_size();
         std::cout << end << ':' << std::endl;
+        // copy $v0 to $f0 incase it is float
+        mt_c("$f0","$v0");
         // restore saved registers
         for (int i = 0; i < 8; i++)
         {
