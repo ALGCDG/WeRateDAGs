@@ -1,4 +1,4 @@
-struct a {int a; int b; int c};
+struct a {int a; int b; int c;};
 
 int f()
 {

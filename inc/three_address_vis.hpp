@@ -104,6 +104,7 @@ class three_address_Visitor : public Visitor
     std::vector<Record*> struct_record;
     std::unordered_map<std::string, int> sizeof_variables;
     bool sizeof_flag;
+    int array_counter;
     std::stack<std::pair<int, TypeInfo*>> parameter_types;
     void pop(std::string reg, int stack_offset = 0) { std::cout << "lw " << reg << ", " << stack_offset << "($sp)" << std::endl << "nop" << std::endl;}
     void push(std::string reg, int stack_offset = 0) { std::cout << "sw " << reg << ", " << stack_offset << "($sp)" << std::endl << "nop" << std::endl;}
@@ -1219,6 +1220,15 @@ class three_address_Visitor : public Visitor
                     id->dec->accept(this);
                     writing = false;
                 }
+                else 
+                {
+                    // array
+                    writing = true;
+                    id->dec->accept(this);
+                    writing = false;
+                    array_counter = 0;
+                    id->init->accept(this);
+                }
             }
             else 
             {
@@ -1251,8 +1261,9 @@ class three_address_Visitor : public Visitor
             {
                 i->ass_expr->accept(this);
                 // std::cout << "addiu $sp, $sp, 4" << std::endl; move("$fp", "$sp");
-                // std::cout << "sw $v0, 0($sp)" << std::endl;
-                // std::cout << "nop" << std::endl;
+                std::cout << "sw $v0, " << variable_map.lookup(array_name+'['+std::to_string(array_counter)+']') << "($sp)" << std::endl;
+                std::cout << "nop" << std::endl;
+                array_counter++;
                 // variable_map.update(4);
             }
             else if (i->init_list != NULL)
