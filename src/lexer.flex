@@ -4,6 +4,8 @@
 #include <iostream>
 #include <sstream>
 #include "parser.tab.hpp"
+#include "feSymtab.hpp"
+#include "feSymtabDec.hpp"
 extern "C" int fileno(FILE *stream); // fixing bug in flex
 %}
 
