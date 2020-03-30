@@ -1,6 +1,7 @@
 #include "ASTProc.hpp"
 #include <exception>
-
+#include <cassert>
+#include "ast_TypeInfo.hpp"
 //void visit(Node*); //If nothing defined for this type of node
 void ASTProcVis::visit(ArraySubscript* _subcr){
     // std::cout << "visit " << "arraysubsr" << std::endl;
@@ -17,10 +18,36 @@ void ASTProcVis::visit(MemberAccess* _memberaccess){
     //cant link easily to their meaning, don't know their namespace
     //_memberaccess->ID->accept(this);
     _memberaccess->LHS->accept(this);
+    TypeGetter* getter = new TypeGetter;
+    TypeInfo* struct_info = _memberaccess->LHS->acceptTypeGetter(getter);
+    assert(struct_info->Options==TypeInfo::STRUCT);
+    assert(struct_info->isStruct!=NULL);
+    Record* member_record = struct_info->isStruct->SearchForMember(_memberaccess->ID->Name);
+    _memberaccess->ID->ContextRecord = dynamic_cast<NamedRecord*>(member_record);
+    delete getter;
+    delete struct_info;
 }
 void ASTProcVis::visit(DerefMemberAccess* _derefmemberacc){
     //_derefmemberacc->ID->accept(this);
     _derefmemberacc->LHS->accept(this);
+    TypeGetter* getter = new TypeGetter;
+    TypeInfo* struct_pt_info = _derefmemberacc->LHS->acceptTypeGetter(getter);
+    if(struct_pt_info->Options==TypeInfo::POINTER)
+    {
+        assert(struct_pt_info->isPt!=NULL);
+        assert(struct_pt_info->isPt->ptToStruct!=NULL);
+        Record* member_record = struct_pt_info->isPt->ptToStruct->SearchForMember(_derefmemberacc->ID->Name);
+        _derefmemberacc->ID->ContextRecord = dynamic_cast<NamedRecord*>(member_record);
+    }
+    else if(struct_pt_info->Options==TypeInfo::ARR)
+    {
+        assert(struct_pt_info->isArr!=NULL);
+        assert(struct_pt_info->isArr->structElementType!=NULL);
+        Record* member_record = struct_pt_info->isArr->structElementType->SearchForMember(_derefmemberacc->ID->Name);
+        _derefmemberacc->ID->ContextRecord = dynamic_cast<NamedRecord*>(member_record);
+    }
+    delete getter;
+    delete struct_pt_info;
 }
 void ASTProcVis::visit(ArgExprList* _argexprlist){
     for(auto i : _argexprlist->Args){
@@ -457,7 +484,7 @@ void ASTProcVis::visit(ExternalDeclaration* _extdec){
 }
 
 void ASTProcVis::visit(IdentifierNode* _idnode){
-    
+
     _idnode->ContextRecord = TableInstance->GetIDRecord((_idnode->Name));
 }
 
