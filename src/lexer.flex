@@ -29,9 +29,9 @@ Operator [+\-*/%&|^><=!~?:.,#\[\]\(\)\{\}]
 
 
 
-SourceCharSet [a-zA-Z0-9_\{\}\[\]#\(\)<>%:;.?*+-/^&|~!=,\\"'\n]
-sChar [a-zA-Z0-9_\{\}\[\]#\(\)<>%:;.?*+-/^&|~!=,' \t\v\f]
-cChar [a-zA-Z0-9_\{\}\[\]#\(\)<>%:;.?*+-/^&|~!=," \t\v\f]
+SourceCharSet [a-zA-Z0-9_\{\}\[\]#\(\)<>%:;.?*+-\/^&|~!=,\\"'\n]
+sChar [a-zA-Z0-9_\{\}\[\]#\(\)<>%:;.?*+-\/\^&|~!=,' \t\v\f]
+cChar [a-zA-Z0-9_\{\}\[\]#\(\)<>%:;.?*+-\/\^&|~!=,\" \t\v\f]
 simpEscSeq \\.
 %%
 
@@ -45,6 +45,8 @@ simpEscSeq \\.
         fprintf(stderr, "its a string literal: %s\n", *(yylval.text)); 
         return String;
 }
+
+
 
 \'({cChar}|{simpEscSeq})+\' {
 		/*
@@ -89,7 +91,7 @@ simpEscSeq \\.
 "&&" { return Operator_and; }
 "||" { return Operator_or; }
 "!" { return Operator_not; }
-"=" { fprintf(stderr, "its an assignment!/n"); return Operator_assign; }
+"=" { fprintf(stderr, "its an assignment!\n"); return Operator_assign; }
 "==" { return Operator_equal; }
 "!=" { return Operator_not_equal; }
 ">" { return Operator_greater; }
