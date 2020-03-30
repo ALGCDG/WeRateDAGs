@@ -290,9 +290,11 @@ class three_address_Visitor : public Visitor
         {
             li((int)sl->str[i]);
             std::cout << "sb $v0, " << i+4 << "($sp)" << std::endl;
+            std::cout << "nop" << std::endl;
         }
         li((int)'\0');
-        std::cout << "sb $v0, " << sl->str.length() << "($sp)" << std::endl;
+        std::cout << "sb $v0, " << sl->str.length()+4 << "($sp)" << std::endl;
+        std::cout << "nop" << std::endl;
         // storing pointer to string beginning in $v0
         std::cout << "addiu $v0, $sp, 4" << std::endl;
         variable_map.update(size+4);
@@ -530,6 +532,7 @@ class three_address_Visitor : public Visitor
                 default:
                     std::cout << "lw $v0, 0($v0)" << std::endl;
             }
+            std::cout << "nop" << std::endl;
         }
         else
         {
@@ -545,6 +548,7 @@ class three_address_Visitor : public Visitor
                 default:
                     std::cout << "sw $v1, 0($v0)" << std::endl;
             }
+            std::cout << "nop" << std::endl;
         }
     }
     void visit(UnaryPlusOperator * upo)
