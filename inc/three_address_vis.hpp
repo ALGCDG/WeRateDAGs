@@ -439,6 +439,28 @@ class three_address_Visitor : public Visitor
     }
     void visit(DerefMemberAccess * dma)
     {
+        // finding struct record associated with pointer
+        auto info = get_type_info(dma->LHS);
+        // getting offset of member
+        int offset = 0;
+        for (auto & r : info->isPt->ptToStruct->get_table()->subRecords)
+            if (r->get_id()==dma->ID->Name) break; else offset+=4;
+        delete info;
+        // get pointer
+        auto tmp = writing;
+        writing = false;
+        dma->LHS->accept(this);
+        std::cout << "lw $v0, 0($v0)" << std::endl;
+        writing = tmp;
+        if (!writing)
+        {
+            std::cout << "lw $v0, " << offset << "($v0)" << std::endl;
+        }
+        else
+        {
+            std::cout << "sw $v1, " << offset << "($v0)" << std::endl;
+        }
+        std::cout << "nop" << std::endl;
         // // get pointer to structure (also requried record)
         // if (writing) move("$v1", "$v0");
         // struct_fetch_record = true;
