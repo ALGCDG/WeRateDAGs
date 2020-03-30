@@ -167,7 +167,7 @@ Ident: Identifier { $$ = new IdentifierNode(*($1)); }
 Constant: Constant_int { $$ = new constant_int($1); }  
 		| Constant_char  { $$ = new constant_char(*$1); } 
 		| Constant_double { $$ = new Constant(); }  
-		| Constant_float { $$ = new Constant(); }  
+		| Constant_float { $$ = new constant_float($1); }  
 		| Constant_long_double { $$ = new Constant(); }  
 
 postfix_EXPR: primary_EXPR { $$ = $1; } /*Pass through*/

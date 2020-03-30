@@ -1,3 +1,4 @@
+./compiler_tests/Archie/local_array_init.c
 ./compiler_tests/float/add_double.c
 ./compiler_tests/float/add.c
 ./compiler_tests/float/add_mul.c
@@ -7,7 +8,6 @@
 ./compiler_tests/float/pow.c
 ./compiler_tests/misc/typedef1.c
 ./compiler_tests/misc/typedef2.c
-./compiler_tests/strings/escaped.c
 ./compiler_tests/strings/puts.c
 ./compiler_tests/strings/search.c
 ./compiler_tests/types/sizeof_char_inst.c

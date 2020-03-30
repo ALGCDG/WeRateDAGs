@@ -37,6 +37,7 @@ class IdentifierNode;
 class Constant;
 class constant_int;
 class constant_char;
+class constant_float;
 class StringLiteral;
 class PostfixExpr;
 class ArgExprList;
@@ -162,6 +163,7 @@ public:
     virtual void visit(Constant *) {}
     virtual void visit(constant_int *) {}
     virtual void visit(constant_char *) {}
+    virtual void visit(constant_float *) {}
     virtual void visit(StringLiteral *) {}
     virtual void visit(ArraySubscript *) {}
     virtual void visit(FuncCall *) {}
@@ -276,6 +278,7 @@ public:
     virtual TypeInfo* GetType(Constant*) = 0;
     virtual TypeInfo* GetType(constant_int*) = 0;
     virtual TypeInfo* GetType(constant_char*) = 0;
+    virtual TypeInfo* GetType(constant_float*) = 0;
     virtual TypeInfo* GetType(StringLiteral*) = 0;
     virtual TypeInfo* GetType(TypedefNode*) = 0;
     virtual TypeInfo* GetType(PostfixExpr*) = 0;
@@ -391,6 +394,14 @@ class constant_char : public Constant {
 public:
     constant_char(const std::string& _str) : constant(ConvertEscapes(_str)){}
     std::string constant;//can be more than one char, cast to int in such a case, implementation defined
+    void accept(Visitor * AVisitor) override { AVisitor->visit(this); }//todo, no such visitor
+    TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ return getter->GetType(this); }
+};
+class constant_float: public Constant 
+{
+    public:
+    constant_float(const float & f): value(f) {}
+    float value;
     void accept(Visitor * AVisitor) override { AVisitor->visit(this); }//todo, no such visitor
     TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ return getter->GetType(this); }
 };

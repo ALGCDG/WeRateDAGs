@@ -159,6 +159,7 @@ simpEscSeq \\.
         float constant
         */
         fprintf(stderr, "its a float constant");
+        yylval.fvalue = std::stof(yytext);
 		return Constant_float;
 }
 
