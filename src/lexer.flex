@@ -76,7 +76,7 @@ simpEscSeq \\.
 "float"     { return Keyword_float; }
 "char"      { return Keyword_char; }
 "void"      { return Keyword_void; }
-
+"unsigned"      { return Keyword_unsigned; }
 
 [/][/].*  {/*A single line comment*/ fprintf(stderr, "its a single line comment\n"); }
 [/][*][^*/]*[*][/] {/*A multy line comment*/ fprintf(stderr, "its a multi line comment\n"); }

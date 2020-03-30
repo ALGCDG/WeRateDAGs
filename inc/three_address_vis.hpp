@@ -628,9 +628,21 @@ class three_address_Visitor : public Visitor
     }
     void visit(SizeofExpr * soe)
     {
-        sizeof_flag = true;
-        soe->RHS->accept(this);
-        sizeof_flag = false;
+        // sizeof_flag = true;
+        // soe->RHS->accept(this);
+        // sizeof_flag = false;
+        auto info = get_type_info(soe->RHS);
+        switch(info->Options)
+        {
+            case(TypeInfo::STRUCT):
+                    sizeof_flag = true;
+                    soe->RHS->accept(this);
+                    sizeof_flag = false;
+                    break;
+            case(TypeInfo::CHAR): li(1); break;
+            default:
+                li(4);
+        }
     }
     void visit(SizeofType * sot)
     {
@@ -1022,7 +1034,7 @@ class three_address_Visitor : public Visitor
                 mt_c("$f0","$v0"); mt_c("$f2","$v1"); std::cout << "mul.s $f0, $f0, $f2" << std::endl; mf_c("$v0","$f0");
                 break;
             default:
-                std::cout << "mult $v0, $v1" << std::endl;
+                std::cout << "multu $v0, $v1" << std::endl;
                 std::cout << "mflo $v0" << std::endl;
         }
         delete info;
