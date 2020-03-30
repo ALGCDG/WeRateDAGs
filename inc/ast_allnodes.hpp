@@ -397,7 +397,7 @@ public:
 class StringLiteral : public Expression
 {
 public:
-    StringLiteral(std::string _str) : str(ConvertEscapes(_str)){}
+    StringLiteral(std::string _str) : str(ConvertEscapes(_str)){std::cerr << "string literal is " <<str << " and " << str.length() << " chars long" << std::endl;}
     // bool wide; not needed, not tested
     std::string str;
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this);}
