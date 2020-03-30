@@ -700,14 +700,14 @@ class three_address_Visitor : public Visitor
             {
                 std::cout << "# promoting left hand side to float" << std::endl;
                 mt_c("$f0", "$v0");
-                std::cout << "cvt.s.w $f0, $fo" << std::endl;
+                std::cout << "cvt.s.w $f0, $f0" << std::endl;
                 mf_c("$v0", "$f0");
             }
             else if (info_left->Options == TypeInfo::FLOAT)
             {
                 std::cout << "# promoting right hand side to float" << std::endl;
                 mt_c("$f0", "$v1");
-                std::cout << "cvt.s.w $f0, $fo" << std::endl;
+                std::cout << "cvt.s.w $f0, $f0" << std::endl;
                 mf_c("$v1", "$f0");
             }
         }
@@ -920,6 +920,28 @@ class three_address_Visitor : public Visitor
     void visit(AssignmentExpression *ae)
     {
         ae->RHS->accept(this);
+        auto info_right = get_type_info(ae->RHS);
+        auto info_left = get_type_info(ae->LHS);
+        if (info_right->Options != info_left->Options)
+        {
+            std::cout << "# mismatched types" << std::endl;
+            switch(info_left->Options)
+            {
+
+                case(TypeInfo::FLOAT):
+                    std::cout << "# promoting right hand side to float" << std::endl;
+                    mt_c("$f0", "$v1");
+                    std::cout << "cvt.s.w $f0, $f0" << std::endl;
+                    mf_c("$v1", "$f0");
+                    break;
+                default:
+                    std::cout << "# promoting right hand side to integral" << std::endl;
+                    mt_c("$f0", "$v1");
+                    std::cout << "cvt.w.s $f0, $f0" << std::endl;
+                    mf_c("$v1", "$f0");
+            }
+        }
+        delete info_right; delete info_left;
         writing = true;
         ae->LHS->accept(this);
         writing = false;
@@ -955,13 +977,51 @@ class three_address_Visitor : public Visitor
         std::cout << "move $fp, $sp" << std::endl;
         // variable_map.update(-8);
         variable_map.update(-4);
+        auto info_right = get_type_info(gae->RHS);
+        auto info_left = get_type_info(gae->LHS);
+        // promoting rhs to lhs if not matched
+        if (info_right->Options != info_left->Options)
+        {
+            std::cout << "# mismatched types" << std::endl;
+            if (info_left->Options == TypeInfo::POINTER)
+            {
+                std::cout << "# promoting right hand side to pointer" << std::endl;
+                li(info_left->pointerDataSize.value(), "$t7");
+                std::cout << "multu $v1, $t7" << std::endl;
+                std::cout << "mflo $v1" << std::endl;
+            }
+            else if (info_left->Options == TypeInfo::FLOAT)
+            {
+                std::cout << "# promoting right hand side to float" << std::endl;
+                mt_c("$f0", "$v1");
+                std::cout << "cvt.s.w $f0, $f0" << std::endl;
+                mf_c("$v1", "$f0");
+            }
+            else if (info_left->Options == TypeInfo::INT || info_left->Options == TypeInfo::CHAR)
+            {
+                std::cout << "# promoting right hand side to integral" << std::endl;
+                mt_c("$f0", "$v1");
+                std::cout << "cvt.w.s $f0, $f0" << std::endl;
+                mf_c("$v1", "$f0");
+            }
+        }
+        delete info_right; delete info_left;
     }
 
     void visit(MulAssignment * ma)
     {
         descend(ma);
-        std::cout << "mult $v0, $v1" << std::endl;
-        std::cout << "mflo $v0" << std::endl;
+        auto info = get_type_info(ma);
+        switch (info->Options)
+        {
+            case(TypeInfo::FLOAT):
+                mt_c("$f0","$v0"); mt_c("$f2","$v1"); std::cout << "mul.s $f0, $f0, $f2" << std::endl; mf_c("$v0","$f0");
+                break;
+            default:
+                std::cout << "mult $v0, $v1" << std::endl;
+                std::cout << "mflo $v0" << std::endl;
+        }
+        delete info;
         writing = true;
         ma->LHS->accept(this);
         writing = false;
@@ -969,8 +1029,17 @@ class three_address_Visitor : public Visitor
     void visit(DivAssignment * da)
     {
         descend(da);
-        std::cout << "div  $v0, $v1" << std::endl;
-        std::cout << "mfhi $v0" << std::endl;
+        auto info = get_type_info(da);
+        switch (info->Options)
+        {
+            case(TypeInfo::FLOAT):
+                mt_c("$f0","$v0"); mt_c("$f2","$v1"); std::cout << "div.s $f0, $f0, $f2" << std::endl; mf_c("$v0","$f0");
+                break;
+            default:
+                std::cout << "div  $v0, $v1" << std::endl;
+                std::cout << "mfhi $v0" << std::endl;
+        }
+        delete info;
         writing = true;
         da->LHS->accept(this);
         writing = false;
@@ -987,7 +1056,16 @@ class three_address_Visitor : public Visitor
     void visit(AddAssignment * aa)
     {
         descend(aa);
-        std::cout << "addu $v0, $v0, $v1" << std::endl;
+        auto info = get_type_info(aa);
+        switch (info->Options)
+        {
+            case(TypeInfo::FLOAT):
+                mt_c("$f0","$v0"); mt_c("$f2","$v1"); std::cout << "add.s $f0, $f0, $f2" << std::endl; mf_c("$v0","$f0");
+                break;
+            default:
+                std::cout << "addu $v0, $v0, $v1" << std::endl;
+        }
+        delete info;
         writing = true;
         aa->LHS->accept(this);
         writing = false;  
@@ -995,7 +1073,16 @@ class three_address_Visitor : public Visitor
     void visit(SubAssignment * sa)
     {
         descend(sa);
-        std::cout << "subu $v0, $v0, $v1" << std::endl;
+        auto info = get_type_info(sa);
+        switch (info->Options)
+        {
+            case(TypeInfo::FLOAT):
+                mt_c("$f0","$v0"); mt_c("$f2","$v1"); std::cout << "sub.s $f0, $f0, $f2" << std::endl; mf_c("$v0","$f0");
+                break;
+            default:
+                std::cout << "subu $v0, $v0, $v1" << std::endl;
+        }
+        delete info;
         writing = true;
         sa->LHS->accept(this);
         writing = false;
