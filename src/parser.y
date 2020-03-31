@@ -6,11 +6,6 @@
   #include "./feSymtab.hpp"
   #include "./feSymtabDec.hpp"
 
-  bool flag_active_typedef = false;
-  //true when typedef in dec spec
-  bool flag_add_names = false;
-  //true when needing to add names
-  //typedef flag is then checked to see if it should be a typename or othername
 
   extern TranslationUnit *g_root; // A way of getting the AST out
   //! This is to fix problems when generating C++
@@ -175,8 +170,6 @@ primary_EXPR: Ident { $$ = $1; }
 
 Ident: Identifier { 
       $$ = new IdentifierNode(*($1)); 
-      if(flag_active_typedef){ insertTypeName(*($1)); } 
-      else if(flag_add_names) { insertOtherName(*($1)); }
 } 
 
 Constant: Constant_int { $$ = new constant_int($1); }  
@@ -285,15 +278,15 @@ DECLARATIONS
 */
 
 
-declaration: declaration_specifiers init_declarator_list Punctuator_eol { $$ = new declaration($1, $2); flag_active_typedef = false; flag_add_names = false; }
-           | declaration_specifiers Punctuator_eol { $$ = new declaration($1); flag_active_typedef = false; flag_add_names = false; }
+declaration: declaration_specifiers init_declarator_list Punctuator_eol { $$ = new declaration($1, $2);}
+           | declaration_specifiers Punctuator_eol { $$ = new declaration($1);}
 
-declaration_specifiers: storage_class_specifier { $$ = new declaration_specifiers(NULL,NULL,$1); flag_add_names=true; }/*Now expect names*/
+declaration_specifiers: storage_class_specifier { $$ = new declaration_specifiers(NULL,NULL,$1);}
                       | storage_class_specifier declaration_specifiers { $$ = new declaration_specifiers(NULL,$2,$1); }
-                      | type_specifier { $$ = new declaration_specifiers($1); flag_add_names=true; }/*Now expect names*/
+                      | type_specifier { $$ = new declaration_specifiers($1);}
                       | type_specifier declaration_specifiers { $$ = new declaration_specifiers($1, $2); }
 
-storage_class_specifier: Keyword_typedef { $$ = new TypedefNode; flag_active_typedef = true; }
+storage_class_specifier: Keyword_typedef { $$ = new TypedefNode;}
 
 init_declarator_list: init_declarator { $$ = new init_declarator_list($1); }
                     | init_declarator_list Operator_comma init_declarator { $$ = new init_declarator_list($3, $1); }
@@ -314,20 +307,18 @@ type_specifier: Keyword_void { $$ = new type_specifier("void"); }
 /*              | typedef_name { std::cerr << "typedef type" << std::endl; }*/
               | struct_specifier{ $$ = $1; }
 
-struct_specifier: Keyword_struct FORCEIDENT Ident ENDFORCEIDENT Punctuator_cur_open struct_declaration_list Punctuator_cur_close 
+struct_specifier: Keyword_struct  Ident  Punctuator_cur_open struct_declaration_list Punctuator_cur_close 
         { $$ = new struct_specifier($2, $4); }
 				| Keyword_struct Punctuator_cur_open struct_declaration_list Punctuator_cur_close 
         { $$ = new struct_specifier(NULL, $3); }
-				| Keyword_struct FORCEIDENT Ident ENDFORCEIDENT { $$ = new struct_specifier($2); }
+				| Keyword_struct  Ident  { $$ = new struct_specifier($2); }
 
-FORCEIDENT: %empty% { forceIdent(); }
 
-ENDFORCEIDENT: %empty% {endForceIdent(); }
 
 struct_declaration_list: struct_declaration { $$ = new struct_declaration_list($1); }
 					   | struct_declaration_list struct_declaration { $1->AppendDeclaration($2); }
 
-struct_declaration: specifier_list FORCEIDENT struct_declarator_list ENDFORCEIDENT Punctuator_eol { $$ = new struct_declaration($1, $2); }
+struct_declaration: specifier_list  struct_declarator_list  Punctuator_eol { $$ = new struct_declaration($1, $2); }
 
 specifier_list: type_specifier  { $$ = new specifier_list($1); }
 						| type_specifier specifier_list { $$ = new specifier_list($1, $2); }

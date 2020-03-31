@@ -73,6 +73,7 @@ struct arrayType : public genericConstituentType{
     void AddNextType(typeSpecifiers* typ) override;
     void AddNextType(structType* str) override;
     void AddNextType(enumType* en) override;
+
     //TODO array of enums
     enumType* enumElementType;
     arrayType* nextArray;
@@ -118,7 +119,7 @@ struct typeSpecifiers : public genericConstituentType{
 
 struct structType : public genericConstituentType{
     nsTable* members;
-    virtual nsTable* get_table() { return members; }
+    virtual nsTable* get_table() { std::cerr << "accessing struct members" << std::endl; return members; }
     void BeAppended(genericConstituentType* other);
     void BeAppended(pointerType* ptr);
     void BeAppended(VariableDeclaration* vardec);

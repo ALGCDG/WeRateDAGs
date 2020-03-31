@@ -416,11 +416,11 @@ void FunctionDefinitionRec::AddPrimary(functionType* _Func){
 }
 
 genericConstituentType* VariableDeclaration::GetPrimary(){
-    if(primaryPt!=NULL) return primaryPt;
-    else if(primaryArr!=NULL) return primaryArr;
-    else if(primaryFunc!=NULL) return primaryFunc;
-    else if(primaryTypespec!=NULL) return primaryTypespec;
-    else if(primaryStruct!=NULL) return primaryStruct;
+    if(primaryPt!=NULL) {std::cerr << "primary is pointer" << std::endl; return primaryPt;}
+    else if(primaryArr!=NULL) {std::cerr << "primary is arr" << std::endl;return primaryArr;}
+    else if(primaryFunc!=NULL) {std::cerr << "primary is func" << std::endl;return primaryFunc;}
+    else if(primaryTypespec!=NULL) {std::cerr << "primary is typespec" << std::endl;return primaryTypespec;}
+    else if(primaryStruct!=NULL) {std::cerr << "primary is struct" << std::endl;return primaryStruct;}
     else throw("variable record has no info!");
 }
 

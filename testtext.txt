@@ -1,12 +1,11 @@
-int fib(int n){
-    if(n == 0 || n == 1){
-        return 1;
-    }
-    else{
-        return n + fib(n-1);
-    }
-}
+struct a {int a; int b; int c;};
 
-int main(){
-    return 1 + fib(2);
+int f()
+{
+    struct a b;
+    struct a * c;
+    // struct a * d;
+    // // c=&b;
+    // c++;
+    // return !((c-d)==8) ;
 }
