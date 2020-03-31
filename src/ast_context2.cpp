@@ -543,6 +543,7 @@ void SymbolTable::EndDeclaration(){
 }
 
 void SymbolTable::AddArrayToCurrRecord(int size){
+    std::cerr << "adding array with size " << size << " to current record" << std::endl;
     declPartsStack.top().push_back(new arrayType(size));
 }
 
