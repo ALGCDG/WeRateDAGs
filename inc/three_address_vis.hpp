@@ -189,6 +189,10 @@ class three_address_Visitor : public Visitor
                 std::cout << "lw $v0, " << variable_map.lookup(in->ContextRecord->unique_id) << "($fp) " << std::endl; // still need to add frame offset TODO
                 std::cout << "nop" << std::endl;
             }
+            else if(global_labels.find(in->ContextRecord->unique_id)!=global_labels.end())
+            {
+                std::cout << "lw $v0, " << in->ContextRecord->unique_id << std::endl;
+            }
             else
             {
                 std::cout << "li $v0, " << enum_symbol_map[in->Name] << std::endl;
@@ -212,6 +216,10 @@ class three_address_Visitor : public Visitor
                     std::cout << "nop" << std::endl;
                     variable_map.register_variable(in->ContextRecord->unique_id, 4);
                     sizeof_variables[in->ContextRecord->unique_id] = 4;
+                }
+                else if(global_labels.find(in->ContextRecord->unique_id)!=global_labels.end())
+                {
+                    std::cout << "sw $v0, " << in->ContextRecord->unique_id << std::endl;
                 }
                 else
                 {
