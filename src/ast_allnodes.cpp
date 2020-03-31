@@ -158,3 +158,15 @@ std::string ConvertEscapes(const std::string& str_in){
     }
         return str_out;
 }
+
+IdentifierNode* GetIdentNode(declarator* dec){
+    if(dec->dir_dec!=NULL)return GetIdentNode(dec->dir_dec);
+}
+IdentifierNode* GetIdentNode(direct_declarator* dirdec){
+    if(dirdec->ID!=NULL) return dirdec->ID;
+    else if(dirdec->dec!=NULL) return GetIdentNode(dirdec->dec);
+    else if(dirdec->dir_dec!=NULL) return GetIdentNode(dirdec->dir_dec);
+}
+IdentifierNode* GetIdentNode(init_declarator* indec){
+    if(indec->dec!=NULL) return GetIdentNode(indec->dec);
+}
