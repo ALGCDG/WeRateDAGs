@@ -292,12 +292,12 @@ unsigned int functionType::ByteSize(){
 }
 
 unsigned int structType::ByteSize(){
-    std::cout << "calculating size of struct" << std::endl;
+    // std::cout << "calculating size of struct" << std::endl;
     unsigned int sum = 0;
     for(auto rec : members->subRecords){
         sum += rec->DeclarationSize();
     }
-    std::cout << "Size is " << sum << std::endl;
+    // std::cout << "Size is " << sum << std::endl;
     return sum;
 }
 

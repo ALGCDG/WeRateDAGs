@@ -1,11 +1,3 @@
-
-
-
-
-
-
-
-
 x=0
 def main():
 	global x
