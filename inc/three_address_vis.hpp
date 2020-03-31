@@ -1475,9 +1475,11 @@ class three_address_Visitor : public Visitor
     }
     void visit(parameter_list * pl)
     {
+        std::cerr << "visiting first para dec" << std::endl;
         pl->para_dec->accept(this);
         if (pl->para_list != NULL)
         {
+            std::cerr << "visiting other para decs" << std::endl;
             pl->para_list->accept(this);
         }
     }

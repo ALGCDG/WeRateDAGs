@@ -62,10 +62,9 @@ std::string ConvertEscapes(const std::string& str_in){
     std::string buffer;
     bool expect_oct = false;
     bool expect_hex = false;
-    std::cerr << "Converting escapes for string " << str_in << "which is originally " << str_in.length() << " characters long " << std::endl;
     for(auto next_char : str_in){
         if(buffer.length()==0){
-            if(next_char=='\\'){ buffer+=next_char; std::cerr << "added prelim escape \\" << std::endl; }
+            if(next_char=='\\'){ buffer+=next_char; }
             else { str_out+=next_char; }
         }
         else{
@@ -120,12 +119,10 @@ std::string ConvertEscapes(const std::string& str_in){
                 }
             }
             else if(buffer.length()==2){
-                std::cerr << "Longer buffer of length 2" << std::endl;
                 if(buffer[1]=='x') expect_hex = true;
                 else if(std::regex_match(buffer, octalEsc)) expect_oct = true;
             }
             else if(expect_hex){
-                std::cerr << "Even Longer buffer, hex" << std::endl;
                 //length at least 3 now
                 if(!std::regex_match(buffer,hexEsc)){
                     str_out+=evalHexCode(buffer.substr(0,buffer.length()-1));
@@ -140,7 +137,6 @@ std::string ConvertEscapes(const std::string& str_in){
                 }
             }
             else if(expect_oct){
-                std::cerr << "Even Longer buffer, oct" << std::endl;
                 if(!std::regex_match(buffer,octalEsc)){
                     str_out+=evalOctCode(buffer.substr(0,buffer.length()-1));
                     if(buffer.back() == '\\'){
@@ -156,7 +152,6 @@ std::string ConvertEscapes(const std::string& str_in){
         }
     }
     if(buffer.length()!=0){
-        std::cerr << "Emptying buffer" << std::endl;
         if(std::regex_match(buffer,octalEsc)){ str_out += evalOctCode(buffer);}
         else if(std::regex_match(buffer, hexEsc)){ str_out += evalHexCode(buffer);}
         else{ str_out += buffer;}

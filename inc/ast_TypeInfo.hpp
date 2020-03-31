@@ -33,6 +33,7 @@ public:
     TypeInfo* GetType(constant_float* _constant_float);
     TypeInfo* GetType(StringLiteral* _StringLiteral);
     TypeInfo* GetType(TypedefNode* _TypedefNode);
+    TypeInfo* GetType(type_name* typ);
     TypeInfo* GetType(PostfixExpr* _PostfixExpr);
     TypeInfo* GetType(ArgExprList* _ArgExprList);
     TypeInfo* GetType(ArraySubscript* _ArraySubscript);

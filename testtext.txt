@@ -1,12 +1,6 @@
-int fib(int n){
-    if(n == 0 || n == 1){
-        return 1;
-    }
-    else{
-        return n + fib(n-1);
-    }
-}
 
 int main(){
-    return 1 + fib(2);
+    int a;
+    char b;
+    b = (char) a;
 }

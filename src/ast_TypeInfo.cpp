@@ -95,10 +95,8 @@ TypeInfo* TypeInfo::UsualArithConversion(TypeInfo* A, TypeInfo* B){
 
 TypeInfo* TypeGetter::GetType(Expression* _Expression){}
 TypeInfo* TypeGetter::GetType(IdentifierNode* _IdentifierNode){
-    std::cerr << "visting ID node" << std::endl;
     std::cerr << (_IdentifierNode->ContextRecord == NULL) << std::endl;
     genericConstituentType* gen = _IdentifierNode->ContextRecord->GetPrimary();
-    std::cerr << "got gen" << std::endl;
     TypeInfo* info = new TypeInfo(gen);
     return info;
 }
@@ -124,6 +122,14 @@ TypeInfo* TypeGetter::GetType(StringLiteral* _StringLiteral){
     return info;
 }
 TypeInfo* TypeGetter::GetType(TypedefNode* _TypedefNode){}
+
+TypeInfo* TypeGetter::GetType(type_name* typ){
+    TypeInfo* info = new TypeInfo;
+    if(typ->abs_dec!=NULL){
+        if(typ->spec_list!=NULL){ ;}
+    }
+}
+
 TypeInfo* TypeGetter::GetType(PostfixExpr* _PostfixExpr){}
 TypeInfo* TypeGetter::GetType(ArgExprList* _ArgExprList){}
 TypeInfo* TypeGetter::GetType(ArraySubscript* _ArraySubscript){
@@ -268,7 +274,8 @@ TypeInfo* TypeGetter::GetType(SizeofType* _SizeofType){
     return info;
 }
 TypeInfo* TypeGetter::GetType(CastExpr* _CastExpr){
-    //TODO analyse declarator!
+    TypeInfo* info = new TypeInfo(_CastExpr->castInfo->GetPrimary());
+    return info;
 }
 TypeInfo* TypeGetter::GetType(BinaryOpExpression* _BinaryOpExpression){}
 

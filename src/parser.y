@@ -3,6 +3,9 @@
   #include<iostream>
   #include<string>
   #include "./ast_allnodes.hpp"
+  #include "./feSymtab.hpp"
+  #include "./feSymtabDec.hpp"
+
 
   extern TranslationUnit *g_root; // A way of getting the AST out
   //! This is to fix problems when generating C++
@@ -10,6 +13,9 @@
   // that Bison generated code can call them.
   int yylex(void);
   void yyerror(const char *);
+
+  
+
 }
 
 %union
@@ -162,7 +168,9 @@ primary_EXPR: Ident { $$ = $1; }
                   | String { std::cerr << "new string literal" << std::endl;$$ = new StringLiteral(*$1); }/*TODO*/
                   | Punctuator_par_open EXPR Punctuator_par_close { $$ = $2; }
 
-Ident: Identifier { $$ = new IdentifierNode(*($1)); } 
+Ident: Identifier { 
+      $$ = new IdentifierNode(*($1)); 
+} 
 
 Constant: Constant_int { $$ = new constant_int($1); }  
 		| Constant_char  { $$ = new constant_char(*$1); } 
@@ -270,15 +278,15 @@ DECLARATIONS
 */
 
 
-declaration: declaration_specifiers init_declarator_list Punctuator_eol { $$ = new declaration($1, $2); }
-           | declaration_specifiers Punctuator_eol { $$ = new declaration($1); }
+declaration: declaration_specifiers init_declarator_list Punctuator_eol { $$ = new declaration($1, $2);}
+           | declaration_specifiers Punctuator_eol { $$ = new declaration($1);}
 
-declaration_specifiers: storage_class_specifier { $$ = new declaration_specifiers(NULL,NULL,$1); }
+declaration_specifiers: storage_class_specifier { $$ = new declaration_specifiers(NULL,NULL,$1);}
                       | storage_class_specifier declaration_specifiers { $$ = new declaration_specifiers(NULL,$2,$1); }
-                      | type_specifier { $$ = new declaration_specifiers($1); }
+                      | type_specifier { $$ = new declaration_specifiers($1);}
                       | type_specifier declaration_specifiers { $$ = new declaration_specifiers($1, $2); }
 
-storage_class_specifier: Keyword_typedef { $$ = new TypedefNode; }
+storage_class_specifier: Keyword_typedef { $$ = new TypedefNode;}
 
 init_declarator_list: init_declarator { $$ = new init_declarator_list($1); }
                     | init_declarator_list Operator_comma init_declarator { $$ = new init_declarator_list($3, $1); }
@@ -299,18 +307,20 @@ type_specifier: Keyword_void { $$ = new type_specifier("void"); }
 /*              | typedef_name { std::cerr << "typedef type" << std::endl; }*/
               | struct_specifier{ $$ = $1; }
 
-struct_specifier: Keyword_struct Ident Punctuator_cur_open struct_declaration_list Punctuator_cur_close 
+struct_specifier: Keyword_struct  Ident  Punctuator_cur_open struct_declaration_list Punctuator_cur_close 
         { $$ = new struct_specifier($2, $4); }
 				| Keyword_struct Punctuator_cur_open struct_declaration_list Punctuator_cur_close 
         { $$ = new struct_specifier(NULL, $3); }
-				| Keyword_struct Ident { $$ = new struct_specifier($2); }
+				| Keyword_struct  Ident  { $$ = new struct_specifier($2); }
+
+
 
 struct_declaration_list: struct_declaration { $$ = new struct_declaration_list($1); }
 					   | struct_declaration_list struct_declaration { $1->AppendDeclaration($2); }
 
-struct_declaration: specifier_list struct_declarator_list Punctuator_eol { $$ = new struct_declaration($1, $2); }
+struct_declaration: specifier_list  struct_declarator_list  Punctuator_eol { $$ = new struct_declaration($1, $2); }
 
-specifier_list: type_specifier  { $$ = new specifier_list($1); } /*TODO!*/
+specifier_list: type_specifier  { $$ = new specifier_list($1); }
 						| type_specifier specifier_list { $$ = new specifier_list($1, $2); }
 
 struct_declarator_list: declarator { $$ = new struct_declarator_list($1); }
@@ -339,7 +349,7 @@ declarator: direct_declarator { $$ = new declarator($1); }
 		  | pointer direct_declarator { $$ = new declarator($2, $1); }
 
 
-direct_declarator: Ident { $$ = new direct_declarator($1); }
+direct_declarator: Ident { $$ = new direct_declarator($1);}
 				 | Punctuator_par_open declarator Punctuator_par_close  { $$ = new direct_declarator(NULL, NULL, NULL,NULL, $2); }
 				 | direct_declarator Punctuator_squ_open Punctuator_squ_close  { $$ = new direct_declarator(NULL, $1, new unspecified_array_length()); }
 				 | direct_declarator Punctuator_squ_open constant_EXPR Punctuator_squ_close  { $$ = new direct_declarator(NULL, $1, $3); }
@@ -350,9 +360,9 @@ direct_declarator: Ident { $$ = new direct_declarator($1); }
 pointer: Operator_mul { $$ = new pointer(); }
 	   | Operator_mul pointer { $$ = new pointer($2); }
 
-parameter_type_list: parameter_list { $$ = $1; }
+parameter_type_list: parameter_list { $$ = $1; std::cerr << "Finished params" << std::endl; }
 
-parameter_list: parameter_declaration { $$ = new parameter_list($1); }
+parameter_list: parameter_declaration { $$ = new parameter_list($1); std::cerr << "LHS most param" <<std::endl; }
 		 	  | parameter_list Operator_comma parameter_declaration { $$ = new parameter_list($3, $1); }
 
 parameter_declaration: declaration_specifiers declarator { $$ = new parameter_declaration($1, $2); }

@@ -74,6 +74,7 @@ public:
     void visit(declaration_specifiers* _decspec);
     void visit(init_declarator_list* _indeclis);
     void visit(init_declarator* _indec);
+    void visit(type_name* typ);
     void visit(type_specifier* _typespec);
     void visit(specifier_list* _speclist);
     void visit(pointer* _pt);
