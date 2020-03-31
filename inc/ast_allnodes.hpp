@@ -26,6 +26,7 @@ std::string ConvertEscapes(const std::string& str_in);
 //CONTEXT DOES NOT NEED TO KNOW THESE NODES, HANDLED BY VISITOR
 //NO FORWARD DECLARATION NEEDED
 class NamedRecord;
+
 namespace ContextData{
     class Record;
 }
@@ -1394,6 +1395,9 @@ public:
 };
 
 
+IdentifierNode* GetIdentNode(declarator* dec);
+IdentifierNode* GetIdentNode(direct_declarator* dirdec);
+IdentifierNode* GetIdentNode(init_declarator* indec);
 
 
 #endif
