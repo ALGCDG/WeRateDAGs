@@ -219,6 +219,12 @@ class three_address_Visitor : public Visitor
                     std::cout << "nop" << std::endl;
                 }
             }
+            // else
+            // {
+            //     std::cout << in->ContextRecord->unique_id << ':';
+            //     global_labels.insert(in->ContextRecord->unique_id);
+            // }
+            
         }
         if (struct_flag) 
         {
@@ -252,19 +258,25 @@ class three_address_Visitor : public Visitor
     void visit(Constant *) {}
     void visit(constant_int * ci)
     {
-        // if (return_register.empty())
-        // {
-        //     std::cout << ci->value;
-        // }
-        // else
-        // {
+        if (global)
+        {
+            std::cout << " .word " << ci->value << std::endl;
+        }
+        else
+        {
         std::cout << "li $v0, " << ci->value << std::endl;
-        // }
+        }
     }
     void visit(constant_char * cc)
     {
         std::cerr << "character string " << cc->constant << std::endl;
+        if (global)
+        {
+            std::cout << " .byte " << (int)cc->constant[0] << std::endl;
+        }
+        else {
         std::cout << "li $v0, " << (int)cc->constant[0] << std::endl;
+        }
     }
     void visit(constant_float *cf)
     {
@@ -275,7 +287,7 @@ class three_address_Visitor : public Visitor
         }
         else
         {
-            std::cout << ".float " << cf->value << std::endl;
+            std::cout << " .float " << cf->value << std::endl;
         }
         
     }
@@ -342,6 +354,11 @@ class three_address_Visitor : public Visitor
                 // reading from array
                 // load relevant word
                 std::cout << "lw $v0, 0($t0)" << std::endl;
+                std::cout << "nop" << std::endl;
+            }
+            else
+            {
+                std::cout << "sw $v0, 0($t0)" << std::endl;
                 std::cout << "nop" << std::endl;
             }
             // else
@@ -690,7 +707,34 @@ class three_address_Visitor : public Visitor
         else if (type == "short") li(2);
         }}}
     }
-    void visit(CastExpr *) {}
+    void visit(CastExpr * ce)
+    {
+        auto ret_info = get_type_info(ce); // finding what type is expected
+        auto expr_info = get_type_info(ce->RHS); // finding what type is expected
+        if (ret_info->Options != expr_info->Options)
+        {
+            if (ret_info->Options == TypeInfo::FLOAT)
+            {
+                std::cout << "# promoting expression to float" << std::endl;
+                mt_c("$f0", "$v0");
+                std::cout << "cvt.s.w $f0, $f0" << std::endl;
+                mf_c("$v0", "$f0");
+
+            }
+            else
+            {
+                switch(expr_info->Options)
+                {
+                    case(TypeInfo::FLOAT):
+                        std::cout << "# promoting expression to integral" << std::endl;
+                        mt_c("$f0", "$v0");
+                        std::cout << "cvt.w.s $f0, $f0" << std::endl;
+                        mf_c("$v0", "$f0");
+                        break;
+                }
+            }
+        }
+    }
     // std::pair<std::string, std::string> descend(BinaryOpExpression * bop)
     // {
     //     auto ret_A = get_temp_register(gen_name("ret_A_"));
@@ -1213,8 +1257,18 @@ class three_address_Visitor : public Visitor
         {
             writing = true;
             id->dec->accept(this);
-            if (id->init != NULL) id->init->accept(this);
+            if (id->init != NULL)
+            {
+                id->init->accept(this);
+                std::cout << " .space " << std::max(array_counter,4) << std::endl;
+            }
+            // else if 
+            // {
+            //     std::cout << " .space " << std::max(array_counter,4) << std::endl;
+            //     std::cout << ".space 4" << std::endl;
+            // }
             writing = false;
+            array_counter = 0;
         }
         else
         {
@@ -1296,9 +1350,7 @@ class three_address_Visitor : public Visitor
         {
             if (i->ass_expr != NULL)
             {
-                std::cout << ".word ";
                 i->ass_expr->accept(this);
-                std::cout << std::endl;
             }
             else if (i->init_list != NULL)
             {
@@ -1405,7 +1457,8 @@ class three_address_Visitor : public Visitor
                     }
                     else
                     {
-                        std::cout << array_name << ':' << " .space " <<  no_elements*4 << std::endl;
+                        array_counter=no_elements*4;
+                        // std::cout << " .space " <<  no_elements*4 << std::endl;
                     }
                     
                     array_flag = false;
@@ -1434,9 +1487,17 @@ class three_address_Visitor : public Visitor
     void visit(parameter_declaration * pd)
     {
         parameter_size++;
-        parameter_flag=true;
-        pd->dec->accept(this);
-        parameter_flag=false;
+        if(pd->dec != NULL)
+        {
+            parameter_flag=true;
+            pd->dec->accept(this);
+            parameter_flag=false;
+        }
+        else
+        {
+            parameter_types.push(std::make_pair(parameter_size,(TypeInfo*)NULL));
+        }
+        
     }
     void visit(Enumerator* _enum)
     {
@@ -1820,13 +1881,16 @@ class three_address_Visitor : public Visitor
             {
                 if (i < 2)
                 {
-                    switch(parameter_types.top().second->Options)
+                    if (parameter_types.top().second!=NULL)
                     {
-                        case(TypeInfo::FLOAT):
-                            std::cout << "s.s $f" << 12+i*2 << ", " << (i)*4 << "($sp)" << std::endl;
-                            break;
-                        default:
-                            std::cout << "sw $a" << i << ", " << (i)*4 << "($sp)" << std::endl;
+                        switch(parameter_types.top().second->Options)
+                        {
+                            case(TypeInfo::FLOAT):
+                                std::cout << "s.s $f" << 12+i*2 << ", " << (i)*4 << "($sp)" << std::endl;
+                                break;
+                            default:
+                                std::cout << "sw $a" << i << ", " << (i)*4 << "($sp)" << std::endl;
+                        }
                     }
                 }
                 else
