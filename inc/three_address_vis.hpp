@@ -735,7 +735,10 @@ class three_address_Visitor : public Visitor
                         std::cout << "cvt.w.s $f0, $f0" << std::endl;
                         mf_c("$v0", "$f0");
                         break;
+                    default:
+                        break;
                 }
+
             }
         }
     }

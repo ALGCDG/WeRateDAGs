@@ -1,6 +1,5 @@
+struct a{int a; int b;};
 
 int main(){
-    int a;
-    char b;
-    b = (char) a;
+    struct a b;
 }
