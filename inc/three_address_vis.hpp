@@ -1213,15 +1213,48 @@ class three_address_Visitor : public Visitor
 
             if (id->init!=NULL)
             {
+                // if (id->dec->dir_dec->const_expr->constEval() == 0)
+                // {
+                //     std::cout << "# array size is implicit, " << count_array_elements(id->init) << " elements" << std::endl;
+                //     id->dec->dir_dec->const_expr->set_elements(count_array_elements(id->init));
+                // }
                 if (id->init->ass_expr!=NULL)
                 {
+                    std::cerr << "A" << std::endl;
                     id->init->ass_expr->accept(this);
                     writing = true;
                     id->dec->accept(this);
                     writing = false;
                 }
+                // else if (id->dec->dir_dec->const_expr->constEval() == 0)
+                // {
+                //     array_flag = true;
+                //     id->dec->dir_dec->dir_dec->ID->accept(this);
+                //     array_flag = false;
+                //     // array whose size is dependant on init list
+                //     std::cout << "# array size is implicit, " << count_array_elements(id->init) << " elements" << std::endl;
+                //     // count elements
+                //     int no_elements = count_array_elements(id->init);
+                //     //assuming type is int
+                //     std::cout << "# allocating " << no_elements*4 << " bytes for array " << array_name << " on function stack" << std::endl;
+                //     std::cerr << -no_elements*4 << std::endl;
+                //     std::cout << "addiu $sp, $sp, " << -no_elements*4 << std::endl;
+                //     std::cout << "move $fp, $sp" << std::endl;
+                //     sizeof_variables[array_name]=no_elements*4;
+                //     for (int i = no_elements-1; i >= 0 ; i--)
+                //     {
+                //         variable_map.update(4);
+                //         variable_map.register_variable(array_name+'['+std::to_string(i)+']', 4);
+                //     }
+                //     std::cout << "addiu $v0, $fp, " << variable_map.lookup(array_name+"[0]") << std::endl;
+                //     std::cout << "sw $v0, " << variable_map.lookup(array_name) << "($fp)" << std::endl;
+                //     std::cout << "nop" << std::endl;
+                //     array_counter = 0;
+                //     id->init->accept(this);
+                // }
                 else 
                 {
+                    std::cerr << "B" << std::endl;
                     // array
                     writing = true;
                     id->dec->accept(this);
@@ -1232,11 +1265,21 @@ class three_address_Visitor : public Visitor
             }
             else 
             {
+                std::cerr << "C" << std::endl;
                 writing = true;
                 id->dec->accept(this);
                 writing = false;
             }
         }
+    }
+    int count_array_elements(initializer * i) 
+    {
+        if (i->ass_expr != NULL) return 1;
+        else return count_array_elements(i->init_list);
+    } 
+    int count_array_elements(initializer_list * il)
+    {
+        return count_array_elements(il->init) + (il->init_list != NULL ? count_array_elements(il->init_list) : 0 );
     }
     void visit(initializer * i)
     {

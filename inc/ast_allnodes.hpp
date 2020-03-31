@@ -851,6 +851,7 @@ public:
     unsigned int constEval() override { return ConstantSubtree->constEval(); }
     Expression* ConstantSubtree;
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
+    virtual void set_elements(const int & i) {};
     TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ return getter->GetType(this); }
 };
 
@@ -1253,9 +1254,11 @@ public:
 // a class used to signify that an array declaration does not specify array length
 class unspecified_array_length : public ConstantExpression {
 public:
-    unspecified_array_length(){ std::cerr << "constructing unspec arr len" << std::endl;}
+    int elements;
+    unspecified_array_length() : elements(0) { std::cerr << "constructing unspec arr len" << std::endl;}
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
-    unsigned int constEval() override { std::cerr << "testout";return 0; }
+    unsigned int constEval() override { std::cerr << "testout";return elements; }
+    void set_elements(const int & i) { elements = i; }
 };
 
 class direct_abstract_declarator : public base_direct_declarator
