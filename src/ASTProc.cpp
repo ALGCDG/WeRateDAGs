@@ -612,7 +612,7 @@ void ASTProcVis::visit(Enumerator* _enumer){
     }
 }
 
-unsigned int ASTProcVis::EvalConstantExpression(ConstantExpression* _const_expr){
+int ASTProcVis::EvalConstantExpression(ConstantExpression* _const_expr){
     return _const_expr->constEval();
 }
 
@@ -621,7 +621,7 @@ unsigned int ASTProcVis::EvalConstantExpression(ConstantExpression* _const_expr)
 //     return _const->constEval();
 // }
 
-unsigned int ASTProcVis::EvalConstantExpression(Expression* expr){
+int ASTProcVis::EvalConstantExpression(Expression* expr){
     std::cerr << "eval expr" << std::endl;
     return expr->constEval();
     //throw("No eval for class: expression");
