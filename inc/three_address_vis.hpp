@@ -339,7 +339,7 @@ class three_address_Visitor : public Visitor
                 info->isStruct->get_table()->subRecords.size()*4; // assuming int
                 break;
             case(TypeInfo::ARR):
-                li(info->isArr->size, "$t7");
+                li(info->isArr->ByteSize(), "$t7");
                 std::cout << "multu $t0, $t7" << std::endl;
                 std::cout << "mflo $t0" << std::endl;
                 break;
