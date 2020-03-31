@@ -690,7 +690,34 @@ class three_address_Visitor : public Visitor
         else if (type == "short") li(2);
         }}}
     }
-    void visit(CastExpr *) {}
+    void visit(CastExpr * ce)
+    {
+        auto ret_info = get_type_info(ce); // finding what type is expected
+        auto expr_info = get_type_info(ce->RHS); // finding what type is expected
+        if (ret_info->Options != expr_info->Options)
+        {
+            if (ret_info->Options == TypeInfo::FLOAT)
+            {
+                std::cout << "# promoting expression to float" << std::endl;
+                mt_c("$f0", "$v0");
+                std::cout << "cvt.s.w $f0, $f0" << std::endl;
+                mf_c("$v0", "$f0");
+
+            }
+            else
+            {
+                switch(expr_info->Options)
+                {
+                    case(TypeInfo::FLOAT):
+                        std::cout << "# promoting expression to integral" << std::endl;
+                        mt_c("$f0", "$v0");
+                        std::cout << "cvt.w.s $f0, $f0" << std::endl;
+                        mf_c("$v0", "$f0");
+                        break;
+                }
+            }
+        }
+    }
     // std::pair<std::string, std::string> descend(BinaryOpExpression * bop)
     // {
     //     auto ret_A = get_temp_register(gen_name("ret_A_"));
