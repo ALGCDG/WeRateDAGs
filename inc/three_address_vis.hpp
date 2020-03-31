@@ -1432,9 +1432,17 @@ class three_address_Visitor : public Visitor
     void visit(parameter_declaration * pd)
     {
         parameter_size++;
-        parameter_flag=true;
-        pd->dec->accept(this);
-        parameter_flag=false;
+        if(pd->dec != NULL)
+        {
+            parameter_flag=true;
+            pd->dec->accept(this);
+            parameter_flag=false;
+        }
+        else
+        {
+            parameter_types.push(std::make_pair(parameter_size,(TypeInfo*)NULL));
+        }
+        
     }
     void visit(Enumerator* _enum)
     {
@@ -1818,13 +1826,16 @@ class three_address_Visitor : public Visitor
             {
                 if (i < 2)
                 {
-                    switch(parameter_types.top().second->Options)
+                    if (parameter_types.top().second!=NULL)
                     {
-                        case(TypeInfo::FLOAT):
-                            std::cout << "s.s $f" << 12+i*2 << ", " << (i)*4 << "($sp)" << std::endl;
-                            break;
-                        default:
-                            std::cout << "sw $a" << i << ", " << (i)*4 << "($sp)" << std::endl;
+                        switch(parameter_types.top().second->Options)
+                        {
+                            case(TypeInfo::FLOAT):
+                                std::cout << "s.s $f" << 12+i*2 << ", " << (i)*4 << "($sp)" << std::endl;
+                                break;
+                            default:
+                                std::cout << "sw $a" << i << ", " << (i)*4 << "($sp)" << std::endl;
+                        }
                     }
                 }
                 else
