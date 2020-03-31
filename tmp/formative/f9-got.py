@@ -1,23 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 def function(a, b):
 	if a < b :
 		a=a - 1

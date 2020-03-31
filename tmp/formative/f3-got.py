@@ -1,13 +1,3 @@
-
-
-
-
-
-
-
-
-
-
 def f(x):
 	return 10
 def main():
