@@ -499,7 +499,9 @@ void SymbolTable::StartNewDeclaration(){
     NewDeclParts();
     VariableDeclaration* dec = new VariableDeclaration(ActiveScopePtr);
     ActiveRecordPtr = dec;
+    std::cerr << "declarationstack  size before start new: " << declarationStack.size() << std::endl;
     declarationStack.push(dec);
+    std::cerr << "declarationstack  size after start new: " << declarationStack.size() << std::endl;
 }
 
 void SymbolTable::awaitDecSpecs(){
@@ -511,14 +513,27 @@ void SymbolTable::clearDecSpecs(){
 }
 
 void SymbolTable::PushDecSpec(std::string _specid){
+    std::cerr << "Pushing dec spec " << _specid << std::endl;
     decspecStack.top().push_back(_specid);
+    std::cerr << "Pushed dec spec " << _specid << std::endl;
+}
+
+void SymbolTable::EndDeclaration(VariableDeclaration* &GetRecord){
+    std::cerr << "attempting to give record to sizeof type or cast expr" << std::endl;
+    AccumulateDeclParts();
+    std::cerr << "accumulated decl parts" << std::endl;
+    ActiveScopePtr->subRecords.push_back(declarationStack.top());
+    GetRecord = declarationStack.top();
+    declarationStack.pop();
+    ActiveRecordPtr = declarationStack.top();   
+    PopDeclParts();
+    std::cerr << "given record pointer to cast or size of" << std::endl;
 }
 
 void SymbolTable::EndDeclaration(){
     //declarationStack.top()->AddPrimary(AccumulateDeclParts());
     AccumulateDeclParts();
     ActiveScopePtr->subRecords.push_back(declarationStack.top());
-    
     declarationStack.pop();
     ActiveRecordPtr = declarationStack.top();
     PopDeclParts();
@@ -713,42 +728,22 @@ void SymbolTable::EndEnumDeclaration(){
 // }
 //-----------------------------------
 void SymbolTable::AccumulateDeclParts(){
-    // if (declPartsStack.top().size() == 1){
-    //     return declPartsStack.top()[0];
-    // }
-    // else{
-        // genericConstituentType* tmp = NULL;//workaround for accumulate
-        std::vector<genericConstituentType*> decls = declPartsStack.top();
-        
-        // genericConstituentType* top = std::accumulate(decls.rbegin(),decls.rend(), tmp,
-        //     [](genericConstituentType* left, genericConstituentType* right){
-        //         std::cout << "accumulating" << std::endl;
-        //         left->AddNextType(right);
-        //         return left;
-        //     }
-        // );
-        genericConstituentType* acc = NULL;
-        // for(auto i = decls.rbegin(); i < decls.rend(); i++){
-        //             //     (*i)->AddNextType(acc);
-        //     acc = *i;
-            
-        // }
-        for(int i = decls.size() - 1; i > 0; i--){
-            decls[i]->BeAppended(decls[i-1]);
-        }
-    
-    // }
-    if(FuncDefIsFocus){
+    std::vector<genericConstituentType*> decls = declPartsStack.top();
+    std::cerr << decls.size() << std::endl;
+    genericConstituentType* acc = NULL;
+    for(int i = decls.size() - 1; i > 0; i--){
+        decls[i]->BeAppended(decls[i-1]);
+    }
+    std::cerr << "Finished accumulating" << std::endl;
+    if(FuncDefIsFocus){ 
         decls[0]->BeAppended(ActiveFuncDefPtr);
     }
     else{
-        
+        std::cerr << "Attemping to append the head decl to the declaration record" << std::endl;
+        std::cerr << decls.size() << std::endl;
         decls[0]->BeAppended(declarationStack.top());
-        
-        // declarationStack.top()->AddPrimary(decls[0]);
+        std::cerr << "Appended the head decl to the declaration record" << std::endl;
     }
-    
-
 }
 
 NamedRecord* SymbolTable::GetIDRecord(const std::string& _ID){

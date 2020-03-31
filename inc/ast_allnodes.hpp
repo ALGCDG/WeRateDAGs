@@ -225,6 +225,7 @@ public:
     virtual void visit(initializer *) {}
     virtual void visit(initializer_list *) {}
     virtual void visit(type_specifier *) {}
+    virtual void visit(type_name *) {}
     virtual void visit(specifier_list *) {}
     virtual void visit(pointer *) {}
     virtual void visit(base_declarator *) {}
@@ -281,6 +282,7 @@ public:
     virtual TypeInfo* GetType(constant_float*) = 0;
     virtual TypeInfo* GetType(StringLiteral*) = 0;
     virtual TypeInfo* GetType(TypedefNode*) = 0;
+    virtual TypeInfo* GetType(type_name*) = 0;
     virtual TypeInfo* GetType(PostfixExpr*) = 0;
     virtual TypeInfo* GetType(ArgExprList*) = 0;
     virtual TypeInfo* GetType(ArraySubscript*) = 0;
@@ -570,12 +572,14 @@ public:
     TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ return getter->GetType(this); }
 };
 
+struct VariableDeclaration;
 class SizeofType : public Expression{
 public:
     SizeofType(type_name* _typ_nam) : typ_nam(_typ_nam){}
     type_name* typ_nam;
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
     TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ return getter->GetType(this); }
+    VariableDeclaration* typeInfo;
 };
 
 class CastExpr : public PrefixExpr{
@@ -585,6 +589,7 @@ public:
 //TODO -> Needs type system
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
     TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ return getter->GetType(this); }
+    VariableDeclaration* castInfo;
 };
 
 //---------------------------------------------------------

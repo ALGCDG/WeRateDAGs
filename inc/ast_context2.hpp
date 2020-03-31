@@ -326,7 +326,8 @@ public:
     void EndFuncDfDeclaration();
     void EndFuncDef();//done
     void StartNewDeclaration();//done
-    void EndDeclaration();//done
+    void EndDeclaration(VariableDeclaration* &GetRecord);//done
+    void EndDeclaration();
     void NewScope();//done
     void PopScope();//done
     void NewDeclParts();//done
