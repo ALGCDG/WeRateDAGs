@@ -64,7 +64,7 @@ class vm
 class three_address_Visitor : public Visitor
 {
     public:
-    three_address_Visitor(): counter(0), return_register(), continue_to(), break_to(), cases(), global(true), global_labels(), intermediate_values(), temporary_registers(), saved_registers(), variable_map(), writing(false), parameter_flag(false), func_flag(false), array_flag(false), initlist_count(0), address_flag(false), struct_flag(false), struct_fetch_record(false), sizeof_flag(false), string_literal_flag(false), parameter_types()
+    three_address_Visitor(): counter(0), return_register(), continue_to(), break_to(), cases(), global(true), global_labels(), intermediate_values(), temporary_registers(), saved_registers(), variable_map(), writing(false), parameter_flag(false), func_flag(false), array_flag(false), initlist_count(0), address_flag(false), struct_flag(false), struct_fetch_record(false), sizeof_flag(false), string_literal_flag(false), parameter_types(), array_flag_nameonly(false)
     {
         for (int i = 9; i >= 0; i--)
             temporary_registers.push("$t"+std::to_string(i));
@@ -84,6 +84,7 @@ class three_address_Visitor : public Visitor
     std::stack<std::string> temporary_registers;
     std::stack<std::string> saved_registers;
     bool writing;
+    bool array_flag_nameonly;
     bool parameter_flag;
     bool func_flag;
     bool array_flag;
@@ -143,6 +144,7 @@ class three_address_Visitor : public Visitor
     void visit(IdentifierNode * in)
     {
         std::cerr << "ID" << std::endl;
+        if (array_flag_nameonly) {array_name = in->ContextRecord->unique_id; return;}
         if (array_flag) array_name = in->ContextRecord->unique_id;
         // if (true)
         // {
@@ -219,11 +221,11 @@ class three_address_Visitor : public Visitor
                     std::cout << "nop" << std::endl;
                 }
             }
-            // else
-            // {
-            //     std::cout << in->ContextRecord->unique_id << ':';
-            //     global_labels.insert(in->ContextRecord->unique_id);
-            // }
+            else
+            {
+                std::cout << in->ContextRecord->unique_id << ':';
+                global_labels.insert(in->ContextRecord->unique_id);
+            }
             
         }
         if (struct_flag) 
@@ -338,10 +340,12 @@ class three_address_Visitor : public Visitor
                 std::cout << "sll $t0, $t0, 2" << std::endl;
         }
         // getting array name, stored in array_name string
-        // array_flag = true;
-        // as->LHS->accept(this);
-        // array_flag = false;
-        if (global)
+        array_name = "";
+        array_flag_nameonly = true;
+        as->LHS->accept(this);
+        array_flag_nameonly = false;
+        bool array_is_global =global_labels.find(array_name)!= global_labels.end();
+        if (array_is_global)
         {
             std::cout << "# accessing global array " << array_name << std::endl;
             // if array is global
