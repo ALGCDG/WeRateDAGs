@@ -219,6 +219,12 @@ class three_address_Visitor : public Visitor
                     std::cout << "nop" << std::endl;
                 }
             }
+            // else
+            // {
+            //     std::cout << in->ContextRecord->unique_id << ':';
+            //     global_labels.insert(in->ContextRecord->unique_id);
+            // }
+            
         }
         if (struct_flag) 
         {
@@ -252,19 +258,25 @@ class three_address_Visitor : public Visitor
     void visit(Constant *) {}
     void visit(constant_int * ci)
     {
-        // if (return_register.empty())
-        // {
-        //     std::cout << ci->value;
-        // }
-        // else
-        // {
+        if (global)
+        {
+            std::cout << " .word " << ci->value << std::endl;
+        }
+        else
+        {
         std::cout << "li $v0, " << ci->value << std::endl;
-        // }
+        }
     }
     void visit(constant_char * cc)
     {
         std::cerr << "character string " << cc->constant << std::endl;
+        if (global)
+        {
+            std::cout << " .byte " << (int)cc->constant[0] << std::endl;
+        }
+        else {
         std::cout << "li $v0, " << (int)cc->constant[0] << std::endl;
+        }
     }
     void visit(constant_float *cf)
     {
@@ -275,7 +287,7 @@ class three_address_Visitor : public Visitor
         }
         else
         {
-            std::cout << ".float " << cf->value << std::endl;
+            std::cout << " .float " << cf->value << std::endl;
         }
         
     }
@@ -342,6 +354,11 @@ class three_address_Visitor : public Visitor
                 // reading from array
                 // load relevant word
                 std::cout << "lw $v0, 0($t0)" << std::endl;
+                std::cout << "nop" << std::endl;
+            }
+            else
+            {
+                std::cout << "sw $v0, 0($t0)" << std::endl;
                 std::cout << "nop" << std::endl;
             }
             // else
@@ -1240,8 +1257,18 @@ class three_address_Visitor : public Visitor
         {
             writing = true;
             id->dec->accept(this);
-            if (id->init != NULL) id->init->accept(this);
+            if (id->init != NULL)
+            {
+                id->init->accept(this);
+                std::cout << " .space " << std::max(array_counter,4) << std::endl;
+            }
+            // else if 
+            // {
+            //     std::cout << " .space " << std::max(array_counter,4) << std::endl;
+            //     std::cout << ".space 4" << std::endl;
+            // }
             writing = false;
+            array_counter = 0;
         }
         else
         {
@@ -1323,9 +1350,7 @@ class three_address_Visitor : public Visitor
         {
             if (i->ass_expr != NULL)
             {
-                std::cout << ".word ";
                 i->ass_expr->accept(this);
-                std::cout << std::endl;
             }
             else if (i->init_list != NULL)
             {
@@ -1432,7 +1457,8 @@ class three_address_Visitor : public Visitor
                     }
                     else
                     {
-                        std::cout << array_name << ':' << " .space " <<  no_elements*4 << std::endl;
+                        array_counter=no_elements*4;
+                        // std::cout << " .space " <<  no_elements*4 << std::endl;
                     }
                     
                     array_flag = false;
