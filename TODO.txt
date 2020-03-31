@@ -1,8 +1,1 @@
 ./compiler_tests/Archie/dim.c
-./compiler_tests/Archie/struct_copy.c
-./compiler_tests/Archie/struct_pointer.c
-./compiler_tests/Archie/unsigned.c
-./compiler_tests/float/add_double.c
-./compiler_tests/float/mul_double.c
-./compiler_tests/misc/typedef1.c
-./compiler_tests/misc/typedef2.c
