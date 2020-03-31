@@ -37,6 +37,7 @@ class IdentifierNode;
 class Constant;
 class constant_int;
 class constant_char;
+class constant_float;
 class StringLiteral;
 class PostfixExpr;
 class ArgExprList;
@@ -162,6 +163,7 @@ public:
     virtual void visit(Constant *) {}
     virtual void visit(constant_int *) {}
     virtual void visit(constant_char *) {}
+    virtual void visit(constant_float *) {}
     virtual void visit(StringLiteral *) {}
     virtual void visit(ArraySubscript *) {}
     virtual void visit(FuncCall *) {}
@@ -276,6 +278,7 @@ public:
     virtual TypeInfo* GetType(Constant*) = 0;
     virtual TypeInfo* GetType(constant_int*) = 0;
     virtual TypeInfo* GetType(constant_char*) = 0;
+    virtual TypeInfo* GetType(constant_float*) = 0;
     virtual TypeInfo* GetType(StringLiteral*) = 0;
     virtual TypeInfo* GetType(TypedefNode*) = 0;
     virtual TypeInfo* GetType(PostfixExpr*) = 0;
@@ -391,6 +394,14 @@ class constant_char : public Constant {
 public:
     constant_char(const std::string& _str) : constant(ConvertEscapes(_str)){}
     std::string constant;//can be more than one char, cast to int in such a case, implementation defined
+    void accept(Visitor * AVisitor) override { AVisitor->visit(this); }//todo, no such visitor
+    TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ return getter->GetType(this); }
+};
+class constant_float: public Constant 
+{
+    public:
+    constant_float(const float & f): value(f) {}
+    float value;
     void accept(Visitor * AVisitor) override { AVisitor->visit(this); }//todo, no such visitor
     TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ return getter->GetType(this); }
 };
@@ -840,6 +851,7 @@ public:
     unsigned int constEval() override { return ConstantSubtree->constEval(); }
     Expression* ConstantSubtree;
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
+    virtual void set_elements(const int & i) {};
     TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ return getter->GetType(this); }
 };
 
@@ -1242,9 +1254,11 @@ public:
 // a class used to signify that an array declaration does not specify array length
 class unspecified_array_length : public ConstantExpression {
 public:
-    unspecified_array_length(){ std::cerr << "constructing unspec arr len" << std::endl;}
+    int elements;
+    unspecified_array_length() : elements(0) { std::cerr << "constructing unspec arr len" << std::endl;}
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
-    unsigned int constEval() override { std::cerr << "testout";return 0; }
+    unsigned int constEval() override { std::cerr << "testout";return elements; }
+    void set_elements(const int & i) { elements = i; }
 };
 
 class direct_abstract_declarator : public base_direct_declarator

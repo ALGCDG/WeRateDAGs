@@ -64,7 +64,7 @@ class vm
 class three_address_Visitor : public Visitor
 {
     public:
-    three_address_Visitor(): counter(0), return_register(), continue_to(), break_to(), cases(), global(true), global_labels(), intermediate_values(), temporary_registers(), saved_registers(), variable_map(), writing(false), parameter_flag(false), func_flag(false), array_flag(false), initlist_count(0), address_flag(false), struct_flag(false), struct_fetch_record(false), sizeof_flag(false), string_literal_flag(false)
+    three_address_Visitor(): counter(0), return_register(), continue_to(), break_to(), cases(), global(true), global_labels(), intermediate_values(), temporary_registers(), saved_registers(), variable_map(), writing(false), parameter_flag(false), func_flag(false), array_flag(false), initlist_count(0), address_flag(false), struct_flag(false), struct_fetch_record(false), sizeof_flag(false), string_literal_flag(false), parameter_types()
     {
         for (int i = 9; i >= 0; i--)
             temporary_registers.push("$t"+std::to_string(i));
@@ -104,6 +104,8 @@ class three_address_Visitor : public Visitor
     std::vector<Record*> struct_record;
     std::unordered_map<std::string, int> sizeof_variables;
     bool sizeof_flag;
+    int array_counter;
+    std::stack<std::pair<int, TypeInfo*>> parameter_types;
     void pop(std::string reg, int stack_offset = 0) { std::cout << "lw " << reg << ", " << stack_offset << "($sp)" << std::endl << "nop" << std::endl;}
     void push(std::string reg, int stack_offset = 0) { std::cout << "sw " << reg << ", " << stack_offset << "($sp)" << std::endl << "nop" << std::endl;}
     void move(std::string dest, std::string src) { std::cout << "move " << dest << ", " << src << std::endl; }
@@ -162,6 +164,8 @@ class three_address_Visitor : public Visitor
             std::cerr << "parameter flag" << std::endl;
             variable_map.update(4, false);
             variable_map.register_variable(in->ContextRecord->unique_id, 0);
+            auto info = get_type_info(in);
+            parameter_types.push(std::make_pair(parameter_size, info));
         }
         else if (sizeof_flag) li(sizeof_variables[in->ContextRecord->get_unique_id()]);
         else if (func_flag)
@@ -257,26 +261,41 @@ class three_address_Visitor : public Visitor
         std::cout << "li $v0, " << ci->value << std::endl;
         // }
     }
-    virtual void visit(constant_char * cc)
+    void visit(constant_char * cc)
     {
         std::cerr << "character string " << cc->constant << std::endl;
         std::cout << "li $v0, " << (int)cc->constant[0] << std::endl;
+    }
+    void visit(constant_float *cf)
+    {
+        if (!global)
+        {
+            std::cout << "li.s $f0, " << cf->value << std::endl;
+            mf_c("$v0", "$f0");
+        }
+        else
+        {
+            std::cout << ".float " << cf->value << std::endl;
+        }
+        
     }
     void visit(StringLiteral * sl)
     {
         std::cerr << "string literal: " << sl->str << std::endl;
         int size = sl->str.length()+1;
         size = size + (4-size%4);
-        std::cout << "# allocating " << size << " bytes for string " << sl->str << std::endl;
+        std::cout << "# allocating " << size << " bytes for string " << sl->str << " , which is " << sl->str.length() << " characters long" << std::endl;
         std::cout << "addiu $sp, $sp, " << -size-4 << std::endl;
         move("$fp", "$sp");
         for (int i = 0; i < sl->str.length(); i++) 
         {
             li((int)sl->str[i]);
             std::cout << "sb $v0, " << i+4 << "($sp)" << std::endl;
+            std::cout << "nop" << std::endl;
         }
         li((int)'\0');
-        std::cout << "sb $v0, " << sl->str.length() << "($sp)" << std::endl;
+        std::cout << "sb $v0, " << sl->str.length()+4 << "($sp)" << std::endl;
+        std::cout << "nop" << std::endl;
         // storing pointer to string beginning in $v0
         std::cout << "addiu $v0, $sp, 4" << std::endl;
         variable_map.update(size+4);
@@ -294,6 +313,14 @@ class three_address_Visitor : public Visitor
         std::cerr << "type info options " << info->Options << std::endl;
         switch(info->Options)
         {
+            case(TypeInfo::STRUCT):
+                info->isStruct->get_table()->subRecords.size()*4; // assuming int
+                break;
+            case(TypeInfo::ARR):
+                li(info->isArr->size, "$t7");
+                std::cout << "multu $t0, $t7" << std::endl;
+                std::cout << "mflo $t0" << std::endl;
+                break;
             case(TypeInfo::CHAR): break;
             default:
                 std::cout << "sll $t0, $t0, 2" << std::endl;
@@ -421,6 +448,28 @@ class three_address_Visitor : public Visitor
     }
     void visit(DerefMemberAccess * dma)
     {
+        // finding struct record associated with pointer
+        auto info = get_type_info(dma->LHS);
+        // getting offset of member
+        int offset = 0;
+        for (auto & r : info->isPt->ptToStruct->get_table()->subRecords)
+            if (r->get_id()==dma->ID->Name) break; else offset+=4;
+        delete info;
+        // get pointer
+        auto tmp = writing;
+        writing = false;
+        dma->LHS->accept(this);
+        std::cout << "lw $v0, 0($v0)" << std::endl;
+        writing = tmp;
+        if (!writing)
+        {
+            std::cout << "lw $v0, " << offset << "($v0)" << std::endl;
+        }
+        else
+        {
+            std::cout << "sw $v1, " << offset << "($v0)" << std::endl;
+        }
+        std::cout << "nop" << std::endl;
         // // get pointer to structure (also requried record)
         // if (writing) move("$v1", "$v0");
         // struct_fetch_record = true;
@@ -514,6 +563,7 @@ class three_address_Visitor : public Visitor
                 default:
                     std::cout << "lw $v0, 0($v0)" << std::endl;
             }
+            std::cout << "nop" << std::endl;
         }
         else
         {
@@ -529,6 +579,7 @@ class three_address_Visitor : public Visitor
                 default:
                     std::cout << "sw $v1, 0($v0)" << std::endl;
             }
+            std::cout << "nop" << std::endl;
         }
     }
     void visit(UnaryPlusOperator * upo)
@@ -608,9 +659,21 @@ class three_address_Visitor : public Visitor
     }
     void visit(SizeofExpr * soe)
     {
-        sizeof_flag = true;
-        soe->RHS->accept(this);
-        sizeof_flag = false;
+        // sizeof_flag = true;
+        // soe->RHS->accept(this);
+        // sizeof_flag = false;
+        auto info = get_type_info(soe->RHS);
+        switch(info->Options)
+        {
+            case(TypeInfo::STRUCT):
+                    sizeof_flag = true;
+                    soe->RHS->accept(this);
+                    sizeof_flag = false;
+                    break;
+            case(TypeInfo::CHAR): li(1); break;
+            default:
+                li(4);
+        }
     }
     void visit(SizeofType * sot)
     {
@@ -660,20 +723,72 @@ class three_address_Visitor : public Visitor
         std::cout << "move $fp, $sp" << std::endl;
         // variable_map.update(-8);
         variable_map.update(-4);
+        auto info_right = get_type_info(bop->RHS);
+        auto info_left = get_type_info(bop->LHS);
+        // promoting expressions if not matched
+        if (info_right->Options != info_left->Options)
+        {
+            std::cout << "# mismatched types" << std::endl;
+            if (info_right->Options == TypeInfo::POINTER)
+            {
+                std::cout << "# promoting left hand side to pointer" << std::endl;
+                li(info_right->pointerDataSize.value(), "$t7");
+                std::cout << "multu $v0, $t7" << std::endl;
+                std::cout << "mflo $v0" << std::endl;
+            }
+            else if (info_left->Options == TypeInfo::POINTER)
+            {
+                std::cout << "# promoting right hand side to pointer" << std::endl;
+                li(info_left->pointerDataSize.value(), "$t7");
+                std::cout << "multu $v1, $t7" << std::endl;
+                std::cout << "mflo $v1" << std::endl;
+            }
+            else if (info_right->Options == TypeInfo::FLOAT)
+            {
+                std::cout << "# promoting left hand side to float" << std::endl;
+                mt_c("$f0", "$v0");
+                std::cout << "cvt.s.w $f0, $f0" << std::endl;
+                mf_c("$v0", "$f0");
+            }
+            else if (info_left->Options == TypeInfo::FLOAT)
+            {
+                std::cout << "# promoting right hand side to float" << std::endl;
+                mt_c("$f0", "$v1");
+                std::cout << "cvt.s.w $f0, $f0" << std::endl;
+                mf_c("$v1", "$f0");
+            }
+        }
+        delete info_right; delete info_left;
     }
     void visit(Multiply *m)
     {
         descend(m);
-        std::cout << "multu $v0, $v1" << std::endl;
-        std::cout << "mflo $v0" << std::endl;
-        // { mt_c("$f0","$v0"); mt_c("$f2","$v1"); std::cout << "mul.s $f0, $f0, $f2" << std::endl; mf_c("$v0","$f0"); }
+        auto info = get_type_info(m);
+        switch (info->Options)
+        {
+            case(TypeInfo::FLOAT):
+                mt_c("$f0","$v0"); mt_c("$f2","$v1"); std::cout << "mul.s $f0, $f0, $f2" << std::endl; mf_c("$v0","$f0");
+                break;
+            default:
+                std::cout << "multu $v0, $v1" << std::endl;
+                std::cout << "mflo $v0" << std::endl;
+        }
+        delete info;
     }
     void visit(Divide *d)
     {
         descend(d);
-        std::cout << "div $v0, $v1" << std::endl;
-        std::cout << "mflo $v0" << std::endl;
-        // { mt_c("$f0","$v0"); mt_c("$f2","$v1"); std::cout << "div.s $f0, $f0, $f2" << std::endl; mf_c("$v0","$f0"); }
+        auto info = get_type_info(d);
+        switch (info->Options)
+        {
+            case(TypeInfo::FLOAT):
+                mt_c("$f0","$v0"); mt_c("$f2","$v1"); std::cout << "div.s $f0, $f0, $f2" << std::endl; mf_c("$v0","$f0");
+                break;
+            default:
+                std::cout << "div $v0, $v1" << std::endl;
+                std::cout << "mflo $v0" << std::endl;
+        }
+        delete info;
     }
     void visit(Modulo * m)
     {
@@ -684,60 +799,76 @@ class three_address_Visitor : public Visitor
     void visit(Add * a)
     {
         descend(a);
-        auto info_right = get_type_info(a->RHS);
-        std::cerr << "RHS: " << info_right->Options << std::endl;
-        auto info_left = get_type_info(a->LHS);
-        std::cerr << "got type info" << std::endl;
-        // promoting expressions if not matched
-        if (info_right->Options != info_left->Options)
+        // auto info_right = get_type_info(a->RHS);
+        // std::cerr << "RHS: " << info_right->Options << std::endl;
+        // auto info_left = get_type_info(a->LHS);
+        // std::cerr << "got type info" << std::endl;
+        // // promoting expressions if not matched
+        // if (info_right->Options != info_left->Options)
+        // {
+        //     std::cout << "# mismatched types" << std::endl;
+        //     if (info_right->Options == TypeInfo::POINTER)
+        //     {
+        //         std::cout << "# promoting left hand side" << std::endl;
+        //         li(info_right->pointerDataSize.value(), "$t7");
+        //         std::cout << "multu $v0, $t7" << std::endl;
+        //         std::cout << "mflo $v0" << std::endl;
+        //     }
+        //     else if (info_left->Options == TypeInfo::POINTER)
+        //     {
+        //         std::cout << "# promoting right hand side" << std::endl;
+        //         li(info_left->pointerDataSize.value(), "$t7");
+        //         std::cout << "multu $v1, $t7" << std::endl;
+        //         std::cout << "mflo $v1" << std::endl;
+        //     }
+        // }
+        auto info = get_type_info(a);
+        switch (info->Options)
         {
-            std::cout << "# mismatched types" << std::endl;
-            if (info_right->Options == TypeInfo::POINTER)
-            {
-                std::cout << "# promoting left hand side" << std::endl;
-                li(info_right->pointerDataSize.value(), "$t7");
-                std::cout << "multu $v0, $t7" << std::endl;
-                std::cout << "mflo $v0" << std::endl;
-            }
-            else if (info_left->Options == TypeInfo::POINTER)
-            {
-                std::cout << "# promoting right hand side" << std::endl;
-                li(info_left->pointerDataSize.value(), "$t7");
-                std::cout << "multu $v1, $t7" << std::endl;
-                std::cout << "mflo $v1" << std::endl;
-            }
+            case(TypeInfo::FLOAT):
+                mt_c("$f0","$v0"); mt_c("$f2","$v1"); std::cout << "add.s $f0, $f0, $f2" << std::endl; mf_c("$v0","$f0");
+                break;
+            default:
+                std::cout << "addu $v0, $v0, $v1" << std::endl;
         }
-        std::cout << "addu $v0, $v0, $v1" << std::endl;
-        // { mt_c("$f0","$v0"); mt_c("$f2","$v1"); std::cout << "add.s $f0, $f0, $f2" << std::endl; mf_c("$v0","$f0"); }
+        delete info;
     }
     void visit(Sub * s)
     {
         descend(s);
-        auto info_right = get_type_info(s->RHS);
-        std::cerr << "RHS: " << info_right->Options << std::endl;
-        auto info_left = get_type_info(s->LHS);
-        std::cerr << "got type info" << std::endl;
-        // promoting expressions if not matched
-        if (info_right->Options != info_left->Options)
+        // auto info_right = get_type_info(s->RHS);
+        // std::cerr << "RHS: " << info_right->Options << std::endl;
+        // auto info_left = get_type_info(s->LHS);
+        // std::cerr << "got type info" << std::endl;
+        // // promoting expressions if not matched
+        // if (info_right->Options != info_left->Options)
+        // {
+        //     std::cout << "# mismatched types" << std::endl;
+        //     if (info_right->Options == TypeInfo::POINTER)
+        //     {
+        //         std::cout << "# promoting left hand side" << std::endl;
+        //         li(info_right->pointerDataSize.value(), "$t7");
+        //         std::cout << "multu $v0, $t7" << std::endl;
+        //         std::cout << "mflo $v0" << std::endl;
+        //     }
+        //     else if (info_left->Options == TypeInfo::POINTER)
+        //     {
+        //         std::cout << "# promoting right hand side" << std::endl;
+        //         li(info_left->pointerDataSize.value(), "$t7");
+        //         std::cout << "multu $v1, $t7" << std::endl;
+        //         std::cout << "mflo $v1" << std::endl;
+        //     }
+        // }
+        auto info = get_type_info(s);
+        switch (info->Options)
         {
-            std::cout << "# mismatched types" << std::endl;
-            if (info_right->Options == TypeInfo::POINTER)
-            {
-                std::cout << "# promoting left hand side" << std::endl;
-                li(info_right->pointerDataSize.value(), "$t7");
-                std::cout << "multu $v0, $t7" << std::endl;
-                std::cout << "mflo $v0" << std::endl;
-            }
-            else if (info_left->Options == TypeInfo::POINTER)
-            {
-                std::cout << "# promoting right hand side" << std::endl;
-                li(info_left->pointerDataSize.value(), "$t7");
-                std::cout << "multu $v1, $t7" << std::endl;
-                std::cout << "mflo $v1" << std::endl;
-            }
+            case(TypeInfo::FLOAT):
+                mt_c("$f0","$v0"); mt_c("$f2","$v1"); std::cout << "sub.s $f0, $f0, $f2" << std::endl; mf_c("$v0","$f0");
+                break;
+            default:
+                std::cout << "subu $v0, $v0, $v1" << std::endl;
         }
-        std::cout << "subu $v0, $v0, $v1" << std::endl;
-        // { mt_c("$f0","$v0"); mt_c("$f2","$v1"); std::cout << "sub.s $f0, $f0, $f2" << std::endl; mf_c("$v0","$f0"); }
+        delete info;
     }
     void visit(ShiftLeft * sl)
     {
@@ -755,7 +886,7 @@ class three_address_Visitor : public Visitor
         descend(lt);
         std::cout << "slt $v0, $v0, $v1" << std::endl;
         std::cerr << "VAN" << std::endl;
-        // { mt_c("$f0","$v0"); mt_c("$f2","$v1"); std::cout << "c.lt.s $f0, $f0, $f2" << std::endl; mf_c("$v0","$f0"); }
+        // { mt_c("$f0","$v0"); mt_c("$f2","$v1"); std::cout << "c.lt.s $f0, $f2" << std::endl; mf_c("$v0","$f0"); }
     }
     void visit(GreaterThan * gt)
     {
@@ -836,6 +967,28 @@ class three_address_Visitor : public Visitor
     void visit(AssignmentExpression *ae)
     {
         ae->RHS->accept(this);
+        auto info_right = get_type_info(ae->RHS);
+        auto info_left = get_type_info(ae->LHS);
+        if (info_right->Options != info_left->Options)
+        {
+            std::cout << "# mismatched types" << std::endl;
+            switch(info_left->Options)
+            {
+
+                case(TypeInfo::FLOAT):
+                    std::cout << "# promoting right hand side to float" << std::endl;
+                    mt_c("$f0", "$v1");
+                    std::cout << "cvt.s.w $f0, $f0" << std::endl;
+                    mf_c("$v1", "$f0");
+                    break;
+                default:
+                    std::cout << "# promoting right hand side to integral" << std::endl;
+                    mt_c("$f0", "$v1");
+                    std::cout << "cvt.w.s $f0, $f0" << std::endl;
+                    mf_c("$v1", "$f0");
+            }
+        }
+        delete info_right; delete info_left;
         writing = true;
         ae->LHS->accept(this);
         writing = false;
@@ -871,13 +1024,51 @@ class three_address_Visitor : public Visitor
         std::cout << "move $fp, $sp" << std::endl;
         // variable_map.update(-8);
         variable_map.update(-4);
+        auto info_right = get_type_info(gae->RHS);
+        auto info_left = get_type_info(gae->LHS);
+        // promoting rhs to lhs if not matched
+        if (info_right->Options != info_left->Options)
+        {
+            std::cout << "# mismatched types" << std::endl;
+            if (info_left->Options == TypeInfo::POINTER)
+            {
+                std::cout << "# promoting right hand side to pointer" << std::endl;
+                li(info_left->pointerDataSize.value(), "$t7");
+                std::cout << "multu $v1, $t7" << std::endl;
+                std::cout << "mflo $v1" << std::endl;
+            }
+            else if (info_left->Options == TypeInfo::FLOAT)
+            {
+                std::cout << "# promoting right hand side to float" << std::endl;
+                mt_c("$f0", "$v1");
+                std::cout << "cvt.s.w $f0, $f0" << std::endl;
+                mf_c("$v1", "$f0");
+            }
+            else if (info_left->Options == TypeInfo::INT || info_left->Options == TypeInfo::CHAR)
+            {
+                std::cout << "# promoting right hand side to integral" << std::endl;
+                mt_c("$f0", "$v1");
+                std::cout << "cvt.w.s $f0, $f0" << std::endl;
+                mf_c("$v1", "$f0");
+            }
+        }
+        delete info_right; delete info_left;
     }
 
     void visit(MulAssignment * ma)
     {
         descend(ma);
-        std::cout << "mult $v0, $v1" << std::endl;
-        std::cout << "mflo $v0" << std::endl;
+        auto info = get_type_info(ma);
+        switch (info->Options)
+        {
+            case(TypeInfo::FLOAT):
+                mt_c("$f0","$v0"); mt_c("$f2","$v1"); std::cout << "mul.s $f0, $f0, $f2" << std::endl; mf_c("$v0","$f0");
+                break;
+            default:
+                std::cout << "multu $v0, $v1" << std::endl;
+                std::cout << "mflo $v0" << std::endl;
+        }
+        delete info;
         writing = true;
         ma->LHS->accept(this);
         writing = false;
@@ -885,8 +1076,17 @@ class three_address_Visitor : public Visitor
     void visit(DivAssignment * da)
     {
         descend(da);
-        std::cout << "div  $v0, $v1" << std::endl;
-        std::cout << "mfhi $v0" << std::endl;
+        auto info = get_type_info(da);
+        switch (info->Options)
+        {
+            case(TypeInfo::FLOAT):
+                mt_c("$f0","$v0"); mt_c("$f2","$v1"); std::cout << "div.s $f0, $f0, $f2" << std::endl; mf_c("$v0","$f0");
+                break;
+            default:
+                std::cout << "div  $v0, $v1" << std::endl;
+                std::cout << "mfhi $v0" << std::endl;
+        }
+        delete info;
         writing = true;
         da->LHS->accept(this);
         writing = false;
@@ -903,7 +1103,16 @@ class three_address_Visitor : public Visitor
     void visit(AddAssignment * aa)
     {
         descend(aa);
-        std::cout << "addu $v0, $v0, $v1" << std::endl;
+        auto info = get_type_info(aa);
+        switch (info->Options)
+        {
+            case(TypeInfo::FLOAT):
+                mt_c("$f0","$v0"); mt_c("$f2","$v1"); std::cout << "add.s $f0, $f0, $f2" << std::endl; mf_c("$v0","$f0");
+                break;
+            default:
+                std::cout << "addu $v0, $v0, $v1" << std::endl;
+        }
+        delete info;
         writing = true;
         aa->LHS->accept(this);
         writing = false;  
@@ -911,7 +1120,16 @@ class three_address_Visitor : public Visitor
     void visit(SubAssignment * sa)
     {
         descend(sa);
-        std::cout << "subu $v0, $v0, $v1" << std::endl;
+        auto info = get_type_info(sa);
+        switch (info->Options)
+        {
+            case(TypeInfo::FLOAT):
+                mt_c("$f0","$v0"); mt_c("$f2","$v1"); std::cout << "sub.s $f0, $f0, $f2" << std::endl; mf_c("$v0","$f0");
+                break;
+            default:
+                std::cout << "subu $v0, $v0, $v1" << std::endl;
+        }
+        delete info;
         writing = true;
         sa->LHS->accept(this);
         writing = false;
@@ -1003,21 +1221,73 @@ class three_address_Visitor : public Visitor
 
             if (id->init!=NULL)
             {
+                // if (id->dec->dir_dec->const_expr->constEval() == 0)
+                // {
+                //     std::cout << "# array size is implicit, " << count_array_elements(id->init) << " elements" << std::endl;
+                //     id->dec->dir_dec->const_expr->set_elements(count_array_elements(id->init));
+                // }
                 if (id->init->ass_expr!=NULL)
                 {
+                    std::cerr << "A" << std::endl;
                     id->init->ass_expr->accept(this);
                     writing = true;
                     id->dec->accept(this);
                     writing = false;
                 }
+                // else if (id->dec->dir_dec->const_expr->constEval() == 0)
+                // {
+                //     array_flag = true;
+                //     id->dec->dir_dec->dir_dec->ID->accept(this);
+                //     array_flag = false;
+                //     // array whose size is dependant on init list
+                //     std::cout << "# array size is implicit, " << count_array_elements(id->init) << " elements" << std::endl;
+                //     // count elements
+                //     int no_elements = count_array_elements(id->init);
+                //     //assuming type is int
+                //     std::cout << "# allocating " << no_elements*4 << " bytes for array " << array_name << " on function stack" << std::endl;
+                //     std::cerr << -no_elements*4 << std::endl;
+                //     std::cout << "addiu $sp, $sp, " << -no_elements*4 << std::endl;
+                //     std::cout << "move $fp, $sp" << std::endl;
+                //     sizeof_variables[array_name]=no_elements*4;
+                //     for (int i = no_elements-1; i >= 0 ; i--)
+                //     {
+                //         variable_map.update(4);
+                //         variable_map.register_variable(array_name+'['+std::to_string(i)+']', 4);
+                //     }
+                //     std::cout << "addiu $v0, $fp, " << variable_map.lookup(array_name+"[0]") << std::endl;
+                //     std::cout << "sw $v0, " << variable_map.lookup(array_name) << "($fp)" << std::endl;
+                //     std::cout << "nop" << std::endl;
+                //     array_counter = 0;
+                //     id->init->accept(this);
+                // }
+                else 
+                {
+                    std::cerr << "B" << std::endl;
+                    // array
+                    writing = true;
+                    id->dec->accept(this);
+                    writing = false;
+                    array_counter = 0;
+                    id->init->accept(this);
+                }
             }
             else 
             {
+                std::cerr << "C" << std::endl;
                 writing = true;
                 id->dec->accept(this);
                 writing = false;
             }
         }
+    }
+    int count_array_elements(initializer * i) 
+    {
+        if (i->ass_expr != NULL) return 1;
+        else return count_array_elements(i->init_list);
+    } 
+    int count_array_elements(initializer_list * il)
+    {
+        return count_array_elements(il->init) + (il->init_list != NULL ? count_array_elements(il->init_list) : 0 );
     }
     void visit(initializer * i)
     {
@@ -1042,8 +1312,9 @@ class three_address_Visitor : public Visitor
             {
                 i->ass_expr->accept(this);
                 // std::cout << "addiu $sp, $sp, 4" << std::endl; move("$fp", "$sp");
-                // std::cout << "sw $v0, 0($sp)" << std::endl;
-                // std::cout << "nop" << std::endl;
+                std::cout << "sw $v0, " << variable_map.lookup(array_name+'['+std::to_string(array_counter)+']') << "($sp)" << std::endl;
+                std::cout << "nop" << std::endl;
+                array_counter++;
                 // variable_map.update(4);
             }
             else if (i->init_list != NULL)
@@ -1075,7 +1346,7 @@ class three_address_Visitor : public Visitor
     void visit(struct_declarator_list* _strdeclist){}
 
     void visit(specifier_list *) {}
-    void visit(pointer *) {}
+    void visit(pointer *) {struct_flag = false;}
     void visit(base_declarator *) {}
     void visit(direct_declarator * dd)
     {
@@ -1145,6 +1416,7 @@ class three_address_Visitor : public Visitor
     void visit(abstract_declarator *) {}
     void visit(declarator * d)
     {
+        if (d->p!=NULL) d->p->accept(this);
         std::cerr << "D" << std::endl;
         d->dir_dec->accept(this);
     }
@@ -1544,9 +1816,25 @@ class three_address_Visitor : public Visitor
         {
             if  (i < 4)
             {
-                std::cout << "sw $a" << i << ", " << (i)*4 << "($sp)" << std::endl;
+                if (i < 2)
+                {
+                    switch(parameter_types.top().second->Options)
+                    {
+                        case(TypeInfo::FLOAT):
+                            std::cout << "s.s $f" << 12+i*2 << ", " << (i)*4 << "($sp)" << std::endl;
+                            break;
+                        default:
+                            std::cout << "sw $a" << i << ", " << (i)*4 << "($sp)" << std::endl;
+                    }
+                }
+                else
+                {
+                    std::cout << "sw $a" << i << ", " << (i)*4 << "($sp)" << std::endl;
+                }
                 std::cout << "nop" << std::endl;
             }
+            delete parameter_types.top().second;
+            parameter_types.pop();
         }
         // make space for local variables
         stacksize = 8 + 8*4 + 4; // by default we assign space for return address, old stack pointer, and saved registers
@@ -1578,6 +1866,8 @@ class three_address_Visitor : public Visitor
         move("$fp", "$sp");
         // stacksize = variable_map.get_stack_size();
         std::cout << end << ':' << std::endl;
+        // copy $v0 to $f0 incase it is float
+        mt_c("$f0","$v0");
         // restore saved registers
         for (int i = 0; i < 8; i++)
         {

@@ -1,5 +1,5 @@
 #include <string.h>
-
+#include <stdio.h>
 int ok;
 
 void fakeputs(char *x)

@@ -113,6 +113,11 @@ TypeInfo* TypeGetter::GetType(constant_char* _constant_char){
     info->Options=TypeInfo::CHAR;
     return info;
 }
+TypeInfo* TypeGetter::GetType(constant_float* _constant_float){
+    TypeInfo* info = new TypeInfo;
+    info->Options=TypeInfo::FLOAT;
+    return info;
+}
 TypeInfo* TypeGetter::GetType(StringLiteral* _StringLiteral){
     TypeInfo* info = new TypeInfo;
     //todo
