@@ -576,7 +576,14 @@ class three_address_Visitor : public Visitor
         uao->RHS->accept(this);
         address_flag = false;
         std::cout << "# getting address of " << address_name << std::endl;
-        std::cout << "addiu $v0, $sp, " << variable_map.lookup(address_name) << std::endl;
+        if(global_labels.find(address_name)!=global_labels.end())
+        {
+            std::cout << "la $v0, " << address_name << std::endl;
+        }
+        else
+        {
+            std::cout << "addiu $v0, $sp, " << variable_map.lookup(address_name) << std::endl;
+        }
     }
     void visit(UnaryDerefOperator * udo)
     {
