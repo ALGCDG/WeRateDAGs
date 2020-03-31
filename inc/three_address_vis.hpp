@@ -313,6 +313,14 @@ class three_address_Visitor : public Visitor
         std::cerr << "type info options " << info->Options << std::endl;
         switch(info->Options)
         {
+            case(TypeInfo::STRUCT):
+                info->isStruct->get_table()->subRecords.size()*4; // assuming int
+                break;
+            case(TypeInfo::ARR):
+                li(info->isArr->size, "$t7");
+                std::cout << "multu $t0, $t7" << std::endl;
+                std::cout << "mflo $t0" << std::endl;
+                break;
             case(TypeInfo::CHAR): break;
             default:
                 std::cout << "sll $t0, $t0, 2" << std::endl;
@@ -1338,7 +1346,7 @@ class three_address_Visitor : public Visitor
     void visit(struct_declarator_list* _strdeclist){}
 
     void visit(specifier_list *) {}
-    void visit(pointer *) {}
+    void visit(pointer *) {struct_flag = false;}
     void visit(base_declarator *) {}
     void visit(direct_declarator * dd)
     {
@@ -1408,6 +1416,7 @@ class three_address_Visitor : public Visitor
     void visit(abstract_declarator *) {}
     void visit(declarator * d)
     {
+        if (d->p!=NULL) d->p->accept(this);
         std::cerr << "D" << std::endl;
         d->dir_dec->accept(this);
     }
