@@ -7,7 +7,7 @@ all : bin/compiler src/wrapper.sh
 	chmod u+x bin/c_compiler
 
 src/parser.tab.cpp Include/parser.tab.hpp : src/parser.y
-	bison -v -d src/parser.y -o src/parser.tab.cpp
+	bison -v -d src/parser.y -Wconflicts-sr -o src/parser.tab.cpp
 
 src/lexer.yy.cpp : src/lexer.flex Include/parser.tab.hpp
 	flex -o src/lexer.yy.cpp  src/lexer.flex
@@ -23,7 +23,7 @@ src/ast_context2.o : src/ast_context2.cpp
 src/ast_allnodes.o : src/ast_allnodes.cpp
 	g++ $(CPPFLAGS) -c -o src/ast_allnodes.o $^
 
-bin/compiler : src/parser.tab.o src/lexer.yy.o src/compiler.o src/ast_allnodes.o src/ASTProc.o src/ast_context2.o src/ast_TypeInfo.o
+bin/compiler : src/parser.tab.o src/lexer.yy.o src/compiler.o src/ast_allnodes.o src/ASTProc.o src/ast_context2.o src/ast_TypeInfo.o src/feSymtab.o
 	mkdir -p bin
 	g++ $(CPPFLAGS) -o bin/compiler $^
 	

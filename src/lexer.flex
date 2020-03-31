@@ -71,6 +71,7 @@ simpEscSeq \\.
             builtin functions: sizeof
             luckily not flexible
             */
+            std::cerr << "its int\n";
             return Keyword_int;
 }
 
@@ -143,9 +144,13 @@ simpEscSeq \\.
             Identifier
             variable names, function names, etc...
             */
-            fprintf(stderr, "its an identifier\n");      
             yylval.text = new std::string(yytext);
-            return Identifier;
+            fprintf(stderr, "its an identifier %s ",yytext);      
+            /*return Identifier;*/
+            bool istype = isTypeName(*yylval.text);
+            std::cerr << "and is a type: " << istype << std::endl;
+            if(istype) return typedefIdentifier;
+            else return varIdentifier;
 }
 
 {Decimal}*\.{Decimal}*({Exponent}{Sign}?{Decimal}+)?   {

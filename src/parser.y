@@ -2,15 +2,9 @@
 
   #include<iostream>
   #include<string>
-  #include "./ast_allnodes.hpp"
-  #include "./feSymtab.hpp"
-  #include "./feSymtabDec.hpp"
-
-  bool flag_active_typedef = false;
-  //true when typedef in dec spec
-  bool flag_add_names = false;
-  //true when needing to add names
-  //typedef flag is then checked to see if it should be a typename or othername
+  #include "ast_allnodes.hpp"
+  #include "feSymtab.hpp"
+  #include "feSymtabDec.hpp"
 
   extern TranslationUnit *g_root; // A way of getting the AST out
   //! This is to fix problems when generating C++
@@ -77,7 +71,7 @@
 
 %token Constant_int Constant_char Constant_double Constant_float Constant_long_double
 %token String
-%token Identifier
+%token Identifier varIdentifier typedefIdentifier
 %token Operator Operator_add  Operator_sub  Operator_addadd  Operator_subsub  Operator_mul  Operator_div  Operator_mod  Operator_and  Operator_or  Operator_not  Operator_assign  Operator_equal  Operator_not_equal  Operator_greater  Operator_less  Operator_greater_equal  Operator_less_equal  Operator_bit_and  Operator_bit_or  Operator_bit_not  Operator_bit_xor  Operator_sl  Operator_sr  Operator_add_assign  Operator_sub_assign  Operator_mul_assign  Operator_div_assign  Operator_mod_assign  Operator_and_assign  Operator_or_assign  Operator_xor_assign  Operator_sr_assign  Operator_sl_assign  Operator_ref  Operator_deref  Operator_access  Operator_deref_access  Operator_sizeof  Operator_trinary_question  Operator_trinary_choice  Operator_comma 
 %token Keyword Keyword_void Keyword_char Keyword_short Keyword_int Keyword_long Keyword_float Keyword_double Keyword_signed Keyword_unsigned Keyword_case Keyword_default Keyword_if Keyword_else Keyword_switch Keyword_while Keyword_do Keyword_for Keyword_continue Keyword_break Keyword_return Keyword_enum Keyword_struct Keyword_typedef
 %token Punctuator Punctuator_eol Punctuator_par_open Punctuator_par_close Punctuator_squ_open Punctuator_squ_close Punctuator_cur_open Punctuator_cur_close
@@ -93,12 +87,12 @@
 %type <fvalue> Constant_float
 %type <ldvalue> Constant_long_double
 %type <text> String
-%type <text> Identifier
+%type <text> Identifier varIdentifier  typedefIdentifier typedefnamespec
 %type <text> Keyword Keyword_void Keyword_char Keyword_short Keyword_int Keyword_long Keyword_float Keyword_double Keyword_signed Keyword_unsigned Keyword_case Keyword_default Keyword_if Keyword_else Keyword_switch Keyword_while Keyword_do Keyword_for Keyword_continue Keyword_break Keyword_return Keyword_enum Keyword_struct Keyword_typedef
 
 
 %type <expression> primary_EXPR
-%type <identnode> Ident
+%type <identnode> varIdent generalIdent
 %type <expression> Constant
 %type <expression> postfix_EXPR
 %type <argexprlist> argument_EXPR_list
@@ -123,13 +117,21 @@
 
 %type <t_declaration> declaration
 %type <t_declaration_specifiers> declaration_specifiers
+%type <t_declaration_specifiers> declaration_specifiers_type
 %type <t_storage_class_specifier> storage_class_specifier
 %type <t_init_declarator_list> init_declarator_list
+%type <t_init_declarator_list> init_declarator_list_type
 %type <t_init_declarator> init_declarator
+%type <t_init_declarator> init_declarator_type
 %type <t_type_specifier> type_specifier
 %type <t_specifier_list> specifier_list
 %type <t_declarator> declarator
+%type <t_declarator> func_declarator
+%type <t_declarator> declaratorType
+%type <t_declarator> declaratorVar
+%type <t_declarator> declaratorVarFunc
 %type <t_direct_declarator> direct_declarator
+%type <t_direct_declarator> direct_func_declarator
 %type <t_pointer> pointer
 %type <t_parameter_list> parameter_type_list
 %type <t_parameter_list> parameter_list
@@ -143,6 +145,7 @@
 %type <stmt> statement
 %type <stmt> labeled_statement
 %type <cmpstmt> compound_statement
+%type <cmpstmt> compound_statement_func
 %type <t_declist> declaration_list
 %type <stmtlist> statement_list
 %type <exprstmt> EXPR_statement
@@ -165,19 +168,23 @@
 %%
 
 /*
+Utility
+*/
+
+
+
+/*
 EXPRESSIONS
 */
 
-primary_EXPR: Ident { $$ = $1; }
+primary_EXPR: varIdent { $$ = $1; }
                   | Constant { $$ = $1; }
                   | String { std::cerr << "new string literal" << std::endl;$$ = new StringLiteral(*$1); }/*TODO*/
                   | Punctuator_par_open EXPR Punctuator_par_close { $$ = $2; }
 
-Ident: Identifier { 
-      $$ = new IdentifierNode(*($1)); 
-      if(flag_active_typedef){ insertTypeName(*($1)); } 
-      else if(flag_add_names) { insertOtherName(*($1)); }
-} 
+varIdent: varIdentifier { $$ = new IdentifierNode(*($1)); } 
+generalIdent: varIdentifier  { $$ = new IdentifierNode(*($1)); }
+            | typedefIdentifier { $$ = new IdentifierNode(*($1)); }
 
 Constant: Constant_int { $$ = new constant_int($1); }  
 		| Constant_char  { $$ = new constant_char(*$1); } 
@@ -189,8 +196,8 @@ postfix_EXPR: primary_EXPR { $$ = $1; } /*Pass through*/
                   | postfix_EXPR Punctuator_squ_open EXPR Punctuator_squ_close { $$ = new ArraySubscript($1, $3); }
                   | postfix_EXPR Punctuator_par_open  Punctuator_par_close  { $$ = new FuncCall($1); }
                   | postfix_EXPR Punctuator_par_open argument_EXPR_list Punctuator_par_close  { $$ = new FuncCall($1, $3); }
-                  | postfix_EXPR Operator_access Ident   { $$ = new MemberAccess($1, $3); }
-                  | postfix_EXPR Operator_deref_access Ident   { $$ = new DerefMemberAccess($1, $3); }
+                  | postfix_EXPR Operator_access generalIdent   { $$ = new MemberAccess($1, $3); }
+                  | postfix_EXPR Operator_deref_access generalIdent   { $$ = new DerefMemberAccess($1, $3); }
                   | postfix_EXPR Operator_addadd  { $$ = new PostInc($1); }
                   | postfix_EXPR Operator_subsub  { $$ = new PostDec($1); }
 
@@ -285,21 +292,38 @@ DECLARATIONS
 */
 
 
-declaration: declaration_specifiers init_declarator_list Punctuator_eol { $$ = new declaration($1, $2); flag_active_typedef = false; flag_add_names = false; }
-           | declaration_specifiers Punctuator_eol { $$ = new declaration($1); flag_active_typedef = false; flag_add_names = false; }
+declaration: declaration_specifiers init_declarator_list Punctuator_eol { $$ = new declaration($1, $2); }
+           | declaration_specifiers_type init_declarator_list_type Punctuator_eol { $$ = new declaration($1, $2); }
+           | declaration_specifiers Punctuator_eol { $$ = new declaration($1); }
 
-declaration_specifiers: storage_class_specifier { $$ = new declaration_specifiers(NULL,NULL,$1); flag_add_names=true; }/*Now expect names*/
-                      | storage_class_specifier declaration_specifiers { $$ = new declaration_specifiers(NULL,$2,$1); }
-                      | type_specifier { $$ = new declaration_specifiers($1); flag_add_names=true; }/*Now expect names*/
+declaration_specifiers: type_specifier { $$ = new declaration_specifiers($1);}
                       | type_specifier declaration_specifiers { $$ = new declaration_specifiers($1, $2); }
 
-storage_class_specifier: Keyword_typedef { $$ = new TypedefNode; flag_active_typedef = true; }
+declaration_specifiers_type: storage_class_specifier { $$ = new declaration_specifiers(NULL,NULL,$1); std::cerr << "New typedef" << std::endl;}
+                      | storage_class_specifier declaration_specifiers_type { $$ = new declaration_specifiers(NULL,$2,$1); }
+                      | type_specifier { $$ = new declaration_specifiers($1); }
+                      | type_specifier declaration_specifiers_type { $$ = new declaration_specifiers($1, $2); }
+                      
+
+storage_class_specifier: Keyword_typedef { $$ = new TypedefNode; }
+
+declaratorVar: declarator { insertOtherName(GetIdentName($1)); }
+
+declaratorVarFunc: func_declarator { insertOtherName(GetIdentName($1));}
+
+declaratorType: declarator { insertTypeName(GetIdentName($1)); }
 
 init_declarator_list: init_declarator { $$ = new init_declarator_list($1); }
                     | init_declarator_list Operator_comma init_declarator { $$ = new init_declarator_list($3, $1); }
 
-init_declarator: declarator { $$ = new init_declarator($1); }
-               | declarator Operator_assign initializer { $$ = new init_declarator($1, $3); }
+init_declarator_list_type: init_declarator_type {}
+                            | init_declarator_list_type Operator_comma init_declarator_type {} /*todo*/
+
+init_declarator: declaratorVar { $$ = new init_declarator($1); }
+               | declaratorVar Operator_assign initializer { $$ = new init_declarator($1, $3); }
+
+init_declarator_type: declaratorType {}
+                        | declaratorType Operator_assign initializer {}
 
 type_specifier: Keyword_void { $$ = new type_specifier("void"); }
               | Keyword_char { $$ = new type_specifier("char"); }
@@ -311,23 +335,22 @@ type_specifier: Keyword_void { $$ = new type_specifier("void"); }
               | Keyword_signed { $$ = new type_specifier("signed"); }
               | Keyword_unsigned{ $$ = new type_specifier("unsigned"); }
               | enum_specifier { $$ = $1; }
-/*              | typedef_name { std::cerr << "typedef type" << std::endl; }*/
+              | typedefIdentifier { $$ = new type_specifier(*$1); } /*todo*/
               | struct_specifier{ $$ = $1; }
 
-struct_specifier: Keyword_struct FORCEIDENT Ident ENDFORCEIDENT Punctuator_cur_open struct_declaration_list Punctuator_cur_close 
+        
+struct_specifier: Keyword_struct generalIdent  Punctuator_cur_open struct_declaration_list Punctuator_cur_close 
         { $$ = new struct_specifier($2, $4); }
 				| Keyword_struct Punctuator_cur_open struct_declaration_list Punctuator_cur_close 
         { $$ = new struct_specifier(NULL, $3); }
-				| Keyword_struct FORCEIDENT Ident ENDFORCEIDENT { $$ = new struct_specifier($2); }
+				| Keyword_struct generalIdent { $$ = new struct_specifier($2); }
 
-FORCEIDENT: %empty% { forceIdent(); }
 
-ENDFORCEIDENT: %empty% {endForceIdent(); }
 
 struct_declaration_list: struct_declaration { $$ = new struct_declaration_list($1); }
 					   | struct_declaration_list struct_declaration { $1->AppendDeclaration($2); }
 
-struct_declaration: specifier_list FORCEIDENT struct_declarator_list ENDFORCEIDENT Punctuator_eol { $$ = new struct_declaration($1, $2); }
+struct_declaration: specifier_list struct_declarator_list Punctuator_eol { $$ = new struct_declaration($1, $2); }
 
 specifier_list: type_specifier  { $$ = new specifier_list($1); }
 						| type_specifier specifier_list { $$ = new specifier_list($1, $2); }
@@ -342,8 +365,8 @@ struct_declarator: declarator
 */
 
 
-enum_specifier: Keyword_enum Ident { $$ = new EnumSpecifier($2); }
-			  | Keyword_enum Ident Punctuator_cur_open enum_list Punctuator_cur_close { $$ = new EnumSpecifier($2, $4); }
+enum_specifier: Keyword_enum generalIdent { $$ = new EnumSpecifier($2); }
+			  | Keyword_enum generalIdent Punctuator_cur_open enum_list Punctuator_cur_close { $$ = new EnumSpecifier($2, $4); }
 			  | Keyword_enum Punctuator_cur_open enum_list Punctuator_cur_close { $$ = new EnumSpecifier($3); }
 
 enum_list: enumerator { $$ = new EnumeratorList($1); }
@@ -352,19 +375,28 @@ enum_list: enumerator { $$ = new EnumeratorList($1); }
 enumerator: ENUM_CONST { $$ = new Enumerator($1);}
 		  | ENUM_CONST Operator_assign constant_EXPR { $$ = new Enumerator($1, $3);}
 
-ENUM_CONST: Ident { $$ = $1; }
+ENUM_CONST: generalIdent { $$ = $1; }
 
 declarator: direct_declarator { $$ = new declarator($1); }
 		  | pointer direct_declarator { $$ = new declarator($2, $1); }
 
 
-direct_declarator: Ident { $$ = new direct_declarator($1);}
+direct_declarator: generalIdent { $$ = new direct_declarator($1);}
 				 | Punctuator_par_open declarator Punctuator_par_close  { $$ = new direct_declarator(NULL, NULL, NULL,NULL, $2); }
 				 | direct_declarator Punctuator_squ_open Punctuator_squ_close  { $$ = new direct_declarator(NULL, $1, new unspecified_array_length()); }
 				 | direct_declarator Punctuator_squ_open constant_EXPR Punctuator_squ_close  { $$ = new direct_declarator(NULL, $1, $3); }
 				 | direct_declarator Punctuator_par_open parameter_type_list  Punctuator_par_close  { $$ = new direct_declarator(NULL, $1, NULL, $3); }
 				 /*| direct_declarator Punctuator_par_open identifier_list Punctuator_par_close { std::cerr << "still not sure what this does" << std::endl; } k&r style, not needed*/
 				 | direct_declarator Punctuator_par_open Punctuator_par_close { $$ = new direct_declarator(NULL, $1, NULL, new empty_parameter_list()); }
+
+func_declarator: direct_func_declarator { $$ = new declarator($1); }
+
+direct_func_declarator: generalIdent { $$ = new direct_declarator($1);}
+				 | direct_declarator paren_start_func_scope parameter_type_list  Punctuator_par_close  { $$ = new direct_declarator(NULL, $1, NULL, $3); }
+				 | direct_declarator paren_start_func_scope Punctuator_par_close { $$ = new direct_declarator(NULL, $1, NULL, new empty_parameter_list()); }
+
+paren_start_func_scope : Punctuator_par_open { NewScope(); }
+paren_end_func_scope : Punctuator_cur_open { PopScope(); PopScope(); }
 
 pointer: Operator_mul { $$ = new pointer(); }
 	   | Operator_mul pointer { $$ = new pointer($2); }
@@ -374,7 +406,7 @@ parameter_type_list: parameter_list { $$ = $1; }
 parameter_list: parameter_declaration { $$ = new parameter_list($1); }
 		 	  | parameter_list Operator_comma parameter_declaration { $$ = new parameter_list($3, $1); }
 
-parameter_declaration: declaration_specifiers declarator { $$ = new parameter_declaration($1, $2); }
+parameter_declaration: declaration_specifiers declaratorVar { $$ = new parameter_declaration($1, $2); }
 					 | declaration_specifiers  { $$ = new parameter_declaration($1); }
 					 | declaration_specifiers abstract_declarator { $$ = new parameter_declaration($1, NULL, $2); }
 
@@ -432,10 +464,20 @@ statement: selection_statement { $$ = $1; }
 labeled_statement: Keyword_case constant_EXPR Operator_trinary_choice statement { $$ = new CaseOrDefault($2, $4); }
                  | Keyword_default Operator_trinary_choice statement { $$ = new CaseOrDefault($3); }
 
-compound_statement: Punctuator_cur_open declaration_list statement_list Punctuator_cur_close { $$ = new CompoundStatement($2, $3); }
-                  | Punctuator_cur_open declaration_list Punctuator_cur_close { $$ = new CompoundStatement($2);}
-                  | Punctuator_cur_open statement_list Punctuator_cur_close { $$ = new CompoundStatement($2); /*Will need to use arg overloaded constructor to differentiate between the above*/}
-                  | Punctuator_cur_open Punctuator_cur_close { $$ = new CompoundStatement(); }
+compound_statement: newscope_paren declaration_list statement_list endscope_paren { $$ = new CompoundStatement($2, $3); }
+                  | newscope_paren declaration_list endscope_paren { $$ = new CompoundStatement($2);}
+                  | newscope_paren statement_list endscope_paren { $$ = new CompoundStatement($2); /*Will need to use arg overloaded constructor to differentiate between the above*/}
+                  | newscope_paren endscope_paren { $$ = new CompoundStatement(); }
+
+compound_statement_func: newscope_paren declaration_list statement_list paren_end_func_scope { $$ = new CompoundStatement($2, $3); }
+                  | newscope_paren declaration_list paren_end_func_scope { $$ = new CompoundStatement($2);}
+                  | newscope_paren statement_list paren_end_func_scope { $$ = new CompoundStatement($2); /*Will need to use arg overloaded constructor to differentiate between the above*/}
+                  | newscope_paren paren_end_func_scope { $$ = new CompoundStatement(); }
+
+newscope_paren: Punctuator_cur_open { NewScope(); }
+
+endscope_paren: Punctuator_cur_close { PopScope(); }
+
 
 declaration_list: declaration {$$ = new DeclarationList($1); }
                 | declaration_list declaration { $$ = new DeclarationList($1, $2); }
@@ -483,9 +525,8 @@ translation_unit: external_declaration { $$ = new TranslationUnit($1); }
 external_declaration: function_definition { $$ = $1; }
                     | declaration { $$ = new ExternalDeclaration($1); }
 
-function_definition: declarator compound_statement { $$ = new FunctionDefinition($1, $2); }
-                   | declaration_specifiers declarator compound_statement { $$ = new FunctionDefinition($1, $2, $3); }
-                   /*| declaration_specifiers declaration declaration_list compound_statement -> only for K&R*/
+function_definition:  declaratorVarFunc compound_statement_func { $$ = new FunctionDefinition($1, $2); }
+                   |  declaration_specifiers declaratorVarFunc compound_statement_func { $$ = new FunctionDefinition($1, $2, $3); }
 
 
 ROOT: translation_unit {g_root = $1; }

@@ -47,7 +47,7 @@ unsigned char evalOctCode(std::string code){
 
 unsigned char evalHexCode(std::string code){
 	unsigned char count = 0;
-	for(int i = 0; i < code.length(); i++){
+	for(unsigned int i = 0; i < code.length(); i++){
 		if(code[i] >= 'a') code[i] = code[i] - 32;
 		count += ((code[i] >= 'A') ? (code[i] - 'A' + 10) : (code[i] - '0'))*std::pow(16,code.length()-i-1);
 	}
@@ -157,4 +157,18 @@ std::string ConvertEscapes(const std::string& str_in){
         else{ str_out += buffer;}
     }
         return str_out;
+}
+
+std::string& GetIdentName(declarator* dec){
+    if(dec->dir_dec!=NULL){ return GetIdentName(dec->dir_dec);}
+}
+
+std::string& GetIdentName(direct_declarator* dir_dec){
+    if(dir_dec->ID!=NULL){ return GetIdentName(dir_dec->ID);}
+    else if(dir_dec->dec!=NULL){ return GetIdentName(dir_dec->dec);}
+    else if(dir_dec->dir_dec!=NULL){ return GetIdentName(dir_dec->dir_dec);}
+}
+
+std::string& GetIdentName(IdentifierNode* ident){
+    return ident->Name;
 }

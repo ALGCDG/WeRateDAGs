@@ -1,8 +1,8 @@
-typedef int int_t;
+// typedef int int_t;
 
 int g()
 {
-    int_t x;
+    int x;
     x=13;
     return 13;
 }

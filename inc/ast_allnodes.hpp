@@ -1268,6 +1268,17 @@ public:
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
 };
 
+//-----------
+//Utility to get name from declarator node
+
+std::string& GetIdentName(declarator* dec);
+std::string& GetIdentName(direct_declarator* dir_dec);
+std::string& GetIdentName(IdentifierNode* identnode);
+
+//------------
+
+
+
 /*
 Parameters
 */
