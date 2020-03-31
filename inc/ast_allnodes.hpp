@@ -5,6 +5,7 @@
 #include <vector>
 #include <iostream>
 #include <experimental/optional> 
+#include <cmath>
 
 enum class en_typeData{ 
     INT,
@@ -352,7 +353,7 @@ EXPRESSIONS
 */
 class Expression : public Node{
 public:
-    virtual unsigned int constEval(){}
+    virtual int constEval(){}
     //TODO types!
     void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
 
@@ -387,7 +388,7 @@ public:
 class constant_int : public Constant {
 public:
     int value;
-    unsigned int constEval(){ return value; }
+    int constEval(){ return value; }
     constant_int(int v): value(v) {}
 
     void accept(Visitor *AVisitor) override { AVisitor->visit(this); }
@@ -608,6 +609,7 @@ public:
     Multiply(Expression* _LHS, Expression* _RHS) : BinaryOpExpression(_LHS, _RHS){}
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
     TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ return getter->GetType(this); }
+    int constEval() override { return LHS->constEval() * RHS->constEval(); }
 };
 
 class Divide : public BinaryOpExpression{
@@ -615,6 +617,7 @@ public:
     Divide(Expression* _LHS, Expression* _RHS) : BinaryOpExpression(_LHS, _RHS){}
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
     TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ return getter->GetType(this); }
+    int constEval() override { return LHS->constEval() / RHS->constEval(); }
 };
 
 class Modulo : public BinaryOpExpression{
@@ -622,6 +625,7 @@ public:
     Modulo(Expression* _LHS, Expression* _RHS) : BinaryOpExpression(_LHS, _RHS){}
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
     TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ return getter->GetType(this); }
+    int constEval() override { return LHS->constEval() % RHS->constEval(); }
 };
 
 class Add : public BinaryOpExpression{
@@ -629,6 +633,7 @@ public:
     Add(Expression* _LHS, Expression* _RHS) : BinaryOpExpression(_LHS, _RHS){}
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
     TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ return getter->GetType(this); }
+    int constEval() override { return LHS->constEval() + RHS->constEval();}
 };
 
 class Sub : public BinaryOpExpression{
@@ -636,6 +641,7 @@ public:
     Sub(Expression* _LHS, Expression* _RHS) : BinaryOpExpression(_LHS, _RHS){}
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
     TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ return getter->GetType(this); }
+    int constEval() override { return LHS->constEval() - RHS->constEval();}
 };
 
 class ShiftLeft : public BinaryOpExpression{
@@ -643,6 +649,7 @@ public:
     ShiftLeft(Expression* _LHS, Expression* _RHS) : BinaryOpExpression(_LHS, _RHS){}
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
     TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ return getter->GetType(this); }
+    int constEval() override { return LHS->constEval()* std::pow(2,RHS->constEval());}
 };
 
 class ShiftRight : public BinaryOpExpression{
@@ -650,6 +657,7 @@ public:
     ShiftRight(Expression* _LHS, Expression* _RHS) : BinaryOpExpression(_LHS, _RHS){}
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
     TypeInfo* acceptTypeGetter(AbstractTypeGetter* getter){ return getter->GetType(this); }
+    int constEval() override { return LHS->constEval()* std::pow(2,RHS->constEval()); }
 };
 
 //------------
@@ -854,7 +862,7 @@ class ConstantExpression : public Expression{
 public:
     ConstantExpression(){}
     ConstantExpression(Expression* Expr): ConstantSubtree(Expr){}
-    unsigned int constEval() override { return ConstantSubtree->constEval(); }
+    int constEval() override { return ConstantSubtree->constEval(); }
     Expression* ConstantSubtree;
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
     virtual void set_elements(const int & i) {};
@@ -1263,7 +1271,7 @@ public:
     int elements;
     unspecified_array_length() : elements(0) { std::cerr << "constructing unspec arr len" << std::endl;}
 	void accept(Visitor * AVisitor) override { AVisitor->visit(this); }
-    unsigned int constEval() override { std::cerr << "testout";return elements; }
+    int constEval() override { std::cerr << "testout";return elements; }
     void set_elements(const int & i) { elements = i; }
 };
 

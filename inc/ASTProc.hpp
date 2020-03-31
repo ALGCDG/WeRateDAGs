@@ -124,10 +124,10 @@ public:
     void visit(initializer * _init);
     void visit(initializer_list * _init_list);
 
-    unsigned int EvalConstantExpression(ConstantExpression* _const_expr);
-    unsigned int EvalConstantExpression(Expression* expr);
-    unsigned int EvalConstantExpression(constant_int* _const);
-    unsigned int EvalConstantExpression(unspecified_array_length* _unspec);
+    int EvalConstantExpression(ConstantExpression* _const_expr);
+    int EvalConstantExpression(Expression* expr);
+    int EvalConstantExpression(constant_int* _const);
+    int EvalConstantExpression(unspecified_array_length* _unspec);
 
 private:
     SymbolTable* TableInstance;
